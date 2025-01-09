@@ -1,20 +1,20 @@
 import pandas as pd
 
-from database.definitions import col_names_league_table
+from database.definitions import Columns
 
 
 def fetch_matchday(data, season, league_name, matchday):
-    return data[(data[col_names_league_table.season] == season) &
-                (data[col_names_league_table.week] == matchday) &
-                (data[col_names_league_table.league_name] == league_name)]
+    return data[(data[Columns.season] == season) &
+                (data[Columns.week] == matchday) &
+                (data[Columns.league_name] == league_name)]
 
 
 def fetch_match(data, team, match_number):
     return data[(
-                        (data[col_names_league_table.team_name] == team)
-                        | (data[col_names_league_table.team_name_opponent] == team)
+                        (data[Columns.team_name] == team)
+                        | (data[Columns.team_name_opponent] == team)
                 )
-                & (data[col_names_league_table.match_number] == match_number)]
+                & (data[Columns.match_number] == match_number)]
 
 
 def calculate_match_outcome(df):
@@ -24,10 +24,10 @@ def calculate_match_outcome(df):
 
     # add col if missing
 
-    col_pos = col_names_league_table.position
-    col_score = col_names_league_table.score
-    col_points = col_names_league_table.points
-    col_team = col_names_league_table.team_name
+    col_pos = Columns.position
+    col_score = Columns.score
+    col_points = Columns.points
+    col_team = Columns.team_name
 
     lala = 0
 
@@ -59,9 +59,9 @@ def calculate_match_outcome(df):
 
         # Neue Werte in der kopierten Zeile setzen
         row_total[col_score] = row[col_score]
-        row_total[col_names_league_table.player_name] = 'Total'
-        row_total[col_names_league_table.player_id] = None
-        row_total[col_names_league_table.match_number] = None
+        row_total[Columns.player_name] = 'Total'
+        row_total[Columns.player_id] = None
+        row_total[Columns.match_number] = None
 
         rows_team_result.append(row_total)
 
@@ -120,23 +120,23 @@ def calculate_points(df_season_results, league_name, league_season):
     print("hi there")
     print(df_season_results.size)
 
-    df_filtered = df_season_results[(df_season_results[col_names_league_table.league_name] == league_name)
-                                    & (df_season_results[col_names_league_table.season] == league_season)]
+    df_filtered = df_season_results[(df_season_results[Columns.league_name] == league_name)
+                                    & (df_season_results[Columns.season] == league_season)]
 
     print(df_filtered.size)
 
     # go week by week
-    for (week, df_per_week) in df_filtered.groupby(col_names_league_table.week):
+    for (week, df_per_week) in df_filtered.groupby(Columns.week):
         # is a tuple --> unpack
 
         print(df_per_week)
-        for (game, df_per_week_per_game) in df_per_week.groupby(col_names_league_table.match_number):
+        for (game, df_per_week_per_game) in df_per_week.groupby(Columns.match_number):
             print(df_per_week_per_game)
             df_per_week_per_game.to_csv('tmp.csv', index=False, sep=";")
 
             pairings = [set([tmp_team, tmp_opponent]) for tmp_team, tmp_opponent in
-                        zip(df_per_week_per_game[col_names_league_table.team_name],
-                            df_per_week_per_game[col_names_league_table.team_name_opponent])
+                        zip(df_per_week_per_game[Columns.team_name],
+                            df_per_week_per_game[Columns.team_name_opponent])
                        ]
             pairings = list(set(frozenset(s) for s in pairings))
             for pairing in pairings:
@@ -148,14 +148,14 @@ def calculate_points(df_season_results, league_name, league_season):
 def calculate_averages(df: pd.DataFrame, league_name=None, season=None, player=None):
 
     if league_name is not None:
-        df = df[df[col_names_league_table.league_name] == league_name]
+        df = df[df[Columns.league_name] == league_name]
 
     if season is not None:
-        df = df[(df[col_names_league_table.season] == season)]
+        df = df[(df[Columns.season] == season)]
 
     if player is not None:
-        df = df[df[col_names_league_table.player_name] == player]
+        df = df[df[Columns.player_name] == player]
 
-    result = df.groupby(col_names_league_table.player_name)[col_names_league_table.score].mean()
+    result = df.groupby(Columns.player_name)[Columns.score].mean()
 
     print(result)

@@ -1,4 +1,8 @@
 import pandas as pd
+import sys
+import os
+
+sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
 import database.definitions
 from business_logic.league import League
@@ -84,7 +88,7 @@ if __name__ == "__main__":
                                                                 league.number_of_players_per_team, league.name,
                                                                 season=season)], ignore_index=True)
 
-    df_results.to_csv('.\\..\\database\\data\\bowling_ergebnisse.csv', index=False, sep=";")
+    df_results.to_csv('.\\database\\data\\bowling_ergebnisse.csv', index=False, sep=";")
 
     # calculate_averages(df_results, league_name=league_name, season=league_season)
 

@@ -3,6 +3,11 @@ import random
 import numpy as np
 import pandas as pd
 
+import sys
+import os
+
+sys.path.append(os.path.dirname(os.path.dirname(__file__)))
+
 from business_logic.lib import get_round_robin_pairings
 from business_logic.team import Team
 from business_logic.player import Player
@@ -118,9 +123,6 @@ def get_random_alley(teams, week):
 
 def simulate_season(teams, weeks, number_of_players_per_team, name, season):
 
-    col_names = ['Season', 'Week', 'Datum', 'League Name', 'Spielort', 'Team Name', 'Name', 'EDV', 'Match Number',
-                 'Team Name Opponent', 'Position', 'Pins']
-
     col_names = Columns().get_column_names()
 
     df_season = pd.DataFrame(columns=col_names)
@@ -154,5 +156,5 @@ def simulate_season(teams, weeks, number_of_players_per_team, name, season):
                     df_season = pd.concat([df_season, pd.DataFrame(cols_match, columns=col_names)], ignore_index=True)
                     # print(df_season)
 
-    df_season = df_season.sort_values(by=['Week', 'Team', 'Match', 'Position'])
+    df_season = df_season.sort_values(by=[Columns.week, Columns.team_name, Columns.match_number, Columns.position])
     return df_season
