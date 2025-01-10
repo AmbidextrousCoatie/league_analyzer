@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <!-- Player Selection Sidebar -->
+        <div class="col-md-3">
+            {% include 'components/player_select.html' %}
+        </div>
+        
+        <!-- Main Content Area -->
+        <div class="col-md-9">
+            {% block player_content %}{% endblock %}
+        </div>
+    </div>
+</div>
+{% endblock %} 

@@ -14,6 +14,7 @@ from database.definitions import Columns
 from business_logic.statistics import calculate_score_average_player, calculate_score_min_player, calculate_score_max_player, calculate_games_count_player, calculate_score_average_league
 app = Flask(__name__, template_folder='html/templates')
 
+
 # CSV-Datei laden (dein Datenspeicher) mit dem Separator ";"
 df = pd.read_csv('database/data/bowling_ergebnisse.csv', sep=';')
 

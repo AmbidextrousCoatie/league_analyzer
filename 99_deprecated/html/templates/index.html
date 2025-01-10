@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bowling Dashboard</title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+<body>
+<div class="container">
+    <h1 class="mt-5">Bowling Dashboard</h1>
+    <form id="filter-form" action="/" method="post">
+        <div class="form-group">
+            <label for="spieler">Spieler</label>
+            <select class="form-control" id="spieler" name="spieler">
+                <option value="">Bitte wählen</option>
+                {% for sp in spieler %}
+                <option value="{{ sp }}">{{ sp }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="auswertungszeitraum">Auswertungszeitraum</label>
+            <select class="form-control" id="auswertungszeitraum" name="auswertungszeitraum">
+                <option value="gesamt">Gesamt</option>
+                {% for saison in saisons %}
+                <option value="{{ saison }}">{{ saison }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary">Filter anwenden</button>
+    </form>
+
+    {% if html_kpis %}
+    <div class="mt-5">
+        <h3>Kennzahlen für {{ spieler }}</h3>
+        <ul>
+            <li>Pins im Schnitt: {{ html_kpis.pins_im_schnitt }}</li>
+            <li>Min Pins: {{ html_kpis.min_pins }}</li>
+            <li>Max Pins: {{ html_kpis.max_pins }}</li>
+            <li>Anzahl Spiele: {{ html_kpis.anzahl_spiele }}</li>
+        </ul>
+    </div>
+
+    {% if spieler_positionen %}
+    <div class="mt-5">
+        <h4>Einsätze pro Position</h4>
+        <ul>
+            {% for position, count in spieler_positionen.items() %}
+            <li>Position {{ position }}: {{ count }} Einsätze</li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+    {% endif %}
+
+    {% if player_avg_json %}
+    <div class="mt-5">
+        <h3>Schnitt des Spielers im Vergleich zur Liga</h3>
+        <div id="player_avg_plot"></div>
+    </div>
+    <script>
+        var playerAvgPlot = {{ player_avg_json|safe }};
+        Plotly.newPlot('player_avg_plot', playerAvgPlot.data, playerAvgPlot.layout);
+    </script>
+    {% endif %}
+
+    {% if heatmap_json %}
+    <div class="mt-5">
+        <h3>Heatmap: Durchschnittliche Pins pro Woche und Team</h3>
+        <div id="heatmap_plot"></div>
+    </div>
+    <script>
+        var heatmapPlot = {{ heatmap_json|safe }};
+        Plotly.newPlot('heatmap_plot', heatmapPlot.data, heatmapPlot.layout);
+    </script>
+    {% endif %}
+
+    {% if heatmap_abweichung_json %}
+    <div class="mt-5">
+        <h3>Heatmap: Abweichung des Teamschnitts in der Woche vom Saisondurchschnitt</h3>
+        <div id="heatmap_abweichung_plot"></div>
+    </div>
+    <script>
+        var heatmapAbweichungPlot = {{ heatmap_abweichung_json|safe }};
+        Plotly.newPlot('heatmap_abweichung_plot', heatmapAbweichungPlot.data, heatmapAbweichungPlot.layout);
+    </script>
+    {% endif %}
+</div>
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+</body>
+</html>

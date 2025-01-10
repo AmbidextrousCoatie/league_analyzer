@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{% endblock %} - Sports Analytics</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('main.index') }}">Sports Analytics</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <!-- Tier 1: Main Sections -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            Overall Stats
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{{ url_for('main.overall_stats', analysis='league_overview') }}">League Overview</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('main.overall_stats', analysis='performance_trends') }}">Performance Trends</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('main.overall_stats', analysis='rankings') }}">Rankings</a></li>
+                        </ul>
+                    </li>
+                    
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            League Stats
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{{ url_for('main.league_stats', analysis='tables') }}">League Tables</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('main.league_stats', analysis='averages') }}">League Averages</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('main.league_stats', analysis='comparisons') }}">Team Comparisons</a></li>
+                        </ul>
+                    </li>
+
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            Team Stats
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{{ url_for('main.team_stats', analysis='performance') }}">Team Performance</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('main.team_stats', analysis='league_comparison') }}">vs League Average</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('main.team_stats', analysis='historical') }}">Historical Trends</a></li>
+                        </ul>
+                    </li>
+
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            Individual Stats
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{{ url_for('main.player_stats', analysis='personal') }}">Personal Stats</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('main.player_stats', analysis='team_comparison') }}">vs Team Average</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('main.player_stats', analysis='historical') }}">Historical Data</a></li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <!-- Tier 2: Season Selection -->
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a href="{{ url_for('main.reload_data') }}" 
+                           class="nav-link" 
+                           title="Reload Data">
+                            <i class="bi bi-arrow-clockwise"></i> Reload Data
+                        </a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            Season: {{ session.get('selected_season', 'All') }}
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{{ url_for('main.set_season', season='2023') }}">2023</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('main.set_season', season='2022') }}">2022</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('main.set_season', season='all') }}">All Seasons</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container mt-4">
+        {% block content %}{% endblock %}
+    </main>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html> 
