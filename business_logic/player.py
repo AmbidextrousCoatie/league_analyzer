@@ -8,15 +8,19 @@ class Player:
         self.name_last = name_last
         self.skill = skill
 
-    def simulate_score(self):
+    def simulate_score(self, is_home_alley: bool=False, has_a_good_day: bool=False):
         # 7.5 == 200
         base_score = 200
 
         offset_due_to_skill = self.skill - 7.5
 
-        luck_or_lack_of = (random.random() - 0.5) * 50
+        luck_or_lack_of = (random.random() - 0.5) * 25
 
-        score = base_score * (1 + offset_due_to_skill / 10) + luck_or_lack_of
+        home_bonus = 50 if is_home_alley else 0
+
+        good_day_bonus = 25 if has_a_good_day else 0
+
+        score = base_score * (1 + offset_due_to_skill / 10) + luck_or_lack_of + home_bonus + good_day_bonus
 
         return int(score)
 

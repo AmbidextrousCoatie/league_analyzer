@@ -131,7 +131,14 @@ def simulate_season(teams, weeks, number_of_players_per_team, name, season):
     round_robin_rounds = np.array(get_round_robin_pairings(team_ids))
     round_robin_rounds_per_week = list([np.roll(round_robin_rounds, i) for i in range(weeks)])
 
+    # find players that have a good day
+    # 50 % that on player in each team has a good day
+    # select random 
+    teams_with_good_day = [random.randint(0, 1) for i in range(len(teams))]
+    players_with_good_day = [random.randint(0, number_of_players_per_team-1) for i in range(len(teams_with_good_day) )]
+
     for week in range(weeks):
+        alley = get_random_alley(teams, week)
         # iterate over all pairings
         for match_number, pairings in enumerate(round_robin_rounds_per_week[week]):
             for (team_id, opponent_id) in pairings:
@@ -142,16 +149,19 @@ def simulate_season(teams, weeks, number_of_players_per_team, name, season):
 
                 team = teams[team_id]
                 team_opponent = teams[opponent_id]
+                is_home_alley = team.home_alley == alley
 
                 for player_number in range(number_of_players_per_team):
                     player = team.players[player_number]
-                    player_opponent = team_opponent.players[player_number]
-                    player_score = teams[team_id].players[player_number].simulate_score()
-                    opponent_score = teams[opponent_id].players[player_number].simulate_score()
+                    player_has_good_day = teams_with_good_day[team_id] and players_with_good_day[team_id] == player_number
+                    player_opponent = team_opponent.players[player_number]  
+                    player_opponent_has_good_day = teams_with_good_day[opponent_id] and players_with_good_day[opponent_id] == player_number
+                    player_score = teams[team_id].players[player_number].simulate_score(is_home_alley, player_has_good_day)
+                    opponent_score = teams[opponent_id].players[player_number].simulate_score(is_home_alley, player_opponent_has_good_day)
 
                     cols_match = [
-                        [season, week, "n/a", name, get_random_alley(teams, week), team.team_name, player.get_full_name(), player.id, match_number, team_opponent.team_name, player_number, player_score, np.nan],
-                        [season, week, "n/a", name, get_random_alley(teams, week), team_opponent.team_name, player_opponent.get_full_name(), player_opponent.id, match_number, team.team_name, player_number, opponent_score, np.nan]
+                        [season, week+1, "n/a", name, alley, team.team_name, player.get_full_name(), player.id, match_number, team_opponent.team_name, player_number, player_score, np.nan, True, False],
+                        [season, week+1, "n/a", name, alley, team_opponent.team_name, player_opponent.get_full_name(), player_opponent.id, match_number, team.team_name, player_number, opponent_score, np.nan, True, False]
                         ]
                     df_season = pd.concat([df_season, pd.DataFrame(cols_match, columns=col_names)], ignore_index=True)
                     # print(df_season)

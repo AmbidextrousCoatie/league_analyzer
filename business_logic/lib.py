@@ -1,4 +1,5 @@
 import pandas as pd
+from tqdm import tqdm
 
 from database.definitions import Columns
 
@@ -156,31 +157,32 @@ def calculate_points(df):
     # Group by match identifiers
     match_groups = df_with_points.groupby([Columns.season, Columns.league_name, Columns.week, Columns.match_number])
     #print(match_groups)
-    for (season, league, week, match), match_df in match_groups:
-        # Calculate individual points
-        #print(season, league, week, match)
-        #print(match_df)
+    total_groups = len(match_groups)
+    with tqdm(total=total_groups, desc="Calculating points") as pbar:
+        for (season, league, week, match), match_df in match_groups:
+            # Calculate individual points
+            
+            # iterate over all teams
+            for team in match_df[Columns.team_name].unique():
+                # for each team find the opponent for this match:
+                individual_match_groups = match_df[(match_df[Columns.team_name] == team) | (match_df[Columns.team_name_opponent] == team)].groupby(Columns.position)
+                # filter for team_name == team 
+                for position, individual_match in individual_match_groups:
+                    #print(individual_match)
+                    if individual_match.iloc[0][Columns.score] > individual_match.iloc[1][Columns.score]:
+                        df_with_points.loc[individual_match.index[0], Columns.points] = 1
+                    elif individual_match.iloc[0][Columns.score] < individual_match.iloc[1][Columns.score]:
+                        df_with_points.loc[individual_match.index[0], Columns.points] = 0
+                        df_with_points.loc[individual_match.index[1], Columns.points] = 1
+                    else:
+                        df_with_points.loc[individual_match.index, Columns.points] = 0.5 
+                    df_with_points.loc[individual_match.index, Columns.input_data] = True
+                    df_with_points.loc[individual_match.index, Columns.computed_data] = False
+    
+                #print(df_with_points)
+            pbar.update(1)
 
-        # iterate over all teams
-        for team in match_df[Columns.team_name].unique():
-            # for each team find the opponent for this match:
-            individual_match_groups = match_df[(match_df[Columns.team_name] == team) | (match_df[Columns.team_name_opponent] == team)].groupby(Columns.position)
-            # filter for team_name == team 
-            for position, individual_match in individual_match_groups:
-                #print(individual_match)
-                if individual_match.iloc[0][Columns.score] > individual_match.iloc[1][Columns.score]:
-                    df_with_points.loc[individual_match.index[0], Columns.points] = 1
-                elif individual_match.iloc[0][Columns.score] < individual_match.iloc[1][Columns.score]:
-                    df_with_points.loc[individual_match.index[0], Columns.points] = 0
-                    df_with_points.loc[individual_match.index[1], Columns.points] = 1
-                else:
-                    df_with_points.loc[individual_match.index, Columns.points] = 0.5 
-                df_with_points.loc[individual_match.index, Columns.input_data] = True
-                df_with_points.loc[individual_match.index, Columns.computed_data] = False
-   
-            #print(df_with_points)
-
-                    
+                        
             lala = 0
         
         # Calculate team totals and add new rows

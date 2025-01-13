@@ -80,9 +80,13 @@ if __name__ == "__main__":
 
     df_results = pd.DataFrame(columns=col_names)
 
-    if 0:
-        for league in [league_ll, league_bzl]:
-            for season in ["18/19", "19/20", "20/21", "21/22", "22/23", "23/24", "24/25"]:
+    all_seasons = ["18/19", "19/20", "20/21", "21/22", "22/23", "23/24", "24/25"]
+    all_leagues = [league_ll, league_bzl]
+
+
+    if 1:
+        for league in all_leagues:
+            for season in all_seasons:
                 print(f"Simulating season {season} for {league.name}")
                 df_results_season = simulate_season(league.teams, league.weeks,
                                                                 league.number_of_players_per_team, league.name,
