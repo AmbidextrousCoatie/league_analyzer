@@ -108,20 +108,34 @@ document.addEventListener('DOMContentLoaded', function() {
                         <table class="table table-striped table-hover">
                             <thead>
                                 <tr>
+                                    <th colspan="2"></th>
+                                    <th class="text-center" colspan="2">Match Day ${selectedMatchDay || ''}</th>
+                                    <th class="text-center" colspan="2">Season Standings</th>
+                                </tr>
+                                <tr>
                                     <th>#</th>
                                     <th>Team</th>
-                                    <th class="text-center">Games</th>
-                                    <th class="text-center">Points</th>
-                                    <th class="text-center">Average</th>
+                                    <th class="text-center sortable" data-sort="matchPoints">Points</th>
+                                    <th class="text-center sortable" data-sort="matchAvg">Average</th>
+                                    <th class="text-center sortable" data-sort="totalPoints">Total Points</th>
+                                    <th class="text-center sortable" data-sort="totalAvg">Average</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                ${data.map((row, index) => `
+                                ${data.standings.map((row, index) => `
                                     <tr>
-                                        <td>${index + 1}</td>
+                                        <td>
+                                            ${index + 1}
+                                            ${row.positionChange > 0 ? 
+                                                `<span class="text-success">↑${row.positionChange}</span>` : 
+                                                row.positionChange < 0 ? 
+                                                `<span class="text-danger">↓${Math.abs(row.positionChange)}</span>` : 
+                                                ''}
+                                        </td>
                                         <td>${row.Team}</td>
-                                        <td class="text-center">${row.Games}</td>
-                                        <td class="text-center">${row.Points}</td>
+                                        <td class="text-center">${row.MatchPoints || '-'}</td>
+                                        <td class="text-center">${row.MatchAverage ? row.MatchAverage.toFixed(1) : '-'}</td>
+                                        <td class="text-center">${row.TotalPoints}</td>
                                         <td class="text-center">${row.Average.toFixed(1)}</td>
                                     </tr>
                                 `).join('')}
@@ -129,6 +143,14 @@ document.addEventListener('DOMContentLoaded', function() {
                         </table>
                     `;
                     document.getElementById('leagueTable').innerHTML = tableHtml;
+
+                    // Add sorting functionality
+                    document.querySelectorAll('th.sortable').forEach(th => {
+                        th.addEventListener('click', () => {
+                            const sortKey = th.dataset.sort;
+                            sortTable(sortKey);
+                        });
+                    });
                 })
                 .catch(error => {
                     console.error('Error:', error);
@@ -143,6 +165,16 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('leagueTable').innerHTML = 
                 '<div class="alert alert-info">Please select both season and league</div>';
         }
+    }
+
+    function sortTable(sortKey) {
+        const data = currentData.standings;  // Store the current data globally
+        data.sort((a, b) => {
+            const valA = sortKey.includes('Avg') ? a[sortKey] || 0 : a[sortKey] || 0;
+            const valB = sortKey.includes('Avg') ? b[sortKey] || 0 : b[sortKey] || 0;
+            return valB - valA;  // Descending order
+        });
+        updateTableDisplay(data);
     }
 });
 </script>

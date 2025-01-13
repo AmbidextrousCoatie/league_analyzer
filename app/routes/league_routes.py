@@ -38,7 +38,7 @@ def get_table():
             return jsonify({"error": "Season and league are required"}), 400
             
         table_data = league_service.get_table(season, league, match_day)
-        print(f"Generated table data: {table_data}")
+        #print(f"Generated table data: {table_data}")
         
         if not table_data:
             return jsonify({"message": "No data found for these filters"}), 404

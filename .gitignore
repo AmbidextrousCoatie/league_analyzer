@@ -42,3 +42,6 @@ business_logic/__pycache__/team.cpython-312.pyc
 data_access/__pycache__/pd_dataframes.cpython-312.pyc
 data_access/__pycache__/seed.cpython-312.pyc
 app/services/__pycache__/league_service.cpython-312.pyc
+app/routes/__pycache__/league_routes.cpython-312.pyc
+app/routes/__pycache__/league_routes.cpython-312.pyc
+app/routes/__pycache__/league_routes.cpython-312.pyc
