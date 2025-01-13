@@ -15,7 +15,9 @@ class Columns:
     team_name_opponent: str = 'Opponent'
     position: str = 'Position'
     score: str = 'Score'
-    points: str = 'Points'
+    points: str = 'Points',
+    input_data: str = 'Input Data'
+    computed_data: str = 'Computed Data'
 
     def __str__(self):
         return str(self.get_column_names())
@@ -24,7 +26,7 @@ class Columns:
         if selection is None:
             return [self.season, self.week, self.date, self.league_name, self.location, self.team_name,
                     self.player_name, self.player_id, self.match_number, self.team_name_opponent,
-                    self.position, self.score, self.points]
+                    self.position, self.score, self.points, self.input_data, self.computed_data]
 
 
 class Mapping(Enum):

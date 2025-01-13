@@ -10,7 +10,7 @@ class LeagueService:
 
     def get_valid_combinations(self):
         """Returns all existing combinations in the database"""
-        combinations = self.df[['Season', 'League', 'Week']].drop_duplicates()
+        combinations = self.df[[Columns.season, Columns.league_name, Columns.week]].drop_duplicates()
         print(combinations)
         return combinations.to_dict('records')
 
@@ -26,7 +26,7 @@ class LeagueService:
         """Returns all possible match days"""
         try:
             # Get unique weeks, sort them, and convert to list
-            weeks = sorted(self.df['Week'].unique().tolist())
+            weeks = sorted(self.df[Columns.week].unique().tolist())
             # Filter out None/NaN values if any
             weeks = [week for week in weeks if week is not None]
             print(f"Available weeks: {weeks}")  # Debug output
@@ -38,18 +38,19 @@ class LeagueService:
     def get_table(self, season, league, match_day=None):
         # Build filters based on selections
         filters = {
-            'Season': season,
-            'League': league
+            Columns.season: season,
+            Columns.league_name: league
         }
         
         # Only add Week filter if match_day is provided and valid
         if match_day and match_day.strip():
             try:
                 week_value = int(match_day)
-                filters['Week'] = week_value
+                filters[Columns.week] = week_value
             except ValueError:
                 print(f"Invalid match day value: {match_day}")
         
+        filters[Columns.input_data] = True
         print(f"Final filters: {filters}")  # Debug log
         
         # Get filtered data

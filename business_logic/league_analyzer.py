@@ -91,7 +91,7 @@ if __name__ == "__main__":
                 df_results = pd.concat([df_results, df_results_season], ignore_index=True)
 
         df_results.to_csv('.\\database\\data\\bowling_ergebnisse_ohne_punkte.csv', index=False, sep=";")
-    df_results = pd.read_csv('.\\database\\data\\bowling_ergebnisse_ohne_punkte_subset.csv', sep=";")
+    df_results = pd.read_csv('.\\database\\data\\bowling_ergebnisse_ohne_punkte.csv', sep=";")
     df_results_with_points = calculate_points(df_results)
     df_results_with_points.to_csv('.\\database\\data\\bowling_ergebnisse.csv', index=False, sep=";")
     # calculate_averages(df_results, league_name=league_name, season=league_season)
