@@ -2,6 +2,7 @@ from flask import Blueprint, render_template, jsonify, request
 from app.services.league_service import LeagueService
 from database.definitions import Columns
 from business_logic.statistics import query_database
+import traceback
 
 bp = Blueprint('league', __name__)
 league_service = LeagueService()
@@ -74,5 +75,72 @@ def get_available_matchdays():
         return jsonify({"matchdays": available_matchdays})
     except Exception as e:
         print(f"Error getting available match days: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+
+@bp.route('/league/get_position_history')
+def get_position_history():
+    try:
+        season = request.args.get('season')
+        league = request.args.get('league')
+        
+        if not season or not league:
+            return jsonify({"error": "Season and league are required"}), 400
+            
+        filters = {
+            Columns.season: season,
+            Columns.league_name: league,
+            Columns.input_data: True
+        }
+        
+        # Get data for all match days
+        df_filtered = query_database(league_service.df, filters)
+        
+        if df_filtered.empty:
+            return jsonify({
+                'matchDays': [],
+                'teams': [],
+                'data': []
+            })
+        
+        match_days = [int(x) for x in sorted(df_filtered[Columns.week].unique())]
+        teams = sorted(df_filtered['Team'].unique())
+        print("-->" + str(teams))
+        position_data = []
+        for match_day in match_days:
+            # Get standings for this match day using the existing service method
+            standings = league_service.calculate_standings(
+                league_service.df,
+                filters,
+                match_day,
+                cumulative=True,
+                include_changes=False
+            )
+            
+            # Sort standings by Points and Average (same as in calculate_standings)
+            standings = standings.sort_values(['Points', 'Average'], ascending=[False, False])
+            standings = standings.reset_index(drop=True)  # Reset index to get proper positions
+            
+            # Record position for each team
+            for team in teams:
+                team_data = standings[standings['Team'] == team]
+                if not team_data.empty:
+                    position = team_data.index[0] + 1  # Get position from sorted index
+                    print(f"Match day {match_day}, {team}: Position {position}, Points {team_data['Points'].iloc[0]}")
+                    position_data.append({
+                        'matchDay': int(match_day),
+                        'team': str(team),
+                        'position': int(position)
+                    })
+        
+        result = {
+            'matchDays': match_days,
+            'teams': [str(t) for t in teams],
+            'data': position_data
+        }
+        return jsonify(result)
+        
+    except Exception as e:
+        print(f"ERROR: {str(e)}")
+        traceback.print_exc()
         return jsonify({"error": str(e)}), 500
 

@@ -49,9 +49,25 @@
         </div>
     </div>
 </div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5>Position Development</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="positionChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
 {% endblock %}
 
 {% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Handle season selection
@@ -209,5 +225,148 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 });
+
+let positionChart = null;
+
+function updatePositionChart() {
+    const selectedSeason = document.querySelector('input[name="season"]:checked')?.value;
+    const selectedLeague = document.querySelector('input[name="league"]:checked')?.value;
+    
+    if (selectedSeason && selectedLeague) {
+        fetch(`/league/get_position_history?season=${selectedSeason}&league=${selectedLeague}`)
+            .then(response => response.json())
+            .then(data => {
+                // Destroy existing chart if it exists
+                if (positionChart) positionChart.destroy();
+                
+                // Updated color palette
+                const colors = [
+                    '#28255c', '#592a6b', '#882c70', '#b4306b',
+                    '#d8405e', '#f25b4a', '#ff7f30', '#ffa600'
+                ];
+                
+                // Assign colors to teams
+                const teamColors = data.teams.reduce((acc, team, index) => {
+                    acc[team] = colors[index % colors.length];
+                    return acc;
+                }, {});
+                
+                // Create new chart
+                positionChart = new Chart(document.getElementById('positionChart'), {
+                    type: 'line',
+                    data: {
+                        labels: data.matchDays,
+                        datasets: data.teams.map(team => ({
+                            label: team,
+                            data: data.data
+                                .filter(d => d.team === team)
+                                .sort((a, b) => a.matchDay - b.matchDay)
+                                .map(d => d.position),
+                            borderColor: teamColors[team],
+                            backgroundColor: teamColors[team],
+                            fill: false,
+                            tension: 0.1,
+                            pointRadius: 4,
+                            pointHoverRadius: 6,
+                            borderWidth: 2,
+                            pointStyle: 'circle',
+                        }))
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                reverse: true,
+                                min: 0.5,
+                                max: data.teams.length + 0.5,
+                                ticks: {
+                                    stepSize: 1,
+                                    callback: function(value) {
+                                        return Number.isInteger(value) ? value : '';
+                                    }
+                                },
+                                grid: {
+                                    color: '#f0f0f0',
+                                    offset: false,
+                                    drawTicks: true,
+                                    drawOnChartArea: true,
+                                    // Align grid with integer positions
+                                    z: 1,
+                                    tickOffset: 0,
+                                    tickLength: 0
+                                },
+                                afterFit: function(scaleInstance) {
+                                    // Ensure grid lines align with positions
+                                    scaleInstance.options.grid.offset = false;
+                                },
+                                afterDataLimits: (scale) => {
+                                    // Align grid with integer positions
+                                    scale.min = 0.5;
+                                    scale.max = data.teams.length + 0.5;
+                                },
+                                title: { 
+                                    display: true, 
+                                    text: 'Position',
+                                    font: { weight: 'bold' },
+                                    padding: { top: 10, bottom: 10 }
+                                }
+                            },
+                            x: {
+                                grid: {
+                                    drawTicks: true
+                                },
+                                title: {
+                                    display: true,
+                                    text: 'Match Day',
+                                    font: { weight: 'bold' },
+                                    padding: { top: 10, bottom: 10 }
+                                }
+                            }
+                        },
+                        plugins: {
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const team = context.dataset.label;
+                                        const position = context.parsed.y;
+                                        const points = data.data.find(d => 
+                                            d.team === team && d.matchDay === context.parsed.x
+                                        ).points;
+                                        return `${team}: Position ${position} (${points} pts)`;
+                                    }
+                                }
+                            },
+                            legend: {
+                                position: 'right',
+                                labels: {
+                                    padding: 20,
+                                    usePointStyle: true,
+                                    pointStyle: 'circle',
+                                    boxWidth: 10
+                                }
+                            }
+                        },
+                        layout: {
+                            padding: {
+                                top: 10,
+                                bottom: 10
+                            }
+                        }
+                    }
+                });
+            })
+            .catch(error => console.error('Error:', error));
+    }
+}
+
+// Update chart when selection changes
+document.querySelectorAll('input[name="season"], input[name="league"]')
+    .forEach(input => input.addEventListener('change', updatePositionChart));
+
+// Initial chart update if selections exist
+if (document.querySelector('input[name="season"]:checked') && 
+    document.querySelector('input[name="league"]:checked')) {
+    updatePositionChart();
+}
 </script>
 {% endblock %}
