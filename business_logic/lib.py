@@ -114,7 +114,7 @@ def get_round_robin_pairings(teams):
     return pairings
 
 
-def calculate_points(df_season_results, league_name, league_season):
+def depr_calculate_points(df_season_results, league_name, league_season):
     # filter for league and season
 
     print("hi there")
@@ -129,7 +129,7 @@ def calculate_points(df_season_results, league_name, league_season):
     for (week, df_per_week) in df_filtered.groupby(Columns.week):
         # is a tuple --> unpack
 
-        print(df_per_week)
+        #print(df_per_week)
         for (game, df_per_week_per_game) in df_per_week.groupby(Columns.match_number):
             print(df_per_week_per_game)
             df_per_week_per_game.to_csv('tmp.csv', index=False, sep=";")
@@ -143,6 +143,73 @@ def calculate_points(df_season_results, league_name, league_season):
                 lala = 0
 
     print(df_filtered.size)
+    return df_filtered
+
+def calculate_points(df):
+    """Calculate points according to German Minor League rules"""
+    # Create a copy to avoid modifying original
+    df_with_points = df.copy()
+    
+    # Initialize points column
+    df_with_points['Points'] = 0.0
+    
+    # Group by match identifiers
+    match_groups = df_with_points.groupby([Columns.season, Columns.league_name, Columns.week, Columns.match_number])
+    
+    for (season, league, week, match), match_df in match_groups:
+        # Calculate individual points
+        print(season, league, week, match)
+        positions = match_df[Columns.position].unique()
+        for pos in positions:
+            pos_df = match_df[match_df[Columns.position] == pos].sort_values(Columns.team_name)
+            if len(pos_df) == 2:  # Ensure we have both players
+                score1, score2 = pos_df[Columns.score].values
+                print(score1, score2)
+                if score1 > score2:
+                    df_with_points.loc[pos_df.index[0], Columns.points] = 1
+                    df_with_points.loc[pos_df.index[1], Columns.points] = 0
+                elif score1 < score2:
+                    df_with_points.loc[pos_df.index[0], Columns.points] = 0
+                    df_with_points.loc[pos_df.index[1], Columns.points] = 1
+                else:  # Tie
+                    df_with_points.loc[pos_df.index, Columns.points] = 0.5
+        
+        # Calculate team totals and add new rows
+        team_totals = match_df.groupby(Columns.team_name)[Columns.score].sum().reset_index()
+        team1_score = team_totals.iloc[0][Columns.score]
+        team2_score = team_totals.iloc[1][Columns.score]
+        
+        # Create team total rows
+        team_total_rows = []
+        for _, team_row in team_totals.iterrows():
+            team_points = 0
+            if team1_score > team2_score:
+                team_points = 2 if team_row[Columns.team_name] == team_totals.iloc[0][Columns.team_name] else 0
+            elif team1_score < team2_score:
+                team_points = 2 if team_row[Columns.team_name] == team_totals.iloc[1][Columns.team_name] else 0
+            else:
+                team_points = 1  # Tie
+                
+            team_total_rows.append({
+                Columns.season: season,
+                Columns.week: week,
+                Columns.date: match_df[Columns.date].iloc[0],
+                Columns.league_name: league,
+                Columns.location: match_df[Columns.location].iloc[0],
+                Columns.team_name: team_row[Columns.team_name],
+                Columns.player_name: 'Team Total',
+                Columns.player_id: None,
+                Columns.match_number: match,
+                Columns.team_name_opponent: match_df[match_df[Columns.team_name] != team_row[Columns.team_name]].iloc[0][Columns.team_name],
+                Columns.position: None,
+                Columns.score: team_row[Columns.score],
+                Columns.points: team_points
+            })
+            
+        # Add team total rows to DataFrame
+        df_with_points = pd.concat([df_with_points, pd.DataFrame(team_total_rows)], ignore_index=True)
+    
+    return df_with_points
 
 
 def calculate_averages(df: pd.DataFrame, league_name=None, season=None, player=None):

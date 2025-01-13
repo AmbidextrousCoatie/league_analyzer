@@ -30,3 +30,15 @@ app/routes/__pycache__/main.cpython-310.pyc
 app/routes/__pycache__/player_routes.cpython-310.pyc
 app/services/__pycache__/data_manager.cpython-310.pyc
 app/services/__pycache__/player_service.cpython-310.pyc
+app/__pycache__/__init__.cpython-312.pyc
+app/routes/__pycache__/player_routes.cpython-312.pyc
+app/routes/__pycache__/main.cpython-312.pyc
+app/services/__pycache__/data_manager.cpython-312.pyc
+app/services/__pycache__/player_service.cpython-312.pyc
+business_logic/__pycache__/league.cpython-312.pyc
+business_logic/__pycache__/lib.cpython-312.pyc
+business_logic/__pycache__/player.cpython-312.pyc
+business_logic/__pycache__/team.cpython-312.pyc
+data_access/__pycache__/pd_dataframes.cpython-312.pyc
+data_access/__pycache__/seed.cpython-312.pyc
+app/services/__pycache__/league_service.cpython-312.pyc

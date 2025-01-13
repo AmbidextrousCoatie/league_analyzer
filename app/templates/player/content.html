@@ -1,0 +1,239 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h4>Player Statistics</h4>
+    </div>
+    <div class="card-body">
+        <!-- Searchable input with datalist -->
+        <div class="mb-4">
+            <label for="playerInput" class="form-label">Select Player</label>
+            <input 
+                type="text" 
+                class="form-control" 
+                id="playerInput" 
+                list="playerList" 
+                placeholder="Type a player name..."
+                autocomplete="off"
+            >
+            <datalist id="playerList">
+                <!-- Players will be loaded here -->
+            </datalist>
+        </div>
+
+        <!-- Stats will be loaded here -->
+        <div id="playerStats" class="mt-4">
+            <!-- Stats will be dynamically inserted here -->
+        </div>
+    </div>
+</div>
+
+<div class="card mt-4">
+    <div class="card-header">
+        <h5>Performance Trend</h5>
+    </div>
+    <div class="card-body">
+        <canvas id="trendChart" height="300"></canvas>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const playerInput = document.getElementById('playerInput');
+    const playerList = document.getElementById('playerList');
+    
+    // Load all players immediately
+    fetch('{{ url_for("player.search_players") }}')
+        .then(response => response.json())
+        .then(players => {
+            // Populate datalist with options
+            playerList.innerHTML = players.map(player => 
+                `<option value="${player.name}" data-id="${player.id}">`
+            ).join('');
+        });
+
+    // Handle player selection
+    playerInput.addEventListener('change', function() {
+        const selectedName = this.value;
+        const option = Array.from(playerList.options).find(opt => opt.value === selectedName);
+        
+        if (option) {
+            const playerId = option.dataset.id;
+            loadPlayerStats(playerId);
+        }
+    });
+
+    function loadPlayerStats(playerId) {
+        fetch(`{{ url_for("player.get_stats") }}?player_id=${playerId}`)
+            .then(response => response.json())
+            .then(stats => {
+                displayStats(stats);
+            });
+    }
+
+    function displayStats(stats) {
+        console.log('Received stats:', stats);  // Let's see what we're getting
+        
+        // First, just display the basic stats we know we have
+        const statsHtml = `
+            <div class="row">
+                <div class="col-md-6 mb-4">
+                    <h5>Player Information</h5>
+                    <table class="table">
+                        <tbody>
+                            <tr>
+                                <th>Player Name:</th>
+                                <td>${stats.name}</td>
+                            </tr>
+                            <tr>
+                                <th>Player ID:</th>
+                                <td>${stats.id}</td>
+                            </tr>
+                            <tr>
+                                <th>Team:</th>
+                                <td>${stats.team}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        `;
+        document.getElementById('playerStats').innerHTML = statsHtml;
+
+        // Debug logs
+        console.log('All data:', {
+            seasons: stats.season,
+            averages: stats.average,
+            gameCounts: stats.game_count
+        });
+
+        const allTimeIndex = stats.season.indexOf('all time');
+        const allTimeAverage = stats.average[allTimeIndex];
+        
+        const seasons = stats.season.filter((_, i) => i !== allTimeIndex);
+        const averages = stats.average.filter((_, i) => i !== allTimeIndex);
+        const gameCounts = stats.game_count.filter((_, i) => i !== allTimeIndex);
+
+        // Debug the data going into the chart
+        console.log('Chart data:', {
+            seasons,
+            averages,
+            gameCounts,
+            allTimeAverage
+        });
+
+        const maxSize = 15;
+        const minSize = 5;
+        // Find the maximum number of games in the actual data
+        const actualMaxGames = 150
+        const pointSizes = gameCounts.map(count => {
+            const scaledSize = (count / actualMaxGames) * (maxSize - minSize) + minSize;
+            console.log(`Games: ${count}, Size: ${scaledSize}`);  // Debug log
+            return scaledSize;
+        });
+
+        const ctx = document.getElementById('trendChart');
+        const existingChart = Chart.getChart(ctx);
+        if (existingChart) {
+            existingChart.destroy();
+        }
+
+        const chartData = {
+            datasets: [
+                {
+                    label: 'Season Average',
+                    data: seasons.map((season, i) => ({
+                        x: season,
+                        y: averages[i],
+                        r: pointSizes[i]
+                    })),
+                    backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    pointStyle: 'circle'
+                },
+                {
+                    label: 'Trend Line',
+                    showInLegend: false,
+                    data: seasons.map((season, i) => ({
+                        x: season,
+                        y: averages[i]
+                    })),
+                    type: 'line',
+                    borderColor: 'rgba(54, 162, 235, 0.6)',
+                    fill: false,
+                    tension: 0.1,
+                    showLine: true,
+                    pointRadius: 0
+                },
+                {
+                    label: 'All-Time Average',
+                    data: seasons.map(season => ({
+                        x: season,
+                        y: allTimeAverage
+                    })),
+                    type: 'line',
+                    borderColor: 'rgba(128, 128, 128, 0.6)',
+                    borderDash: [5, 5],
+                    pointStyle: 'line',
+                    fill: false,
+                    tension: 0
+                }
+            ]
+        };
+
+        // Debug the final chart configuration
+        console.log('Chart configuration:', chartData);
+
+        window.trendChart = new Chart(ctx, {
+            type: 'bubble',
+            data: chartData,
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        type: 'category',
+                        title: {
+                            display: true,
+                            text: 'Season'
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'Average Score'
+                        },
+                        beginAtZero: false
+                    }
+                },
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const dataIndex = context.dataIndex;
+                                if (context.dataset.label === 'Season Average') {
+                                    return [
+                                        `Average: ${averages[dataIndex].toFixed(1)}`,
+                                        `Games: ${gameCounts[dataIndex]}`
+                                    ];
+                                }
+                                return `All-Time Average: ${allTimeAverage.toFixed(1)}`;
+                            }
+                        }
+                    },
+                    legend: {
+                        display: true,
+                        position: 'top'
+                    }
+                }
+            }
+        });
+    }
+});
+</script>
+{% endblock %} 

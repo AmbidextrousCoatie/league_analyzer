@@ -21,7 +21,7 @@ def overall_stats(analysis):
 @bp.route('/league/<analysis>')
 def league_stats(analysis):
     season = session.get('selected_season', 'all')
-    return render_template('league.html', analysis=analysis, season=season)
+    return render_template('league/stats.html', analysis=analysis, season=season)
 
 @bp.route('/team/<analysis>')
 def team_stats(analysis):
@@ -31,7 +31,7 @@ def team_stats(analysis):
 @bp.route('/player/<analysis>')
 def player_stats(analysis):
     season = session.get('selected_season', 'all')
-    return render_template('player.html', analysis=analysis, season=season)
+    return render_template('player.html2', analysis=analysis, season=season)
 
 @bp.route('/reload-data')
 def reload_data():

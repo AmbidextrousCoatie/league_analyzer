@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h4>League Statistics</h4>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <!-- Navigation Section -->
+            <div class="col-md-4">
+                <div class="mb-4">
+                    <h5>Season</h5>
+                    <div class="btn-group-vertical w-100" role="group" id="seasonButtons">
+                        {% for season in seasons %}
+                        <input type="radio" class="btn-check" name="season" id="season_{{ season }}" value="{{ season }}">
+                        <label class="btn btn-outline-primary text-start" for="season_{{ season }}">{{ season }}</label>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <h5>League</h5>
+                    <div class="btn-group-vertical w-100" role="group" id="leagueButtons">
+                        {% for league in leagues %}
+                        <input type="radio" class="btn-check" name="league" id="league_{{ league }}" value="{{ league }}">
+                        <label class="btn btn-outline-primary text-start" for="league_{{ league }}">{{ league }}</label>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <h5>Match Day</h5>
+                    <div class="btn-group" role="group" id="matchDayButtons">
+                        {% for week in weeks %}
+                        <input type="radio" class="btn-check" name="matchDay" id="matchDay_{{ week }}" value="{{ week }}">
+                        <label class="btn btn-outline-primary" for="matchDay_{{ week }}">{{ week }}</label>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Content Section -->
+            <div class="col-md-8">
+                <div id="leagueTable">
+                    <!-- Table will be dynamically inserted here -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Handle season selection
+    document.querySelectorAll('input[name="season"]').forEach(radio => {
+        radio.addEventListener('change', function() {
+            if (this.checked) {
+                updateTable();
+            }
+        });
+    });
+
+    // Handle league selection
+    document.querySelectorAll('input[name="league"]').forEach(radio => {
+        radio.addEventListener('change', function() {
+            if (this.checked) {
+                updateTable();
+            }
+        });
+    });
+
+    // Handle match day selection
+    document.querySelectorAll('input[name="matchDay"]').forEach(radio => {
+        radio.addEventListener('change', function() {
+            if (this.checked) {
+                updateTable();
+            }
+        });
+    });
+
+    function updateTable() {
+        const selectedSeason = document.querySelector('input[name="season"]:checked')?.value;
+        const selectedLeague = document.querySelector('input[name="league"]:checked')?.value;
+        const selectedMatchDay = document.querySelector('input[name="matchDay"]:checked')?.value;
+
+        if (selectedSeason && selectedLeague) {
+            document.getElementById('leagueTable').innerHTML = 
+                '<div class="alert alert-info">Loading data...</div>';
+            
+            fetch(`/league/get_table?season=${selectedSeason}&league=${selectedLeague}&match_day=${selectedMatchDay || ''}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (!data || data.length === 0) {
+                        document.getElementById('leagueTable').innerHTML = 
+                            '<div class="alert alert-warning">No data available for this combination</div>';
+                        return;
+                    }
+                    
+                    const tableHtml = `
+                        <table class="table table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Team</th>
+                                    <th class="text-center">Games</th>
+                                    <th class="text-center">Points</th>
+                                    <th class="text-center">Average</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${data.map((row, index) => `
+                                    <tr>
+                                        <td>${index + 1}</td>
+                                        <td>${row.Team}</td>
+                                        <td class="text-center">${row.Games}</td>
+                                        <td class="text-center">${row.Points}</td>
+                                        <td class="text-center">${row.Average.toFixed(1)}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    `;
+                    document.getElementById('leagueTable').innerHTML = tableHtml;
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    document.getElementById('leagueTable').innerHTML = 
+                        `<div class="alert alert-danger">
+                            Error loading table data: ${error.message}
+                            <br>
+                            Please try again or contact support if the problem persists.
+                        </div>`;
+                });
+        } else {
+            document.getElementById('leagueTable').innerHTML = 
+                '<div class="alert alert-info">Please select both season and league</div>';
+        }
+    }
+});
+</script>
+{% endblock %}
