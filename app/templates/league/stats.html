@@ -58,7 +58,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('input[name="season"]').forEach(radio => {
         radio.addEventListener('change', function() {
             if (this.checked) {
-                updateTable();
+                updateMatchDayButtons();
             }
         });
     });
@@ -67,18 +67,16 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('input[name="league"]').forEach(radio => {
         radio.addEventListener('change', function() {
             if (this.checked) {
-                updateTable();
+                updateMatchDayButtons();
             }
         });
     });
 
     // Handle match day selection
-    document.querySelectorAll('input[name="matchDay"]').forEach(radio => {
-        radio.addEventListener('change', function() {
-            if (this.checked) {
-                updateTable();
-            }
-        });
+    document.addEventListener('change', function(e) {
+        if (e.target.name === 'matchDay') {
+            updateTable();
+        }
     });
 
     function updateTable() {
@@ -175,6 +173,40 @@ document.addEventListener('DOMContentLoaded', function() {
             return valB - valA;  // Descending order
         });
         updateTableDisplay(data);
+    }
+
+    function updateMatchDayButtons() {
+        const selectedSeason = document.querySelector('input[name="season"]:checked')?.value;
+        const selectedLeague = document.querySelector('input[name="league"]:checked')?.value;
+        const currentMatchDay = document.querySelector('input[name="matchDay"]:checked')?.value;
+        
+        if (selectedSeason && selectedLeague) {
+            fetch(`/league/get_available_matchdays?season=${selectedSeason}&league=${selectedLeague}`)
+                .then(response => response.json())
+                .then(data => {
+                    const matchDayButtons = document.getElementById('matchDayButtons');
+                    const availableWeeks = data.matchdays;
+                    
+                    // Create match day buttons
+                    const buttonsHtml = availableWeeks.map(week => `
+                        <input type="radio" class="btn-check" name="matchDay" id="matchDay_${week}" value="${week}">
+                        <label class="btn btn-outline-primary" for="matchDay_${week}">${week}</label>
+                    `).join('');
+                    
+                    matchDayButtons.innerHTML = buttonsHtml;
+                    
+                    // Select match day: keep current if available, otherwise take latest
+                    const latestMatchDay = Math.max(...availableWeeks);
+                    if (currentMatchDay && availableWeeks.includes(parseInt(currentMatchDay))) {
+                        document.getElementById(`matchDay_${currentMatchDay}`).checked = true;
+                    } else {
+                        document.getElementById(`matchDay_${latestMatchDay}`).checked = true;
+                    }
+                    
+                    // Update table with selected match day
+                    updateTable();
+                });
+        }
     }
 });
 </script>

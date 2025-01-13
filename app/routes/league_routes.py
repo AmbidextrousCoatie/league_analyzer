@@ -1,5 +1,7 @@
 from flask import Blueprint, render_template, jsonify, request
 from app.services.league_service import LeagueService
+from database.definitions import Columns
+from business_logic.statistics import query_database
 
 bp = Blueprint('league', __name__)
 league_service = LeagueService()
@@ -48,5 +50,29 @@ def get_table():
         import traceback
         print(f"Error in get_table: {str(e)}")
         print(f"Traceback: {traceback.format_exc()}")  # This will show the full error trace
+        return jsonify({"error": str(e)}), 500
+
+@bp.route('/league/get_available_matchdays')
+def get_available_matchdays():
+    try:
+        season = request.args.get('season')
+        league = request.args.get('league')
+        
+        if not season or not league:
+            return jsonify({"error": "Season and league are required"}), 400
+            
+        filters = {
+            Columns.season: season,
+            Columns.league_name: league,
+            Columns.input_data: True
+        }
+        
+        # Get available match days for this combination
+        df_filtered = query_database(league_service.df, filters)
+        available_matchdays = sorted(df_filtered[Columns.week].unique().tolist())
+        
+        return jsonify({"matchdays": available_matchdays})
+    except Exception as e:
+        print(f"Error getting available match days: {str(e)}")
         return jsonify({"error": str(e)}), 500
 
