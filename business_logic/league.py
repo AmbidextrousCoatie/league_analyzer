@@ -1,3 +1,5 @@
+import pandas as pd
+
 class League:
 
     def __init__(self, league_name, number_of_teams, number_of_players_per_team, weeks=None, skill_level: int = 7):
@@ -10,5 +12,12 @@ class League:
 
     def __str__(self):
 
-        all_teams = [team.get_name() + " " + team.get_skill() for team in self.teams]
-        return "\n" + self.name + " (" + str(self.skill) + ")\n------------------\n" + "\n".join(all_teams)
+        all_teams = [team.get_name() for team in self.teams]
+        return "\n" + self.name + "\n------------------\n" + "\n".join(all_teams)
+
+
+def get_league_week(df: pd.DataFrame, season: str, league: str, week: int, cumulated: bool = False) -> pd.DataFrame:
+    if cumulated:
+        return df.loc[(df['Season'] == season) & (df['League'] == league) & (df['Week'] <= week)]
+    else:
+        return df.loc[(df['Season'] == season) & (df['League'] == league) & (df['Week'] == week)]

@@ -1,20 +1,21 @@
 import pandas as pd
-from database.definitions import Columns
+from data_access.schema import Columns
 from data_access.pd_dataframes import fetch_data, fetch_column
 
 
 def query_database(database_df: pd.DataFrame, filters: dict = None, column_name: Columns = None, group_by: Columns = None) -> pd.DataFrame:
-    #print(database_df.size)
-    for key, value in filters.items():
-        
-        if value is None or value == [None]:
-            continue
-        #print("filtering for ", key, "with value", value)
-        if not isinstance(value, list):
-            value = [value]
-        df_filtered = database_df[database_df[key].isin(value)]
-        #print(df_filtered.size)
-
+    df_filtered = database_df.copy()  # Start with a copy of the full DataFrame
+    
+    if filters:
+        for key, value in filters.items():
+            if value is None or value == [None]:
+                continue
+            
+            if not isinstance(value, list):
+                value = [value]
+            
+            df_filtered = df_filtered[df_filtered[key].isin(value)]
+    
     if group_by is not None:
         df_filtered = df_filtered.groupby(group_by)
     
@@ -31,7 +32,8 @@ def calculate_score_max(database_df: pd.DataFrame, filters: dict = None, group_b
     return int(fetch_column(database_df, Columns.score, filters, group_by=group_by)[Columns.score].max())
 
 def calculate_games_count(database_df: pd.DataFrame, filters: dict = None, group_by: Columns = None) -> int:
-    return int(fetch_column(database_df, Columns.score, filters, group_by=group_by)[Columns.score].size)
+    lala = fetch_column(database_df, Columns.score, filters, group_by=group_by)[Columns.score].size
+    return lala
 
     
 def calculate_score_average_player(database_df: pd.DataFrame, player_name: str, season: str = None, group_by: Columns = None) -> float:

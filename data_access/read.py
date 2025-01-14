@@ -1,5 +1,5 @@
 import pandas as pd
-from database.definitions import Columns
+from data_access.schema import Columns
 
 def read(data_df: pd.DataFrame, columns: list[Columns] | Columns | None = None, filters: dict[Columns, list[str]]=None, unique: bool=False, as_list: bool=False):
     """Reads and filters data from a DataFrame, returning results in simple Python data types.

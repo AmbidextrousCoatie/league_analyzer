@@ -8,12 +8,11 @@ import os
 
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
-from business_logic.lib import get_round_robin_pairings
-from business_logic.team import Team
-from business_logic.player import Player
-from business_logic.league import League
+from database.generator.teams import DataGeneratorTeam
+from database.generator.player import DataGeneratorPlayer
+from database.generator.league import DataGeneratorLeague
 
-from database.definitions import Columns
+from data_access.schema import Columns
 
 
 def get_random_city():
@@ -26,10 +25,10 @@ def get_random_city():
 
 def create_random_player(league_skill):
 
-    return Player(get_random_id(), get_random_first_name(), get_random_last_name(), get_random_skill(league_skill))
+    return DataGeneratorPlayer(get_random_id(), get_random_first_name(), get_random_last_name(), get_random_skill(league_skill))
 
 
-def create_league_roster(league: League):
+def create_league_roster(league: DataGeneratorLeague):
     league.teams = [create_team(league.skill, league.number_of_players_per_team) for i in range(league.number_of_teams)]
     return league
 
@@ -38,7 +37,7 @@ def create_team(league_skill, players_per_team=4):
     home_alley = get_random_city()
     team_name = get_random_team_name(team_city=home_alley)
     players = [create_random_player(league_skill) for i in range(players_per_team)]
-    return Team(team_name, players, home_alley)
+    return DataGeneratorTeam(team_name, players, home_alley)
 
 
 def get_random_last_name():
@@ -121,6 +120,31 @@ def get_random_alley(teams, week):
         return get_random_city()
 
 
+def get_round_robin_pairings(teams):
+
+    # Wenn die Anzahl der Teams ungerade ist, fügen wir ein Freilos hinzu
+    if len(teams) % 2 != 0:
+        teams.append('Freilos')
+
+    n = len(teams)
+    pairings = []
+
+    for play_round in range(n - 1):
+        pairs = []
+        for i in range(n // 2):
+            home = teams[i]
+            away = teams[n - 1 - i]
+            if play_round % 2 == 0:
+                pairs.append((home, away))
+            else:
+                pairs.append((away, home))
+        pairings.append(pairs)
+        # Die Rotation der Teams für die nächste Runde, ohne das erste Team zu bewegen
+        teams = [teams[0]] + [teams[-1]] + teams[1:-1]
+
+    return pairings
+
+
 def simulate_season(teams, weeks, number_of_players_per_team, name, season):
 
     col_names = Columns().get_column_names()
@@ -131,7 +155,14 @@ def simulate_season(teams, weeks, number_of_players_per_team, name, season):
     round_robin_rounds = np.array(get_round_robin_pairings(team_ids))
     round_robin_rounds_per_week = list([np.roll(round_robin_rounds, i) for i in range(weeks)])
 
+    # find players that have a good day
+    # 50 % that on player in each team has a good day
+    # select random 
+    teams_with_good_day = [random.randint(0, 1) for i in range(len(teams))]
+    players_with_good_day = [random.randint(0, number_of_players_per_team-1) for i in range(len(teams_with_good_day) )]
+
     for week in range(weeks):
+        alley = get_random_alley(teams, week)
         # iterate over all pairings
         for match_number, pairings in enumerate(round_robin_rounds_per_week[week]):
             for (team_id, opponent_id) in pairings:
@@ -142,16 +173,19 @@ def simulate_season(teams, weeks, number_of_players_per_team, name, season):
 
                 team = teams[team_id]
                 team_opponent = teams[opponent_id]
+                is_home_alley = team.home_alley == alley
 
                 for player_number in range(number_of_players_per_team):
                     player = team.players[player_number]
-                    player_opponent = team_opponent.players[player_number]
-                    player_score = teams[team_id].players[player_number].simulate_score()
-                    opponent_score = teams[opponent_id].players[player_number].simulate_score()
+                    player_has_good_day = teams_with_good_day[team_id] and players_with_good_day[team_id] == player_number
+                    player_opponent = team_opponent.players[player_number]  
+                    player_opponent_has_good_day = teams_with_good_day[opponent_id] and players_with_good_day[opponent_id] == player_number
+                    player_score = teams[team_id].players[player_number].simulate_score(is_home_alley, player_has_good_day)
+                    opponent_score = teams[opponent_id].players[player_number].simulate_score(is_home_alley, player_opponent_has_good_day)
 
                     cols_match = [
-                        [season, week, "n/a", name, get_random_alley(teams, week), team.team_name, player.get_full_name(), player.id, match_number, team_opponent.team_name, player_number, player_score, np.nan],
-                        [season, week, "n/a", name, get_random_alley(teams, week), team_opponent.team_name, player_opponent.get_full_name(), player_opponent.id, match_number, team.team_name, player_number, opponent_score, np.nan]
+                        [season, week+1, "n/a", name, alley, team.team_name, player.get_full_name(), player.id, match_number, team_opponent.team_name, player_number, player_score, np.nan, True, False],
+                        [season, week+1, "n/a", name, alley, team_opponent.team_name, player_opponent.get_full_name(), player_opponent.id, match_number, team.team_name, player_number, opponent_score, np.nan, True, False]
                         ]
                     df_season = pd.concat([df_season, pd.DataFrame(cols_match, columns=col_names)], ignore_index=True)
                     # print(df_season)

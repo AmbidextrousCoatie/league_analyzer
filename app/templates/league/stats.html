@@ -1,0 +1,372 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h4>League Statistics</h4>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <!-- Navigation Section -->
+            <div class="col-md-4">
+                <div class="mb-4">
+                    <h5>Season</h5>
+                    <div class="btn-group-vertical w-100" role="group" id="seasonButtons">
+                        {% for season in seasons %}
+                        <input type="radio" class="btn-check" name="season" id="season_{{ season }}" value="{{ season }}">
+                        <label class="btn btn-outline-primary text-start" for="season_{{ season }}">{{ season }}</label>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <h5>League</h5>
+                    <div class="btn-group-vertical w-100" role="group" id="leagueButtons">
+                        {% for league in leagues %}
+                        <input type="radio" class="btn-check" name="league" id="league_{{ league }}" value="{{ league }}">
+                        <label class="btn btn-outline-primary text-start" for="league_{{ league }}">{{ league }}</label>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <h5>Match Day</h5>
+                    <div class="btn-group" role="group" id="matchDayButtons">
+                        {% for week in weeks %}
+                        <input type="radio" class="btn-check" name="matchDay" id="matchDay_{{ week }}" value="{{ week }}">
+                        <label class="btn btn-outline-primary" for="matchDay_{{ week }}">{{ week }}</label>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Content Section -->
+            <div class="col-md-8">
+                <div id="leagueTable">
+                    <!-- Table will be dynamically inserted here -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5>Position Development</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="positionChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Handle season selection
+    document.querySelectorAll('input[name="season"]').forEach(radio => {
+        radio.addEventListener('change', function() {
+            if (this.checked) {
+                updateMatchDayButtons();
+            }
+        });
+    });
+
+    // Handle league selection
+    document.querySelectorAll('input[name="league"]').forEach(radio => {
+        radio.addEventListener('change', function() {
+            if (this.checked) {
+                updateMatchDayButtons();
+            }
+        });
+    });
+
+    // Handle match day selection
+    document.addEventListener('change', function(e) {
+        if (e.target.name === 'matchDay') {
+            updateTable();
+        }
+    });
+
+    function updateTable() {
+        const selectedSeason = document.querySelector('input[name="season"]:checked')?.value;
+        const selectedLeague = document.querySelector('input[name="league"]:checked')?.value;
+        const selectedMatchDay = document.querySelector('input[name="matchDay"]:checked')?.value;
+
+        if (selectedSeason && selectedLeague) {
+            document.getElementById('leagueTable').innerHTML = 
+                '<div class="alert alert-info">Loading data...</div>';
+            
+            fetch(`/league/get_table?season=${selectedSeason}&league=${selectedLeague}&match_day=${selectedMatchDay || ''}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (!data || data.length === 0) {
+                        document.getElementById('leagueTable').innerHTML = 
+                            '<div class="alert alert-warning">No data available for this combination</div>';
+                        return;
+                    }
+                    
+                    const tableHtml = `
+                        <table class="table table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th colspan="2"></th>
+                                    <th class="text-center" colspan="2">Match Day ${selectedMatchDay || ''}</th>
+                                    <th class="text-center" colspan="2">Season Standings</th>
+                                </tr>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Team</th>
+                                    <th class="text-center sortable" data-sort="matchPoints">Points</th>
+                                    <th class="text-center sortable" data-sort="matchAvg">Average</th>
+                                    <th class="text-center sortable" data-sort="totalPoints">Total Points</th>
+                                    <th class="text-center sortable" data-sort="totalAvg">Average</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${data.standings.map((row, index) => `
+                                    <tr>
+                                        <td>
+                                            ${index + 1}
+                                            ${row.positionChange > 0 ? 
+                                                `<span class="text-success">↑${row.positionChange}</span>` : 
+                                                row.positionChange < 0 ? 
+                                                `<span class="text-danger">↓${Math.abs(row.positionChange)}</span>` : 
+                                                ''}
+                                        </td>
+                                        <td>${row.Team}</td>
+                                        <td class="text-center">${row.MatchPoints || '-'}</td>
+                                        <td class="text-center">${row.MatchAverage ? row.MatchAverage.toFixed(1) : '-'}</td>
+                                        <td class="text-center">${row.TotalPoints}</td>
+                                        <td class="text-center">${row.Average.toFixed(1)}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    `;
+                    document.getElementById('leagueTable').innerHTML = tableHtml;
+
+                    // Add sorting functionality
+                    document.querySelectorAll('th.sortable').forEach(th => {
+                        th.addEventListener('click', () => {
+                            const sortKey = th.dataset.sort;
+                            sortTable(sortKey);
+                        });
+                    });
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    document.getElementById('leagueTable').innerHTML = 
+                        `<div class="alert alert-danger">
+                            Error loading table data: ${error.message}
+                            <br>
+                            Please try again or contact support if the problem persists.
+                        </div>`;
+                });
+        } else {
+            document.getElementById('leagueTable').innerHTML = 
+                '<div class="alert alert-info">Please select both season and league</div>';
+        }
+    }
+
+    function sortTable(sortKey) {
+        const data = currentData.standings;  // Store the current data globally
+        data.sort((a, b) => {
+            const valA = sortKey.includes('Avg') ? a[sortKey] || 0 : a[sortKey] || 0;
+            const valB = sortKey.includes('Avg') ? b[sortKey] || 0 : b[sortKey] || 0;
+            return valB - valA;  // Descending order
+        });
+        updateTableDisplay(data);
+    }
+
+    function updateMatchDayButtons() {
+        const selectedSeason = document.querySelector('input[name="season"]:checked')?.value;
+        const selectedLeague = document.querySelector('input[name="league"]:checked')?.value;
+        const currentMatchDay = document.querySelector('input[name="matchDay"]:checked')?.value;
+        
+        if (selectedSeason && selectedLeague) {
+            fetch(`/league/get_available_matchdays?season=${selectedSeason}&league=${selectedLeague}`)
+                .then(response => response.json())
+                .then(data => {
+                    const matchDayButtons = document.getElementById('matchDayButtons');
+                    const availableWeeks = data.matchdays;
+                    
+                    // Create match day buttons
+                    const buttonsHtml = availableWeeks.map(week => `
+                        <input type="radio" class="btn-check" name="matchDay" id="matchDay_${week}" value="${week}">
+                        <label class="btn btn-outline-primary" for="matchDay_${week}">${week}</label>
+                    `).join('');
+                    
+                    matchDayButtons.innerHTML = buttonsHtml;
+                    
+                    // Select match day: keep current if available, otherwise take latest
+                    const latestMatchDay = Math.max(...availableWeeks);
+                    if (currentMatchDay && availableWeeks.includes(parseInt(currentMatchDay))) {
+                        document.getElementById(`matchDay_${currentMatchDay}`).checked = true;
+                    } else {
+                        document.getElementById(`matchDay_${latestMatchDay}`).checked = true;
+                    }
+                    
+                    // Update table with selected match day
+                    updateTable();
+                });
+        }
+    }
+});
+
+let positionChart = null;
+
+function updatePositionChart() {
+    const selectedSeason = document.querySelector('input[name="season"]:checked')?.value;
+    const selectedLeague = document.querySelector('input[name="league"]:checked')?.value;
+    
+    if (selectedSeason && selectedLeague) {
+        fetch(`/league/get_position_history?season=${selectedSeason}&league=${selectedLeague}`)
+            .then(response => response.json())
+            .then(data => {
+                // Destroy existing chart if it exists
+                if (positionChart) positionChart.destroy();
+                
+                // Updated color palette
+                const colors = [
+                    '#28255c', '#592a6b', '#882c70', '#b4306b',
+                    '#d8405e', '#f25b4a', '#ff7f30', '#ffa600'
+                ];
+                
+                // Assign colors to teams
+                const teamColors = data.teams.reduce((acc, team, index) => {
+                    acc[team] = colors[index % colors.length];
+                    return acc;
+                }, {});
+                
+                // Create new chart
+                positionChart = new Chart(document.getElementById('positionChart'), {
+                    type: 'line',
+                    data: {
+                        labels: data.matchDays,
+                        datasets: data.teams.map(team => ({
+                            label: team,
+                            data: data.data
+                                .filter(d => d.team === team)
+                                .sort((a, b) => a.matchDay - b.matchDay)
+                                .map(d => d.position),
+                            borderColor: teamColors[team],
+                            backgroundColor: teamColors[team],
+                            fill: false,
+                            tension: 0.1,
+                            pointRadius: 4,
+                            pointHoverRadius: 6,
+                            borderWidth: 2,
+                            pointStyle: 'circle',
+                        }))
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                reverse: true,
+                                min: 0.5,
+                                max: data.teams.length + 0.5,
+                                ticks: {
+                                    stepSize: 1,
+                                    callback: function(value) {
+                                        return Number.isInteger(value) ? value : '';
+                                    }
+                                },
+                                grid: {
+                                    color: '#f0f0f0',
+                                    offset: false,
+                                    drawTicks: true,
+                                    drawOnChartArea: true,
+                                    // Align grid with integer positions
+                                    z: 1,
+                                    tickOffset: 0,
+                                    tickLength: 0
+                                },
+                                afterFit: function(scaleInstance) {
+                                    // Ensure grid lines align with positions
+                                    scaleInstance.options.grid.offset = false;
+                                },
+                                afterDataLimits: (scale) => {
+                                    // Align grid with integer positions
+                                    scale.min = 0.5;
+                                    scale.max = data.teams.length + 0.5;
+                                },
+                                title: { 
+                                    display: true, 
+                                    text: 'Position',
+                                    font: { weight: 'bold' },
+                                    padding: { top: 10, bottom: 10 }
+                                }
+                            },
+                            x: {
+                                grid: {
+                                    drawTicks: true
+                                },
+                                title: {
+                                    display: true,
+                                    text: 'Match Day',
+                                    font: { weight: 'bold' },
+                                    padding: { top: 10, bottom: 10 }
+                                }
+                            }
+                        },
+                        plugins: {
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const team = context.dataset.label;
+                                        const position = context.parsed.y;
+                                        const points = data.data.find(d => 
+                                            d.team === team && d.matchDay === context.parsed.x
+                                        ).points;
+                                        return `${team}: Position ${position} (${points} pts)`;
+                                    }
+                                }
+                            },
+                            legend: {
+                                position: 'right',
+                                labels: {
+                                    padding: 20,
+                                    usePointStyle: true,
+                                    pointStyle: 'circle',
+                                    boxWidth: 10
+                                }
+                            }
+                        },
+                        layout: {
+                            padding: {
+                                top: 10,
+                                bottom: 10
+                            }
+                        }
+                    }
+                });
+            })
+            .catch(error => console.error('Error:', error));
+    }
+}
+
+// Update chart when selection changes
+document.querySelectorAll('input[name="season"], input[name="league"]')
+    .forEach(input => input.addEventListener('change', updatePositionChart));
+
+// Initial chart update if selections exist
+if (document.querySelector('input[name="season"]:checked') && 
+    document.querySelector('input[name="league"]:checked')) {
+    updatePositionChart();
+}
+</script>
+{% endblock %}

@@ -8,10 +8,6 @@ class Team:
     def get_name(self):
         return self.team_name
 
-    def get_skill(self):
-        skills = [player.skill for player in self.players]
-        avg = round(sum(skills) / len(skills), 2)
-        return "(" + str(avg) + ")"
 
     def get_number_of_players(self):
         return len(self.players)
