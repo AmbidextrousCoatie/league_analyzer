@@ -27,3 +27,4 @@ class Columns:
             return [self.season, self.week, self.date, self.league_name, self.location, self.team_name,
                     self.player_name, self.player_id, self.match_number, self.team_name_opponent,
                     self.position, self.score, self.points, self.input_data, self.computed_data]
+        
