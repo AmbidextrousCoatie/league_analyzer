@@ -1,9 +1,10 @@
 import pandas as pd
 
-
-from data_access.pd_dataframes import fetch_data, filter_data, fetch_column
-from database.definitions import Columns
+from database.generator.seed import create_team
+from data_access.pd_dataframes import fetch_data, fetch_column
+from data_access.schema import Columns
 from business_logic.statistics import calculate_score_average_player, calculate_score_min_player, calculate_score_max_player, calculate_games_count_player, calculate_score_average_team, calculate_score_average_league, calculate_score_average
+from business_logic.lib import fetch_matchday, fetch_match, calculate_points
 
 df = pd.read_csv('database/data/bowling_ergebnisse.csv', sep=';')
 
@@ -50,3 +51,57 @@ print("Average of league " + all_leagues[0] + ": " + str(league_average))
 #filtered_df = df.copy()
 player_avg = calculate_score_average_player(df, spieler, group_by=Columns.week)
 print("Average of player " + spieler + " in season 22/23: " + str(player_avg))
+
+    # for consistency checks: player database
+    # 'Player ID', 'Player Name', 'Player Surname',
+
+    # for consistency checks: club database
+    # 'Season', 'Club Name', 'Team Name', 'EDV'
+
+columns = Columns()
+col_names = columns.get_column_names()
+
+league_cols = ['League Name', 'Season', 'Team Name', 'Week', 'Date', 'Loation']
+league_teams = ['Donaubowler 1', 'Comet 1', 'Bayreuth 1', 'Ratisbona 2']
+league_content = ['LL1_N', "22/23", 'Donaubowler 1', 1, '01.01.23', 'Regensburg']
+
+data_dummy = [
+    ['22/23', 1, '01.01.23', 'LL1_N', 'Regensburg', 'Donaubowler 1', 'Feller, Christian', 16007, 1, 'Comet 1', 1, 220, 1, True, False],
+    ['22/23', 1, '01.01.23', 'LL1_N', 'Regensburg', 'Donaubowler 1', 'Hartfeil, Volkmar', 123, 1, 'Comet 1', 2, 210, 1,True, False],
+    ['22/23', 1, '01.01.23', 'LL1_N', 'Regensburg', 'Donaubowler 1', 'Hürdler, Marco', 456, 1, 'Comet 1', 3, 200, 0, True, False],
+    ['22/23', 1, '01.01.23', 'LL1_N', 'Regensburg', 'Donaubowler 1', 'Obermeier, Kurt', 789, 1, 'Comet 1', 4, 190, 0, True, False],
+    ['22/23', 1, '01.01.23', 'LL1_N', 'Regensburg', 'Comet 1', 'Comet #1', 67, 1, 'Donaubowler 1', 1, 200, 0, True, False],
+    ['22/23', 1, '01.01.23', 'LL1_N', 'Regensburg', 'Comet 1', 'Comet #2', 23, 1, 'Donaubowler 1', 2, 205, 0,True, False],
+    ['22/23', 1, '01.01.23', 'LL1_N', 'Regensburg', 'Comet 1', 'Comet #3', 56, 1, 'Donaubowler 1', 3, 205, 1,True, False],
+    ['22/23', 1, '01.01.23', 'LL1_N', 'Regensburg', 'Comet 1', 'Comet #4', 89, 1, 'Donaubowler 1', 4, 195, 1,True, False],
+    ['23/24', 2, '03.01.24', 'LL1_N', 'Regensburg', 'Donaubowler 1', 'Feller, Christian', 16007, 1, 'Comet 1', 1, 220, 1, True, False],
+    ['23/24', 2, '03.01.24', 'LL1_N', 'Regensburg', 'Donaubowler 1', 'Hartfeil, Volkmar', 123, 1, 'Comet 1', 2, 210, 1, True, False],
+    ['23/24', 2, '03.01.24', 'LL1_N', 'Regensburg', 'Donaubowler 1', 'Hürdler, Marco', 456, 1, 'Comet 1', 3, 200, 0.5, True, False],
+    ['23/24', 2, '03.01.24', 'LL1_N', 'Regensburg', 'Donaubowler 1', 'Obermeier, Kurt', 789, 1, 'Comet 1', 4, 190, 0, True, False],
+    ['22/23', 2, '01.01.23', 'LL1_N', 'Regensburg', 'Comet 1', 'Comet #1', 67, 1, 'Donaubowler 1', 1, 200, 0, True, False],
+    ['22/23', 2, '01.01.23', 'LL1_N', 'Regensburg', 'Comet 1', 'Comet #2', 23, 1, 'Donaubowler 1', 2, 200, 0,True, False],
+    ['22/23', 2, '01.01.23', 'LL1_N', 'Regensburg', 'Comet 1', 'Comet #3', 56, 1, 'Donaubowler 1', 3, 200, 0.5,True, False],
+    ['22/23', 2, '01.01.23', 'LL1_N', 'Regensburg', 'Comet 1', 'Comet #4', 89, 1, 'Donaubowler 1', 4, 200, 1,True, False],
+]
+
+# DataFrame erstellen
+data_league = pd.DataFrame(data_dummy, columns=col_names)
+data_league['Points'] = None
+
+# DataFrame anzeigen
+
+data_matchday = fetch_matchday(data_league, '22/23', 'LL1_N', 1)
+
+data_match = fetch_match(data_matchday, 'Donaubowler 1', 1)
+
+data_match_processed = calculate_points(data_match)
+
+if 0:
+    for df in [data_league, data_matchday, data_match, data_match_processed]:
+        print(df)
+        print()
+
+# DataFrame in eine CSV-Datei speichern
+
+team = create_team(7)
+print(team)

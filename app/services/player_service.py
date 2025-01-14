@@ -1,6 +1,6 @@
 import pandas as pd
 from data_access.pd_dataframes import fetch_column, fetch_data
-from database.definitions import Columns
+from data_access.schema import Columns
 from app.services.data_manager import DataManager
 from business_logic.statistics import calculate_score_average_player, calculate_games_count_player
 

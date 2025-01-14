@@ -1,6 +1,6 @@
 from business_logic.statistics import query_database
 from app.services.data_manager import DataManager
-from database.definitions import Columns
+from data_access.schema import Columns
 import pandas as pd
 
 class LeagueService:

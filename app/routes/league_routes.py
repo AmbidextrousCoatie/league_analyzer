@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, jsonify, request
 from app.services.league_service import LeagueService
-from database.definitions import Columns
+from data_access.schema import Columns
 from business_logic.statistics import query_database
 import traceback
 

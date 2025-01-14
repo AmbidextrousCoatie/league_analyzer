@@ -8,12 +8,11 @@ import os
 
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
-from business_logic.lib import get_round_robin_pairings
 from business_logic.team import Team
 from business_logic.player import Player
 from business_logic.league import League
 
-from database.definitions import Columns
+from data_access.schema import Columns
 
 
 def get_random_city():
@@ -119,6 +118,31 @@ def get_random_alley(teams, week):
         return teams[week - 1].home_alley
     else:
         return get_random_city()
+
+
+def get_round_robin_pairings(teams):
+
+    # Wenn die Anzahl der Teams ungerade ist, fügen wir ein Freilos hinzu
+    if len(teams) % 2 != 0:
+        teams.append('Freilos')
+
+    n = len(teams)
+    pairings = []
+
+    for play_round in range(n - 1):
+        pairs = []
+        for i in range(n // 2):
+            home = teams[i]
+            away = teams[n - 1 - i]
+            if play_round % 2 == 0:
+                pairs.append((home, away))
+            else:
+                pairs.append((away, home))
+        pairings.append(pairs)
+        # Die Rotation der Teams für die nächste Runde, ohne das erste Team zu bewegen
+        teams = [teams[0]] + [teams[-1]] + teams[1:-1]
+
+    return pairings
 
 
 def simulate_season(teams, weeks, number_of_players_per_team, name, season):

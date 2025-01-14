@@ -1,5 +1,5 @@
 import pandas as pd
-from database.definitions import Columns
+from data_access.schema import Columns
 from data_access.pd_dataframes import fetch_data, fetch_column
 
 
@@ -32,7 +32,8 @@ def calculate_score_max(database_df: pd.DataFrame, filters: dict = None, group_b
     return int(fetch_column(database_df, Columns.score, filters, group_by=group_by)[Columns.score].max())
 
 def calculate_games_count(database_df: pd.DataFrame, filters: dict = None, group_by: Columns = None) -> int:
-    return fetch_column(database_df, Columns.score, filters, group_by=group_by)[Columns.score].size()
+    lala = fetch_column(database_df, Columns.score, filters, group_by=group_by)[Columns.score].size
+    return lala
 
     
 def calculate_score_average_player(database_df: pd.DataFrame, player_name: str, season: str = None, group_by: Columns = None) -> float:
