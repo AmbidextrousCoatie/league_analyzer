@@ -8,9 +8,9 @@ import os
 
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
-from business_logic.team import Team
-from business_logic.player import Player
-from business_logic.league import League
+from database.generator.teams import DataGeneratorTeam
+from database.generator.player import DataGeneratorPlayer
+from database.generator.league import DataGeneratorLeague
 
 from data_access.schema import Columns
 
@@ -25,10 +25,10 @@ def get_random_city():
 
 def create_random_player(league_skill):
 
-    return Player(get_random_id(), get_random_first_name(), get_random_last_name(), get_random_skill(league_skill))
+    return DataGeneratorPlayer(get_random_id(), get_random_first_name(), get_random_last_name(), get_random_skill(league_skill))
 
 
-def create_league_roster(league: League):
+def create_league_roster(league: DataGeneratorLeague):
     league.teams = [create_team(league.skill, league.number_of_players_per_team) for i in range(league.number_of_teams)]
     return league
 
@@ -37,7 +37,7 @@ def create_team(league_skill, players_per_team=4):
     home_alley = get_random_city()
     team_name = get_random_team_name(team_city=home_alley)
     players = [create_random_player(league_skill) for i in range(players_per_team)]
-    return Team(team_name, players, home_alley)
+    return DataGeneratorTeam(team_name, players, home_alley)
 
 
 def get_random_last_name():

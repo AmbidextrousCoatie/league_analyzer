@@ -50,3 +50,6 @@ app/services/__pycache__/league_service.cpython-310.pyc
 business_logic/__pycache__/definitions.cpython-310.pyc
 data_access/__pycache__/schema.cpython-310.pyc
 database/generator/__pycache__/seed.cpython-310.pyc
+database/generator/__pycache__/league.cpython-310.pyc
+database/generator/__pycache__/player.cpython-310.pyc
+database/generator/__pycache__/teams.cpython-310.pyc

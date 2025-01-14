@@ -4,7 +4,7 @@ import os
 
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
-from business_logic.league import League
+from database.generator.league import DataGeneratorLeague
 from business_logic.lib import calculate_points
 from database.generator.seed import create_league_roster, simulate_season
 from data_access.schema import Columns
@@ -15,8 +15,8 @@ if __name__ == "__main__":
     col_names = Columns().get_column_names()
 
  
-    league_ll = League(league_name="LL1 Nord", number_of_teams=4, number_of_players_per_team=4, skill_level=7)
-    league_bzl = League(league_name="BZL 2 Nord", number_of_teams=4, number_of_players_per_team=4, skill_level=5)
+    league_ll = DataGeneratorLeague(league_name="LL1 Nord", number_of_teams=4, number_of_players_per_team=4, skill_level=7)
+    league_bzl = DataGeneratorLeague(league_name="BZL 2 Nord", number_of_teams=4, number_of_players_per_team=4, skill_level=5)
 
     league_ll = create_league_roster(league_ll)
     league_bzl = create_league_roster(league_bzl)

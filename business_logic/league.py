@@ -12,8 +12,8 @@ class League:
 
     def __str__(self):
 
-        all_teams = [team.get_name() + " " + team.get_skill() for team in self.teams]
-        return "\n" + self.name + " (" + str(self.skill) + ")\n------------------\n" + "\n".join(all_teams)
+        all_teams = [team.get_name() for team in self.teams]
+        return "\n" + self.name + "\n------------------\n" + "\n".join(all_teams)
 
 
 def get_league_week(df: pd.DataFrame, season: str, league: str, week: int, cumulated: bool = False) -> pd.DataFrame:
