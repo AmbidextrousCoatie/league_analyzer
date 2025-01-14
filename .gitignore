@@ -53,3 +53,6 @@ database/generator/__pycache__/seed.cpython-310.pyc
 database/generator/__pycache__/league.cpython-310.pyc
 database/generator/__pycache__/player.cpython-310.pyc
 database/generator/__pycache__/teams.cpython-310.pyc
+tests/data_access/__pycache__/test_data_adapter_pandas_dummy_data.cpython-310-pytest-8.3.4.pyc
+tests/data_access/__pycache__/test_data_adapter_pandas_imported_data.cpython-310-pytest-8.3.4.pyc
+tests/data_access/__pycache__/test_data_adapter_pandas.cpython-310-pytest-8.3.4.pyc

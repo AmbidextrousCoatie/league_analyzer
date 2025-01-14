@@ -26,7 +26,7 @@ if __name__ == "__main__":
 
     df_results = pd.DataFrame(columns=col_names)
 
-    all_seasons = ["18/19", "19/20", "20/21", "21/22", "22/23", "23/24", "24/25"]
+    all_seasons = ["18/19", "19/20"] #, "20/21", "21/22", "22/23", "23/24", "24/25"]
     all_leagues = [league_ll, league_bzl]
 
 

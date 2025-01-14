@@ -1,4 +1,4 @@
-from data_access.interfaces import DataAdapter
+from data_access.adapters.data_adapter import DataAdapter
 import pandas as pd
 from typing import List
 
