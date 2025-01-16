@@ -5,6 +5,8 @@ import pandas as pd
 
 import sys
 import os
+import itertools
+from random import shuffle
 
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
@@ -120,11 +122,64 @@ def get_random_alley(teams, week):
         return get_random_city()
 
 
-def get_round_robin_pairings(teams):
+
+def find_round_robin_combinations(values: list):
+    
+    # Generate all possible pairwise combinations
+    
+    # make values unique
+    values = list(set(values))
+    
+    # if len(values) is odd, add a wildcard
+    if len(values) % 2 != 0:
+        values.append('wildcard')
+    
+    number_of_rounds = len(values) - 1
+    number_of_pairs_per_round = len(values) // 2
+
+
+    #all_pairs = list(itertools.combinations(values, 2))
+
+    pairs_as_sets = [set(pair) for pair in itertools.combinations(values, 2)]
+
+
+    print(pairs_as_sets)
+    print("start")
+    selected_pairs = []
+    
+    for round in range(number_of_rounds):
+        print("round: ", round)
+        pairs_for_round = [pairs_as_sets.pop(0)]
+        for i in range(number_of_pairs_per_round - 1):
+            print(pairs_as_sets)
+            candidate_pair = pairs_as_sets[i]
+            for pair in pairs_for_round:
+                print(pairs_for_round)
+                if candidate_pair.intersection(pair):
+                    continue
+                    print("ignored pair: ", candidate_pair)
+                else:
+                    pairs_for_round.append(pairs_as_sets.pop(i))
+                    print("selected pair: ", candidate_pair)
+        selected_pairs.append(pairs_for_round)
+
+    print(selected_pairs)
+    
+
+
+    return results
+
+
+def get_round_robin_pairings_old(teams):
 
     # Wenn die Anzahl der Teams ungerade ist, fügen wir ein Freilos hinzu
     if len(teams) % 2 != 0:
         teams.append('Freilos')
+    pairs = list(itertools.combinations(teams, 2))
+    shuffled_pairs = shuffle(pairs)
+    #print(teams)
+    #print(pairs)
+    #print(shuffled_pairs)
 
     n = len(teams)
     pairings = []
@@ -142,7 +197,99 @@ def get_round_robin_pairings(teams):
         # Die Rotation der Teams für die nächste Runde, ohne das erste Team zu bewegen
         teams = [teams[0]] + [teams[-1]] + teams[1:-1]
 
+    #print(pairings)
+
     return pairings
+
+def generate_nested_round_robin_pairings(teams):
+    """
+    Generate a nested list of pairings for a round-robin tournament with an extra layer for match numbers.
+
+    Args:
+        teams (list): List of team names.
+
+    Returns:
+        list: Nested list where the outer list represents match days,
+              the second layer represents match numbers on that day,
+              and the innermost lists contain the pairings [Team1, Team2].
+    """
+    # If odd number of teams, add a dummy team for byes
+    if len(teams) % 2 != 0:
+        teams.append("BYE")
+    
+    n = len(teams)
+    match_days = n - 1  # Number of match days for even number of teams
+    matches_per_day = n // 2  # Number of concurrent matches per match day
+
+    # Initialize the list to hold all match days
+    all_match_days = []
+
+    # Create a list of teams excluding the first one for rotation
+    teams_rotating = teams[1:]
+
+    for day in range(match_days):
+        # List to hold all match numbers for the current match day
+        match_numbers = []
+        
+        # Divide the rotating teams into chunks for match numbers
+        # Each chunk represents a match number (time slot) with concurrent matches
+        # For simplicity, we'll assign one match number per concurrent pairing
+        # This can be adjusted based on specific requirements
+
+        # Shuffle the teams_rotating to create concurrent pairings
+        concurrent_pairings = []
+        temp_rotating = teams_rotating.copy()
+
+        for i in range(0, len(temp_rotating), matches_per_day):
+            pairings = []
+            for j in range(matches_per_day):
+                if i + j < len(temp_rotating):
+                    pairings.append([temp_rotating[i + j], temp_rotating[-(i + j + 1)]])
+            if pairings:
+                concurrent_pairings.append(pairings)
+        
+        match_numbers.extend(concurrent_pairings)
+
+        # Fix the first team and rotate the rest
+        fixed_team = teams[0]
+        rotated = [teams_rotating[-1]] + teams_rotating[:-1]
+        teams_rotating = rotated
+
+        # Pair the fixed team with the last team in the rotated list
+        first_pair = [fixed_team, teams_rotating[-1]]
+        if "BYE" not in first_pair:
+            # Insert the first pair at the beginning
+            match_numbers.insert(0, [first_pair])
+
+        # Pair the remaining teams
+        paired = []
+        for i in range(matches_per_day):
+            team1 = teams_rotating[i]
+            team2 = teams_rotating[-i - 1]
+            if "BYE" not in [team1, team2]:
+                pair = [team1, team2]
+                # Find the match number (time slot) to append this pairing
+                if i < len(match_numbers):
+                    match_numbers[i].append(pair)
+                else:
+                    match_numbers.append([pair])
+        
+        all_match_days.append(match_numbers)
+
+    return all_match_days
+
+# Example Usage
+teams = ["A", "B", "C", "D"]
+pairings = generate_nested_round_robin_pairings(teams)
+
+for day_num, day in enumerate(pairings, start=1):
+    print(f"Match Day {day_num}:")
+    for match_num, match in enumerate(day, start=1):
+        print(f"  Match Number {match_num}:")
+        for pairing in match:
+            print(f"    {pairing[0]} vs {pairing[1]}")
+    print()
+
 
 
 def simulate_season(teams, weeks, number_of_players_per_team, name, season):
@@ -152,43 +299,54 @@ def simulate_season(teams, weeks, number_of_players_per_team, name, season):
     df_season = pd.DataFrame(columns=col_names)
 
     team_ids = list(range(len(teams)))
-    round_robin_rounds = np.array(get_round_robin_pairings(team_ids))
-    round_robin_rounds_per_week = list([np.roll(round_robin_rounds, i) for i in range(weeks)])
+    round_robin_rounds = np.array(get_round_robin_pairings_old(team_ids))
+    #round_robin_rounds_per_week = list([np.roll(round_robin_rounds, i) for i in range(weeks)])
 
     # find players that have a good day
     # 50 % that on player in each team has a good day
     # select random 
-    teams_with_good_day = [random.randint(0, 1) for i in range(len(teams))]
-    players_with_good_day = [random.randint(0, number_of_players_per_team-1) for i in range(len(teams_with_good_day) )]
-
+    
     for week in range(weeks):
+        #print("\n week: ", week)
+        teams_with_good_day = [random.randint(0, 1) for i in range(len(teams))]
+        players_with_good_day = [random.randint(0, number_of_players_per_team-1) for i in range(len(teams_with_good_day) )]
+    
         alley = get_random_alley(teams, week)
         # iterate over all pairings
-        for match_number, pairings in enumerate(round_robin_rounds_per_week[week]):
+        for round_number, pairings in enumerate(round_robin_rounds):
+            #print(pairings)
+            match_number = 0
             for (team_id, opponent_id) in pairings:
                 if team_id == opponent_id:
                     continue
-                # print(str(team_id) + " : " + str(opponent_id) + "  |  ", end="")
+                
+                #print(str(team_id) + " : " + str(opponent_id) + "  |  ", end="")
                 # match on team level
 
                 team = teams[team_id]
                 team_opponent = teams[opponent_id]
-                is_home_alley = team.home_alley == alley
+                team_is_home_alley = team.home_alley == alley
+                opponent_is_home_alley = team_opponent.home_alley == alley
 
                 for player_number in range(number_of_players_per_team):
                     player = team.players[player_number]
                     player_has_good_day = teams_with_good_day[team_id] and players_with_good_day[team_id] == player_number
                     player_opponent = team_opponent.players[player_number]  
                     player_opponent_has_good_day = teams_with_good_day[opponent_id] and players_with_good_day[opponent_id] == player_number
-                    player_score = teams[team_id].players[player_number].simulate_score(is_home_alley, player_has_good_day)
-                    opponent_score = teams[opponent_id].players[player_number].simulate_score(is_home_alley, player_opponent_has_good_day)
+                    player_score = teams[team_id].players[player_number].simulate_score(team_is_home_alley, player_has_good_day)
+                    opponent_score = teams[opponent_id].players[player_number].simulate_score(opponent_is_home_alley, player_opponent_has_good_day)
 
                     cols_match = [
-                        [season, week+1, "n/a", name, alley, team.team_name, player.get_full_name(), player.id, match_number, team_opponent.team_name, player_number, player_score, np.nan, True, False],
-                        [season, week+1, "n/a", name, alley, team_opponent.team_name, player_opponent.get_full_name(), player_opponent.id, match_number, team.team_name, player_number, opponent_score, np.nan, True, False]
+                        [season, week+1, "n/a", name, alley, round_number, match_number, 
+                         team.team_name, player_number, player.get_full_name(), player.id, team_opponent.team_name, 
+                         player_score, np.nan, True, False],
+                        [season, week+1, "n/a", name, alley, round_number, match_number, 
+                         team_opponent.team_name, player_number, player_opponent.get_full_name(), player_opponent.id, team.team_name,
+                         opponent_score, np.nan, True, False]
                         ]
                     df_season = pd.concat([df_season, pd.DataFrame(cols_match, columns=col_names)], ignore_index=True)
                     # print(df_season)
+                match_number += 1
 
-    df_season = df_season.sort_values(by=[Columns.week, Columns.team_name, Columns.match_number, Columns.position])
+    df_season = df_season.sort_values(by=[Columns.week, Columns.round_number, Columns.match_number, Columns.team_name, Columns.position])
     return df_season

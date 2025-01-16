@@ -5,7 +5,7 @@ import os
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
 from database.generator.league import DataGeneratorLeague
-from business_logic.lib import calculate_points
+from business_logic.lib import calculate_point3
 from database.generator.seed import create_league_roster, simulate_season
 from data_access.schema import Columns
 
@@ -26,7 +26,7 @@ if __name__ == "__main__":
 
     df_results = pd.DataFrame(columns=col_names)
 
-    all_seasons = ["18/19", "19/20"] #, "20/21", "21/22", "22/23", "23/24", "24/25"]
+    all_seasons = ["18/19", "19/20", "20/21", "21/22", "22/23", "23/24", "24/25"]
     all_leagues = [league_ll, league_bzl]
 
 
@@ -42,6 +42,6 @@ if __name__ == "__main__":
 
         df_results.to_csv('.\\database\\data\\bowling_ergebnisse_ohne_punkte.csv', index=False, sep=";")
     df_results = pd.read_csv('.\\database\\data\\bowling_ergebnisse_ohne_punkte.csv', sep=";")
-    df_results_with_points = calculate_points(df_results)
+    df_results_with_points = calculate_point3(df_results)
     df_results_with_points.to_csv('.\\database\\data\\bowling_ergebnisse.csv', index=False, sep=";")
     # calculate_averages(df_results, league_name=league_name, season=league_season)
