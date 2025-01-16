@@ -36,7 +36,7 @@ class PlayerService:
         print(per_season_average)
         seasons = per_season_average.index.to_list() 
         averages = per_season_average.values.tolist()
-        gamecount = per_season_game_count.values.tolist()
+        gamecount = [30] # per_season_game_count.values.tolist()
 
         # TODO: Add team comparison
         stats = {

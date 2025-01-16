@@ -1,12 +1,13 @@
 from business_logic.statistics import query_database
 from app.services.data_manager import DataManager
 from data_access.schema import Columns
+from data_access.adapters.data_adapter import DataAdapter
+from data_access.adapters.data_adapter_factory import DataAdapterFactory, DataAdapterSelector
 import pandas as pd
 
 class LeagueService:
-    def __init__(self):
-        self.data_manager = DataManager()
-        self.df = self.data_manager.df
+    def __init__(self, adapter_type: DataAdapterSelector = DataAdapterSelector.PANDAS):
+        self.data_adapter: DataAdapter = DataAdapterFactory.get_adapter(adapter_type)
 
     def get_valid_combinations(self):
         """Returns all existing combinations in the database"""
@@ -35,11 +36,13 @@ class LeagueService:
             print(f"Error getting weeks: {str(e)}")
             return []
 
-    def calculate_standings(self, df, filters, match_day=None, cumulative=False, include_changes=False):
+    def get_standings_table(self, league:str, season:str, week:int=None, cumulative=False, include_changes=False):
         """Calculate standings for a specific match day or cumulative standings"""
         # Apply base filters
-        df_filtered = query_database(df, filters)
         
+        standings_week = self.data_adapter.get_league_standings(league_name=league, season=season, week=week, cumulative=cumulative)
+
+        df_filtered = query_database(df, filters)
         # Apply match day filter
         if match_day is not None:
             if cumulative:
@@ -53,7 +56,7 @@ class LeagueService:
                 'Points': 'sum',
                 'Score': 'mean'
             }).reset_index()
-            
+            print(standings)
             standings.columns = ['Team', 'Points', 'Average']
             standings = standings.sort_values(['Points', 'Average'], ascending=[False, False])
             
@@ -85,12 +88,15 @@ class LeagueService:
         
         return pd.DataFrame(columns=['Team', 'Points', 'Average'])
 
-    def get_table(self, season, league, match_day=None):
+    def get_table(self, season, league, week=None, cumulative=False):
         """Get combined table data for frontend"""
+        
+        standings_week = self.data_adapter.get_league_standings(season=season, league=league, week=week, cumulative=cumulative)
+        
         filters = {
             Columns.season: season,
-            Columns.league_name: league,
-            Columns.input_data: True
+            Columns.league_name: league #,
+            #Columns.input_data: True
         }
         
         try:
@@ -103,13 +109,13 @@ class LeagueService:
         # Get match day standings
         match_day_standings = pd.DataFrame()
         if week_value is not None:
-            match_day_standings = self.calculate_standings(
+            match_day_standings = self.get_standings_table(
                 self.df, filters, week_value, cumulative=False, include_changes=False
             )
             print(f"Match day standings found: {not match_day_standings.empty}")
         
         # Get cumulative standings
-        season_standings = self.calculate_standings(
+        season_standings = self.get_standings_table(
             self.df, filters, week_value, cumulative=True, include_changes=(week_value > 1)
         )
         
@@ -119,7 +125,7 @@ class LeagueService:
             team_data = {
                 'Team': row['Team'],
                 'TotalPoints': row['Points'],
-                'Average': row['Average'],
+                'Average': row['Average'] ,
                 'positionChange': row.get('PositionChange', 0)
             }
             
@@ -128,7 +134,7 @@ class LeagueService:
                 if not match_team.empty:
                     team_data.update({
                         'MatchPoints': match_team['Points'].iloc[0],
-                        'MatchAverage': match_team['Average'].iloc[0]
+                        'MatchAverage': match_team['Average'].iloc[0] 
                     })
             
             combined_data.append(team_data)

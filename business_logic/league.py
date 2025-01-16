@@ -21,3 +21,18 @@ def get_league_week(df: pd.DataFrame, season: str, league: str, week: int, cumul
         return df.loc[(df['Season'] == season) & (df['League'] == league) & (df['Week'] <= week)]
     else:
         return df.loc[(df['Season'] == season) & (df['League'] == league) & (df['Week'] == week)]
+
+
+def get_league_standings(season: str, league: str, week: int, cumulated: bool = False) -> pd.DataFrame:
+     # if cumulated, get all weeks up to the requested week for the season + league combo
+
+    if cumulated:
+        return df.loc[(df['Season'] == season) & (df['League'] == league) & (df['Week'] <= week)]
+    else:
+        return df.loc[(df['Season'] == season) & (df['League'] == league) & (df['Week'] == week)]
+
+
+
+
+    
+    pass

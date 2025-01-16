@@ -108,7 +108,7 @@ def get_position_history():
         position_data = []
         for match_day in match_days:
             # Get standings for this match day using the existing service method
-            standings = league_service.calculate_standings(
+            standings = league_service.get_standings_table(
                 league_service.df,
                 filters,
                 match_day,
