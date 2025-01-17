@@ -1,13 +1,19 @@
 from business_logic.statistics import query_database
 from app.services.data_manager import DataManager
-from data_access.schema import Columns
+from data_access.schema import Columns, ColumnsExtra
 from data_access.adapters.data_adapter import DataAdapter
 from data_access.adapters.data_adapter_factory import DataAdapterFactory, DataAdapterSelector
 import pandas as pd
+from business_logic.server import Server
+from flask import jsonify, Response
 
 class LeagueService:
-    def __init__(self, adapter_type: DataAdapterSelector = DataAdapterSelector.PANDAS):
-        self.data_adapter: DataAdapter = DataAdapterFactory.get_adapter(adapter_type)
+    # fetches dataframes from server
+    # converts dataframes to dicts
+    # jsonifies dicts   
+    # forwards JSON dict to app routes
+    def __init__(self):
+        self.server = Server()
 
     def get_valid_combinations(self):
         """Returns all existing combinations in the database"""
@@ -17,30 +23,55 @@ class LeagueService:
 
     def get_seasons(self):
         """Returns all possible seasons"""
-        return sorted(self.df[Columns.season].unique().tolist())
+        return self.server.get_seasons()
 
     def get_leagues(self):
         """Returns all possible leagues"""
-        return sorted(self.df[Columns.league_name].unique().tolist())
+        return self.server.get_leagues()
 
     def get_weeks(self):
         """Returns all possible match days"""
-        try:
-            # Get unique weeks, sort them, and convert to list
-            weeks = sorted(self.df[Columns.week].unique().tolist())
-            # Filter out None/NaN values if any
-            weeks = [week for week in weeks if week is not None]
-            #print(f"Available weeks: {weeks}")  # Debug output
-            return weeks
-        except Exception as e:
-            print(f"Error getting weeks: {str(e)}")
-            return []
+        return self.server.get_weeks()
 
-    def get_standings_table(self, league:str, season:str, week:int=None, cumulative=False, include_changes=False):
-        """Calculate standings for a specific match day or cumulative standings"""
+    def get_league_week(self, league:str, season:str, week:int=None) -> Response:     
+        """Get results of a league on a specific match day"""
+        return self.server.get_league_week(league_name=league, season=season, week=week).to_dict('records')
+
+    def get_league_standings_history(self, league:str, season:str, week:int=None) -> Response:     
+        return self.server.get_league_standings_history(league_name=league, season=season, week=week).to_dict('records')   
+
+    def get_league_standings(self, league:str, season:str, week:int=None) -> Response:     
+        """Get standings of a leagaue up to a specific match day"""
         # Apply base filters
+        return self.server.get_league_standings(league_name=league, season=season, week=week).to_dict('records')
+
+
+
+        table_data = []
+
+        for _, row in lala.iterrows():
+            table_row = {
+                Columns.team_name: row[Columns.team_name],
+                Columns.points: row[Columns.points],
+                ColumnsExtra.average_score: row[ColumnsExtra.average_score],
+                ColumnsExtra.position_change: row[ColumnsExtra.position_change],
+            }
+
+            table_data.append(table_row)
+
+            if cumulative:
+                table_row[ColumnsExtra.points_total] = row[ColumnsExtra.points_total]
+                table_row[ColumnsExtra.average_score_total] = row[ColumnsExtra.average_score_total]
+
+
+        #team_data = [{'Team': 'Team1', 'TotalPoints': 100, 'Average': 190, 'positionChange': +1, 'MatchPoints': 70, 'MatchAverage': 180},
+        #             {'Team': 'Team2', 'TotalPoints': 90, 'Average': 185, 'positionChange': -1, 'MatchPoints': 60, 'MatchAverage': 175}]
+                    
+        return jsonify({'standings': table_data})
+
+
+    def deprecated_get_table1(self, df: pd.DataFrame, filters: dict, match_day: int, cumulative: bool, include_changes: bool):
         
-        standings_week = self.data_adapter.get_league_standings(league_name=league, season=season, week=week, cumulative=cumulative)
 
         df_filtered = query_database(df, filters)
         # Apply match day filter
@@ -88,10 +119,11 @@ class LeagueService:
         
         return pd.DataFrame(columns=['Team', 'Points', 'Average'])
 
-    def get_table(self, season, league, week=None, cumulative=False):
+
+    def deprecated_get_table(self, season, league, week=None, cumulative=False, match_day=None):
         """Get combined table data for frontend"""
         
-        standings_week = self.data_adapter.get_league_standings(season=season, league=league, week=week, cumulative=cumulative)
+        
         
         filters = {
             Columns.season: season,
@@ -109,13 +141,13 @@ class LeagueService:
         # Get match day standings
         match_day_standings = pd.DataFrame()
         if week_value is not None:
-            match_day_standings = self.get_standings_table(
+            match_day_standings = self.get_league_stanings(
                 self.df, filters, week_value, cumulative=False, include_changes=False
             )
             print(f"Match day standings found: {not match_day_standings.empty}")
         
         # Get cumulative standings
-        season_standings = self.get_standings_table(
+        season_standings = self.get_league_stanings(
             self.df, filters, week_value, cumulative=True, include_changes=(week_value > 1)
         )
         

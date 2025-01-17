@@ -33,15 +33,19 @@ def get_table():
     try:
         season = request.args.get('season')
         league = request.args.get('league')
-        match_day = request.args.get('match_day')
+        #match_day should be int
+        match_day = int(request.args.get('match_day'))
         
         print(f"Received request with: season={season}, league={league}, match_day={match_day}")
         
         if not season or not league:
             return jsonify({"error": "Season and league are required"}), 400
-            
-        table_data = league_service.get_table(season, league, match_day)
-        #print(f"Generated table data: {table_data}")
+
+        week_data = league_service.get_league_week(league=league, season=season, week=match_day)
+        print(f"Generated week data: {week_data}")
+
+        table_data = league_service.get_league_standings(league=league, season=season, week=match_day)
+        print(f"Generated table data: {table_data}")
         
         if not table_data:
             return jsonify({"message": "No data found for these filters"}), 404
@@ -69,8 +73,8 @@ def get_available_matchdays():
         }
         
         # Get available match days for this combination
-        df_filtered = query_database(league_service.df, filters)
-        available_matchdays = sorted(df_filtered[Columns.week].unique().tolist())
+        #df_filtered = query_database(league_service.df, filters)
+        available_matchdays = league_service.get_weeks()
         
         return jsonify({"matchdays": available_matchdays})
     except Exception as e:
@@ -79,6 +83,12 @@ def get_available_matchdays():
 
 @bp.route('/league/get_position_history')
 def get_position_history():
+    result = {
+        'matchDays': [],
+        'teams': [],
+        'data': []
+    }
+    return jsonify(result)
     try:
         season = request.args.get('season')
         league = request.args.get('league')
@@ -108,7 +118,7 @@ def get_position_history():
         position_data = []
         for match_day in match_days:
             # Get standings for this match day using the existing service method
-            standings = league_service.get_standings_table(
+            standings = league_service.get_league_stanings(
                 league_service.df,
                 filters,
                 match_day,
