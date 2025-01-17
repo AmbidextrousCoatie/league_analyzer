@@ -22,14 +22,66 @@ class DataAdapterPandas(DataAdapter):
     def get_all_players(self) -> List[str]:
         return self.df[Columns.player_name].unique().tolist()
     
-    def get_filtered_data(self, filters: dict) -> pd.DataFrame:
+    def get_filtered_data(self, columns: List[Columns]=None, filters_eq: dict=None, filters_lt: dict=None, filters_gt: dict=None, print_debug: bool=False) -> pd.DataFrame:
         filtered_df = self.df.copy()
-        for column, value in filters.items():
-            filtered_df = filtered_df[filtered_df[column] == value]
-        return filtered_df 
+
+        if print_debug:
+            print("Initial DataFrame shape:", filtered_df.shape)
+            print("Available columns:", filtered_df.columns.tolist())
+
+        if filters_eq is not None:
+            for column, value in filters_eq.items():
+                if print_debug:
+                    print(column + " == " + str(value))
+                filtered_df = filtered_df[filtered_df[column] == value]
+            if print_debug:
+                print(f"DataFrame shape after filtering: {filtered_df.shape}")  
+
+        if filters_lt is not None:
+            for column, value in filters_lt.items():
+                if print_debug:
+                    print(column + " < " + str(value))
+                filtered_df = filtered_df[filtered_df[column] < value]
+            if print_debug:
+                print(f"DataFrame shape after filtering: {filtered_df.shape}")  
+
+        if filters_gt is not None:
+            for column, value in filters_gt.items():
+                if print_debug:
+                    print(column + " > " + str(value))
+                filtered_df = filtered_df[filtered_df[column] > value]
+            if print_debug:
+                print(f"DataFrame shape after filtering: {filtered_df.shape}")  
+
+        # extract columns
+        if columns is not None:
+            filtered_df = filtered_df[columns] 
+            if print_debug:
+                print("extracting columns: " + str(columns))
+                print(f"DataFrame shape after extracting columns: {filtered_df.shape}")  
+        return filtered_df
+    
+
+    def get_seasons(self) -> List[str]:
+        return self.df[Columns.season].unique().tolist()
+    
+    def get_leagues(self) -> List[str]:
+        return self.df[Columns.league_name].unique().tolist()
+    
+    def get_weeks(self) -> List[int]:
+        try:
+            # Get unique weeks, sort them, and convert to list
+            weeks = sorted(self.df[Columns.week].unique().tolist())
+            # Filter out None/NaN values if any
+            weeks = [week for week in weeks if week is not None]
+            #print(f"Available weeks: {weeks}")  # Debug output
+            return weeks
+        except Exception as e:
+            print(f"Error getting weeks: {str(e)}")
+            return []
     
     def get_league_match_day(self, league_name: str, season: str, week: int) -> pd.DataFrame:
-        return self.df[self.df[Columns.league_name] == league_name][self.df[Columns.season] == season][self.df[Columns.week] == week]
+        return self.df[(self.df[Columns.league_name] == league_name) & (self.df[Columns.season] == season) & (self.df[Columns.week] == week)]
     
     def get_league_season(self, league_name: str, season: str, week: int=None) -> pd.DataFrame:
         if week is None:
@@ -38,6 +90,9 @@ class DataAdapterPandas(DataAdapter):
             return self.df[self.df[Columns.league_name] == league_name][self.df[Columns.season] == season][self.df[Columns.week] <= week]
 
     def get_league_standings(self, league_name: str, season: str, week: int, cumulative: bool=False) -> pd.DataFrame:
+        deprecated = True
+        return None
+        
         league_results = self.get_league_match_day(league_name=league_name, season=season, week=week) if not cumulative else self.get_league_season(league_name=league_name, season=season, week=week)
         
         league_standings_table = pd.DataFrame(columns=[Columns.team_name, Columns.points, ColumnsExtra.average_score])
@@ -46,7 +101,7 @@ class DataAdapterPandas(DataAdapter):
         for team_name, team_results in team_results_all:
             
             points = team_results[Columns.points].sum()
-            average_score = team_results[Columns.score].mean() / 2.0
+            average_score = round(team_results[Columns.score].mean() / 2.0, 2)
             print(team_name)
             print(points)
             print(average_score)
@@ -55,11 +110,14 @@ class DataAdapterPandas(DataAdapter):
             team_results_all[ColumnsExtra.average_score] = team_results_all[Columns.points] / team_results_all[Columns.match_number]
             league_standings_table = league_standings_table.append(team_results_all, ignore_index=True)
 
-        
-
 
         results = league_results.groupby(Columns.team_name).sum().sort_values(by=Columns.points, ascending=False)
         print(results)
-        return results
+      
+        team_data = [{'Team': 'Team1', 'TotalPoints': 100, 'Average': 190, 'positionChange': +1, 'MatchPoints': 70, 'MatchAverage': 180},
+                     {'Team': 'Team2', 'TotalPoints': 90, 'Average': 185, 'positionChange': -1, 'MatchPoints': 60, 'MatchAverage': 175}]
+                    
+        return {'standings': team_data}
+
 
         

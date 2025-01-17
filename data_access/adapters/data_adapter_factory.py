@@ -1,6 +1,7 @@
 from typing import Optional
 from data_access.adapters.data_adapter import DataAdapter
 from enum import Enum
+from database.config import path_to_csv_data
 
 class DataAdapterSelector(Enum):
     PANDAS = "pandas"
@@ -12,7 +13,7 @@ class DataAdapterFactory:
     def get_adapter(adapter_type: DataAdapterSelector) -> DataAdapter:
         if adapter_type == DataAdapterSelector.PANDAS:
             from data_access.adapters.data_adapter_pandas import DataAdapterPandas
-            return DataAdapterPandas()
+            return DataAdapterPandas(path_to_csv_data=path_to_csv_data)
         elif adapter_type == DataAdapterSelector.MYSQL:
             from data_access.adapters.data_adapter_mysql import MySQLAdapter
             return MySQLAdapter()

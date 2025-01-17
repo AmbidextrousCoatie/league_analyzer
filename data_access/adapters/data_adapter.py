@@ -1,8 +1,9 @@
 import pandas as pd
 
-
+from data_access.schema import Columns, ColumnsExtra
 from abc import ABC, abstractmethod
 from typing import List
+
 
 
 class DataAdapter(ABC):
@@ -15,7 +16,7 @@ class DataAdapter(ABC):
         pass
 
     @abstractmethod
-    def get_filtered_data(self, filters: dict) -> pd.DataFrame:
+    def get_filtered_data(self, columns: List[Columns]=None, filters_eq: dict=None, filters_lt: dict=None, filters_gt: dict=None) -> pd.DataFrame:
         pass
 
     @abstractmethod

@@ -32,5 +32,8 @@ class Columns:
 @dataclass
 class ColumnsExtra:
     position: str = '#'
-    average_score: str = 'Avg. Score'
+    score_average: str = 'ScoreAverage'
+    score_total: str = 'ScoreTotal'
+    points_total: str = 'PointsTotal'
+    position_change: str = 'PositionChange'
     
