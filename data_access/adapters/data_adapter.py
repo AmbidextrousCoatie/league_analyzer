@@ -16,7 +16,7 @@ class DataAdapter(ABC):
         pass
 
     @abstractmethod
-    def get_filtered_data(self, columns: List[Columns]=None, filters_eq: dict=None, filters_lt: dict=None, filters_gt: dict=None) -> pd.DataFrame:
+    def get_filtered_data(self, columns: List[Columns]=None, filters_eq: dict=None, filters_lt: dict=None, filters_gt: dict=None, print_debug: bool=False) -> pd.DataFrame:
         pass
 
     @abstractmethod

@@ -33,15 +33,31 @@ class LeagueService:
         """Returns all possible match days"""
         return self.server.get_weeks()
 
-    def get_league_week(self, league:str, season:str, week:int=None) -> Response:     
+    def get_league_week(self, league:str, season:str, week:int=None, history_depth:int=None) -> Response:     
         """Get results of a league on a specific match day"""
         return self.server.get_league_week(league_name=league, season=season, week=week).to_dict('records')
 
-    def get_league_standings_history(self, league:str, season:str, week:int=None) -> Response:     
-        return self.server.get_league_standings_history(league_name=league, season=season, week=week).to_dict('records')   
+    def get_league_history_table(self, league:str, season:str, week:int=None, depth:int=None) -> Response:     
+        return self.server.get_league_history(league_name=league, season=season, week=week, depth=depth).to_dict('records')   
 
-    def get_league_standings(self, league:str, season:str, week:int=None) -> Response:     
+    def get_league_standings_table(self, league:str, season:str, week:int=None, depth:int=None) -> Response:     
         """Get standings of a leagaue up to a specific match day"""
+        self.get_league_history_table(league, season, week, depth)
+        return self.server.get_league_standings(league_name=league, season=season, week=week).to_dict('records') 
+        # if no depth is provided, use 1 to fetch also the data of the current week
+        if depth is None:
+            depth = 1
+
+        # history should not be deeper than the current week
+        depth = min(depth, week)
+
+        data_season = self.server.get_league_season(league_name=league, season=season, week=week, depth=depth)
+        for week_current in range(week-depth, week):
+            print(f"fetching week {week_current}")
+            data_week = self.server.get_league_week(league_name=league, season=season, week=week_current)
+        
+        data_week = self.server.get_league_week(league_name=league, season=season, week=week)
+
         # Apply base filters
         return self.server.get_league_standings(league_name=league, season=season, week=week).to_dict('records')
 

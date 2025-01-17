@@ -33,6 +33,7 @@ class Columns:
 class ColumnsExtra:
     position: str = '#'
     score_average: str = 'ScoreAverage'
+    score_average_total: str = 'ScoreAverageTotal'
     score_total: str = 'ScoreTotal'
     points_total: str = 'PointsTotal'
     position_change: str = 'PositionChange'
