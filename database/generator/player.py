@@ -17,7 +17,7 @@ class DataGeneratorPlayer(Player):
 
         luck_or_lack_of = (random.random() - 0.5) * 25
 
-        home_bonus = 50 if is_home_alley else 0
+        home_bonus = 15 if is_home_alley else 0
 
         good_day_bonus = 25 if has_a_good_day else 0
 

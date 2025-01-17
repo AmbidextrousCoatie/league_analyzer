@@ -74,3 +74,6 @@ tests/data_access/__pycache__/test_pd_dataframes.cpython-312-pytest-8.3.4.pyc
 tests/database/__pycache__/test_generator.cpython-310-pytest-8.3.4.pyc
 tests/database/__pycache__/test_generator.cpython-312-pytest-8.3.4.pyc
 app/routes/__pycache__/league_routes.cpython-312.pyc
+database/__pycache__/config.cpython-310.pyc
+data_access/adapters/__pycache__/data_adapter_factory.cpython-310.pyc
+business_logic/__pycache__/server.cpython-310.pyc

@@ -15,8 +15,8 @@ if __name__ == "__main__":
     col_names = Columns().get_column_names()
 
  
-    league_ll = DataGeneratorLeague(league_name="LL1 Nord", number_of_teams=4, number_of_players_per_team=4, skill_level=7)
-    league_bzl = DataGeneratorLeague(league_name="BZL 2 Nord", number_of_teams=4, number_of_players_per_team=4, skill_level=5)
+    league_ll = DataGeneratorLeague(league_name="LL1 Nord", number_of_teams=6, number_of_players_per_team=4, skill_level=7)
+    league_bzl = DataGeneratorLeague(league_name="BZL 2 Nord", number_of_teams=8, number_of_players_per_team=4, skill_level=5)
 
     league_ll = create_league_roster(league_ll)
     league_bzl = create_league_roster(league_bzl)
