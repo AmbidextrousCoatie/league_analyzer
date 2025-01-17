@@ -1,0 +1,861 @@
+Season;Week;Date;League;Location;Team;Player;Player ID;Match Number;Opponent;Position;Score;Points;Input Data;Computed Data
+18/19;1;;BZL 2 Nord;Kempten;Kempten 10;Diego Neumann;71402;0;Kempten 32;0;191;0.0;True;False
+18/19;1;;BZL 2 Nord;Kempten;Kempten 10;Ahmed Peters;43038;0;Kempten 32;1;183;0.0;True;False
+18/19;1;;BZL 2 Nord;Kempten;Kempten 10;Christian Schmitt;58001;0;Kempten 32;2;171;0.0;True;False
+18/19;1;;BZL 2 Nord;Kempten;Kempten 10;Ahmed Gonzalez;38995;0;Kempten 32;3;228;1.0;True;False
+18/19;1;;BZL 2 Nord;Kempten;Kempten 10;Team Total;;0;Kempten 32;;773;0.0;False;True
+18/19;1;;BZL 2 Nord;Kempten;Kempten 32;Leon Ludwig;26703;0;Kempten 10;0;201;1.0;True;False
+18/19;1;;BZL 2 Nord;Kempten;Kempten 32;Samuel Zimmermann;24543;0;Kempten 10;1;221;1.0;True;False
+18/19;1;;BZL 2 Nord;Kempten;Kempten 32;Julian Davis;94765;0;Kempten 10;2;228;1.0;True;False
+18/19;1;;BZL 2 Nord;Kempten;Kempten 32;Niklas Martinez;74377;0;Kempten 10;3;193;0.0;True;False
+18/19;1;;BZL 2 Nord;Kempten;Kempten 32;Team Total;;0;Kempten 10;;843;2.0;False;True
+18/19;1;;LL1 Nord;Landshut;Kempten 92;Oscar Hartmann;71871;0;Neu-Ulm 51;0;153;0.0;True;False
+18/19;1;;LL1 Nord;Landshut;Kempten 92;Dominik Weiß;81281;0;Neu-Ulm 51;1;153;0.0;True;False
+18/19;1;;LL1 Nord;Landshut;Kempten 92;Thomas Weber;43070;0;Neu-Ulm 51;2;233;1.0;True;False
+18/19;1;;LL1 Nord;Landshut;Kempten 92;James Richter;46467;0;Neu-Ulm 51;3;164;1.0;True;False
+18/19;1;;LL1 Nord;Landshut;Kempten 92;Team Total;;0;Landshut 69;;703;2.0;False;True
+18/19;1;;LL1 Nord;Landshut;Landshut 69;Christoph Wilson;87082;0;Passau 99;0;175;0.0;True;False
+18/19;1;;LL1 Nord;Landshut;Landshut 69;Moritz Hernandez;56293;0;Passau 99;1;188;1.0;True;False
+18/19;1;;LL1 Nord;Landshut;Landshut 69;Matthew Jung;43328;0;Passau 99;2;161;0.0;True;False
+18/19;1;;LL1 Nord;Landshut;Landshut 69;Diego Schröder;53174;0;Passau 99;3;169;1.0;True;False
+18/19;1;;LL1 Nord;Landshut;Landshut 69;Team Total;;0;Kempten 92;;693;0.0;False;True
+18/19;1;;LL1 Nord;Landshut;Neu-Ulm 51;Jackson Brown;46891;0;Kempten 92;0;188;1.0;True;False
+18/19;1;;LL1 Nord;Landshut;Neu-Ulm 51;Julius Anderson;47075;0;Kempten 92;1;236;1.0;True;False
+18/19;1;;LL1 Nord;Landshut;Neu-Ulm 51;Markus Vogel;81147;0;Kempten 92;2;159;0.0;True;False
+18/19;1;;LL1 Nord;Landshut;Neu-Ulm 51;Andrew Garcia;11260;0;Kempten 92;3;149;0.0;True;False
+18/19;1;;LL1 Nord;Landshut;Neu-Ulm 51;Team Total;;0;Kempten 92;;732;0.0;False;True
+18/19;1;;BZL 2 Nord;Kempten;Passau 91;Peter Lang;38309;0;Rosenheim 1;0;156;0.0;True;False
+18/19;1;;BZL 2 Nord;Kempten;Passau 91;Finn Dietrich;41716;0;Rosenheim 1;1;161;0.0;True;False
+18/19;1;;BZL 2 Nord;Kempten;Passau 91;Samuel Günther;48461;0;Rosenheim 1;2;113;0.0;True;False
+18/19;1;;BZL 2 Nord;Kempten;Passau 91;Ethan Koch;92874;0;Rosenheim 1;3;152;1.0;True;False
+18/19;1;;BZL 2 Nord;Kempten;Passau 91;Team Total;;0;Kempten 10;;582;0.0;False;True
+18/19;1;;LL1 Nord;Landshut;Passau 99;Leo Bauer;76826;0;Landshut 69;0;217;1.0;True;False
+18/19;1;;LL1 Nord;Landshut;Passau 99;Marco Lehmann;53724;0;Landshut 69;1;151;0.0;True;False
+18/19;1;;LL1 Nord;Landshut;Passau 99;Thomas Köhler;33508;0;Landshut 69;2;225;1.0;True;False
+18/19;1;;LL1 Nord;Landshut;Passau 99;Lars Meyer;41871;0;Landshut 69;3;146;0.0;True;False
+18/19;1;;LL1 Nord;Landshut;Passau 99;Team Total;;0;Kempten 92;;739;0.0;False;True
+18/19;1;;BZL 2 Nord;Kempten;Rosenheim 1;Peter Lorenz;23805;0;Passau 91;0;174;1.0;True;False
+18/19;1;;BZL 2 Nord;Kempten;Rosenheim 1;Marco Thomas;74563;0;Passau 91;1;173;1.0;True;False
+18/19;1;;BZL 2 Nord;Kempten;Rosenheim 1;Arthur Zimmermann;10075;0;Passau 91;2;189;1.0;True;False
+18/19;1;;BZL 2 Nord;Kempten;Rosenheim 1;Ryan Ludwig;82185;0;Passau 91;3;131;0.0;True;False
+18/19;1;;BZL 2 Nord;Kempten;Rosenheim 1;Team Total;;0;Kempten 10;;667;0.0;False;True
+18/19;1;;BZL 2 Nord;Kempten;Kempten 10;Diego Neumann;71402;1;Passau 91;0;149;0.0;True;False
+18/19;1;;BZL 2 Nord;Kempten;Kempten 10;Ahmed Peters;43038;1;Passau 91;1;152;0.0;True;False
+18/19;1;;BZL 2 Nord;Kempten;Kempten 10;Christian Schmitt;58001;1;Passau 91;2;120;1.0;True;False
+18/19;1;;BZL 2 Nord;Kempten;Kempten 10;Ahmed Gonzalez;38995;1;Passau 91;3;184;1.0;True;False
+18/19;1;;BZL 2 Nord;Kempten;Kempten 10;Team Total;;1;Kempten 32;;605;0.0;False;True
+18/19;1;;BZL 2 Nord;Kempten;Kempten 32;Leon Ludwig;26703;1;Rosenheim 1;0;163;0.0;True;False
+18/19;1;;BZL 2 Nord;Kempten;Kempten 32;Samuel Zimmermann;24543;1;Rosenheim 1;1;175;0.0;True;False
+18/19;1;;BZL 2 Nord;Kempten;Kempten 32;Julian Davis;94765;1;Rosenheim 1;2;168;0.0;True;False
+18/19;1;;BZL 2 Nord;Kempten;Kempten 32;Niklas Martinez;74377;1;Rosenheim 1;3;134;1.0;True;False
+18/19;1;;BZL 2 Nord;Kempten;Kempten 32;Team Total;;1;Kempten 10;;640;2.0;False;True
+18/19;1;;LL1 Nord;Landshut;Kempten 92;Oscar Hartmann;71871;1;Landshut 69;0;159;0.0;True;False
+18/19;1;;LL1 Nord;Landshut;Kempten 92;Dominik Weiß;81281;1;Landshut 69;1;149;0.0;True;False
+18/19;1;;LL1 Nord;Landshut;Kempten 92;Thomas Weber;43070;1;Landshut 69;2;231;1.0;True;False
+18/19;1;;LL1 Nord;Landshut;Kempten 92;James Richter;46467;1;Landshut 69;3;145;0.0;True;False
+18/19;1;;LL1 Nord;Landshut;Kempten 92;Team Total;;1;Landshut 69;;684;0.0;False;True
+18/19;1;;LL1 Nord;Landshut;Landshut 69;Christoph Wilson;87082;1;Kempten 92;0;164;1.0;True;False
+18/19;1;;LL1 Nord;Landshut;Landshut 69;Moritz Hernandez;56293;1;Kempten 92;1;188;1.0;True;False
+18/19;1;;LL1 Nord;Landshut;Landshut 69;Matthew Jung;43328;1;Kempten 92;2;169;0.0;True;False
+18/19;1;;LL1 Nord;Landshut;Landshut 69;Diego Schröder;53174;1;Kempten 92;3;183;1.0;True;False
+18/19;1;;LL1 Nord;Landshut;Landshut 69;Team Total;;1;Kempten 92;;704;2.0;False;True
+18/19;1;;LL1 Nord;Landshut;Neu-Ulm 51;Jackson Brown;46891;1;Passau 99;0;178;0.0;True;False
+18/19;1;;LL1 Nord;Landshut;Neu-Ulm 51;Julius Anderson;47075;1;Passau 99;1;242;1.0;True;False
+18/19;1;;LL1 Nord;Landshut;Neu-Ulm 51;Markus Vogel;81147;1;Passau 99;2;156;0.0;True;False
+18/19;1;;LL1 Nord;Landshut;Neu-Ulm 51;Andrew Garcia;11260;1;Passau 99;3;152;0.0;True;False
+18/19;1;;LL1 Nord;Landshut;Neu-Ulm 51;Team Total;;1;Kempten 92;;728;0.0;False;True
+18/19;1;;BZL 2 Nord;Kempten;Passau 91;Peter Lang;38309;1;Kempten 10;0;162;1.0;True;False
+18/19;1;;BZL 2 Nord;Kempten;Passau 91;Finn Dietrich;41716;1;Kempten 10;1;185;1.0;True;False
+18/19;1;;BZL 2 Nord;Kempten;Passau 91;Samuel Günther;48461;1;Kempten 10;2;106;0.0;True;False
+18/19;1;;BZL 2 Nord;Kempten;Passau 91;Ethan Koch;92874;1;Kempten 10;3;148;0.0;True;False
+18/19;1;;BZL 2 Nord;Kempten;Passau 91;Team Total;;1;Kempten 10;;601;0.0;False;True
+18/19;1;;LL1 Nord;Landshut;Passau 99;Leo Bauer;76826;1;Neu-Ulm 51;0;240;1.0;True;False
+18/19;1;;LL1 Nord;Landshut;Passau 99;Marco Lehmann;53724;1;Neu-Ulm 51;1;159;0.0;True;False
+18/19;1;;LL1 Nord;Landshut;Passau 99;Thomas Köhler;33508;1;Neu-Ulm 51;2;222;1.0;True;False
+18/19;1;;LL1 Nord;Landshut;Passau 99;Lars Meyer;41871;1;Neu-Ulm 51;3;155;1.0;True;False
+18/19;1;;LL1 Nord;Landshut;Passau 99;Team Total;;1;Kempten 92;;776;0.0;False;True
+18/19;1;;BZL 2 Nord;Kempten;Rosenheim 1;Peter Lorenz;23805;1;Kempten 32;0;187;1.0;True;False
+18/19;1;;BZL 2 Nord;Kempten;Rosenheim 1;Marco Thomas;74563;1;Kempten 32;1;193;1.0;True;False
+18/19;1;;BZL 2 Nord;Kempten;Rosenheim 1;Arthur Zimmermann;10075;1;Kempten 32;2;183;1.0;True;False
+18/19;1;;BZL 2 Nord;Kempten;Rosenheim 1;Ryan Ludwig;82185;1;Kempten 32;3;127;0.0;True;False
+18/19;1;;BZL 2 Nord;Kempten;Rosenheim 1;Team Total;;1;Kempten 10;;690;0.0;False;True
+18/19;1;;BZL 2 Nord;Kempten;Kempten 10;Diego Neumann;71402;2;Rosenheim 1;0;145;0.0;True;False
+18/19;1;;BZL 2 Nord;Kempten;Kempten 10;Ahmed Peters;43038;2;Rosenheim 1;1;132;0.0;True;False
+18/19;1;;BZL 2 Nord;Kempten;Kempten 10;Christian Schmitt;58001;2;Rosenheim 1;2;129;0.0;True;False
+18/19;1;;BZL 2 Nord;Kempten;Kempten 10;Ahmed Gonzalez;38995;2;Rosenheim 1;3;183;1.0;True;False
+18/19;1;;BZL 2 Nord;Kempten;Kempten 10;Team Total;;2;Kempten 32;;589;0.0;False;True
+18/19;1;;BZL 2 Nord;Kempten;Kempten 32;Leon Ludwig;26703;2;Passau 91;0;210;1.0;True;False
+18/19;1;;BZL 2 Nord;Kempten;Kempten 32;Samuel Zimmermann;24543;2;Passau 91;1;221;1.0;True;False
+18/19;1;;BZL 2 Nord;Kempten;Kempten 32;Julian Davis;94765;2;Passau 91;2;216;1.0;True;False
+18/19;1;;BZL 2 Nord;Kempten;Kempten 32;Niklas Martinez;74377;2;Passau 91;3;192;0.0;True;False
+18/19;1;;BZL 2 Nord;Kempten;Kempten 32;Team Total;;2;Kempten 10;;839;2.0;False;True
+18/19;1;;LL1 Nord;Landshut;Kempten 92;Oscar Hartmann;71871;2;Passau 99;0;141;0.0;True;False
+18/19;1;;LL1 Nord;Landshut;Kempten 92;Dominik Weiß;81281;2;Passau 99;1;150;1.0;True;False
+18/19;1;;LL1 Nord;Landshut;Kempten 92;Thomas Weber;43070;2;Passau 99;2;225;0.0;True;False
+18/19;1;;LL1 Nord;Landshut;Kempten 92;James Richter;46467;2;Passau 99;3;160;0.0;True;False
+18/19;1;;LL1 Nord;Landshut;Kempten 92;Team Total;;2;Landshut 69;;676;0.0;False;True
+18/19;1;;LL1 Nord;Landshut;Landshut 69;Christoph Wilson;87082;2;Neu-Ulm 51;0;158;0.0;True;False
+18/19;1;;LL1 Nord;Landshut;Landshut 69;Moritz Hernandez;56293;2;Neu-Ulm 51;1;185;0.0;True;False
+18/19;1;;LL1 Nord;Landshut;Landshut 69;Matthew Jung;43328;2;Neu-Ulm 51;2;182;1.0;True;False
+18/19;1;;LL1 Nord;Landshut;Landshut 69;Diego Schröder;53174;2;Neu-Ulm 51;3;192;1.0;True;False
+18/19;1;;LL1 Nord;Landshut;Landshut 69;Team Total;;2;Kempten 92;;717;2.0;False;True
+18/19;1;;LL1 Nord;Landshut;Neu-Ulm 51;Jackson Brown;46891;2;Landshut 69;0;186;1.0;True;False
+18/19;1;;LL1 Nord;Landshut;Neu-Ulm 51;Julius Anderson;47075;2;Landshut 69;1;243;1.0;True;False
+18/19;1;;LL1 Nord;Landshut;Neu-Ulm 51;Markus Vogel;81147;2;Landshut 69;2;176;0.0;True;False
+18/19;1;;LL1 Nord;Landshut;Neu-Ulm 51;Andrew Garcia;11260;2;Landshut 69;3;145;0.0;True;False
+18/19;1;;LL1 Nord;Landshut;Neu-Ulm 51;Team Total;;2;Kempten 92;;750;0.0;False;True
+18/19;1;;BZL 2 Nord;Kempten;Passau 91;Peter Lang;38309;2;Kempten 32;0;204;0.0;True;False
+18/19;1;;BZL 2 Nord;Kempten;Passau 91;Finn Dietrich;41716;2;Kempten 32;1;216;0.0;True;False
+18/19;1;;BZL 2 Nord;Kempten;Passau 91;Samuel Günther;48461;2;Kempten 32;2;169;0.0;True;False
+18/19;1;;BZL 2 Nord;Kempten;Passau 91;Ethan Koch;92874;2;Kempten 32;3;199;1.0;True;False
+18/19;1;;BZL 2 Nord;Kempten;Passau 91;Team Total;;2;Kempten 10;;788;0.0;False;True
+18/19;1;;LL1 Nord;Landshut;Passau 99;Leo Bauer;76826;2;Kempten 92;0;222;1.0;True;False
+18/19;1;;LL1 Nord;Landshut;Passau 99;Marco Lehmann;53724;2;Kempten 92;1;148;0.0;True;False
+18/19;1;;LL1 Nord;Landshut;Passau 99;Thomas Köhler;33508;2;Kempten 92;2;229;1.0;True;False
+18/19;1;;LL1 Nord;Landshut;Passau 99;Lars Meyer;41871;2;Kempten 92;3;162;1.0;True;False
+18/19;1;;LL1 Nord;Landshut;Passau 99;Team Total;;2;Kempten 92;;761;0.0;False;True
+18/19;1;;BZL 2 Nord;Kempten;Rosenheim 1;Peter Lorenz;23805;2;Kempten 10;0;176;1.0;True;False
+18/19;1;;BZL 2 Nord;Kempten;Rosenheim 1;Marco Thomas;74563;2;Kempten 10;1;174;1.0;True;False
+18/19;1;;BZL 2 Nord;Kempten;Rosenheim 1;Arthur Zimmermann;10075;2;Kempten 10;2;175;1.0;True;False
+18/19;1;;BZL 2 Nord;Kempten;Rosenheim 1;Ryan Ludwig;82185;2;Kempten 10;3;135;0.0;True;False
+18/19;1;;BZL 2 Nord;Kempten;Rosenheim 1;Team Total;;2;Kempten 10;;660;0.0;False;True
+18/19;2;;BZL 2 Nord;Kempten;Kempten 10;Diego Neumann;71402;0;Kempten 32;0;187;0.0;True;False
+18/19;2;;BZL 2 Nord;Kempten;Kempten 10;Diego Neumann;71402;0;Passau 91;0;199;0.0;True;False
+18/19;2;;BZL 2 Nord;Kempten;Kempten 10;Ahmed Peters;43038;0;Kempten 32;1;202;0.0;True;False
+18/19;2;;BZL 2 Nord;Kempten;Kempten 10;Ahmed Peters;43038;0;Passau 91;1;186;0.0;True;False
+18/19;2;;BZL 2 Nord;Kempten;Kempten 10;Christian Schmitt;58001;0;Kempten 32;2;174;0.0;True;False
+18/19;2;;BZL 2 Nord;Kempten;Kempten 10;Christian Schmitt;58001;0;Passau 91;2;175;1.0;True;False
+18/19;2;;BZL 2 Nord;Kempten;Kempten 10;Ahmed Gonzalez;38995;0;Kempten 32;3;228;1.0;True;False
+18/19;2;;BZL 2 Nord;Kempten;Kempten 10;Ahmed Gonzalez;38995;0;Passau 91;3;218;1.0;True;False
+18/19;2;;BZL 2 Nord;Kempten;Kempten 10;Team Total;;0;Kempten 32;;1569;2.0;False;True
+18/19;2;;BZL 2 Nord;Kempten;Kempten 32;Leon Ludwig;26703;0;Kempten 10;0;215;1.0;True;False
+18/19;2;;BZL 2 Nord;Kempten;Kempten 32;Samuel Zimmermann;24543;0;Kempten 10;1;224;1.0;True;False
+18/19;2;;BZL 2 Nord;Kempten;Kempten 32;Julian Davis;94765;0;Kempten 10;2;231;1.0;True;False
+18/19;2;;BZL 2 Nord;Kempten;Kempten 32;Niklas Martinez;74377;0;Kempten 10;3;194;0.0;True;False
+18/19;2;;BZL 2 Nord;Kempten;Kempten 32;Team Total;;0;Kempten 10;;864;0.0;False;True
+18/19;2;;LL1 Nord;Passau;Kempten 92;Oscar Hartmann;71871;0;Landshut 69;0;149;0.0;True;False
+18/19;2;;LL1 Nord;Passau;Kempten 92;Dominik Weiß;81281;0;Landshut 69;1;156;0.0;True;False
+18/19;2;;LL1 Nord;Passau;Kempten 92;Thomas Weber;43070;0;Landshut 69;2;227;1.0;True;False
+18/19;2;;LL1 Nord;Passau;Kempten 92;James Richter;46467;0;Landshut 69;3;155;0.0;True;False
+18/19;2;;LL1 Nord;Passau;Kempten 92;Team Total;;0;Landshut 69;;687;0.0;False;True
+18/19;2;;LL1 Nord;Passau;Landshut 69;Christoph Wilson;87082;0;Passau 99;0;155;0.0;True;False
+18/19;2;;LL1 Nord;Passau;Landshut 69;Christoph Wilson;87082;0;Kempten 92;0;174;1.0;True;False
+18/19;2;;LL1 Nord;Passau;Landshut 69;Moritz Hernandez;56293;0;Passau 99;1;188;1.0;True;False
+18/19;2;;LL1 Nord;Passau;Landshut 69;Moritz Hernandez;56293;0;Kempten 92;1;177;1.0;True;False
+18/19;2;;LL1 Nord;Passau;Landshut 69;Matthew Jung;43328;0;Passau 99;2;165;0.0;True;False
+18/19;2;;LL1 Nord;Passau;Landshut 69;Matthew Jung;43328;0;Kempten 92;2;181;0.0;True;False
+18/19;2;;LL1 Nord;Passau;Landshut 69;Diego Schröder;53174;0;Passau 99;3;171;1.0;True;False
+18/19;2;;LL1 Nord;Passau;Landshut 69;Diego Schröder;53174;0;Kempten 92;3;174;1.0;True;False
+18/19;2;;LL1 Nord;Passau;Landshut 69;Team Total;;0;Kempten 92;;1385;2.0;False;True
+18/19;2;;BZL 2 Nord;Kempten;Passau 91;Peter Lang;38309;0;Kempten 10;0;212;1.0;True;False
+18/19;2;;BZL 2 Nord;Kempten;Passau 91;Finn Dietrich;41716;0;Kempten 10;1;221;1.0;True;False
+18/19;2;;BZL 2 Nord;Kempten;Passau 91;Samuel Günther;48461;0;Kempten 10;2;156;0.0;True;False
+18/19;2;;BZL 2 Nord;Kempten;Passau 91;Ethan Koch;92874;0;Kempten 10;3;198;0.0;True;False
+18/19;2;;BZL 2 Nord;Kempten;Passau 91;Team Total;;0;Kempten 10;;787;0.0;False;True
+18/19;2;;LL1 Nord;Passau;Passau 99;Leo Bauer;76826;0;Landshut 69;0;240;1.0;True;False
+18/19;2;;LL1 Nord;Passau;Passau 99;Marco Lehmann;53724;0;Landshut 69;1;147;0.0;True;False
+18/19;2;;LL1 Nord;Passau;Passau 99;Thomas Köhler;33508;0;Landshut 69;2;212;1.0;True;False
+18/19;2;;LL1 Nord;Passau;Passau 99;Lars Meyer;41871;0;Landshut 69;3;149;0.0;True;False
+18/19;2;;LL1 Nord;Passau;Passau 99;Team Total;;0;Kempten 92;;748;0.0;False;True
+18/19;2;;BZL 2 Nord;Kempten;Kempten 32;Leon Ludwig;26703;1;Passau 91;0;214;0.0;True;False
+18/19;2;;BZL 2 Nord;Kempten;Kempten 32;Samuel Zimmermann;24543;1;Passau 91;1;225;1.0;True;False
+18/19;2;;BZL 2 Nord;Kempten;Kempten 32;Julian Davis;94765;1;Passau 91;2;227;1.0;True;False
+18/19;2;;BZL 2 Nord;Kempten;Kempten 32;Niklas Martinez;74377;1;Passau 91;3;191;1.0;True;False
+18/19;2;;BZL 2 Nord;Kempten;Kempten 32;Team Total;;1;Passau 91;;857;2.0;False;True
+18/19;2;;LL1 Nord;Passau;Kempten 92;Oscar Hartmann;71871;1;Passau 99;0;193;0.0;True;False
+18/19;2;;LL1 Nord;Passau;Kempten 92;Dominik Weiß;81281;1;Passau 99;1;193;0.0;True;False
+18/19;2;;LL1 Nord;Passau;Kempten 92;Thomas Weber;43070;1;Passau 99;2;265;0.0;True;False
+18/19;2;;LL1 Nord;Passau;Kempten 92;James Richter;46467;1;Passau 99;3;212;0.0;True;False
+18/19;2;;LL1 Nord;Passau;Kempten 92;Team Total;;1;Passau 99;;863;0.0;False;True
+18/19;2;;BZL 2 Nord;Kempten;Passau 91;Peter Lang;38309;1;Kempten 32;0;215;1.0;True;False
+18/19;2;;BZL 2 Nord;Kempten;Passau 91;Finn Dietrich;41716;1;Kempten 32;1;215;0.0;True;False
+18/19;2;;BZL 2 Nord;Kempten;Passau 91;Samuel Günther;48461;1;Kempten 32;2;169;0.0;True;False
+18/19;2;;BZL 2 Nord;Kempten;Passau 91;Ethan Koch;92874;1;Kempten 32;3;182;0.0;True;False
+18/19;2;;BZL 2 Nord;Kempten;Passau 91;Team Total;;1;Kempten 32;;781;0.0;False;True
+18/19;2;;LL1 Nord;Passau;Passau 99;Leo Bauer;76826;1;Kempten 92;0;271;1.0;True;False
+18/19;2;;LL1 Nord;Passau;Passau 99;Marco Lehmann;53724;1;Kempten 92;1;213;1.0;True;False
+18/19;2;;LL1 Nord;Passau;Passau 99;Thomas Köhler;33508;1;Kempten 92;2;272;1.0;True;False
+18/19;2;;LL1 Nord;Passau;Passau 99;Lars Meyer;41871;1;Kempten 92;3;219;1.0;True;False
+18/19;2;;LL1 Nord;Passau;Passau 99;Team Total;;1;Kempten 92;;975;2.0;False;True
+18/19;2;;BZL 2 Nord;Kempten;Kempten 10;Diego Neumann;71402;2;Kempten 32;0;193;0.0;True;False
+18/19;2;;BZL 2 Nord;Kempten;Kempten 10;Ahmed Peters;43038;2;Kempten 32;1;205;0.0;True;False
+18/19;2;;BZL 2 Nord;Kempten;Kempten 10;Christian Schmitt;58001;2;Kempten 32;2;169;0.0;True;False
+18/19;2;;BZL 2 Nord;Kempten;Kempten 10;Ahmed Gonzalez;38995;2;Kempten 32;3;218;1.0;True;False
+18/19;2;;BZL 2 Nord;Kempten;Kempten 10;Team Total;;2;Kempten 32;;785;0.0;False;True
+18/19;2;;BZL 2 Nord;Kempten;Kempten 32;Leon Ludwig;26703;2;Kempten 10;0;205;1.0;True;False
+18/19;2;;BZL 2 Nord;Kempten;Kempten 32;Samuel Zimmermann;24543;2;Kempten 10;1;221;1.0;True;False
+18/19;2;;BZL 2 Nord;Kempten;Kempten 32;Julian Davis;94765;2;Kempten 10;2;211;1.0;True;False
+18/19;2;;BZL 2 Nord;Kempten;Kempten 32;Niklas Martinez;74377;2;Kempten 10;3;191;0.0;True;False
+18/19;2;;BZL 2 Nord;Kempten;Kempten 32;Team Total;;2;Kempten 10;;828;2.0;False;True
+18/19;2;;LL1 Nord;Passau;Kempten 92;Oscar Hartmann;71871;2;Neu-Ulm 51;0;141;0.0;True;False
+18/19;2;;LL1 Nord;Passau;Kempten 92;Dominik Weiß;81281;2;Neu-Ulm 51;1;140;0.0;True;False
+18/19;2;;LL1 Nord;Passau;Kempten 92;Thomas Weber;43070;2;Neu-Ulm 51;2;228;1.0;True;False
+18/19;2;;LL1 Nord;Passau;Kempten 92;James Richter;46467;2;Neu-Ulm 51;3;147;0.0;True;False
+18/19;2;;LL1 Nord;Passau;Kempten 92;Team Total;;2;Landshut 69;;656;0.0;False;True
+18/19;2;;LL1 Nord;Passau;Landshut 69;Christoph Wilson;87082;2;Passau 99;0;162;0.0;True;False
+18/19;2;;LL1 Nord;Passau;Landshut 69;Moritz Hernandez;56293;2;Passau 99;1;180;1.0;True;False
+18/19;2;;LL1 Nord;Passau;Landshut 69;Matthew Jung;43328;2;Passau 99;2;177;0.0;True;False
+18/19;2;;LL1 Nord;Passau;Landshut 69;Diego Schröder;53174;2;Passau 99;3;193;1.0;True;False
+18/19;2;;LL1 Nord;Passau;Landshut 69;Team Total;;2;Kempten 92;;712;2.0;False;True
+18/19;2;;LL1 Nord;Passau;Neu-Ulm 51;Jackson Brown;46891;2;Kempten 92;0;180;1.0;True;False
+18/19;2;;LL1 Nord;Passau;Neu-Ulm 51;Julius Anderson;47075;2;Kempten 92;1;246;1.0;True;False
+18/19;2;;LL1 Nord;Passau;Neu-Ulm 51;Markus Vogel;81147;2;Kempten 92;2;165;0.0;True;False
+18/19;2;;LL1 Nord;Passau;Neu-Ulm 51;Andrew Garcia;11260;2;Kempten 92;3;160;1.0;True;False
+18/19;2;;LL1 Nord;Passau;Neu-Ulm 51;Team Total;;2;Kempten 92;;751;0.0;False;True
+18/19;2;;BZL 2 Nord;Kempten;Passau 91;Peter Lang;38309;2;Rosenheim 1;0;161;0.0;True;False
+18/19;2;;BZL 2 Nord;Kempten;Passau 91;Finn Dietrich;41716;2;Rosenheim 1;1;184;0.0;True;False
+18/19;2;;BZL 2 Nord;Kempten;Passau 91;Samuel Günther;48461;2;Rosenheim 1;2;108;0.0;True;False
+18/19;2;;BZL 2 Nord;Kempten;Passau 91;Ethan Koch;92874;2;Rosenheim 1;3;144;0.0;True;False
+18/19;2;;BZL 2 Nord;Kempten;Passau 91;Team Total;;2;Kempten 10;;597;0.0;False;True
+18/19;2;;LL1 Nord;Passau;Passau 99;Leo Bauer;76826;2;Landshut 69;0;217;1.0;True;False
+18/19;2;;LL1 Nord;Passau;Passau 99;Marco Lehmann;53724;2;Landshut 69;1;141;0.0;True;False
+18/19;2;;LL1 Nord;Passau;Passau 99;Thomas Köhler;33508;2;Landshut 69;2;224;1.0;True;False
+18/19;2;;LL1 Nord;Passau;Passau 99;Lars Meyer;41871;2;Landshut 69;3;159;0.0;True;False
+18/19;2;;LL1 Nord;Passau;Passau 99;Team Total;;2;Kempten 92;;741;0.0;False;True
+18/19;2;;BZL 2 Nord;Kempten;Rosenheim 1;Peter Lorenz;23805;2;Passau 91;0;193;1.0;True;False
+18/19;2;;BZL 2 Nord;Kempten;Rosenheim 1;Marco Thomas;74563;2;Passau 91;1;190;1.0;True;False
+18/19;2;;BZL 2 Nord;Kempten;Rosenheim 1;Arthur Zimmermann;10075;2;Passau 91;2;189;1.0;True;False
+18/19;2;;BZL 2 Nord;Kempten;Rosenheim 1;Ryan Ludwig;82185;2;Passau 91;3;147;1.0;True;False
+18/19;2;;BZL 2 Nord;Kempten;Rosenheim 1;Team Total;;2;Kempten 10;;719;0.0;False;True
+18/19;3;;BZL 2 Nord;Passau;Kempten 10;Diego Neumann;71402;0;Rosenheim 1;0;132;0.0;True;False
+18/19;3;;BZL 2 Nord;Passau;Kempten 10;Diego Neumann;71402;0;Kempten 32;0;130;0.0;True;False
+18/19;3;;BZL 2 Nord;Passau;Kempten 10;Ahmed Peters;43038;0;Rosenheim 1;1;138;0.0;True;False
+18/19;3;;BZL 2 Nord;Passau;Kempten 10;Ahmed Peters;43038;0;Kempten 32;1;153;0.0;True;False
+18/19;3;;BZL 2 Nord;Passau;Kempten 10;Christian Schmitt;58001;0;Rosenheim 1;2;135;0.0;True;False
+18/19;3;;BZL 2 Nord;Passau;Kempten 10;Christian Schmitt;58001;0;Kempten 32;2;122;0.0;True;False
+18/19;3;;BZL 2 Nord;Passau;Kempten 10;Ahmed Gonzalez;38995;0;Rosenheim 1;3;167;1.0;True;False
+18/19;3;;BZL 2 Nord;Passau;Kempten 10;Ahmed Gonzalez;38995;0;Kempten 32;3;184;1.0;True;False
+18/19;3;;BZL 2 Nord;Passau;Kempten 10;Team Total;;0;Kempten 32;;1161;2.0;False;True
+18/19;3;;BZL 2 Nord;Passau;Kempten 32;Leon Ludwig;26703;0;Kempten 10;0;148;1.0;True;False
+18/19;3;;BZL 2 Nord;Passau;Kempten 32;Samuel Zimmermann;24543;0;Kempten 10;1;177;1.0;True;False
+18/19;3;;BZL 2 Nord;Passau;Kempten 32;Julian Davis;94765;0;Kempten 10;2;171;1.0;True;False
+18/19;3;;BZL 2 Nord;Passau;Kempten 32;Niklas Martinez;74377;0;Kempten 10;3;151;0.0;True;False
+18/19;3;;BZL 2 Nord;Passau;Kempten 32;Team Total;;0;Kempten 10;;647;0.0;False;True
+18/19;3;;LL1 Nord;Kempten;Landshut 69;Christoph Wilson;87082;0;Neu-Ulm 51;0;155;0.0;True;False
+18/19;3;;LL1 Nord;Kempten;Landshut 69;Christoph Wilson;87082;0;Passau 99;0;172;0.0;True;False
+18/19;3;;LL1 Nord;Kempten;Landshut 69;Moritz Hernandez;56293;0;Neu-Ulm 51;1;167;0.0;True;False
+18/19;3;;LL1 Nord;Kempten;Landshut 69;Moritz Hernandez;56293;0;Passau 99;1;172;1.0;True;False
+18/19;3;;LL1 Nord;Kempten;Landshut 69;Matthew Jung;43328;0;Neu-Ulm 51;2;162;1.0;True;False
+18/19;3;;LL1 Nord;Kempten;Landshut 69;Matthew Jung;43328;0;Passau 99;2;172;0.0;True;False
+18/19;3;;LL1 Nord;Kempten;Landshut 69;Diego Schröder;53174;0;Neu-Ulm 51;3;182;1.0;True;False
+18/19;3;;LL1 Nord;Kempten;Landshut 69;Diego Schröder;53174;0;Passau 99;3;186;1.0;True;False
+18/19;3;;LL1 Nord;Kempten;Landshut 69;Team Total;;0;Neu-Ulm 51;;1368;2.0;False;True
+18/19;3;;LL1 Nord;Kempten;Neu-Ulm 51;Jackson Brown;46891;0;Landshut 69;0;176;1.0;True;False
+18/19;3;;LL1 Nord;Kempten;Neu-Ulm 51;Julius Anderson;47075;0;Landshut 69;1;241;1.0;True;False
+18/19;3;;LL1 Nord;Kempten;Neu-Ulm 51;Markus Vogel;81147;0;Landshut 69;2;153;0.0;True;False
+18/19;3;;LL1 Nord;Kempten;Neu-Ulm 51;Andrew Garcia;11260;0;Landshut 69;3;160;0.0;True;False
+18/19;3;;LL1 Nord;Kempten;Neu-Ulm 51;Team Total;;0;Landshut 69;;730;0.0;False;True
+18/19;3;;LL1 Nord;Kempten;Passau 99;Leo Bauer;76826;0;Landshut 69;0;240;1.0;True;False
+18/19;3;;LL1 Nord;Kempten;Passau 99;Marco Lehmann;53724;0;Landshut 69;1;150;0.0;True;False
+18/19;3;;LL1 Nord;Kempten;Passau 99;Thomas Köhler;33508;0;Landshut 69;2;220;1.0;True;False
+18/19;3;;LL1 Nord;Kempten;Passau 99;Lars Meyer;41871;0;Landshut 69;3;151;0.0;True;False
+18/19;3;;LL1 Nord;Kempten;Passau 99;Team Total;;0;Landshut 69;;761;0.0;False;True
+18/19;3;;BZL 2 Nord;Passau;Rosenheim 1;Peter Lorenz;23805;0;Kempten 10;0;181;1.0;True;False
+18/19;3;;BZL 2 Nord;Passau;Rosenheim 1;Marco Thomas;74563;0;Kempten 10;1;176;1.0;True;False
+18/19;3;;BZL 2 Nord;Passau;Rosenheim 1;Arthur Zimmermann;10075;0;Kempten 10;2;174;1.0;True;False
+18/19;3;;BZL 2 Nord;Passau;Rosenheim 1;Ryan Ludwig;82185;0;Kempten 10;3;132;0.0;True;False
+18/19;3;;BZL 2 Nord;Passau;Rosenheim 1;Team Total;;0;Kempten 10;;663;0.0;False;True
+18/19;3;;BZL 2 Nord;Passau;Kempten 32;Leon Ludwig;26703;1;Rosenheim 1;0;148;0.0;True;False
+18/19;3;;BZL 2 Nord;Passau;Kempten 32;Samuel Zimmermann;24543;1;Rosenheim 1;1;177;0.0;True;False
+18/19;3;;BZL 2 Nord;Passau;Kempten 32;Julian Davis;94765;1;Rosenheim 1;2;165;1.0;True;False
+18/19;3;;BZL 2 Nord;Passau;Kempten 32;Niklas Martinez;74377;1;Rosenheim 1;3;140;0.0;True;False
+18/19;3;;BZL 2 Nord;Passau;Kempten 32;Team Total;;1;Passau 91;;630;0.0;False;True
+18/19;3;;LL1 Nord;Kempten;Kempten 92;Oscar Hartmann;71871;1;Neu-Ulm 51;0;189;0.0;True;False
+18/19;3;;LL1 Nord;Kempten;Kempten 92;Dominik Weiß;81281;1;Neu-Ulm 51;1;192;0.0;True;False
+18/19;3;;LL1 Nord;Kempten;Kempten 92;Thomas Weber;43070;1;Neu-Ulm 51;2;264;1.0;True;False
+18/19;3;;LL1 Nord;Kempten;Kempten 92;James Richter;46467;1;Neu-Ulm 51;3;214;1.0;True;False
+18/19;3;;LL1 Nord;Kempten;Kempten 92;Team Total;;1;Neu-Ulm 51;;859;0.0;False;True
+18/19;3;;LL1 Nord;Kempten;Neu-Ulm 51;Jackson Brown;46891;1;Kempten 92;0;234;1.0;True;False
+18/19;3;;LL1 Nord;Kempten;Neu-Ulm 51;Jackson Brown;46891;1;Passau 99;0;178;0.0;True;False
+18/19;3;;LL1 Nord;Kempten;Neu-Ulm 51;Julius Anderson;47075;1;Kempten 92;1;286;1.0;True;False
+18/19;3;;LL1 Nord;Kempten;Neu-Ulm 51;Julius Anderson;47075;1;Passau 99;1;253;1.0;True;False
+18/19;3;;LL1 Nord;Kempten;Neu-Ulm 51;Markus Vogel;81147;1;Kempten 92;2;215;0.0;True;False
+18/19;3;;LL1 Nord;Kempten;Neu-Ulm 51;Markus Vogel;81147;1;Passau 99;2;165;0.0;True;False
+18/19;3;;LL1 Nord;Kempten;Neu-Ulm 51;Andrew Garcia;11260;1;Kempten 92;3;212;0.0;True;False
+18/19;3;;LL1 Nord;Kempten;Neu-Ulm 51;Andrew Garcia;11260;1;Passau 99;3;148;0.5;True;False
+18/19;3;;LL1 Nord;Kempten;Neu-Ulm 51;Team Total;;1;Kempten 92;;1691;2.0;False;True
+18/19;3;;BZL 2 Nord;Passau;Passau 91;Peter Lang;38309;1;Rosenheim 1;0;219;1.0;True;False
+18/19;3;;BZL 2 Nord;Passau;Passau 91;Finn Dietrich;41716;1;Rosenheim 1;1;216;1.0;True;False
+18/19;3;;BZL 2 Nord;Passau;Passau 91;Samuel Günther;48461;1;Rosenheim 1;2;148;0.0;True;False
+18/19;3;;BZL 2 Nord;Passau;Passau 91;Ethan Koch;92874;1;Rosenheim 1;3;191;1.0;True;False
+18/19;3;;BZL 2 Nord;Passau;Passau 91;Team Total;;1;Kempten 32;;774;2.0;False;True
+18/19;3;;LL1 Nord;Kempten;Passau 99;Leo Bauer;76826;1;Neu-Ulm 51;0;229;1.0;True;False
+18/19;3;;LL1 Nord;Kempten;Passau 99;Marco Lehmann;53724;1;Neu-Ulm 51;1;144;0.0;True;False
+18/19;3;;LL1 Nord;Kempten;Passau 99;Thomas Köhler;33508;1;Neu-Ulm 51;2;210;1.0;True;False
+18/19;3;;LL1 Nord;Kempten;Passau 99;Lars Meyer;41871;1;Neu-Ulm 51;3;148;0.5;True;False
+18/19;3;;LL1 Nord;Kempten;Passau 99;Team Total;;1;Kempten 92;;731;0.0;False;True
+18/19;3;;BZL 2 Nord;Passau;Rosenheim 1;Peter Lorenz;23805;1;Passau 91;0;231;1.0;True;False
+18/19;3;;BZL 2 Nord;Passau;Rosenheim 1;Peter Lorenz;23805;1;Kempten 32;0;183;1.0;True;False
+18/19;3;;BZL 2 Nord;Passau;Rosenheim 1;Marco Thomas;74563;1;Passau 91;1;242;1.0;True;False
+18/19;3;;BZL 2 Nord;Passau;Rosenheim 1;Marco Thomas;74563;1;Kempten 32;1;184;1.0;True;False
+18/19;3;;BZL 2 Nord;Passau;Rosenheim 1;Arthur Zimmermann;10075;1;Passau 91;2;238;1.0;True;False
+18/19;3;;BZL 2 Nord;Passau;Rosenheim 1;Arthur Zimmermann;10075;1;Kempten 32;2;192;1.0;True;False
+18/19;3;;BZL 2 Nord;Passau;Rosenheim 1;Ryan Ludwig;82185;1;Passau 91;3;199;1.0;True;False
+18/19;3;;BZL 2 Nord;Passau;Rosenheim 1;Ryan Ludwig;82185;1;Kempten 32;3;148;1.0;True;False
+18/19;3;;BZL 2 Nord;Passau;Rosenheim 1;Team Total;;1;Kempten 32;;1617;0.0;False;True
+18/19;3;;BZL 2 Nord;Passau;Kempten 10;Diego Neumann;71402;2;Passau 91;0;191;1.0;True;False
+18/19;3;;BZL 2 Nord;Passau;Kempten 10;Ahmed Peters;43038;2;Passau 91;1;189;1.0;True;False
+18/19;3;;BZL 2 Nord;Passau;Kempten 10;Christian Schmitt;58001;2;Passau 91;2;188;1.0;True;False
+18/19;3;;BZL 2 Nord;Passau;Kempten 10;Ahmed Gonzalez;38995;2;Passau 91;3;219;1.0;True;False
+18/19;3;;BZL 2 Nord;Passau;Kempten 10;Team Total;;2;Kempten 32;;787;2.0;False;True
+18/19;3;;BZL 2 Nord;Passau;Kempten 32;Leon Ludwig;26703;2;Passau 91;0;158;0.0;True;False
+18/19;3;;BZL 2 Nord;Passau;Kempten 32;Samuel Zimmermann;24543;2;Passau 91;1;158;0.0;True;False
+18/19;3;;BZL 2 Nord;Passau;Kempten 32;Julian Davis;94765;2;Passau 91;2;167;1.0;True;False
+18/19;3;;BZL 2 Nord;Passau;Kempten 32;Niklas Martinez;74377;2;Passau 91;3;132;0.0;True;False
+18/19;3;;BZL 2 Nord;Passau;Kempten 32;Team Total;;2;Kempten 10;;615;0.0;False;True
+18/19;3;;LL1 Nord;Kempten;Kempten 92;Oscar Hartmann;71871;2;Landshut 69;0;201;0.0;True;False
+18/19;3;;LL1 Nord;Kempten;Kempten 92;Oscar Hartmann;71871;2;Passau 99;0;154;0.0;True;False
+18/19;3;;LL1 Nord;Kempten;Kempten 92;Dominik Weiß;81281;2;Landshut 69;1;191;0.0;True;False
+18/19;3;;LL1 Nord;Kempten;Kempten 92;Dominik Weiß;81281;2;Passau 99;1;155;0.0;True;False
+18/19;3;;LL1 Nord;Kempten;Kempten 92;Thomas Weber;43070;2;Landshut 69;2;263;1.0;True;False
+18/19;3;;LL1 Nord;Kempten;Kempten 92;Thomas Weber;43070;2;Passau 99;2;219;0.0;True;False
+18/19;3;;LL1 Nord;Kempten;Kempten 92;James Richter;46467;2;Landshut 69;3;216;0.0;True;False
+18/19;3;;LL1 Nord;Kempten;Kempten 92;James Richter;46467;2;Passau 99;3;150;0.0;True;False
+18/19;3;;LL1 Nord;Kempten;Kempten 92;Team Total;;2;Landshut 69;;1549;2.0;False;True
+18/19;3;;LL1 Nord;Kempten;Landshut 69;Christoph Wilson;87082;2;Kempten 92;0;214;1.0;True;False
+18/19;3;;LL1 Nord;Kempten;Landshut 69;Moritz Hernandez;56293;2;Kempten 92;1;227;1.0;True;False
+18/19;3;;LL1 Nord;Kempten;Landshut 69;Matthew Jung;43328;2;Kempten 92;2;225;0.0;True;False
+18/19;3;;LL1 Nord;Kempten;Landshut 69;Diego Schröder;53174;2;Kempten 92;3;237;1.0;True;False
+18/19;3;;LL1 Nord;Kempten;Landshut 69;Team Total;;2;Kempten 92;;903;0.0;False;True
+18/19;3;;BZL 2 Nord;Passau;Passau 91;Peter Lang;38309;2;Kempten 10;0;211;1.0;True;False
+18/19;3;;BZL 2 Nord;Passau;Passau 91;Peter Lang;38309;2;Kempten 32;0;172;1.0;True;False
+18/19;3;;BZL 2 Nord;Passau;Passau 91;Finn Dietrich;41716;2;Kempten 10;1;214;1.0;True;False
+18/19;3;;BZL 2 Nord;Passau;Passau 91;Finn Dietrich;41716;2;Kempten 32;1;182;1.0;True;False
+18/19;3;;BZL 2 Nord;Passau;Passau 91;Samuel Günther;48461;2;Kempten 10;2;161;0.0;True;False
+18/19;3;;BZL 2 Nord;Passau;Passau 91;Samuel Günther;48461;2;Kempten 32;2;118;0.0;True;False
+18/19;3;;BZL 2 Nord;Passau;Passau 91;Ethan Koch;92874;2;Kempten 10;3;193;0.0;True;False
+18/19;3;;BZL 2 Nord;Passau;Passau 91;Ethan Koch;92874;2;Kempten 32;3;134;1.0;True;False
+18/19;3;;BZL 2 Nord;Passau;Passau 91;Team Total;;2;Kempten 10;;1385;0.0;False;True
+18/19;3;;LL1 Nord;Kempten;Passau 99;Leo Bauer;76826;2;Kempten 92;0;218;1.0;True;False
+18/19;3;;LL1 Nord;Kempten;Passau 99;Marco Lehmann;53724;2;Kempten 92;1;159;1.0;True;False
+18/19;3;;LL1 Nord;Kempten;Passau 99;Thomas Köhler;33508;2;Kempten 92;2;225;1.0;True;False
+18/19;3;;LL1 Nord;Kempten;Passau 99;Lars Meyer;41871;2;Kempten 92;3;151;1.0;True;False
+18/19;3;;LL1 Nord;Kempten;Passau 99;Team Total;;2;Kempten 92;;753;0.0;False;True
+18/19;4;;BZL 2 Nord;Rosenheim;Kempten 10;Diego Neumann;71402;0;Kempten 32;0;134;0.0;True;False
+18/19;4;;BZL 2 Nord;Rosenheim;Kempten 10;Ahmed Peters;43038;0;Kempten 32;1;132;0.0;True;False
+18/19;4;;BZL 2 Nord;Rosenheim;Kempten 10;Christian Schmitt;58001;0;Kempten 32;2;126;0.0;True;False
+18/19;4;;BZL 2 Nord;Rosenheim;Kempten 10;Ahmed Gonzalez;38995;0;Kempten 32;3;170;1.0;True;False
+18/19;4;;BZL 2 Nord;Rosenheim;Kempten 10;Team Total;;0;Kempten 32;;562;0.0;False;True
+18/19;4;;BZL 2 Nord;Rosenheim;Kempten 32;Leon Ludwig;26703;0;Kempten 10;0;143;1.0;True;False
+18/19;4;;BZL 2 Nord;Rosenheim;Kempten 32;Samuel Zimmermann;24543;0;Kempten 10;1;175;1.0;True;False
+18/19;4;;BZL 2 Nord;Rosenheim;Kempten 32;Julian Davis;94765;0;Kempten 10;2;177;1.0;True;False
+18/19;4;;BZL 2 Nord;Rosenheim;Kempten 32;Niklas Martinez;74377;0;Kempten 10;3;131;0.0;True;False
+18/19;4;;BZL 2 Nord;Rosenheim;Kempten 32;Team Total;;0;Kempten 10;;626;2.0;False;True
+18/19;4;;LL1 Nord;Neu-Ulm;Kempten 92;Oscar Hartmann;71871;0;Neu-Ulm 51;0;144;0.0;True;False
+18/19;4;;LL1 Nord;Neu-Ulm;Kempten 92;Dominik Weiß;81281;0;Neu-Ulm 51;1;148;0.0;True;False
+18/19;4;;LL1 Nord;Neu-Ulm;Kempten 92;Thomas Weber;43070;0;Neu-Ulm 51;2;216;1.0;True;False
+18/19;4;;LL1 Nord;Neu-Ulm;Kempten 92;James Richter;46467;0;Neu-Ulm 51;3;168;1.0;True;False
+18/19;4;;LL1 Nord;Neu-Ulm;Kempten 92;Team Total;;0;Landshut 69;;676;0.0;False;True
+18/19;4;;LL1 Nord;Neu-Ulm;Landshut 69;Christoph Wilson;87082;0;Passau 99;0;171;0.0;True;False
+18/19;4;;LL1 Nord;Neu-Ulm;Landshut 69;Moritz Hernandez;56293;0;Passau 99;1;170;1.0;True;False
+18/19;4;;LL1 Nord;Neu-Ulm;Landshut 69;Matthew Jung;43328;0;Passau 99;2;174;0.0;True;False
+18/19;4;;LL1 Nord;Neu-Ulm;Landshut 69;Diego Schröder;53174;0;Passau 99;3;170;1.0;True;False
+18/19;4;;LL1 Nord;Neu-Ulm;Landshut 69;Team Total;;0;Kempten 92;;685;2.0;False;True
+18/19;4;;LL1 Nord;Neu-Ulm;Neu-Ulm 51;Jackson Brown;46891;0;Kempten 92;0;176;1.0;True;False
+18/19;4;;LL1 Nord;Neu-Ulm;Neu-Ulm 51;Julius Anderson;47075;0;Kempten 92;1;254;1.0;True;False
+18/19;4;;LL1 Nord;Neu-Ulm;Neu-Ulm 51;Markus Vogel;81147;0;Kempten 92;2;177;0.0;True;False
+18/19;4;;LL1 Nord;Neu-Ulm;Neu-Ulm 51;Andrew Garcia;11260;0;Kempten 92;3;155;0.0;True;False
+18/19;4;;LL1 Nord;Neu-Ulm;Neu-Ulm 51;Team Total;;0;Kempten 92;;762;0.0;False;True
+18/19;4;;BZL 2 Nord;Rosenheim;Passau 91;Peter Lang;38309;0;Rosenheim 1;0;168;0.0;True;False
+18/19;4;;BZL 2 Nord;Rosenheim;Passau 91;Finn Dietrich;41716;0;Rosenheim 1;1;177;0.0;True;False
+18/19;4;;BZL 2 Nord;Rosenheim;Passau 91;Samuel Günther;48461;0;Rosenheim 1;2;114;0.0;True;False
+18/19;4;;BZL 2 Nord;Rosenheim;Passau 91;Ethan Koch;92874;0;Rosenheim 1;3;141;1.0;True;False
+18/19;4;;BZL 2 Nord;Rosenheim;Passau 91;Team Total;;0;Kempten 10;;600;0.0;False;True
+18/19;4;;LL1 Nord;Neu-Ulm;Passau 99;Leo Bauer;76826;0;Landshut 69;0;219;1.0;True;False
+18/19;4;;LL1 Nord;Neu-Ulm;Passau 99;Marco Lehmann;53724;0;Landshut 69;1;152;0.0;True;False
+18/19;4;;LL1 Nord;Neu-Ulm;Passau 99;Thomas Köhler;33508;0;Landshut 69;2;224;1.0;True;False
+18/19;4;;LL1 Nord;Neu-Ulm;Passau 99;Lars Meyer;41871;0;Landshut 69;3;146;0.0;True;False
+18/19;4;;LL1 Nord;Neu-Ulm;Passau 99;Team Total;;0;Kempten 92;;741;0.0;False;True
+18/19;4;;BZL 2 Nord;Rosenheim;Rosenheim 1;Peter Lorenz;23805;0;Passau 91;0;172;1.0;True;False
+18/19;4;;BZL 2 Nord;Rosenheim;Rosenheim 1;Marco Thomas;74563;0;Passau 91;1;185;1.0;True;False
+18/19;4;;BZL 2 Nord;Rosenheim;Rosenheim 1;Arthur Zimmermann;10075;0;Passau 91;2;181;1.0;True;False
+18/19;4;;BZL 2 Nord;Rosenheim;Rosenheim 1;Ryan Ludwig;82185;0;Passau 91;3;136;0.0;True;False
+18/19;4;;BZL 2 Nord;Rosenheim;Rosenheim 1;Team Total;;0;Kempten 10;;674;0.0;False;True
+18/19;4;;BZL 2 Nord;Rosenheim;Kempten 10;Diego Neumann;71402;1;Passau 91;0;151;0.0;True;False
+18/19;4;;BZL 2 Nord;Rosenheim;Kempten 10;Ahmed Peters;43038;1;Passau 91;1;141;0.0;True;False
+18/19;4;;BZL 2 Nord;Rosenheim;Kempten 10;Christian Schmitt;58001;1;Passau 91;2;130;1.0;True;False
+18/19;4;;BZL 2 Nord;Rosenheim;Kempten 10;Ahmed Gonzalez;38995;1;Passau 91;3;187;1.0;True;False
+18/19;4;;BZL 2 Nord;Rosenheim;Kempten 10;Team Total;;1;Passau 91;;609;2.0;False;True
+18/19;4;;LL1 Nord;Neu-Ulm;Kempten 92;Oscar Hartmann;71871;1;Landshut 69;0;145;0.0;True;False
+18/19;4;;LL1 Nord;Neu-Ulm;Kempten 92;Dominik Weiß;81281;1;Landshut 69;1;153;0.0;True;False
+18/19;4;;LL1 Nord;Neu-Ulm;Kempten 92;Thomas Weber;43070;1;Landshut 69;2;214;1.0;True;False
+18/19;4;;LL1 Nord;Neu-Ulm;Kempten 92;James Richter;46467;1;Landshut 69;3;155;0.0;True;False
+18/19;4;;LL1 Nord;Neu-Ulm;Kempten 92;Team Total;;1;Landshut 69;;667;0.0;False;True
+18/19;4;;LL1 Nord;Neu-Ulm;Landshut 69;Christoph Wilson;87082;1;Kempten 92;0;174;1.0;True;False
+18/19;4;;LL1 Nord;Neu-Ulm;Landshut 69;Moritz Hernandez;56293;1;Kempten 92;1;171;1.0;True;False
+18/19;4;;LL1 Nord;Neu-Ulm;Landshut 69;Matthew Jung;43328;1;Kempten 92;2;176;0.0;True;False
+18/19;4;;LL1 Nord;Neu-Ulm;Landshut 69;Diego Schröder;53174;1;Kempten 92;3;181;1.0;True;False
+18/19;4;;LL1 Nord;Neu-Ulm;Landshut 69;Team Total;;1;Kempten 92;;702;2.0;False;True
+18/19;4;;BZL 2 Nord;Rosenheim;Passau 91;Peter Lang;38309;1;Kempten 10;0;162;1.0;True;False
+18/19;4;;BZL 2 Nord;Rosenheim;Passau 91;Finn Dietrich;41716;1;Kempten 10;1;168;1.0;True;False
+18/19;4;;BZL 2 Nord;Rosenheim;Passau 91;Samuel Günther;48461;1;Kempten 10;2;98;0.0;True;False
+18/19;4;;BZL 2 Nord;Rosenheim;Passau 91;Ethan Koch;92874;1;Kempten 10;3;152;0.0;True;False
+18/19;4;;BZL 2 Nord;Rosenheim;Passau 91;Team Total;;1;Kempten 10;;580;0.0;False;True
+18/19;4;;BZL 2 Nord;Rosenheim;Kempten 10;Diego Neumann;71402;2;Kempten 32;0;136;0.0;True;False
+18/19;4;;BZL 2 Nord;Rosenheim;Kempten 10;Ahmed Peters;43038;2;Kempten 32;1;135;0.0;True;False
+18/19;4;;BZL 2 Nord;Rosenheim;Kempten 10;Christian Schmitt;58001;2;Kempten 32;2;133;0.0;True;False
+18/19;4;;BZL 2 Nord;Rosenheim;Kempten 10;Ahmed Gonzalez;38995;2;Kempten 32;3;169;1.0;True;False
+18/19;4;;BZL 2 Nord;Rosenheim;Kempten 10;Team Total;;2;Kempten 32;;573;0.0;False;True
+18/19;4;;BZL 2 Nord;Rosenheim;Kempten 32;Leon Ludwig;26703;2;Passau 91;0;163;0.0;True;False
+18/19;4;;BZL 2 Nord;Rosenheim;Kempten 32;Leon Ludwig;26703;2;Kempten 10;0;160;1.0;True;False
+18/19;4;;BZL 2 Nord;Rosenheim;Kempten 32;Samuel Zimmermann;24543;2;Passau 91;1;169;0.0;True;False
+18/19;4;;BZL 2 Nord;Rosenheim;Kempten 32;Samuel Zimmermann;24543;2;Kempten 10;1;176;1.0;True;False
+18/19;4;;BZL 2 Nord;Rosenheim;Kempten 32;Julian Davis;94765;2;Passau 91;2;159;1.0;True;False
+18/19;4;;BZL 2 Nord;Rosenheim;Kempten 32;Julian Davis;94765;2;Kempten 10;2;162;1.0;True;False
+18/19;4;;BZL 2 Nord;Rosenheim;Kempten 32;Niklas Martinez;74377;2;Passau 91;3;136;0.0;True;False
+18/19;4;;BZL 2 Nord;Rosenheim;Kempten 32;Niklas Martinez;74377;2;Kempten 10;3;151;0.0;True;False
+18/19;4;;BZL 2 Nord;Rosenheim;Kempten 32;Team Total;;2;Kempten 10;;1276;2.0;False;True
+18/19;4;;LL1 Nord;Neu-Ulm;Kempten 92;Oscar Hartmann;71871;2;Passau 99;0;151;0.0;True;False
+18/19;4;;LL1 Nord;Neu-Ulm;Kempten 92;Dominik Weiß;81281;2;Passau 99;1;146;0.0;True;False
+18/19;4;;LL1 Nord;Neu-Ulm;Kempten 92;Thomas Weber;43070;2;Passau 99;2;223;1.0;True;False
+18/19;4;;LL1 Nord;Neu-Ulm;Kempten 92;James Richter;46467;2;Passau 99;3;167;0.0;True;False
+18/19;4;;LL1 Nord;Neu-Ulm;Kempten 92;Team Total;;2;Landshut 69;;687;0.0;False;True
+18/19;4;;LL1 Nord;Neu-Ulm;Landshut 69;Christoph Wilson;87082;2;Passau 99;0;170;1.0;True;False
+18/19;4;;LL1 Nord;Neu-Ulm;Landshut 69;Moritz Hernandez;56293;2;Passau 99;1;180;1.0;True;False
+18/19;4;;LL1 Nord;Neu-Ulm;Landshut 69;Matthew Jung;43328;2;Passau 99;2;174;0.0;True;False
+18/19;4;;LL1 Nord;Neu-Ulm;Landshut 69;Diego Schröder;53174;2;Passau 99;3;180;1.0;True;False
+18/19;4;;LL1 Nord;Neu-Ulm;Landshut 69;Team Total;;2;Kempten 92;;704;2.0;False;True
+18/19;4;;BZL 2 Nord;Rosenheim;Passau 91;Peter Lang;38309;2;Kempten 32;0;169;1.0;True;False
+18/19;4;;BZL 2 Nord;Rosenheim;Passau 91;Finn Dietrich;41716;2;Kempten 32;1;171;1.0;True;False
+18/19;4;;BZL 2 Nord;Rosenheim;Passau 91;Samuel Günther;48461;2;Kempten 32;2;111;0.0;True;False
+18/19;4;;BZL 2 Nord;Rosenheim;Passau 91;Ethan Koch;92874;2;Kempten 32;3;148;1.0;True;False
+18/19;4;;BZL 2 Nord;Rosenheim;Passau 91;Team Total;;2;Kempten 10;;599;0.0;False;True
+18/19;4;;LL1 Nord;Neu-Ulm;Passau 99;Leo Bauer;76826;2;Kempten 92;0;235;1.0;True;False
+18/19;4;;LL1 Nord;Neu-Ulm;Passau 99;Leo Bauer;76826;2;Landshut 69;0;236;1.0;True;False
+18/19;4;;LL1 Nord;Neu-Ulm;Passau 99;Marco Lehmann;53724;2;Kempten 92;1;161;1.0;True;False
+18/19;4;;LL1 Nord;Neu-Ulm;Passau 99;Marco Lehmann;53724;2;Landshut 69;1;150;0.0;True;False
+18/19;4;;LL1 Nord;Neu-Ulm;Passau 99;Thomas Köhler;33508;2;Kempten 92;2;214;0.0;True;False
+18/19;4;;LL1 Nord;Neu-Ulm;Passau 99;Thomas Köhler;33508;2;Landshut 69;2;220;1.0;True;False
+18/19;4;;LL1 Nord;Neu-Ulm;Passau 99;Lars Meyer;41871;2;Kempten 92;3;145;0.0;True;False
+18/19;4;;LL1 Nord;Neu-Ulm;Passau 99;Lars Meyer;41871;2;Landshut 69;3;164;0.0;True;False
+18/19;4;;LL1 Nord;Neu-Ulm;Passau 99;Team Total;;2;Kempten 92;;1525;0.0;False;True
+19/20;1;;BZL 2 Nord;Kempten;Kempten 10;Diego Neumann;71402;0;Kempten 32;0;202;1.0;True;False
+19/20;1;;BZL 2 Nord;Kempten;Kempten 10;Ahmed Peters;43038;0;Kempten 32;1;196;0.0;True;False
+19/20;1;;BZL 2 Nord;Kempten;Kempten 10;Christian Schmitt;58001;0;Kempten 32;2;188;0.0;True;False
+19/20;1;;BZL 2 Nord;Kempten;Kempten 10;Ahmed Gonzalez;38995;0;Kempten 32;3;238;1.0;True;False
+19/20;1;;BZL 2 Nord;Kempten;Kempten 10;Team Total;;0;Kempten 32;;824;0.0;False;True
+19/20;1;;BZL 2 Nord;Kempten;Kempten 32;Leon Ludwig;26703;0;Kempten 10;0;197;0.0;True;False
+19/20;1;;BZL 2 Nord;Kempten;Kempten 32;Samuel Zimmermann;24543;0;Kempten 10;1;216;1.0;True;False
+19/20;1;;BZL 2 Nord;Kempten;Kempten 32;Julian Davis;94765;0;Kempten 10;2;222;1.0;True;False
+19/20;1;;BZL 2 Nord;Kempten;Kempten 32;Niklas Martinez;74377;0;Kempten 10;3;217;0.0;True;False
+19/20;1;;BZL 2 Nord;Kempten;Kempten 32;Team Total;;0;Kempten 10;;852;2.0;False;True
+19/20;1;;LL1 Nord;Landshut;Kempten 92;Oscar Hartmann;71871;0;Neu-Ulm 51;0;143;0.0;True;False
+19/20;1;;LL1 Nord;Landshut;Kempten 92;Dominik Weiß;81281;0;Neu-Ulm 51;1;142;0.0;True;False
+19/20;1;;LL1 Nord;Landshut;Kempten 92;Thomas Weber;43070;0;Neu-Ulm 51;2;193;1.0;True;False
+19/20;1;;LL1 Nord;Landshut;Kempten 92;James Richter;46467;0;Neu-Ulm 51;3;153;0.0;True;False
+19/20;1;;LL1 Nord;Landshut;Kempten 92;Team Total;;0;Landshut 69;;631;0.0;False;True
+19/20;1;;LL1 Nord;Landshut;Landshut 69;Christoph Wilson;87082;0;Passau 99;0;155;0.0;True;False
+19/20;1;;LL1 Nord;Landshut;Landshut 69;Moritz Hernandez;56293;0;Passau 99;1;187;1.0;True;False
+19/20;1;;LL1 Nord;Landshut;Landshut 69;Matthew Jung;43328;0;Passau 99;2;167;0.0;True;False
+19/20;1;;LL1 Nord;Landshut;Landshut 69;Diego Schröder;53174;0;Passau 99;3;178;1.0;True;False
+19/20;1;;LL1 Nord;Landshut;Landshut 69;Team Total;;0;Kempten 92;;687;2.0;False;True
+19/20;1;;LL1 Nord;Landshut;Neu-Ulm 51;Jackson Brown;46891;0;Kempten 92;0;186;1.0;True;False
+19/20;1;;LL1 Nord;Landshut;Neu-Ulm 51;Julius Anderson;47075;0;Kempten 92;1;209;1.0;True;False
+19/20;1;;LL1 Nord;Landshut;Neu-Ulm 51;Markus Vogel;81147;0;Kempten 92;2;172;0.0;True;False
+19/20;1;;LL1 Nord;Landshut;Neu-Ulm 51;Andrew Garcia;11260;0;Kempten 92;3;175;1.0;True;False
+19/20;1;;LL1 Nord;Landshut;Neu-Ulm 51;Team Total;;0;Kempten 92;;742;0.0;False;True
+19/20;1;;BZL 2 Nord;Kempten;Passau 91;Peter Lang;38309;0;Rosenheim 1;0;159;0.0;True;False
+19/20;1;;BZL 2 Nord;Kempten;Passau 91;Finn Dietrich;41716;0;Rosenheim 1;1;182;0.0;True;False
+19/20;1;;BZL 2 Nord;Kempten;Passau 91;Samuel Günther;48461;0;Rosenheim 1;2;118;0.0;True;False
+19/20;1;;BZL 2 Nord;Kempten;Passau 91;Ethan Koch;92874;0;Rosenheim 1;3;154;1.0;True;False
+19/20;1;;BZL 2 Nord;Kempten;Passau 91;Team Total;;0;Kempten 10;;613;0.0;False;True
+19/20;1;;LL1 Nord;Landshut;Passau 99;Leo Bauer;76826;0;Landshut 69;0;234;1.0;True;False
+19/20;1;;LL1 Nord;Landshut;Passau 99;Marco Lehmann;53724;0;Landshut 69;1;143;0.0;True;False
+19/20;1;;LL1 Nord;Landshut;Passau 99;Thomas Köhler;33508;0;Landshut 69;2;232;1.0;True;False
+19/20;1;;LL1 Nord;Landshut;Passau 99;Lars Meyer;41871;0;Landshut 69;3;166;0.0;True;False
+19/20;1;;LL1 Nord;Landshut;Passau 99;Team Total;;0;Kempten 92;;775;0.0;False;True
+19/20;1;;BZL 2 Nord;Kempten;Rosenheim 1;Peter Lorenz;23805;0;Passau 91;0;204;1.0;True;False
+19/20;1;;BZL 2 Nord;Kempten;Rosenheim 1;Marco Thomas;74563;0;Passau 91;1;194;1.0;True;False
+19/20;1;;BZL 2 Nord;Kempten;Rosenheim 1;Arthur Zimmermann;10075;0;Passau 91;2;188;1.0;True;False
+19/20;1;;BZL 2 Nord;Kempten;Rosenheim 1;Ryan Ludwig;82185;0;Passau 91;3;132;0.0;True;False
+19/20;1;;BZL 2 Nord;Kempten;Rosenheim 1;Team Total;;0;Kempten 10;;718;0.0;False;True
+19/20;1;;BZL 2 Nord;Kempten;Kempten 10;Diego Neumann;71402;1;Passau 91;0;163;0.0;True;False
+19/20;1;;BZL 2 Nord;Kempten;Kempten 10;Ahmed Peters;43038;1;Passau 91;1;148;0.0;True;False
+19/20;1;;BZL 2 Nord;Kempten;Kempten 10;Christian Schmitt;58001;1;Passau 91;2;132;1.0;True;False
+19/20;1;;BZL 2 Nord;Kempten;Kempten 10;Ahmed Gonzalez;38995;1;Passau 91;3;172;1.0;True;False
+19/20;1;;BZL 2 Nord;Kempten;Kempten 10;Team Total;;1;Kempten 32;;615;0.0;False;True
+19/20;1;;BZL 2 Nord;Kempten;Kempten 32;Leon Ludwig;26703;1;Rosenheim 1;0;153;0.0;True;False
+19/20;1;;BZL 2 Nord;Kempten;Kempten 32;Samuel Zimmermann;24543;1;Rosenheim 1;1;162;0.0;True;False
+19/20;1;;BZL 2 Nord;Kempten;Kempten 32;Julian Davis;94765;1;Rosenheim 1;2;177;0.0;True;False
+19/20;1;;BZL 2 Nord;Kempten;Kempten 32;Niklas Martinez;74377;1;Rosenheim 1;3;170;1.0;True;False
+19/20;1;;BZL 2 Nord;Kempten;Kempten 32;Team Total;;1;Kempten 10;;662;2.0;False;True
+19/20;1;;LL1 Nord;Landshut;Kempten 92;Oscar Hartmann;71871;1;Landshut 69;0;161;0.0;True;False
+19/20;1;;LL1 Nord;Landshut;Kempten 92;Dominik Weiß;81281;1;Landshut 69;1;157;0.0;True;False
+19/20;1;;LL1 Nord;Landshut;Kempten 92;Thomas Weber;43070;1;Landshut 69;2;201;1.0;True;False
+19/20;1;;LL1 Nord;Landshut;Kempten 92;James Richter;46467;1;Landshut 69;3;149;0.0;True;False
+19/20;1;;LL1 Nord;Landshut;Kempten 92;Team Total;;1;Landshut 69;;668;0.0;False;True
+19/20;1;;LL1 Nord;Landshut;Landshut 69;Christoph Wilson;87082;1;Kempten 92;0;175;1.0;True;False
+19/20;1;;LL1 Nord;Landshut;Landshut 69;Moritz Hernandez;56293;1;Kempten 92;1;176;1.0;True;False
+19/20;1;;LL1 Nord;Landshut;Landshut 69;Matthew Jung;43328;1;Kempten 92;2;172;0.0;True;False
+19/20;1;;LL1 Nord;Landshut;Landshut 69;Diego Schröder;53174;1;Kempten 92;3;178;1.0;True;False
+19/20;1;;LL1 Nord;Landshut;Landshut 69;Team Total;;1;Kempten 92;;701;2.0;False;True
+19/20;1;;LL1 Nord;Landshut;Neu-Ulm 51;Jackson Brown;46891;1;Passau 99;0;188;0.0;True;False
+19/20;1;;LL1 Nord;Landshut;Neu-Ulm 51;Julius Anderson;47075;1;Passau 99;1;231;1.0;True;False
+19/20;1;;LL1 Nord;Landshut;Neu-Ulm 51;Markus Vogel;81147;1;Passau 99;2;165;0.0;True;False
+19/20;1;;LL1 Nord;Landshut;Neu-Ulm 51;Andrew Garcia;11260;1;Passau 99;3;183;1.0;True;False
+19/20;1;;LL1 Nord;Landshut;Neu-Ulm 51;Team Total;;1;Kempten 92;;767;0.0;False;True
+19/20;1;;BZL 2 Nord;Kempten;Passau 91;Peter Lang;38309;1;Kempten 10;0;167;1.0;True;False
+19/20;1;;BZL 2 Nord;Kempten;Passau 91;Finn Dietrich;41716;1;Kempten 10;1;163;1.0;True;False
+19/20;1;;BZL 2 Nord;Kempten;Passau 91;Samuel Günther;48461;1;Kempten 10;2;111;0.0;True;False
+19/20;1;;BZL 2 Nord;Kempten;Passau 91;Ethan Koch;92874;1;Kempten 10;3;140;0.0;True;False
+19/20;1;;BZL 2 Nord;Kempten;Passau 91;Team Total;;1;Kempten 10;;581;0.0;False;True
+19/20;1;;LL1 Nord;Landshut;Passau 99;Leo Bauer;76826;1;Neu-Ulm 51;0;236;1.0;True;False
+19/20;1;;LL1 Nord;Landshut;Passau 99;Marco Lehmann;53724;1;Neu-Ulm 51;1;152;0.0;True;False
+19/20;1;;LL1 Nord;Landshut;Passau 99;Thomas Köhler;33508;1;Neu-Ulm 51;2;209;1.0;True;False
+19/20;1;;LL1 Nord;Landshut;Passau 99;Lars Meyer;41871;1;Neu-Ulm 51;3;160;0.0;True;False
+19/20;1;;LL1 Nord;Landshut;Passau 99;Team Total;;1;Kempten 92;;757;0.0;False;True
+19/20;1;;BZL 2 Nord;Kempten;Rosenheim 1;Peter Lorenz;23805;1;Kempten 32;0;219;1.0;True;False
+19/20;1;;BZL 2 Nord;Kempten;Rosenheim 1;Marco Thomas;74563;1;Kempten 32;1;192;1.0;True;False
+19/20;1;;BZL 2 Nord;Kempten;Rosenheim 1;Arthur Zimmermann;10075;1;Kempten 32;2;191;1.0;True;False
+19/20;1;;BZL 2 Nord;Kempten;Rosenheim 1;Ryan Ludwig;82185;1;Kempten 32;3;141;0.0;True;False
+19/20;1;;BZL 2 Nord;Kempten;Rosenheim 1;Team Total;;1;Kempten 10;;743;0.0;False;True
+19/20;1;;BZL 2 Nord;Kempten;Kempten 10;Diego Neumann;71402;2;Rosenheim 1;0;163;0.0;True;False
+19/20;1;;BZL 2 Nord;Kempten;Kempten 10;Ahmed Peters;43038;2;Rosenheim 1;1;145;0.0;True;False
+19/20;1;;BZL 2 Nord;Kempten;Kempten 10;Christian Schmitt;58001;2;Rosenheim 1;2;127;0.0;True;False
+19/20;1;;BZL 2 Nord;Kempten;Kempten 10;Ahmed Gonzalez;38995;2;Rosenheim 1;3;189;1.0;True;False
+19/20;1;;BZL 2 Nord;Kempten;Kempten 10;Team Total;;2;Kempten 32;;624;0.0;False;True
+19/20;1;;BZL 2 Nord;Kempten;Kempten 32;Leon Ludwig;26703;2;Passau 91;0;197;0.0;True;False
+19/20;1;;BZL 2 Nord;Kempten;Kempten 32;Samuel Zimmermann;24543;2;Passau 91;1;224;1.0;True;False
+19/20;1;;BZL 2 Nord;Kempten;Kempten 32;Julian Davis;94765;2;Passau 91;2;222;1.0;True;False
+19/20;1;;BZL 2 Nord;Kempten;Kempten 32;Niklas Martinez;74377;2;Passau 91;3;215;1.0;True;False
+19/20;1;;BZL 2 Nord;Kempten;Kempten 32;Team Total;;2;Kempten 10;;858;2.0;False;True
+19/20;1;;LL1 Nord;Landshut;Kempten 92;Oscar Hartmann;71871;2;Passau 99;0;148;0.0;True;False
+19/20;1;;LL1 Nord;Landshut;Kempten 92;Dominik Weiß;81281;2;Passau 99;1;157;1.0;True;False
+19/20;1;;LL1 Nord;Landshut;Kempten 92;Thomas Weber;43070;2;Passau 99;2;209;0.0;True;False
+19/20;1;;LL1 Nord;Landshut;Kempten 92;James Richter;46467;2;Passau 99;3;147;0.5;True;False
+19/20;1;;LL1 Nord;Landshut;Kempten 92;Team Total;;2;Landshut 69;;661;0.0;False;True
+19/20;1;;LL1 Nord;Landshut;Landshut 69;Christoph Wilson;87082;2;Neu-Ulm 51;0;171;0.0;True;False
+19/20;1;;LL1 Nord;Landshut;Landshut 69;Moritz Hernandez;56293;2;Neu-Ulm 51;1;186;0.0;True;False
+19/20;1;;LL1 Nord;Landshut;Landshut 69;Matthew Jung;43328;2;Neu-Ulm 51;2;175;1.0;True;False
+19/20;1;;LL1 Nord;Landshut;Landshut 69;Diego Schröder;53174;2;Neu-Ulm 51;3;178;0.0;True;False
+19/20;1;;LL1 Nord;Landshut;Landshut 69;Team Total;;2;Kempten 92;;710;2.0;False;True
+19/20;1;;LL1 Nord;Landshut;Neu-Ulm 51;Jackson Brown;46891;2;Landshut 69;0;174;1.0;True;False
+19/20;1;;LL1 Nord;Landshut;Neu-Ulm 51;Julius Anderson;47075;2;Landshut 69;1;227;1.0;True;False
+19/20;1;;LL1 Nord;Landshut;Neu-Ulm 51;Markus Vogel;81147;2;Landshut 69;2;164;0.0;True;False
+19/20;1;;LL1 Nord;Landshut;Neu-Ulm 51;Andrew Garcia;11260;2;Landshut 69;3;187;1.0;True;False
+19/20;1;;LL1 Nord;Landshut;Neu-Ulm 51;Team Total;;2;Kempten 92;;752;0.0;False;True
+19/20;1;;BZL 2 Nord;Kempten;Passau 91;Peter Lang;38309;2;Kempten 32;0;208;1.0;True;False
+19/20;1;;BZL 2 Nord;Kempten;Passau 91;Finn Dietrich;41716;2;Kempten 32;1;214;0.0;True;False
+19/20;1;;BZL 2 Nord;Kempten;Passau 91;Samuel Günther;48461;2;Kempten 32;2;161;0.0;True;False
+19/20;1;;BZL 2 Nord;Kempten;Passau 91;Ethan Koch;92874;2;Kempten 32;3;182;0.0;True;False
+19/20;1;;BZL 2 Nord;Kempten;Passau 91;Team Total;;2;Kempten 10;;765;0.0;False;True
+19/20;1;;LL1 Nord;Landshut;Passau 99;Leo Bauer;76826;2;Kempten 92;0;220;1.0;True;False
+19/20;1;;LL1 Nord;Landshut;Passau 99;Marco Lehmann;53724;2;Kempten 92;1;153;0.0;True;False
+19/20;1;;LL1 Nord;Landshut;Passau 99;Thomas Köhler;33508;2;Kempten 92;2;224;1.0;True;False
+19/20;1;;LL1 Nord;Landshut;Passau 99;Lars Meyer;41871;2;Kempten 92;3;147;0.5;True;False
+19/20;1;;LL1 Nord;Landshut;Passau 99;Team Total;;2;Kempten 92;;744;0.0;False;True
+19/20;1;;BZL 2 Nord;Kempten;Rosenheim 1;Peter Lorenz;23805;2;Kempten 10;0;218;1.0;True;False
+19/20;1;;BZL 2 Nord;Kempten;Rosenheim 1;Marco Thomas;74563;2;Kempten 10;1;187;1.0;True;False
+19/20;1;;BZL 2 Nord;Kempten;Rosenheim 1;Arthur Zimmermann;10075;2;Kempten 10;2;172;1.0;True;False
+19/20;1;;BZL 2 Nord;Kempten;Rosenheim 1;Ryan Ludwig;82185;2;Kempten 10;3;132;0.0;True;False
+19/20;1;;BZL 2 Nord;Kempten;Rosenheim 1;Team Total;;2;Kempten 10;;709;0.0;False;True
+19/20;2;;BZL 2 Nord;Kempten;Kempten 10;Diego Neumann;71402;0;Kempten 32;0;225;1.0;True;False
+19/20;2;;BZL 2 Nord;Kempten;Kempten 10;Diego Neumann;71402;0;Passau 91;0;202;0.0;True;False
+19/20;2;;BZL 2 Nord;Kempten;Kempten 10;Ahmed Peters;43038;0;Kempten 32;1;191;0.0;True;False
+19/20;2;;BZL 2 Nord;Kempten;Kempten 10;Ahmed Peters;43038;0;Passau 91;1;182;0.0;True;False
+19/20;2;;BZL 2 Nord;Kempten;Kempten 10;Christian Schmitt;58001;0;Kempten 32;2;176;0.0;True;False
+19/20;2;;BZL 2 Nord;Kempten;Kempten 10;Christian Schmitt;58001;0;Passau 91;2;169;1.0;True;False
+19/20;2;;BZL 2 Nord;Kempten;Kempten 10;Ahmed Gonzalez;38995;0;Kempten 32;3;228;0.0;True;False
+19/20;2;;BZL 2 Nord;Kempten;Kempten 10;Ahmed Gonzalez;38995;0;Passau 91;3;228;1.0;True;False
+19/20;2;;BZL 2 Nord;Kempten;Kempten 10;Team Total;;0;Kempten 32;;1601;2.0;False;True
+19/20;2;;BZL 2 Nord;Kempten;Kempten 32;Leon Ludwig;26703;0;Kempten 10;0;193;0.0;True;False
+19/20;2;;BZL 2 Nord;Kempten;Kempten 32;Samuel Zimmermann;24543;0;Kempten 10;1;214;1.0;True;False
+19/20;2;;BZL 2 Nord;Kempten;Kempten 32;Julian Davis;94765;0;Kempten 10;2;214;1.0;True;False
+19/20;2;;BZL 2 Nord;Kempten;Kempten 32;Niklas Martinez;74377;0;Kempten 10;3;230;1.0;True;False
+19/20;2;;BZL 2 Nord;Kempten;Kempten 32;Team Total;;0;Kempten 10;;851;0.0;False;True
+19/20;2;;LL1 Nord;Passau;Kempten 92;Oscar Hartmann;71871;0;Landshut 69;0;161;0.0;True;False
+19/20;2;;LL1 Nord;Passau;Kempten 92;Dominik Weiß;81281;0;Landshut 69;1;157;0.0;True;False
+19/20;2;;LL1 Nord;Passau;Kempten 92;Thomas Weber;43070;0;Landshut 69;2;195;1.0;True;False
+19/20;2;;LL1 Nord;Passau;Kempten 92;James Richter;46467;0;Landshut 69;3;153;0.0;True;False
+19/20;2;;LL1 Nord;Passau;Kempten 92;Team Total;;0;Landshut 69;;666;0.0;False;True
+19/20;2;;LL1 Nord;Passau;Landshut 69;Christoph Wilson;87082;0;Passau 99;0;163;0.0;True;False
+19/20;2;;LL1 Nord;Passau;Landshut 69;Christoph Wilson;87082;0;Kempten 92;0;158;0.0;True;False
+19/20;2;;LL1 Nord;Passau;Landshut 69;Moritz Hernandez;56293;0;Passau 99;1;174;1.0;True;False
+19/20;2;;LL1 Nord;Passau;Landshut 69;Moritz Hernandez;56293;0;Kempten 92;1;180;1.0;True;False
+19/20;2;;LL1 Nord;Passau;Landshut 69;Matthew Jung;43328;0;Passau 99;2;180;0.0;True;False
+19/20;2;;LL1 Nord;Passau;Landshut 69;Matthew Jung;43328;0;Kempten 92;2;160;0.0;True;False
+19/20;2;;LL1 Nord;Passau;Landshut 69;Diego Schröder;53174;0;Passau 99;3;187;1.0;True;False
+19/20;2;;LL1 Nord;Passau;Landshut 69;Diego Schröder;53174;0;Kempten 92;3;181;1.0;True;False
+19/20;2;;LL1 Nord;Passau;Landshut 69;Team Total;;0;Kempten 92;;1383;2.0;False;True
+19/20;2;;BZL 2 Nord;Kempten;Passau 91;Peter Lang;38309;0;Kempten 10;0;207;1.0;True;False
+19/20;2;;BZL 2 Nord;Kempten;Passau 91;Finn Dietrich;41716;0;Kempten 10;1;232;1.0;True;False
+19/20;2;;BZL 2 Nord;Kempten;Passau 91;Samuel Günther;48461;0;Kempten 10;2;154;0.0;True;False
+19/20;2;;BZL 2 Nord;Kempten;Passau 91;Ethan Koch;92874;0;Kempten 10;3;194;0.5;True;False
+19/20;2;;BZL 2 Nord;Kempten;Passau 91;Team Total;;0;Kempten 10;;787;0.0;False;True
+19/20;2;;LL1 Nord;Passau;Passau 99;Leo Bauer;76826;0;Landshut 69;0;219;1.0;True;False
+19/20;2;;LL1 Nord;Passau;Passau 99;Marco Lehmann;53724;0;Landshut 69;1;154;0.0;True;False
+19/20;2;;LL1 Nord;Passau;Passau 99;Thomas Köhler;33508;0;Landshut 69;2;228;1.0;True;False
+19/20;2;;LL1 Nord;Passau;Passau 99;Lars Meyer;41871;0;Landshut 69;3;153;0.0;True;False
+19/20;2;;LL1 Nord;Passau;Passau 99;Team Total;;0;Kempten 92;;754;0.0;False;True
+19/20;2;;BZL 2 Nord;Kempten;Kempten 32;Leon Ludwig;26703;1;Passau 91;0;209;0.0;True;False
+19/20;2;;BZL 2 Nord;Kempten;Kempten 32;Samuel Zimmermann;24543;1;Passau 91;1;211;0.5;True;False
+19/20;2;;BZL 2 Nord;Kempten;Kempten 32;Julian Davis;94765;1;Passau 91;2;216;1.0;True;False
+19/20;2;;BZL 2 Nord;Kempten;Kempten 32;Niklas Martinez;74377;1;Passau 91;3;219;1.0;True;False
+19/20;2;;BZL 2 Nord;Kempten;Kempten 32;Team Total;;1;Passau 91;;855;2.0;False;True
+19/20;2;;LL1 Nord;Passau;Kempten 92;Oscar Hartmann;71871;1;Passau 99;0;206;0.0;True;False
+19/20;2;;LL1 Nord;Passau;Kempten 92;Dominik Weiß;81281;1;Passau 99;1;202;0.0;True;False
+19/20;2;;LL1 Nord;Passau;Kempten 92;Thomas Weber;43070;1;Passau 99;2;257;0.0;True;False
+19/20;2;;LL1 Nord;Passau;Kempten 92;James Richter;46467;1;Passau 99;3;208;0.0;True;False
+19/20;2;;LL1 Nord;Passau;Kempten 92;Team Total;;1;Passau 99;;873;0.0;False;True
+19/20;2;;BZL 2 Nord;Kempten;Passau 91;Peter Lang;38309;1;Kempten 32;0;216;1.0;True;False
+19/20;2;;BZL 2 Nord;Kempten;Passau 91;Finn Dietrich;41716;1;Kempten 32;1;211;0.5;True;False
+19/20;2;;BZL 2 Nord;Kempten;Passau 91;Samuel Günther;48461;1;Kempten 32;2;148;0.0;True;False
+19/20;2;;BZL 2 Nord;Kempten;Passau 91;Ethan Koch;92874;1;Kempten 32;3;190;0.0;True;False
+19/20;2;;BZL 2 Nord;Kempten;Passau 91;Team Total;;1;Kempten 32;;765;0.0;False;True
+19/20;2;;LL1 Nord;Passau;Passau 99;Leo Bauer;76826;1;Kempten 92;0;282;1.0;True;False
+19/20;2;;LL1 Nord;Passau;Passau 99;Marco Lehmann;53724;1;Kempten 92;1;203;1.0;True;False
+19/20;2;;LL1 Nord;Passau;Passau 99;Thomas Köhler;33508;1;Kempten 92;2;271;1.0;True;False
+19/20;2;;LL1 Nord;Passau;Passau 99;Lars Meyer;41871;1;Kempten 92;3;214;1.0;True;False
+19/20;2;;LL1 Nord;Passau;Passau 99;Team Total;;1;Kempten 92;;970;2.0;False;True
+19/20;2;;BZL 2 Nord;Kempten;Kempten 10;Diego Neumann;71402;2;Kempten 32;0;223;1.0;True;False
+19/20;2;;BZL 2 Nord;Kempten;Kempten 10;Ahmed Peters;43038;2;Kempten 32;1;198;0.0;True;False
+19/20;2;;BZL 2 Nord;Kempten;Kempten 10;Christian Schmitt;58001;2;Kempten 32;2;180;0.0;True;False
+19/20;2;;BZL 2 Nord;Kempten;Kempten 10;Ahmed Gonzalez;38995;2;Kempten 32;3;222;1.0;True;False
+19/20;2;;BZL 2 Nord;Kempten;Kempten 10;Team Total;;2;Kempten 32;;823;2.0;False;True
+19/20;2;;BZL 2 Nord;Kempten;Kempten 32;Leon Ludwig;26703;2;Kempten 10;0;192;0.0;True;False
+19/20;2;;BZL 2 Nord;Kempten;Kempten 32;Samuel Zimmermann;24543;2;Kempten 10;1;207;1.0;True;False
+19/20;2;;BZL 2 Nord;Kempten;Kempten 32;Julian Davis;94765;2;Kempten 10;2;208;1.0;True;False
+19/20;2;;BZL 2 Nord;Kempten;Kempten 32;Niklas Martinez;74377;2;Kempten 10;3;210;0.0;True;False
+19/20;2;;BZL 2 Nord;Kempten;Kempten 32;Team Total;;2;Kempten 10;;817;0.0;False;True
+19/20;2;;LL1 Nord;Passau;Kempten 92;Oscar Hartmann;71871;2;Neu-Ulm 51;0;141;0.0;True;False
+19/20;2;;LL1 Nord;Passau;Kempten 92;Dominik Weiß;81281;2;Neu-Ulm 51;1;158;0.0;True;False
+19/20;2;;LL1 Nord;Passau;Kempten 92;Thomas Weber;43070;2;Neu-Ulm 51;2;187;1.0;True;False
+19/20;2;;LL1 Nord;Passau;Kempten 92;James Richter;46467;2;Neu-Ulm 51;3;147;0.0;True;False
+19/20;2;;LL1 Nord;Passau;Kempten 92;Team Total;;2;Landshut 69;;633;0.0;False;True
+19/20;2;;LL1 Nord;Passau;Landshut 69;Christoph Wilson;87082;2;Passau 99;0;177;0.0;True;False
+19/20;2;;LL1 Nord;Passau;Landshut 69;Moritz Hernandez;56293;2;Passau 99;1;173;1.0;True;False
+19/20;2;;LL1 Nord;Passau;Landshut 69;Matthew Jung;43328;2;Passau 99;2;178;0.0;True;False
+19/20;2;;LL1 Nord;Passau;Landshut 69;Diego Schröder;53174;2;Passau 99;3;177;1.0;True;False
+19/20;2;;LL1 Nord;Passau;Landshut 69;Team Total;;2;Kempten 92;;705;2.0;False;True
+19/20;2;;LL1 Nord;Passau;Neu-Ulm 51;Jackson Brown;46891;2;Kempten 92;0;193;1.0;True;False
+19/20;2;;LL1 Nord;Passau;Neu-Ulm 51;Julius Anderson;47075;2;Kempten 92;1;229;1.0;True;False
+19/20;2;;LL1 Nord;Passau;Neu-Ulm 51;Markus Vogel;81147;2;Kempten 92;2;153;0.0;True;False
+19/20;2;;LL1 Nord;Passau;Neu-Ulm 51;Andrew Garcia;11260;2;Kempten 92;3;185;1.0;True;False
+19/20;2;;LL1 Nord;Passau;Neu-Ulm 51;Team Total;;2;Kempten 92;;760;0.0;False;True
+19/20;2;;BZL 2 Nord;Kempten;Passau 91;Peter Lang;38309;2;Rosenheim 1;0;174;0.0;True;False
+19/20;2;;BZL 2 Nord;Kempten;Passau 91;Finn Dietrich;41716;2;Rosenheim 1;1;182;1.0;True;False
+19/20;2;;BZL 2 Nord;Kempten;Passau 91;Samuel Günther;48461;2;Rosenheim 1;2;107;0.0;True;False
+19/20;2;;BZL 2 Nord;Kempten;Passau 91;Ethan Koch;92874;2;Rosenheim 1;3;140;0.0;True;False
+19/20;2;;BZL 2 Nord;Kempten;Passau 91;Team Total;;2;Kempten 10;;603;0.0;False;True
+19/20;2;;LL1 Nord;Passau;Passau 99;Leo Bauer;76826;2;Landshut 69;0;226;1.0;True;False
+19/20;2;;LL1 Nord;Passau;Passau 99;Marco Lehmann;53724;2;Landshut 69;1;143;0.0;True;False
+19/20;2;;LL1 Nord;Passau;Passau 99;Thomas Köhler;33508;2;Landshut 69;2;222;1.0;True;False
+19/20;2;;LL1 Nord;Passau;Passau 99;Lars Meyer;41871;2;Landshut 69;3;159;0.0;True;False
+19/20;2;;LL1 Nord;Passau;Passau 99;Team Total;;2;Kempten 92;;750;0.0;False;True
+19/20;2;;BZL 2 Nord;Kempten;Rosenheim 1;Peter Lorenz;23805;2;Passau 91;0;216;1.0;True;False
+19/20;2;;BZL 2 Nord;Kempten;Rosenheim 1;Marco Thomas;74563;2;Passau 91;1;181;0.0;True;False
+19/20;2;;BZL 2 Nord;Kempten;Rosenheim 1;Arthur Zimmermann;10075;2;Passau 91;2;184;1.0;True;False
+19/20;2;;BZL 2 Nord;Kempten;Rosenheim 1;Ryan Ludwig;82185;2;Passau 91;3;141;1.0;True;False
+19/20;2;;BZL 2 Nord;Kempten;Rosenheim 1;Team Total;;2;Kempten 10;;722;0.0;False;True
+19/20;3;;BZL 2 Nord;Passau;Kempten 10;Diego Neumann;71402;0;Rosenheim 1;0;159;0.0;True;False
+19/20;3;;BZL 2 Nord;Passau;Kempten 10;Diego Neumann;71402;0;Kempten 32;0;162;1.0;True;False
+19/20;3;;BZL 2 Nord;Passau;Kempten 10;Ahmed Peters;43038;0;Rosenheim 1;1;150;0.0;True;False
+19/20;3;;BZL 2 Nord;Passau;Kempten 10;Ahmed Peters;43038;0;Kempten 32;1;153;0.0;True;False
+19/20;3;;BZL 2 Nord;Passau;Kempten 10;Christian Schmitt;58001;0;Rosenheim 1;2;134;0.0;True;False
+19/20;3;;BZL 2 Nord;Passau;Kempten 10;Christian Schmitt;58001;0;Kempten 32;2;141;0.0;True;False
+19/20;3;;BZL 2 Nord;Passau;Kempten 10;Ahmed Gonzalez;38995;0;Rosenheim 1;3;177;1.0;True;False
+19/20;3;;BZL 2 Nord;Passau;Kempten 10;Ahmed Gonzalez;38995;0;Kempten 32;3;186;1.0;True;False
+19/20;3;;BZL 2 Nord;Passau;Kempten 10;Team Total;;0;Kempten 32;;1262;2.0;False;True
+19/20;3;;BZL 2 Nord;Passau;Kempten 32;Leon Ludwig;26703;0;Kempten 10;0;147;0.0;True;False
+19/20;3;;BZL 2 Nord;Passau;Kempten 32;Samuel Zimmermann;24543;0;Kempten 10;1;173;1.0;True;False
+19/20;3;;BZL 2 Nord;Passau;Kempten 32;Julian Davis;94765;0;Kempten 10;2;173;1.0;True;False
+19/20;3;;BZL 2 Nord;Passau;Kempten 32;Niklas Martinez;74377;0;Kempten 10;3;180;0.0;True;False
+19/20;3;;BZL 2 Nord;Passau;Kempten 32;Team Total;;0;Kempten 10;;673;0.0;False;True
+19/20;3;;LL1 Nord;Kempten;Landshut 69;Christoph Wilson;87082;0;Neu-Ulm 51;0;160;0.0;True;False
+19/20;3;;LL1 Nord;Kempten;Landshut 69;Christoph Wilson;87082;0;Passau 99;0;157;0.0;True;False
+19/20;3;;LL1 Nord;Kempten;Landshut 69;Moritz Hernandez;56293;0;Neu-Ulm 51;1;187;0.0;True;False
+19/20;3;;LL1 Nord;Kempten;Landshut 69;Moritz Hernandez;56293;0;Passau 99;1;175;1.0;True;False
+19/20;3;;LL1 Nord;Kempten;Landshut 69;Matthew Jung;43328;0;Neu-Ulm 51;2;173;0.0;True;False
+19/20;3;;LL1 Nord;Kempten;Landshut 69;Matthew Jung;43328;0;Passau 99;2;179;0.0;True;False
+19/20;3;;LL1 Nord;Kempten;Landshut 69;Diego Schröder;53174;0;Neu-Ulm 51;3;177;1.0;True;False
+19/20;3;;LL1 Nord;Kempten;Landshut 69;Diego Schröder;53174;0;Passau 99;3;181;1.0;True;False
+19/20;3;;LL1 Nord;Kempten;Landshut 69;Team Total;;0;Neu-Ulm 51;;1389;2.0;False;True
+19/20;3;;LL1 Nord;Kempten;Neu-Ulm 51;Jackson Brown;46891;0;Landshut 69;0;180;1.0;True;False
+19/20;3;;LL1 Nord;Kempten;Neu-Ulm 51;Julius Anderson;47075;0;Landshut 69;1;220;1.0;True;False
+19/20;3;;LL1 Nord;Kempten;Neu-Ulm 51;Markus Vogel;81147;0;Landshut 69;2;174;1.0;True;False
+19/20;3;;LL1 Nord;Kempten;Neu-Ulm 51;Andrew Garcia;11260;0;Landshut 69;3;173;0.0;True;False
+19/20;3;;LL1 Nord;Kempten;Neu-Ulm 51;Team Total;;0;Landshut 69;;747;0.0;False;True
+19/20;3;;LL1 Nord;Kempten;Passau 99;Leo Bauer;76826;0;Landshut 69;0;239;1.0;True;False
+19/20;3;;LL1 Nord;Kempten;Passau 99;Marco Lehmann;53724;0;Landshut 69;1;157;0.0;True;False
+19/20;3;;LL1 Nord;Kempten;Passau 99;Thomas Köhler;33508;0;Landshut 69;2;221;1.0;True;False
+19/20;3;;LL1 Nord;Kempten;Passau 99;Lars Meyer;41871;0;Landshut 69;3;158;0.0;True;False
+19/20;3;;LL1 Nord;Kempten;Passau 99;Team Total;;0;Landshut 69;;775;0.0;False;True
+19/20;3;;BZL 2 Nord;Passau;Rosenheim 1;Peter Lorenz;23805;0;Kempten 10;0;207;1.0;True;False
+19/20;3;;BZL 2 Nord;Passau;Rosenheim 1;Marco Thomas;74563;0;Kempten 10;1;176;1.0;True;False
+19/20;3;;BZL 2 Nord;Passau;Rosenheim 1;Arthur Zimmermann;10075;0;Kempten 10;2;173;1.0;True;False
+19/20;3;;BZL 2 Nord;Passau;Rosenheim 1;Ryan Ludwig;82185;0;Kempten 10;3;139;0.0;True;False
+19/20;3;;BZL 2 Nord;Passau;Rosenheim 1;Team Total;;0;Kempten 10;;695;0.0;False;True
+19/20;3;;BZL 2 Nord;Passau;Kempten 32;Leon Ludwig;26703;1;Rosenheim 1;0;151;0.0;True;False
+19/20;3;;BZL 2 Nord;Passau;Kempten 32;Samuel Zimmermann;24543;1;Rosenheim 1;1;169;0.0;True;False
+19/20;3;;BZL 2 Nord;Passau;Kempten 32;Julian Davis;94765;1;Rosenheim 1;2;178;1.0;True;False
+19/20;3;;BZL 2 Nord;Passau;Kempten 32;Niklas Martinez;74377;1;Rosenheim 1;3;180;0.0;True;False
+19/20;3;;BZL 2 Nord;Passau;Kempten 32;Team Total;;1;Passau 91;;678;0.0;False;True
+19/20;3;;LL1 Nord;Kempten;Kempten 92;Oscar Hartmann;71871;1;Neu-Ulm 51;0;189;0.0;True;False
+19/20;3;;LL1 Nord;Kempten;Kempten 92;Dominik Weiß;81281;1;Neu-Ulm 51;1;206;0.0;True;False
+19/20;3;;LL1 Nord;Kempten;Kempten 92;Thomas Weber;43070;1;Neu-Ulm 51;2;249;1.0;True;False
+19/20;3;;LL1 Nord;Kempten;Kempten 92;James Richter;46467;1;Neu-Ulm 51;3;219;0.0;True;False
+19/20;3;;LL1 Nord;Kempten;Kempten 92;Team Total;;1;Neu-Ulm 51;;863;0.0;False;True
+19/20;3;;LL1 Nord;Kempten;Neu-Ulm 51;Jackson Brown;46891;1;Kempten 92;0;236;1.0;True;False
+19/20;3;;LL1 Nord;Kempten;Neu-Ulm 51;Jackson Brown;46891;1;Passau 99;0;190;0.0;True;False
+19/20;3;;LL1 Nord;Kempten;Neu-Ulm 51;Julius Anderson;47075;1;Kempten 92;1;271;1.0;True;False
+19/20;3;;LL1 Nord;Kempten;Neu-Ulm 51;Julius Anderson;47075;1;Passau 99;1;229;1.0;True;False
+19/20;3;;LL1 Nord;Kempten;Neu-Ulm 51;Markus Vogel;81147;1;Kempten 92;2;203;0.0;True;False
+19/20;3;;LL1 Nord;Kempten;Neu-Ulm 51;Markus Vogel;81147;1;Passau 99;2;154;0.0;True;False
+19/20;3;;LL1 Nord;Kempten;Neu-Ulm 51;Andrew Garcia;11260;1;Kempten 92;3;241;1.0;True;False
+19/20;3;;LL1 Nord;Kempten;Neu-Ulm 51;Andrew Garcia;11260;1;Passau 99;3;169;1.0;True;False
+19/20;3;;LL1 Nord;Kempten;Neu-Ulm 51;Team Total;;1;Kempten 92;;1693;2.0;False;True
+19/20;3;;BZL 2 Nord;Passau;Passau 91;Peter Lang;38309;1;Rosenheim 1;0;221;1.0;True;False
+19/20;3;;BZL 2 Nord;Passau;Passau 91;Finn Dietrich;41716;1;Rosenheim 1;1;221;1.0;True;False
+19/20;3;;BZL 2 Nord;Passau;Passau 91;Samuel Günther;48461;1;Rosenheim 1;2;149;0.0;True;False
+19/20;3;;BZL 2 Nord;Passau;Passau 91;Ethan Koch;92874;1;Rosenheim 1;3;199;1.0;True;False
+19/20;3;;BZL 2 Nord;Passau;Passau 91;Team Total;;1;Kempten 32;;790;2.0;False;True
+19/20;3;;LL1 Nord;Kempten;Passau 99;Leo Bauer;76826;1;Neu-Ulm 51;0;221;1.0;True;False
+19/20;3;;LL1 Nord;Kempten;Passau 99;Marco Lehmann;53724;1;Neu-Ulm 51;1;143;0.0;True;False
+19/20;3;;LL1 Nord;Kempten;Passau 99;Thomas Köhler;33508;1;Neu-Ulm 51;2;213;1.0;True;False
+19/20;3;;LL1 Nord;Kempten;Passau 99;Lars Meyer;41871;1;Neu-Ulm 51;3;156;0.0;True;False
+19/20;3;;LL1 Nord;Kempten;Passau 99;Team Total;;1;Kempten 92;;733;0.0;False;True
+19/20;3;;BZL 2 Nord;Passau;Rosenheim 1;Peter Lorenz;23805;1;Passau 91;0;251;1.0;True;False
+19/20;3;;BZL 2 Nord;Passau;Rosenheim 1;Peter Lorenz;23805;1;Kempten 32;0;220;1.0;True;False
+19/20;3;;BZL 2 Nord;Passau;Rosenheim 1;Marco Thomas;74563;1;Passau 91;1;230;1.0;True;False
+19/20;3;;BZL 2 Nord;Passau;Rosenheim 1;Marco Thomas;74563;1;Kempten 32;1;191;1.0;True;False
+19/20;3;;BZL 2 Nord;Passau;Rosenheim 1;Arthur Zimmermann;10075;1;Passau 91;2;243;1.0;True;False
+19/20;3;;BZL 2 Nord;Passau;Rosenheim 1;Arthur Zimmermann;10075;1;Kempten 32;2;172;0.0;True;False
+19/20;3;;BZL 2 Nord;Passau;Rosenheim 1;Ryan Ludwig;82185;1;Passau 91;3;190;0.0;True;False
+19/20;3;;BZL 2 Nord;Passau;Rosenheim 1;Ryan Ludwig;82185;1;Kempten 32;3;149;0.0;True;False
+19/20;3;;BZL 2 Nord;Passau;Rosenheim 1;Team Total;;1;Kempten 32;;1646;0.0;False;True
+19/20;3;;BZL 2 Nord;Passau;Kempten 10;Diego Neumann;71402;2;Passau 91;0;211;1.0;True;False
+19/20;3;;BZL 2 Nord;Passau;Kempten 10;Ahmed Peters;43038;2;Passau 91;1;195;1.0;True;False
+19/20;3;;BZL 2 Nord;Passau;Kempten 10;Christian Schmitt;58001;2;Passau 91;2;173;1.0;True;False
+19/20;3;;BZL 2 Nord;Passau;Kempten 10;Ahmed Gonzalez;38995;2;Passau 91;3;223;1.0;True;False
+19/20;3;;BZL 2 Nord;Passau;Kempten 10;Team Total;;2;Kempten 32;;802;2.0;False;True
+19/20;3;;BZL 2 Nord;Passau;Kempten 32;Leon Ludwig;26703;2;Passau 91;0;144;0.0;True;False
+19/20;3;;BZL 2 Nord;Passau;Kempten 32;Samuel Zimmermann;24543;2;Passau 91;1;177;0.0;True;False
+19/20;3;;BZL 2 Nord;Passau;Kempten 32;Julian Davis;94765;2;Passau 91;2;164;1.0;True;False
+19/20;3;;BZL 2 Nord;Passau;Kempten 32;Niklas Martinez;74377;2;Passau 91;3;157;1.0;True;False
+19/20;3;;BZL 2 Nord;Passau;Kempten 32;Team Total;;2;Kempten 10;;642;0.0;False;True
+19/20;3;;LL1 Nord;Kempten;Kempten 92;Oscar Hartmann;71871;2;Landshut 69;0;209;0.0;True;False
+19/20;3;;LL1 Nord;Kempten;Kempten 92;Oscar Hartmann;71871;2;Passau 99;0;139;0.0;True;False
+19/20;3;;LL1 Nord;Kempten;Kempten 92;Dominik Weiß;81281;2;Landshut 69;1;195;0.0;True;False
+19/20;3;;LL1 Nord;Kempten;Kempten 92;Dominik Weiß;81281;2;Passau 99;1;152;0.0;True;False
+19/20;3;;LL1 Nord;Kempten;Kempten 92;Thomas Weber;43070;2;Landshut 69;2;236;1.0;True;False
+19/20;3;;LL1 Nord;Kempten;Kempten 92;Thomas Weber;43070;2;Passau 99;2;201;0.0;True;False
+19/20;3;;LL1 Nord;Kempten;Kempten 92;James Richter;46467;2;Landshut 69;3;197;0.0;True;False
+19/20;3;;LL1 Nord;Kempten;Kempten 92;James Richter;46467;2;Passau 99;3;167;1.0;True;False
+19/20;3;;LL1 Nord;Kempten;Kempten 92;Team Total;;2;Landshut 69;;1496;2.0;False;True
+19/20;3;;LL1 Nord;Kempten;Landshut 69;Christoph Wilson;87082;2;Kempten 92;0;217;1.0;True;False
+19/20;3;;LL1 Nord;Kempten;Landshut 69;Moritz Hernandez;56293;2;Kempten 92;1;226;1.0;True;False
+19/20;3;;LL1 Nord;Kempten;Landshut 69;Matthew Jung;43328;2;Kempten 92;2;223;0.0;True;False
+19/20;3;;LL1 Nord;Kempten;Landshut 69;Diego Schröder;53174;2;Kempten 92;3;242;1.0;True;False
+19/20;3;;LL1 Nord;Kempten;Landshut 69;Team Total;;2;Kempten 92;;908;0.0;False;True
+19/20;3;;BZL 2 Nord;Passau;Passau 91;Peter Lang;38309;2;Kempten 10;0;228;1.0;True;False
+19/20;3;;BZL 2 Nord;Passau;Passau 91;Peter Lang;38309;2;Kempten 32;0;154;1.0;True;False
+19/20;3;;BZL 2 Nord;Passau;Passau 91;Finn Dietrich;41716;2;Kempten 10;1;229;1.0;True;False
+19/20;3;;BZL 2 Nord;Passau;Passau 91;Finn Dietrich;41716;2;Kempten 32;1;185;1.0;True;False
+19/20;3;;BZL 2 Nord;Passau;Passau 91;Samuel Günther;48461;2;Kempten 10;2;170;0.0;True;False
+19/20;3;;BZL 2 Nord;Passau;Passau 91;Samuel Günther;48461;2;Kempten 32;2;114;0.0;True;False
+19/20;3;;BZL 2 Nord;Passau;Passau 91;Ethan Koch;92874;2;Kempten 10;3;185;0.0;True;False
+19/20;3;;BZL 2 Nord;Passau;Passau 91;Ethan Koch;92874;2;Kempten 32;3;149;0.0;True;False
+19/20;3;;BZL 2 Nord;Passau;Passau 91;Team Total;;2;Kempten 10;;1414;0.0;False;True
+19/20;3;;LL1 Nord;Kempten;Passau 99;Leo Bauer;76826;2;Kempten 92;0;218;1.0;True;False
+19/20;3;;LL1 Nord;Kempten;Passau 99;Marco Lehmann;53724;2;Kempten 92;1;155;1.0;True;False
+19/20;3;;LL1 Nord;Kempten;Passau 99;Thomas Köhler;33508;2;Kempten 92;2;211;1.0;True;False
+19/20;3;;LL1 Nord;Kempten;Passau 99;Lars Meyer;41871;2;Kempten 92;3;147;0.0;True;False
+19/20;3;;LL1 Nord;Kempten;Passau 99;Team Total;;2;Kempten 92;;731;0.0;False;True
+19/20;4;;BZL 2 Nord;Rosenheim;Kempten 10;Diego Neumann;71402;0;Kempten 32;0;153;0.0;True;False
+19/20;4;;BZL 2 Nord;Rosenheim;Kempten 10;Ahmed Peters;43038;0;Kempten 32;1;135;0.0;True;False
+19/20;4;;BZL 2 Nord;Rosenheim;Kempten 10;Christian Schmitt;58001;0;Kempten 32;2;120;0.0;True;False
+19/20;4;;BZL 2 Nord;Rosenheim;Kempten 10;Ahmed Gonzalez;38995;0;Kempten 32;3;171;1.0;True;False
+19/20;4;;BZL 2 Nord;Rosenheim;Kempten 10;Team Total;;0;Kempten 32;;579;0.0;False;True
+19/20;4;;BZL 2 Nord;Rosenheim;Kempten 32;Leon Ludwig;26703;0;Kempten 10;0;157;1.0;True;False
+19/20;4;;BZL 2 Nord;Rosenheim;Kempten 32;Samuel Zimmermann;24543;0;Kempten 10;1;176;1.0;True;False
+19/20;4;;BZL 2 Nord;Rosenheim;Kempten 32;Julian Davis;94765;0;Kempten 10;2;160;1.0;True;False
+19/20;4;;BZL 2 Nord;Rosenheim;Kempten 32;Niklas Martinez;74377;0;Kempten 10;3;160;0.0;True;False
+19/20;4;;BZL 2 Nord;Rosenheim;Kempten 32;Team Total;;0;Kempten 10;;653;2.0;False;True
+19/20;4;;LL1 Nord;Neu-Ulm;Kempten 92;Oscar Hartmann;71871;0;Neu-Ulm 51;0;140;0.0;True;False
+19/20;4;;LL1 Nord;Neu-Ulm;Kempten 92;Dominik Weiß;81281;0;Neu-Ulm 51;1;146;0.0;True;False
+19/20;4;;LL1 Nord;Neu-Ulm;Kempten 92;Thomas Weber;43070;0;Neu-Ulm 51;2;208;1.0;True;False
+19/20;4;;LL1 Nord;Neu-Ulm;Kempten 92;James Richter;46467;0;Neu-Ulm 51;3;166;0.0;True;False
+19/20;4;;LL1 Nord;Neu-Ulm;Kempten 92;Team Total;;0;Landshut 69;;660;0.0;False;True
+19/20;4;;LL1 Nord;Neu-Ulm;Landshut 69;Christoph Wilson;87082;0;Passau 99;0;177;0.0;True;False
+19/20;4;;LL1 Nord;Neu-Ulm;Landshut 69;Moritz Hernandez;56293;0;Passau 99;1;169;1.0;True;False
+19/20;4;;LL1 Nord;Neu-Ulm;Landshut 69;Matthew Jung;43328;0;Passau 99;2;161;0.0;True;False
+19/20;4;;LL1 Nord;Neu-Ulm;Landshut 69;Diego Schröder;53174;0;Passau 99;3;171;1.0;True;False
+19/20;4;;LL1 Nord;Neu-Ulm;Landshut 69;Team Total;;0;Kempten 92;;678;2.0;False;True
+19/20;4;;LL1 Nord;Neu-Ulm;Neu-Ulm 51;Jackson Brown;46891;0;Kempten 92;0;196;1.0;True;False
+19/20;4;;LL1 Nord;Neu-Ulm;Neu-Ulm 51;Julius Anderson;47075;0;Kempten 92;1;217;1.0;True;False
+19/20;4;;LL1 Nord;Neu-Ulm;Neu-Ulm 51;Markus Vogel;81147;0;Kempten 92;2;176;0.0;True;False
+19/20;4;;LL1 Nord;Neu-Ulm;Neu-Ulm 51;Andrew Garcia;11260;0;Kempten 92;3;177;1.0;True;False
+19/20;4;;LL1 Nord;Neu-Ulm;Neu-Ulm 51;Team Total;;0;Kempten 92;;766;0.0;False;True
+19/20;4;;BZL 2 Nord;Rosenheim;Passau 91;Peter Lang;38309;0;Rosenheim 1;0;165;0.0;True;False
+19/20;4;;BZL 2 Nord;Rosenheim;Passau 91;Finn Dietrich;41716;0;Rosenheim 1;1;162;0.0;True;False
+19/20;4;;BZL 2 Nord;Rosenheim;Passau 91;Samuel Günther;48461;0;Rosenheim 1;2;115;0.0;True;False
+19/20;4;;BZL 2 Nord;Rosenheim;Passau 91;Ethan Koch;92874;0;Rosenheim 1;3;139;1.0;True;False
+19/20;4;;BZL 2 Nord;Rosenheim;Passau 91;Team Total;;0;Kempten 10;;581;0.0;False;True
+19/20;4;;LL1 Nord;Neu-Ulm;Passau 99;Leo Bauer;76826;0;Landshut 69;0;241;1.0;True;False
+19/20;4;;LL1 Nord;Neu-Ulm;Passau 99;Marco Lehmann;53724;0;Landshut 69;1;160;0.0;True;False
+19/20;4;;LL1 Nord;Neu-Ulm;Passau 99;Thomas Köhler;33508;0;Landshut 69;2;210;1.0;True;False
+19/20;4;;LL1 Nord;Neu-Ulm;Passau 99;Lars Meyer;41871;0;Landshut 69;3;169;0.0;True;False
+19/20;4;;LL1 Nord;Neu-Ulm;Passau 99;Team Total;;0;Kempten 92;;780;0.0;False;True
+19/20;4;;BZL 2 Nord;Rosenheim;Rosenheim 1;Peter Lorenz;23805;0;Passau 91;0;213;1.0;True;False
+19/20;4;;BZL 2 Nord;Rosenheim;Rosenheim 1;Marco Thomas;74563;0;Passau 91;1;175;1.0;True;False
+19/20;4;;BZL 2 Nord;Rosenheim;Rosenheim 1;Arthur Zimmermann;10075;0;Passau 91;2;195;1.0;True;False
+19/20;4;;BZL 2 Nord;Rosenheim;Rosenheim 1;Ryan Ludwig;82185;0;Passau 91;3;135;0.0;True;False
+19/20;4;;BZL 2 Nord;Rosenheim;Rosenheim 1;Team Total;;0;Kempten 10;;718;0.0;False;True
+19/20;4;;BZL 2 Nord;Rosenheim;Kempten 10;Diego Neumann;71402;1;Passau 91;0;157;0.0;True;False
+19/20;4;;BZL 2 Nord;Rosenheim;Kempten 10;Ahmed Peters;43038;1;Passau 91;1;140;0.0;True;False
+19/20;4;;BZL 2 Nord;Rosenheim;Kempten 10;Christian Schmitt;58001;1;Passau 91;2;120;1.0;True;False
+19/20;4;;BZL 2 Nord;Rosenheim;Kempten 10;Ahmed Gonzalez;38995;1;Passau 91;3;173;1.0;True;False
+19/20;4;;BZL 2 Nord;Rosenheim;Kempten 10;Team Total;;1;Passau 91;;590;2.0;False;True
+19/20;4;;LL1 Nord;Neu-Ulm;Kempten 92;Oscar Hartmann;71871;1;Landshut 69;0;146;0.0;True;False
+19/20;4;;LL1 Nord;Neu-Ulm;Kempten 92;Dominik Weiß;81281;1;Landshut 69;1;161;0.0;True;False
+19/20;4;;LL1 Nord;Neu-Ulm;Kempten 92;Thomas Weber;43070;1;Landshut 69;2;206;1.0;True;False
+19/20;4;;LL1 Nord;Neu-Ulm;Kempten 92;James Richter;46467;1;Landshut 69;3;158;0.0;True;False
+19/20;4;;LL1 Nord;Neu-Ulm;Kempten 92;Team Total;;1;Landshut 69;;671;0.0;False;True
+19/20;4;;LL1 Nord;Neu-Ulm;Landshut 69;Christoph Wilson;87082;1;Kempten 92;0;161;1.0;True;False
+19/20;4;;LL1 Nord;Neu-Ulm;Landshut 69;Moritz Hernandez;56293;1;Kempten 92;1;186;1.0;True;False
+19/20;4;;LL1 Nord;Neu-Ulm;Landshut 69;Matthew Jung;43328;1;Kempten 92;2;175;0.0;True;False
+19/20;4;;LL1 Nord;Neu-Ulm;Landshut 69;Diego Schröder;53174;1;Kempten 92;3;181;1.0;True;False
+19/20;4;;LL1 Nord;Neu-Ulm;Landshut 69;Team Total;;1;Kempten 92;;703;2.0;False;True
+19/20;4;;BZL 2 Nord;Rosenheim;Passau 91;Peter Lang;38309;1;Kempten 10;0;166;1.0;True;False
+19/20;4;;BZL 2 Nord;Rosenheim;Passau 91;Finn Dietrich;41716;1;Kempten 10;1;162;1.0;True;False
+19/20;4;;BZL 2 Nord;Rosenheim;Passau 91;Samuel Günther;48461;1;Kempten 10;2;106;0.0;True;False
+19/20;4;;BZL 2 Nord;Rosenheim;Passau 91;Ethan Koch;92874;1;Kempten 10;3;144;0.0;True;False
+19/20;4;;BZL 2 Nord;Rosenheim;Passau 91;Team Total;;1;Kempten 10;;578;0.0;False;True
+19/20;4;;BZL 2 Nord;Rosenheim;Kempten 10;Diego Neumann;71402;2;Kempten 32;0;168;1.0;True;False
+19/20;4;;BZL 2 Nord;Rosenheim;Kempten 10;Ahmed Peters;43038;2;Kempten 32;1;135;0.0;True;False
+19/20;4;;BZL 2 Nord;Rosenheim;Kempten 10;Christian Schmitt;58001;2;Kempten 32;2;132;0.0;True;False
+19/20;4;;BZL 2 Nord;Rosenheim;Kempten 10;Ahmed Gonzalez;38995;2;Kempten 32;3;174;1.0;True;False
+19/20;4;;BZL 2 Nord;Rosenheim;Kempten 10;Team Total;;2;Kempten 32;;609;0.0;False;True
+19/20;4;;BZL 2 Nord;Rosenheim;Kempten 32;Leon Ludwig;26703;2;Passau 91;0;149;0.0;True;False
+19/20;4;;BZL 2 Nord;Rosenheim;Kempten 32;Leon Ludwig;26703;2;Kempten 10;0;163;0.0;True;False
+19/20;4;;BZL 2 Nord;Rosenheim;Kempten 32;Samuel Zimmermann;24543;2;Passau 91;1;176;1.0;True;False
+19/20;4;;BZL 2 Nord;Rosenheim;Kempten 32;Samuel Zimmermann;24543;2;Kempten 10;1;168;1.0;True;False
+19/20;4;;BZL 2 Nord;Rosenheim;Kempten 32;Julian Davis;94765;2;Passau 91;2;177;1.0;True;False
+19/20;4;;BZL 2 Nord;Rosenheim;Kempten 32;Julian Davis;94765;2;Kempten 10;2;165;1.0;True;False
+19/20;4;;BZL 2 Nord;Rosenheim;Kempten 32;Niklas Martinez;74377;2;Passau 91;3;160;1.0;True;False
+19/20;4;;BZL 2 Nord;Rosenheim;Kempten 32;Niklas Martinez;74377;2;Kempten 10;3;171;0.0;True;False
+19/20;4;;BZL 2 Nord;Rosenheim;Kempten 32;Team Total;;2;Kempten 10;;1329;2.0;False;True
+19/20;4;;LL1 Nord;Neu-Ulm;Kempten 92;Oscar Hartmann;71871;2;Passau 99;0;143;0.0;True;False
+19/20;4;;LL1 Nord;Neu-Ulm;Kempten 92;Dominik Weiß;81281;2;Passau 99;1;155;0.0;True;False
+19/20;4;;LL1 Nord;Neu-Ulm;Kempten 92;Thomas Weber;43070;2;Passau 99;2;189;1.0;True;False
+19/20;4;;LL1 Nord;Neu-Ulm;Kempten 92;James Richter;46467;2;Passau 99;3;168;0.0;True;False
+19/20;4;;LL1 Nord;Neu-Ulm;Kempten 92;Team Total;;2;Landshut 69;;655;0.0;False;True
+19/20;4;;LL1 Nord;Neu-Ulm;Landshut 69;Christoph Wilson;87082;2;Passau 99;0;161;1.0;True;False
+19/20;4;;LL1 Nord;Neu-Ulm;Landshut 69;Moritz Hernandez;56293;2;Passau 99;1;166;1.0;True;False
+19/20;4;;LL1 Nord;Neu-Ulm;Landshut 69;Matthew Jung;43328;2;Passau 99;2;182;0.0;True;False
+19/20;4;;LL1 Nord;Neu-Ulm;Landshut 69;Diego Schröder;53174;2;Passau 99;3;188;1.0;True;False
+19/20;4;;LL1 Nord;Neu-Ulm;Landshut 69;Team Total;;2;Kempten 92;;697;2.0;False;True
+19/20;4;;BZL 2 Nord;Rosenheim;Passau 91;Peter Lang;38309;2;Kempten 32;0;171;1.0;True;False
+19/20;4;;BZL 2 Nord;Rosenheim;Passau 91;Finn Dietrich;41716;2;Kempten 32;1;175;0.0;True;False
+19/20;4;;BZL 2 Nord;Rosenheim;Passau 91;Samuel Günther;48461;2;Kempten 32;2;114;0.0;True;False
+19/20;4;;BZL 2 Nord;Rosenheim;Passau 91;Ethan Koch;92874;2;Kempten 32;3;156;0.0;True;False
+19/20;4;;BZL 2 Nord;Rosenheim;Passau 91;Team Total;;2;Kempten 10;;616;0.0;False;True
+19/20;4;;LL1 Nord;Neu-Ulm;Passau 99;Leo Bauer;76826;2;Kempten 92;0;239;1.0;True;False
+19/20;4;;LL1 Nord;Neu-Ulm;Passau 99;Leo Bauer;76826;2;Landshut 69;0;241;1.0;True;False
+19/20;4;;LL1 Nord;Neu-Ulm;Passau 99;Marco Lehmann;53724;2;Kempten 92;1;154;0.0;True;False
+19/20;4;;LL1 Nord;Neu-Ulm;Passau 99;Marco Lehmann;53724;2;Landshut 69;1;147;0.0;True;False
+19/20;4;;LL1 Nord;Neu-Ulm;Passau 99;Thomas Köhler;33508;2;Kempten 92;2;217;1.0;True;False
+19/20;4;;LL1 Nord;Neu-Ulm;Passau 99;Thomas Köhler;33508;2;Landshut 69;2;229;1.0;True;False
+19/20;4;;LL1 Nord;Neu-Ulm;Passau 99;Lars Meyer;41871;2;Kempten 92;3;147;0.0;True;False
+19/20;4;;LL1 Nord;Neu-Ulm;Passau 99;Lars Meyer;41871;2;Landshut 69;3;152;0.0;True;False
+19/20;4;;LL1 Nord;Neu-Ulm;Passau 99;Team Total;;2;Kempten 92;;1526;0.0;False;True

@@ -1,12 +1,19 @@
 from business_logic.statistics import query_database
 from app.services.data_manager import DataManager
-from data_access.schema import Columns
+from data_access.schema import Columns, ColumnsExtra
+from data_access.adapters.data_adapter import DataAdapter
+from data_access.adapters.data_adapter_factory import DataAdapterFactory, DataAdapterSelector
 import pandas as pd
+from business_logic.server import Server
+from flask import jsonify, Response
 
 class LeagueService:
+    # fetches dataframes from server
+    # converts dataframes to dicts
+    # jsonifies dicts   
+    # forwards JSON dict to app routes
     def __init__(self):
-        self.data_manager = DataManager()
-        self.df = self.data_manager.df
+        self.server = Server()
 
     def get_valid_combinations(self):
         """Returns all existing combinations in the database"""
@@ -16,30 +23,57 @@ class LeagueService:
 
     def get_seasons(self):
         """Returns all possible seasons"""
-        return sorted(self.df[Columns.season].unique().tolist())
+        return self.server.get_seasons()
 
     def get_leagues(self):
         """Returns all possible leagues"""
-        return sorted(self.df[Columns.league_name].unique().tolist())
+        return self.server.get_leagues()
 
     def get_weeks(self):
         """Returns all possible match days"""
-        try:
-            # Get unique weeks, sort them, and convert to list
-            weeks = sorted(self.df[Columns.week].unique().tolist())
-            # Filter out None/NaN values if any
-            weeks = [week for week in weeks if week is not None]
-            #print(f"Available weeks: {weeks}")  # Debug output
-            return weeks
-        except Exception as e:
-            print(f"Error getting weeks: {str(e)}")
-            return []
+        return self.server.get_weeks()
 
-    def calculate_standings(self, df, filters, match_day=None, cumulative=False, include_changes=False):
-        """Calculate standings for a specific match day or cumulative standings"""
+    def get_league_week(self, league:str, season:str, week:int=None) -> Response:     
+        """Get results of a league on a specific match day"""
+        return self.server.get_league_week(league_name=league, season=season, week=week).to_dict('records')
+
+    def get_league_standings_history(self, league:str, season:str, week:int=None) -> Response:     
+        return self.server.get_league_standings_history(league_name=league, season=season, week=week).to_dict('records')   
+
+    def get_league_standings(self, league:str, season:str, week:int=None) -> Response:     
+        """Get standings of a leagaue up to a specific match day"""
         # Apply base filters
-        df_filtered = query_database(df, filters)
+        return self.server.get_league_standings(league_name=league, season=season, week=week).to_dict('records')
+
+
+
+        table_data = []
+
+        for _, row in lala.iterrows():
+            table_row = {
+                Columns.team_name: row[Columns.team_name],
+                Columns.points: row[Columns.points],
+                ColumnsExtra.average_score: row[ColumnsExtra.average_score],
+                ColumnsExtra.position_change: row[ColumnsExtra.position_change],
+            }
+
+            table_data.append(table_row)
+
+            if cumulative:
+                table_row[ColumnsExtra.points_total] = row[ColumnsExtra.points_total]
+                table_row[ColumnsExtra.average_score_total] = row[ColumnsExtra.average_score_total]
+
+
+        #team_data = [{'Team': 'Team1', 'TotalPoints': 100, 'Average': 190, 'positionChange': +1, 'MatchPoints': 70, 'MatchAverage': 180},
+        #             {'Team': 'Team2', 'TotalPoints': 90, 'Average': 185, 'positionChange': -1, 'MatchPoints': 60, 'MatchAverage': 175}]
+                    
+        return jsonify({'standings': table_data})
+
+
+    def deprecated_get_table1(self, df: pd.DataFrame, filters: dict, match_day: int, cumulative: bool, include_changes: bool):
         
+
+        df_filtered = query_database(df, filters)
         # Apply match day filter
         if match_day is not None:
             if cumulative:
@@ -53,7 +87,7 @@ class LeagueService:
                 'Points': 'sum',
                 'Score': 'mean'
             }).reset_index()
-            
+            print(standings)
             standings.columns = ['Team', 'Points', 'Average']
             standings = standings.sort_values(['Points', 'Average'], ascending=[False, False])
             
@@ -85,12 +119,16 @@ class LeagueService:
         
         return pd.DataFrame(columns=['Team', 'Points', 'Average'])
 
-    def get_table(self, season, league, match_day=None):
+
+    def deprecated_get_table(self, season, league, week=None, cumulative=False, match_day=None):
         """Get combined table data for frontend"""
+        
+        
+        
         filters = {
             Columns.season: season,
-            Columns.league_name: league,
-            Columns.input_data: True
+            Columns.league_name: league #,
+            #Columns.input_data: True
         }
         
         try:
@@ -103,13 +141,13 @@ class LeagueService:
         # Get match day standings
         match_day_standings = pd.DataFrame()
         if week_value is not None:
-            match_day_standings = self.calculate_standings(
+            match_day_standings = self.get_league_stanings(
                 self.df, filters, week_value, cumulative=False, include_changes=False
             )
             print(f"Match day standings found: {not match_day_standings.empty}")
         
         # Get cumulative standings
-        season_standings = self.calculate_standings(
+        season_standings = self.get_league_stanings(
             self.df, filters, week_value, cumulative=True, include_changes=(week_value > 1)
         )
         
@@ -119,7 +157,7 @@ class LeagueService:
             team_data = {
                 'Team': row['Team'],
                 'TotalPoints': row['Points'],
-                'Average': row['Average'],
+                'Average': row['Average'] ,
                 'positionChange': row.get('PositionChange', 0)
             }
             
@@ -128,7 +166,7 @@ class LeagueService:
                 if not match_team.empty:
                     team_data.update({
                         'MatchPoints': match_team['Points'].iloc[0],
-                        'MatchAverage': match_team['Average'].iloc[0]
+                        'MatchAverage': match_team['Average'].iloc[0] 
                     })
             
             combined_data.append(team_data)

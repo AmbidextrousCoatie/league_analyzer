@@ -104,7 +104,7 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('leagueTable').innerHTML = 
                 '<div class="alert alert-info">Loading data...</div>';
             
-            fetch(`/league/get_table?season=${selectedSeason}&league=${selectedLeague}&match_day=${selectedMatchDay || ''}`)
+            fetch(`/league/get_table?league=${selectedLeague}&season=${selectedSeason}&match_day=${selectedMatchDay || ''}`)
                 .then(response => {
                     if (!response.ok) {
                         throw new Error(`HTTP error! status: ${response.status}`);
@@ -129,14 +129,15 @@ document.addEventListener('DOMContentLoaded', function() {
                                 <tr>
                                     <th>#</th>
                                     <th>Team</th>
-                                    <th class="text-center sortable" data-sort="matchPoints">Points</th>
-                                    <th class="text-center sortable" data-sort="matchAvg">Average</th>
-                                    <th class="text-center sortable" data-sort="totalPoints">Total Points</th>
-                                    <th class="text-center sortable" data-sort="totalAvg">Average</th>
+                                    <th class="text-center sortable" data-sort="Points">Points</th>
+                                    <th class="text-center sortable" data-sort="Score">Score</th>
+                                    <th class="text-center sortable" data-sort="ScoreAverage">Average</th>
+                                    <!--th class="text-center sortable" data-sort="totalPoints">Total Points</th>
+                                    <th class="text-center sortable" data-sort="totalAvg">Average</th-->
                                 </tr>
                             </thead>
                             <tbody>
-                                ${data.standings.map((row, index) => `
+                                ${data.map((row, index) => `
                                     <tr>
                                         <td>
                                             ${index + 1}
@@ -147,10 +148,10 @@ document.addEventListener('DOMContentLoaded', function() {
                                                 ''}
                                         </td>
                                         <td>${row.Team}</td>
-                                        <td class="text-center">${row.MatchPoints || '-'}</td>
-                                        <td class="text-center">${row.MatchAverage ? row.MatchAverage.toFixed(1) : '-'}</td>
-                                        <td class="text-center">${row.TotalPoints}</td>
-                                        <td class="text-center">${row.Average.toFixed(1)}</td>
+                                        <td class="text-center">${row.Points || '-'}</td>
+                                        <td class="text-center">${row.Score}</td>
+                                        <td class="text-center">${row.ScoreAverage}</td>
+                                        
                                     </tr>
                                 `).join('')}
                             </tbody>

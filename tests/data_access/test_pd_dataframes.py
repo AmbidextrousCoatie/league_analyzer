@@ -2,7 +2,7 @@ import pytest
 import pandas as pd
 from data_access.pd_dataframes import fetch_column
 from business_logic.statistics import calculate_score_average
-from database.definitions import Columns
+from data_access.schema import Columns
 
 @pytest.fixture
 def sample_df():
