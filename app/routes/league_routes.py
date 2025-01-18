@@ -41,26 +41,15 @@ def get_table():
         if not season or not league:
             return jsonify({"error": "Season and league are required"}), 400
 
-        week_data = league_service.get_league_week(league=league, season=season, week=match_day)
-        print(f"Generated week data: {week_data}")
+        #week_data = league_service.get_league_week(league=league, season=season, week=match_day)
+        #print(f"Generated week data: {week_data}")
 
-        cumulative_data = league_service.get_league_standings_table(league=league, season=season, week=match_day)
+        league_table_data = league_service.get_league_standings_table(league=league, season=season, week=match_day)
 
-        #cumulative_data = cumulative_data.rename(columns={ColumnsExtra.score_average: ColumnsExtra.score_average_total, 
-        #                                                  Columns.points: ColumnsExtra.points_total,
-        #                                                  Columns.score: ColumnsExtra.score_total})
-        
-        print(f"Generated table data: {cumulative_data}")
-        print(f"Generated week data: {week_data}")
-        data_combined = week_data.append(cumulative_data)
-        print(f"Generated combined data: {data_combined}")
-        data_combined = data_combined.sort_values(by=Columns.points, ascending=False)
-        
-
-        if not data_combined:
+        if not league_table_data:
             return jsonify({"message": "No data found for these filters"}), 404
             
-        return jsonify(data_combined)
+        return jsonify(league_table_data)
     except Exception as e:
         import traceback
         print(f"Error in get_table: {str(e)}")

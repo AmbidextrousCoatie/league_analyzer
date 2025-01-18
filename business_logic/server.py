@@ -22,7 +22,7 @@ class Server:
     def get_weeks(self) -> List[int]:
         return self.data_adapter.get_weeks()
     
-    def aggregate_league_table(self, data_individual: pd.DataFrame, data_team: pd.DataFrame, debug: bool=False) -> pd.DataFrame:
+    def aggregate_league_table(self, data_individual: pd.DataFrame, data_team: pd.DataFrame, week:int, debug: bool=False) -> pd.DataFrame:
         
         data_individual_count = data_individual.groupby(Columns.team_name).size()
         data_individual = data_individual.groupby(Columns.team_name).sum() 
@@ -35,7 +35,7 @@ class Server:
         # add average score
         data_league[ColumnsExtra.score_average] = round(data_individual[Columns.score] / data_individual_count, 2)
         data_league[Columns.points] += data_team[Columns.points]
-
+        data_league[Columns.week] = week
         #data_league[ColumnsExtra.position] = 1
 
         if debug:
@@ -44,16 +44,21 @@ class Server:
 
     def get_league_history(self, league_name: str, season: str, week: int=None, depth: int=None) -> pd.DataFrame:
         if depth is None:
-            depth = 1
-
+            depth = 0
         # history should not be deeper than the current week
         depth = min(depth, week)
+        print([i for i in range(week-depth, week+1)])
 
-        
-        for week_current in range(week-depth, week):
+        print("week: " + str(week) + " | depth: " + str(depth))
+        data_league_history = pd.DataFrame()
+        for week_current in range(week-depth, week+1):
             print(f"fetching week {week_current}")
             data_week = self.get_league_week(league_name=league_name, season=season, week=week_current)
-            print(data_week)
+            if data_league_history.empty:
+                data_league_history = data_week
+            else:
+                data_league_history = pd.concat([data_league_history, data_week])
+            print(data_league_history)
         
         # Apply base filters
         return self.get_league_standings(league_name=league_name, season=season, week=week)
@@ -68,10 +73,11 @@ class Server:
         filters_eq_team = {Columns.league_name: league_name, Columns.season: season, Columns.week: week, Columns.computed_data: True}
         
         columns = [Columns.team_name, Columns.points, Columns.score, Columns.week]
-        data_week_individual = self.data_adapter.get_filtered_data(columns=columns, filters_eq=filters_eq_individual, print_debug=True)
-        data_week_team = self.data_adapter.get_filtered_data(columns=columns, filters_eq=filters_eq_team, print_debug=True)
-
-        return self.aggregate_league_table(data_week_individual, data_week_team)
+        data_week_individual = self.data_adapter.get_filtered_data(columns=columns, filters_eq=filters_eq_individual)
+        data_week_team = self.data_adapter.get_filtered_data(columns=columns, filters_eq=filters_eq_team)
+        print("data individual: " + str(data_week_individual))
+        print("data team: " + str(data_week_team))
+        return self.aggregate_league_table(data_week_individual, data_week_team, week)
 
     def get_league_standings(self, league_name: str, season: str, week: int) -> pd.DataFrame:
 
@@ -84,7 +90,7 @@ class Server:
         data_week_individual = self.data_adapter.get_filtered_data(columns=columns, filters_eq=filters_eq_individual, filters_lt=filters_lt_individual)
         data_week_team = self.data_adapter.get_filtered_data(columns=columns, filters_eq=filters_eq_team, filters_lt=filters_lt_team)
 
-        return self.aggregate_league_table(data_week_individual, data_week_team)        
+        return self.aggregate_league_table(data_week_individual, data_week_team, week)        
 
 
     def __depr__get_league_standings_history(self, league_name: str, season: str, week: int) -> pd.DataFrame:

@@ -42,10 +42,21 @@ class LeagueService:
 
     def get_league_standings_table(self, league:str, season:str, week:int=None, depth:int=None) -> Response:     
         """Get standings of a leagaue up to a specific match day"""
-        self.get_league_history_table(league, season, week, depth)
-        return self.server.get_league_standings(league_name=league, season=season, week=week).to_dict('records') 
+        #print(" >>>>>>>>>>>>>>>>>>>> doing history just for testing")
+        #self.get_league_history_table(league, season, week, 3)
+        #print(" <<<<<<<<<<<<<<<<<<<< done with history")
+        league_standings_data = self.server.get_league_standings(league_name=league, season=season, week=week)
+        league_week_data = self.server.get_league_week(league_name=league, season=season, week=week)
+
+        
+        league_standings_data = league_standings_data.rename(columns={ColumnsExtra.score_average: ColumnsExtra.score_average_total, 
+                                                          Columns.points: ColumnsExtra.points_total,
+                                                          Columns.score: ColumnsExtra.score_total})
+        league_standings_data = pd.merge(league_standings_data, league_week_data, on=Columns.team_name)
+        print(league_standings_data)
+        return league_standings_data.to_dict('records') 
         # if no depth is provided, use 1 to fetch also the data of the current week
-        if depth is None:
+        if depth is None or depth < 1:
             depth = 1
 
         # history should not be deeper than the current week

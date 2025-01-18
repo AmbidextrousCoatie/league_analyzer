@@ -145,13 +145,31 @@ document.addEventListener('DOMContentLoaded', function() {
                                 title: 'Average', 
                                 className: 'text-center',
                                 sortable: true
+                            },
+                            { 
+                                key: 'PointsTotal', 
+                                title: 'Points Total', 
+                                className: 'text-center',
+                                sortable: true 
+                            },
+                            { 
+                                key: 'ScoreTotal', 
+                                title: 'Score Total', 
+                                className: 'text-center',
+                                sortable: true 
+                            },
+                            { 
+                                key: 'ScoreAverageTotal', 
+                                title: 'Score Average Total', 
+                                className: 'text-center',
+                                sortable: true 
                             }
                         ],
                         headerGroups: [
                             [
-                                { title: 'League Table', colspan: 2 },
-                                { title: `Match Day ${selectedMatchDay || ''}`, colspan: 2 },
-                                { title: 'Season Standings', colspan: 2 }
+                                { title: 'League Table', colspan: 1 },
+                                { title: `Match Day ${selectedMatchDay || ''}`, colspan: 3 },
+                                { title: 'Season Standings', colspan: 3 }
                             ]
                         ],
                         rowNumbering: true,
