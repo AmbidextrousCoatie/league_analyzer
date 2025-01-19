@@ -13,14 +13,20 @@ function createTable(config) {
     
     // Create grouped headers if any
     const createHeaderGroups = () => {
-        if (headerGroups.length === 0) return '';
-        return headerGroups.map(group => `
+        if (!headerGroups || headerGroups.length === 0) return '';
+        
+        // Debug log to see what we're getting
+        console.log('headerGroups:', headerGroups);
+        
+        return `
             <tr>
-                ${group.map(col => `
-                    <th class="text-center" colspan="${col.colspan || 1}">${col.title || ''}</th>
+                ${headerGroups.map(group => `
+                    <th class="text-center" colspan="${group.colspan || 1}">
+                        ${group.title || ''}
+                    </th>
                 `).join('')}
             </tr>
-        `).join('');
+        `;
     };
 
     // Create position change indicator

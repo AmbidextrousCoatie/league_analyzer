@@ -53,15 +53,14 @@
     </div>
 </div>
 
-<div class="row mt-4">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-header">
-                <h5>Position Development</h5>
-            </div>
-            <div class="card-body">
-                <canvas id="positionChart"></canvas>
-            </div>
+
+<div class="card"></div>
+    <div class="card-header">
+        <h5>League History</h5>
+    </div>
+    <div class="card-body">
+        <div id="leagueTableHistory">
+            <!-- Table will be dynamically inserted here -->
         </div>
     </div>
 </div>
@@ -95,8 +94,14 @@ document.addEventListener('DOMContentLoaded', function() {
     document.addEventListener('change', function(e) {
         if (e.target.name === 'matchDay') {
             updateTable();
+            updateHistoryTable();
+            
         }
     });
+
+    // Add event listeners to update when selection changes
+    document.querySelectorAll('input[name="season"], input[name="league"], input[name="matchDay"]')
+    .forEach(input => input.addEventListener('change', updatePositionHistory));
 
     function updateTable() {
         const selectedSeason = document.querySelector('input[name="season"]:checked')?.value;
@@ -251,9 +256,10 @@ let positionChart = null;
 function updatePositionChart() {
     const selectedSeason = document.querySelector('input[name="season"]:checked')?.value;
     const selectedLeague = document.querySelector('input[name="league"]:checked')?.value;
+    const currentWeek = document.querySelector('input[name="matchDay"]:checked')?.value;
     
     if (selectedSeason && selectedLeague) {
-        fetch(`/league/get_position_history?season=${selectedSeason}&league=${selectedLeague}`)
+        fetch(`/league/get_position_history?season=${selectedSeason}&league=${selectedLeague}&week=${currentWeek}&depth=${currentWeek}`)
             .then(response => response.json())
             .then(data => {
                 // Destroy existing chart if it exists
@@ -380,13 +386,121 @@ function updatePositionChart() {
 }
 
 // Update chart when selection changes
-document.querySelectorAll('input[name="season"], input[name="league"]')
-    .forEach(input => input.addEventListener('change', updatePositionChart));
+if (false){
+    document.querySelectorAll('input[name="season"], input[name="league"]')
+        .forEach(input => input.addEventListener('change', updatePositionChart));
 
 // Initial chart update if selections exist
 if (document.querySelector('input[name="season"]:checked') && 
     document.querySelector('input[name="league"]:checked')) {
     updatePositionChart();
 }
+}
+
+function updatePositionHistory() {
+    return
+    const selectedSeason = document.querySelector('input[name="season"]:checked')?.value;
+    const selectedLeague = document.querySelector('input[name="league"]:checked')?.value;
+    const currentWeek = document.querySelector('input[name="matchDay"]:checked')?.value;
+    
+    console.log("Season:", selectedSeason);
+    console.log("League:", selectedLeague);
+    console.log("Week:", currentWeek);
+    
+    if (!selectedSeason || !selectedLeague || !currentWeek) {
+        console.log("Missing required selection");
+        return;
+    }
+    
+    const depth = parseInt(currentWeek);  // Convert to number
+    
+    fetch(`/league/get_position_history?season=${selectedSeason}&league=${selectedLeague}&week=${currentWeek}&depth=${currentWeek}`)
+        .then(response => response.json())
+        .then(data => {
+            updateHistoryTable(data);
+        })
+        .catch(error => console.error('Error:', error));
+}
+
+
+
+function updatePositionTable(data) {
+    const table = document.getElementById('positionHistoryTable');
+    
+    // Update headers
+    const headerRow = table.querySelector('thead tr');
+    headerRow.innerHTML = '<th>Team</th>';
+    data.weeks.forEach(week => {
+        headerRow.innerHTML += `
+            <th colspan="2">Week ${week}</th>
+        `;
+    });
+    
+    // Add subheader row for Points/Average
+    const subheaderRow = document.createElement('tr');
+    subheaderRow.innerHTML = '<th></th>';  // Empty cell for team name
+    data.weeks.forEach(() => {
+        subheaderRow.innerHTML += `
+            <th>Points</th>
+            <th>Average</th>
+        `;
+    });
+    table.querySelector('thead').appendChild(subheaderRow);
+    
+    // Update body
+    const tbody = table.querySelector('tbody');
+    tbody.innerHTML = '';
+    
+    data.data.forEach(teamData => {
+        const row = document.createElement('tr');
+        row.innerHTML = `<td>${teamData.team}</td>`;
+        
+        teamData.weeks.forEach(week => {
+            row.innerHTML += `
+                <td>${week.points.toFixed(1)}</td>
+                <td>${week.average.toFixed(2)}</td>
+            `;
+        });
+        
+        tbody.appendChild(row);
+    });
+}
+
+function updateHistoryTable() {
+    const selectedSeason = document.querySelector('input[name="season"]:checked')?.value;
+    const selectedLeague = document.querySelector('input[name="league"]:checked')?.value;
+    const currentWeek = document.querySelector('input[name="matchDay"]:checked')?.value;
+    
+    if (!selectedSeason || !selectedLeague || !currentWeek) {
+        console.log("Missing required selection");
+        return;
+    }
+    
+    fetch(`/league/get_league_history?season=${selectedSeason}&league=${selectedLeague}&week=${currentWeek}&depth=${currentWeek}`)
+        .then(response => response.json())
+        .then(data => {
+            // Create table configuration
+            const tableConfig = {
+                id: 'leagueTableHistory_',
+                headerGroups: data.headerGroups,
+                columns: data.columns,
+                data: data.data,
+                sortable: true
+            };
+
+            // Call the createTable function from components/tables.html
+            const tableHtml = createTable(tableConfig);
+            document.getElementById('leagueTableHistory').innerHTML = tableHtml;
+        })
+        .catch(error => console.error('Error:', error));
+
+}
+
+// Add event listeners
+document.querySelectorAll('input[name="season"], input[name="league"], input[name="matchDay"]')
+    .forEach(input => input.addEventListener('change', updateHistoryTable));
+
+// Initial load
+document.addEventListener('DOMContentLoaded', updateHistoryTable);
 </script>
 {% endblock %}

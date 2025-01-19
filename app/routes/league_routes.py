@@ -2,6 +2,7 @@ from flask import Blueprint, render_template, jsonify, request
 from app.services.league_service import LeagueService
 from data_access.schema import Columns, ColumnsExtra
 from business_logic.statistics import query_database
+from data_access.adapters.data_adapter_factory import DataAdapterSelector
 import traceback
 
 bp = Blueprint('league', __name__)
@@ -48,7 +49,7 @@ def get_table():
 
         if not league_table_data:
             return jsonify({"message": "No data found for these filters"}), 404
-            
+        #print(jsonify(league_table_data))
         return jsonify(league_table_data)
     except Exception as e:
         import traceback
@@ -80,76 +81,49 @@ def get_available_matchdays():
         print(f"Error getting available match days: {str(e)}")
         return jsonify({"error": str(e)}), 500
 
-@bp.route('/league/get_position_history')
-def get_position_history():
-    result = {
-        'matchDays': [],
-        'teams': [],
-        'data': []
-    }
-    return jsonify(result)
+@bp.route('/league/get_league_history')
+def get_league_history():
     try:
+        # Get query parameters
+        print("GOTCHA!")
         season = request.args.get('season')
         league = request.args.get('league')
+        week = request.args.get('week')
         
-        if not season or not league:
-            return jsonify({"error": "Season and league are required"}), 400
+        if not all([season, league]):
+            return jsonify({'error': 'Missing required parameters'}), 400
             
-        filters = {
-            Columns.season: season,
-            Columns.league_name: league,
-            Columns.input_data: True
+        week = int(week) if week is not None else 0
+        
+        # Use LeagueService
+        table_data = league_service.get_league_history_table(
+            league_name=league,
+            season=season,
+            week=week,
+            depth=week,
+            debug_output=True
+        )
+
+        transformed_data = {
+            'headerGroups': [
+                {'title': group[0], 'colspan': group[1]} 
+                for group in table_data['headerGroups']
+            ],
+            'columns': [
+                {'title': col, 'key': str(i)} 
+                for i, col in enumerate(table_data['columns'])
+            ],
+            'data': [
+                {str(i): value for i, value in enumerate(row)}
+                for row in table_data['data']
+            ],
+            'rowNumbering': True
         }
-        
-        # Get data for all match days
-        df_filtered = query_database(league_service.df, filters)
-        
-        if df_filtered.empty:
-            return jsonify({
-                'matchDays': [],
-                'teams': [],
-                'data': []
-            })
-        
-        match_days = [int(x) for x in sorted(df_filtered[Columns.week].unique())]
-        teams = sorted(df_filtered['Team'].unique())
-        print("-->" + str(teams))
-        position_data = []
-        for match_day in match_days:
-            # Get standings for this match day using the existing service method
-            standings = league_service.get_league_stanings(
-                league_service.df,
-                filters,
-                match_day,
-                cumulative=True,
-                include_changes=False
-            )
-            
-            # Sort standings by Points and Average (same as in calculate_standings)
-            standings = standings.sort_values(['Points', 'Average'], ascending=[False, False])
-            standings = standings.reset_index(drop=True)  # Reset index to get proper positions
-            
-            # Record position for each team
-            for team in teams:
-                team_data = standings[standings['Team'] == team]
-                if not team_data.empty:
-                    position = team_data.index[0] + 1  # Get position from sorted index
-                    print(f"Match day {match_day}, {team}: Position {position}, Points {team_data['Points'].iloc[0]}")
-                    position_data.append({
-                        'matchDay': int(match_day),
-                        'team': str(team),
-                        'position': int(position)
-                    })
-        
-        result = {
-            'matchDays': match_days,
-            'teams': [str(t) for t in teams],
-            'data': position_data
-        }
-        return jsonify(result)
+
+        print(transformed_data)
+        return jsonify(transformed_data)  # Make sure to jsonify the response
         
     except Exception as e:
-        print(f"ERROR: {str(e)}")
-        traceback.print_exc()
-        return jsonify({"error": str(e)}), 500
+        print(f"Error: {str(e)}")
+        return jsonify({'error': str(e)}), 500
 

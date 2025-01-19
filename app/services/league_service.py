@@ -4,6 +4,7 @@ from data_access.schema import Columns, ColumnsExtra
 from data_access.adapters.data_adapter import DataAdapter
 from data_access.adapters.data_adapter_factory import DataAdapterFactory, DataAdapterSelector
 import pandas as pd
+from typing import List
 from business_logic.server import Server
 from flask import jsonify, Response
 
@@ -33,12 +34,59 @@ class LeagueService:
         """Returns all possible match days"""
         return self.server.get_weeks()
 
+    def get_teams_in_league_season(self, league_name:str, season:str, debug_output:bool=False) -> List[str]:
+        return self.server.get_teams_in_league_season(league_name=league_name, season=season, debug_output=debug_output)
+
     def get_league_week(self, league:str, season:str, week:int=None, history_depth:int=None) -> Response:     
         """Get results of a league on a specific match day"""
         return self.server.get_league_week(league_name=league, season=season, week=week).to_dict('records')
 
-    def get_league_history_table(self, league:str, season:str, week:int=None, depth:int=None) -> Response:     
-        return self.server.get_league_history(league_name=league, season=season, week=week, depth=depth).to_dict('records')   
+    def get_league_history_table(self, league_name:str, season:str, week:int=None, depth:int=None, debug_output:bool=False) -> Response:    
+        if debug_output:
+            print("get_league_history_table")
+            print("league_name: " + league_name + " season: " + season + " week: " + str(week) + " depth: " + str(depth))
+        data = self.server.get_league_history(league_name=league_name, season=season, week=week, depth=depth, debug_output=debug_output)
+        # find all weeks
+        weeks = data[Columns.week].unique()
+        # groupby week
+        
+        data_collected_by_week = dict()
+        data_per_week = data.groupby(Columns.week)
+
+        # collect by week
+        for week, group in data_per_week:
+            if debug_output & 0 :
+                print("week : " + str(week))
+                print(group)
+            data_collected_by_week[week] = group.to_dict('records')
+        # concat all weeks
+        # collect by team    
+        
+        data_collected_by_team = dict()
+        columns_per_day = [Columns.score, Columns.points]
+        
+        data_collected_by_team['headerGroups'] = [[Columns.team_name, 1]] + [['Week' + str(w), len(columns_per_day) ] for w in weeks] + [["Season Total", len(columns_per_day) +1]]
+        data_collected_by_team['columns'] = [Columns.team_name] + columns_per_day * max(weeks) + columns_per_day + [ColumnsExtra.score_average]
+        data_collected_by_team['data'] = []
+
+        data_per_team = data.groupby(Columns.team_name)
+        for team, group in data_per_team:
+            team_row = [team]
+            if debug_output & 0:
+                print("team : " + str(team))
+                print(group)
+            for row in group.to_dict('records'):
+                rows_to_extract = [row[col] for col in columns_per_day]
+                team_row.extend(rows_to_extract)
+            
+            data_collected_by_team['data'].append(team_row)
+        #print(data_collected_by_week)
+        if debug_output:
+            print("collected data by team: " + str(data_collected_by_team))   
+        if data_collected_by_team is not None:
+            return data_collected_by_team
+        else:
+            return pd.DataFrame().to_dict('records')
 
     def get_league_standings_table(self, league:str, season:str, week:int=None, depth:int=None) -> Response:     
         """Get standings of a leagaue up to a specific match day"""
