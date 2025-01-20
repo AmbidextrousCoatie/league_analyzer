@@ -16,11 +16,23 @@ class Server:
     def get_seasons(self) -> List[str]:
         return self.data_adapter.get_seasons()
     
-    def get_leagues(self) -> List[str]:
-        return self.data_adapter.get_leagues()
+    def get_leagues(self, season: str=None) -> List[str]:
+        return self.data_adapter.get_leagues(season=season)
     
-    def get_weeks(self) -> List[int]:
-        return self.data_adapter.get_weeks()
+    def get_weeks(self, league_name: str=None, season: str=None) -> List[int]:
+        """
+        Fetches the weeks all available weeks in the database, filtered by league_name and season if provided.
+        If league_name and season are provided, the weeks are fetched for the given league and season.
+        If only one of the two is provided, the weeks are fetched for all leagues or seasons respectively.
+
+        Args:
+            league_name (str): The name of the league.
+            season (str): The season.
+
+        Returns:
+            List[int]: The weeks.
+        """
+        return self.data_adapter.get_weeks(league_name=league_name, season=season)
     
 
     def get_teams_in_league_season(self, league_name:str, season:str, debug_output:bool=False) -> List[str]:
@@ -32,7 +44,21 @@ class Server:
         return self.data_adapter.get_filtered_data(columns=columns, filters_eq=filters)[Columns.team_name].unique().tolist()
 
     def aggregate_league_table(self, data_individual: pd.DataFrame, data_team: pd.DataFrame, week:int, debug: bool=False) -> pd.DataFrame:
-        
+        """
+        High level query on the database.
+        Aggregates the league table for a given week.
+
+        Both input dataframes conain the columns are grouped by team_name.
+
+        Args:
+            data_individual (pd.DataFrame): The individual data for the week.
+            data_team (pd.DataFrame): The team data for the week.
+            week (int): The week number.
+            debug (bool): Whether to print debug information.
+
+        Returns:
+            pd.DataFrame: The aggregated league table.
+        """
         data_individual_count = data_individual.groupby(Columns.team_name).size()
         data_individual = data_individual.groupby(Columns.team_name).sum() 
         
@@ -52,6 +78,22 @@ class Server:
         return data_league.reset_index(Columns.team_name).sort_values(by=Columns.points, ascending=False) #, data_week_team
 
     def get_league_history(self, league_name: str, season: str, week: int=None, depth: int=None, debug_output:bool=False) -> pd.DataFrame:
+        """
+        High level query on the database.
+        Fetches the league history for a given league and season up until a given week.
+
+        collects the results of multple weeks using the get_league_week method and concatenates them into a single dataframe.
+
+        Args:
+            league_name (str): The name of the league.
+            season (str): The season.
+            week (int): The week number.
+            depth (int): The depth of the history.
+            debug_output (bool): Whether to print debug information.
+
+        Returns:
+            pd.DataFrame: The league history for the given league, season and week. Columns: team_name, points, score, week, score_average
+        """
         if debug_output:
             print("Entering: week: " + str(week) + " | depth: " + str(depth))
         if depth is None:
@@ -84,6 +126,26 @@ class Server:
             pass
 
     def get_league_week(self, league_name: str, season: str, week: int) -> pd.DataFrame:
+        """
+        High level database query.
+        Coposes a table that represent's a league's results in a given week.
+
+        A datafranme for individual results and one for team results are fetched, both dataframes are filtered for league_name, season and week.
+        Both dataframes contain the columns team_name, points, score and week.
+        
+        The dataframes are aggregated into a single dataframe that contains the columns team_name, points, score, week and score_average.
+        The score_average is the average score of the individual results as well as the teams' results.
+
+        The aggregated dataframe is sorted by points and returned
+
+        Args:
+            league_name (str): The name of the league.
+            season (str): The season.
+            week (int): The week number.
+
+        Returns:
+            pd.DataFrame: The league standings for the given week. Columns: team_name, points, score, week, score_average
+        """
         filters_eq_individual = {Columns.league_name: league_name, Columns.season: season, Columns.week: week, Columns.computed_data: False}
         filters_eq_team = {Columns.league_name: league_name, Columns.season: season, Columns.week: week, Columns.computed_data: True}
         
@@ -95,7 +157,26 @@ class Server:
         return self.aggregate_league_table(data_week_individual, data_week_team, week)
 
     def get_league_standings(self, league_name: str, season: str, week: int) -> pd.DataFrame:
+        """
+        High level database query.
+        Coposes a table that represent's a league's standings in a given week, e.g. the sum of all scores and points up until the given week
 
+        A datafranme for individual results and one for team results are fetched, both dataframes are filtered for league_name, season and weeks.
+        Both dataframes contain the columns team_name, points, score and weeks.
+        
+        The dataframes are aggregated into a single dataframe that contains the columns team_name, points, score, weeks and score_average.
+        The score_average is the average score of the individual results as well as the teams' results.
+
+        The aggregated dataframe is sorted by points and returned
+
+        Args:
+            league_name (str): The name of the league.
+            season (str): The season.
+            week (int): The week number.
+
+        Returns:
+            pd.DataFrame: The league standings for the given week. Columns: team_name, points, score, week, score_average
+        """
         filters_eq_individual = {Columns.league_name: league_name, Columns.season: season, Columns.computed_data: False}
         filters_lt_individual = {Columns.week: week+1}
         filters_eq_team = {Columns.league_name: league_name, Columns.season: season, Columns.computed_data: True}

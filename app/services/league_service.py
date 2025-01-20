@@ -65,7 +65,7 @@ class LeagueService:
         data_collected_by_team = dict()
         columns_per_day = [Columns.score, Columns.points]
         
-        data_collected_by_team['headerGroups'] = [[Columns.team_name, 1]] + [['Week' + str(w), len(columns_per_day) ] for w in weeks] + [["Season Total", len(columns_per_day) +1]]
+        data_collected_by_team['headerGroups'] = [[Columns.team_name, 2]] + [['Week' + str(w), len(columns_per_day) ] for w in weeks] + [["Season Total", len(columns_per_day) +1]]
         data_collected_by_team['columns'] = [Columns.team_name] + columns_per_day * max(weeks) + columns_per_day + [ColumnsExtra.score_average]
         data_collected_by_team['data'] = []
 
