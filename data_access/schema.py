@@ -7,6 +7,7 @@ class Columns:
     week: str = 'Week'
     date: str = 'Date'
     league_name: str = 'League'
+    players_per_team: str = 'Players per Team'
     location: str = 'Location'
     round_number: str = 'Round Number'
     match_number: str = 'Match Number'
@@ -25,8 +26,8 @@ class Columns:
 
     def get_column_names(self, selection=None):
         if selection is None:
-            return [self.season, self.week, self.date, self.league_name, self.location, self.round_number, self.match_number,
-                    self.team_name, self.position, self.player_name, self.player_id, self.team_name_opponent,
+            return [self.season, self.week, self.date, self.league_name, self.players_per_team, self.location, self.round_number, 
+                    self.match_number, self.team_name, self.position, self.player_name, self.player_id, self.team_name_opponent,
                     self.score, self.points, self.input_data, self.computed_data]
         
 @dataclass
