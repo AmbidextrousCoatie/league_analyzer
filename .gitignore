@@ -77,3 +77,10 @@ app/routes/__pycache__/league_routes.cpython-312.pyc
 database/__pycache__/config.cpython-310.pyc
 data_access/adapters/__pycache__/data_adapter_factory.cpython-310.pyc
 business_logic/__pycache__/server.cpython-310.pyc
+app/routes/__pycache__/league_routes.cpython-312.pyc
+business_logic/__pycache__/server.cpython-312.pyc
+data_access/adapters/__pycache__/data_adapter_factory.cpython-312.pyc
+database/__pycache__/config.cpython-312.pyc
+app/routes/__pycache__/league_routes.cpython-312.pyc
+app/services/__pycache__/data_dict.cpython-310.pyc
+app/routes/__pycache__/league_routes.cpython-312.pyc

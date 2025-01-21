@@ -61,17 +61,45 @@ class DataAdapterPandas(DataAdapter):
                 print(f"DataFrame shape after extracting columns: {filtered_df.shape}")  
         return filtered_df
     
+    def get_seasons(self, league_name: str=None) -> List[str]:
+        if league_name is not None:
+            return self.df[self.df[Columns.league_name] == league_name][Columns.season].unique().tolist()
+        else:
+            return self.df[Columns.season].unique().tolist()
+    
+    def get_leagues(self, season: str=None) -> List[str]:
+        if season is not None:
+            return self.df[self.df[Columns.season] == season][Columns.league_name].unique().tolist()
+        else:
+            return self.df[Columns.league_name].unique().tolist()
+    
+    def get_weeks(self, league_name: str=None, season: str=None) -> List[int]:
+        """
+        Fetches the weeks all available weeks in the database, filtered by league_name and season if provided.
+        If league_name and season are provided, the weeks are fetched for the given league and season.
+        If only one of the two is provided, the weeks are fetched for all leagues or seasons respectively.
 
-    def get_seasons(self) -> List[str]:
-        return self.df[Columns.season].unique().tolist()
-    
-    def get_leagues(self) -> List[str]:
-        return self.df[Columns.league_name].unique().tolist()
-    
-    def get_weeks(self) -> List[int]:
+        Args:
+            league_name (str): The name of the league.
+            season (str): The season.
+
+        Returns:
+            List[int]: The weeks.
+        """
+        filters_eq = dict()
+
+        if league_name is not None:
+            filters_eq[Columns.league_name] = league_name
+
+        if season is not None:
+            filters_eq[Columns.season] = season
+
+        if filters_eq is not None:
+            filtered_df = self.get_filtered_data(columns=[Columns.week], filters_eq=filters_eq)
+        
         try:
             # Get unique weeks, sort them, and convert to list
-            weeks = sorted(self.df[Columns.week].unique().tolist())
+            weeks = sorted(filtered_df[Columns.week].unique().tolist())
             # Filter out None/NaN values if any
             weeks = [week for week in weeks if week is not None]
             #print(f"Available weeks: {weeks}")  # Debug output

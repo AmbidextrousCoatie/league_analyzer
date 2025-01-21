@@ -337,10 +337,10 @@ def simulate_season(teams, weeks, number_of_players_per_team, name, season):
                     opponent_score = teams[opponent_id].players[player_number].simulate_score(opponent_is_home_alley, player_opponent_has_good_day)
 
                     cols_match = [
-                        [season, week+1, "n/a", name, alley, round_number, match_number, 
+                        [season, week+1, "n/a", name, number_of_players_per_team, alley, round_number, match_number, 
                          team.team_name, player_number, player.get_full_name(), player.id, team_opponent.team_name, 
                          player_score, np.nan, True, False],
-                        [season, week+1, "n/a", name, alley, round_number, match_number, 
+                        [season, week+1, "n/a", name, number_of_players_per_team, alley, round_number, match_number, 
                          team_opponent.team_name, player_number, player_opponent.get_full_name(), player_opponent.id, team.team_name,
                          opponent_score, np.nan, True, False]
                         ]

@@ -4,6 +4,7 @@ from data_access.schema import Columns, ColumnsExtra
 from data_access.adapters.data_adapter import DataAdapter
 from data_access.adapters.data_adapter_factory import DataAdapterFactory, DataAdapterSelector
 import pandas as pd
+from typing import List
 from business_logic.server import Server
 from flask import jsonify, Response
 
@@ -29,19 +30,146 @@ class LeagueService:
         """Returns all possible leagues"""
         return self.server.get_leagues()
 
-    def get_weeks(self):
+    def get_weeks(self, league_name:str=None, season:str=None):
         """Returns all possible match days"""
-        return self.server.get_weeks()
+        return self.server.get_weeks(league_name=league_name, season=season)
 
-    def get_league_week(self, league:str, season:str, week:int=None) -> Response:     
+    def get_teams_in_league_season(self, league_name:str, season:str, debug_output:bool=False) -> List[str]:
+        return self.server.get_teams_in_league_season(league_name=league_name, season=season, debug_output=debug_output)
+
+    def get_league_week(self, league:str, season:str, week:int=None, history_depth:int=None) -> Response:     
         """Get results of a league on a specific match day"""
         return self.server.get_league_week(league_name=league, season=season, week=week).to_dict('records')
 
-    def get_league_standings_history(self, league:str, season:str, week:int=None) -> Response:     
-        return self.server.get_league_standings_history(league_name=league, season=season, week=week).to_dict('records')   
+    def get_league_history_table(self, league_name:str, season:str, week:int=None, depth:int=None, debug_output:bool=False) -> Response:    
+        if debug_output:
+            print("get_league_history_table")
+            print("league_name: " + league_name + " season: " + season + " week: " + str(week) + " depth: " + str(depth))
+        data = self.server.get_league_history(league_name=league_name, season=season, week=week, depth=depth, debug_output=debug_output)
+        # find all weeks
+        weeks = data[Columns.week].unique()
+        # groupby week
+        
+        data_collected_by_week = dict()
+        data_per_week = data.groupby(Columns.week)
 
-    def get_league_standings(self, league:str, season:str, week:int=None) -> Response:     
+        # collect by week
+        for week, group in data_per_week:
+            if debug_output & 0 :
+                print("week : " + str(week))
+                print(group)
+            data_collected_by_week[week] = group.to_dict('records')
+        # concat all weeks
+        # collect by team    
+        
+        data_collected_by_team = dict()
+        columns_per_day = [Columns.score, Columns.points]
+        columns_total = [ColumnsExtra.score_total, ColumnsExtra.points_total, ColumnsExtra.score_average_total]
+        
+        data_collected_by_team['headerGroups'] = [[Columns.team_name, 2]] + [['Week' + str(w), len(columns_per_day) ] for w in weeks] + [["Season Total", len(columns_per_day) +1]]
+        data_collected_by_team['columns'] = [Columns.team_name] + columns_per_day * max(weeks) + columns_per_day + [ColumnsExtra.score_average]
+        data_collected_by_team['data'] = []
+
+        data_per_team = data.groupby(Columns.team_name)
+        for team, group in data_per_team:
+            team_row = [team]
+            if debug_output:
+                print("team : " + str(team))
+                print(group)
+            points = float(round(group[Columns.points].sum(), 1))
+            score = int(group[Columns.score].sum())
+            score_average = float(round(group[ColumnsExtra.score_average].sum() / len(group), 2))
+
+            for row in group.to_dict('records'):
+                rows_to_extract = [row[col] for col in columns_per_day]
+                team_row.extend(rows_to_extract)
+                #rows_to_extract = [row[col] for col in columns_total]
+                
+            team_row.extend([score, points, score_average])
+            data_collected_by_team['data'].append(team_row)
+        #print(data_collected_by_week)
+        if debug_output:
+            print("collected data by team: " + str(data_collected_by_team))   
+        if data_collected_by_team is not None:
+            return data_collected_by_team
+        else:
+            return pd.DataFrame().to_dict('records')
+
+
+    def get_league_standings_table(self, league:str, season:str, week:int=None, depth:int=None) -> Response:     
         """Get standings of a leagaue up to a specific match day"""
+        #print(" >>>>>>>>>>>>>>>>>>>> doing history just for testing")
+        #self.get_league_history_table(league, season, week, 3)
+        #print(" <<<<<<<<<<<<<<<<<<<< done with history")
+        league_standings_data = self.server.get_league_standings(league_name=league, season=season, week=week)
+        league_week_data = self.server.get_league_week(league_name=league, season=season, week=week)
+
+        
+        league_standings_data = league_standings_data.rename(columns={ColumnsExtra.score_average: ColumnsExtra.score_average_total, 
+                                                          Columns.points: ColumnsExtra.points_total,
+                                                          Columns.score: ColumnsExtra.score_total})
+        league_standings_data = pd.merge(league_standings_data, league_week_data, on=Columns.team_name)
+        #print("league_standings_data")
+        #print(league_standings_data)
+
+        data_collected = dict()
+        columns_to_show_week = [Columns.score, Columns.points, ColumnsExtra.score_average]
+        columns_to_show_season = [ColumnsExtra.score_total, ColumnsExtra.points_total, ColumnsExtra.score_average_total]
+        
+        data_collected['headerGroups'] = [[Columns.team_name, 2]] + [['Week' + str(week), len(columns_to_show_week)]] + [["Season Total", len(columns_to_show_season)]]
+        data_collected['columns'] = [Columns.team_name] + columns_to_show_week + columns_to_show_week
+        data_collected['data'] = []
+
+        for team, group in league_standings_data.groupby(Columns.team_name):
+            team_row = [team]
+            for row in group.to_dict('records'):
+                rows_to_extract = [row[col] for col in columns_to_show_week]
+                team_row.extend(rows_to_extract)
+                rows_to_extract = [row[col] for col in columns_to_show_season]
+                team_row.extend(rows_to_extract)
+            data_collected['data'].append(team_row)
+
+        #print(data_collected)
+
+        return data_collected 
+
+
+    def get_team_week_details(self, league:str, season:str, team:str, week:int) -> Response:
+        return(self.server.get_team_week_details(league_name=league, season=season, team_name=team, week=week))
+
+        
+
+
+
+    def get_league_standings_table_deprecated(self, league:str, season:str, week:int=None, depth:int=None) -> Response:     
+        """Get standings of a leagaue up to a specific match day"""
+        #print(" >>>>>>>>>>>>>>>>>>>> doing history just for testing")
+        #self.get_league_history_table(league, season, week, 3)
+        #print(" <<<<<<<<<<<<<<<<<<<< done with history")
+        league_standings_data = self.server.get_league_standings(league_name=league, season=season, week=week)
+        league_week_data = self.server.get_league_week(league_name=league, season=season, week=week)
+
+        
+        league_standings_data = league_standings_data.rename(columns={ColumnsExtra.score_average: ColumnsExtra.score_average_total, 
+                                                          Columns.points: ColumnsExtra.points_total,
+                                                          Columns.score: ColumnsExtra.score_total})
+        league_standings_data = pd.merge(league_standings_data, league_week_data, on=Columns.team_name)
+        #print(league_standings_data)
+        return league_standings_data.to_dict('records') 
+        # if no depth is provided, use 1 to fetch also the data of the current week
+        if depth is None or depth < 1:
+            depth = 1
+
+        # history should not be deeper than the current week
+        depth = min(depth, week)
+
+        data_season = self.server.get_league_season(league_name=league, season=season, week=week, depth=depth)
+        for week_current in range(week-depth, week):
+            print(f"fetching week {week_current}")
+            data_week = self.server.get_league_week(league_name=league, season=season, week=week_current)
+        
+        data_week = self.server.get_league_week(league_name=league, season=season, week=week)
+
         # Apply base filters
         return self.server.get_league_standings(league_name=league, season=season, week=week).to_dict('records')
 
@@ -70,16 +198,16 @@ class LeagueService:
         return jsonify({'standings': table_data})
 
 
-    def deprecated_get_table1(self, df: pd.DataFrame, filters: dict, match_day: int, cumulative: bool, include_changes: bool):
+    def deprecated_get_table1(self, df: pd.DataFrame, filters: dict, week: int, cumulative: bool, include_changes: bool):
         
 
         df_filtered = query_database(df, filters)
         # Apply match day filter
-        if match_day is not None:
+        if week is not None:
             if cumulative:
-                df_filtered = df_filtered[df_filtered[Columns.week] <= match_day]
+                df_filtered = df_filtered[df_filtered[Columns.week] <= week]
             else:
-                df_filtered = df_filtered[df_filtered[Columns.week] == match_day]
+                df_filtered = df_filtered[df_filtered[Columns.week] == week]
         
         # Calculate standings
         if not df_filtered.empty:
@@ -92,11 +220,11 @@ class LeagueService:
             standings = standings.sort_values(['Points', 'Average'], ascending=[False, False])
             
             # Calculate position changes if requested
-            if include_changes and match_day and match_day > 1:
+            if include_changes and week and week > 1:
                 # Get previous match day standings
                 prev_filters = filters.copy()
                 df_prev = query_database(df, prev_filters)
-                df_prev = df_prev[df_prev[Columns.week] <= (match_day - 1)]
+                df_prev = df_prev[df_prev[Columns.week] <= (week - 1)]
                 
                 prev_standings = df_prev.groupby('Team').agg({
                     'Points': 'sum',
@@ -120,7 +248,7 @@ class LeagueService:
         return pd.DataFrame(columns=['Team', 'Points', 'Average'])
 
 
-    def deprecated_get_table(self, season, league, week=None, cumulative=False, match_day=None):
+    def deprecated_get_table(self, season, league, week=None, cumulative=False, week_=None):
         """Get combined table data for frontend"""
         
         
@@ -132,19 +260,19 @@ class LeagueService:
         }
         
         try:
-            week_value = int(match_day) if match_day and match_day.strip() else None
+            week_value = int(week) if week and week.strip() else None
             print(f"Processing week: {week_value}")
         except ValueError:
-            print(f"Invalid match day value: {match_day}")
+            print(f"Invalid match day value: {week}")
             week_value = None
         
         # Get match day standings
-        match_day_standings = pd.DataFrame()
+        week_standings = pd.DataFrame()
         if week_value is not None:
-            match_day_standings = self.get_league_stanings(
+            week_standings = self.get_league_stanings(
                 self.df, filters, week_value, cumulative=False, include_changes=False
             )
-            print(f"Match day standings found: {not match_day_standings.empty}")
+            print(f"Match day standings found: {not week_standings.empty}")
         
         # Get cumulative standings
         season_standings = self.get_league_stanings(
@@ -161,8 +289,8 @@ class LeagueService:
                 'positionChange': row.get('PositionChange', 0)
             }
             
-            if not match_day_standings.empty:
-                match_team = match_day_standings[match_day_standings['Team'] == row['Team']]
+            if not week_standings.empty:
+                match_team = week_standings[week_standings['Team'] == row['Team']]
                 if not match_team.empty:
                     team_data.update({
                         'MatchPoints': match_team['Points'].iloc[0],
