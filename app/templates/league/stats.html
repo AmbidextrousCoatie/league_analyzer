@@ -100,7 +100,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('input[name="season"]').forEach(radio => {
         radio.addEventListener('change', function() {
             if (this.checked) {
-                updateMatchDayButtons();
+                updateButtonsWeek();
             }
         });
     });
@@ -109,7 +109,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('input[name="league"]').forEach(radio => {
         radio.addEventListener('change', function() {
             if (this.checked) {
-                updateMatchDayButtons();
+                updateButtonsWeek();
             }
         });
     });
@@ -118,7 +118,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('input[name="matchDay"]').forEach(radio => {
         radio.addEventListener('change', function() {
             if (this.checked) {
-                updateMatchDayButtons();
+                updateButtonsWeek();
             }
         });
     });
@@ -126,113 +126,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // Handle match day selection
     document.addEventListener('change', function(e) {
         if (e.target.name === 'matchDay') {
-            updateMatchDayButtons();
+            updateButtonsWeek();
         }
     });
-
-
-    function updateTable() {
-        const selectedSeason = document.querySelector('input[name="season"]:checked')?.value;
-        const selectedLeague = document.querySelector('input[name="league"]:checked')?.value;
-        const selectedMatchDay = document.querySelector('input[name="matchDay"]:checked')?.value;
-
-        if (selectedSeason && selectedLeague) {
-            document.getElementById('leagueTable').innerHTML = 
-                '<div class="alert alert-info">Loading data...</div>';
-            
-            fetch(`/league/get_table?league=${selectedLeague}&season=${selectedSeason}&week=${selectedMatchDay || ''}`)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    if (!data || data.length === 0) {
-                        document.getElementById('leagueTable').innerHTML = 
-                            '<div class="alert alert-warning">No data available for this combination</div>';
-                        return;
-                    }
-                    
-                    const tableConfig = {
-                        data: data,
-                        columns: [
-                            { 
-                                key: 'Team', 
-                                title: 'Team' 
-                            },
-                            { 
-                                key: 'Points', 
-                                title: 'Points', 
-                                className: 'text-center',
-                                sortable: true 
-                            },
-                            { 
-                                key: 'Score', 
-                                title: 'Score', 
-                                className: 'text-center',
-                                sortable: true
-                            },
-                            { 
-                                key: 'ScoreAverage', 
-                                title: 'Average', 
-                                className: 'text-center',
-                                sortable: true
-                            },
-                            { 
-                                key: 'PointsTotal', 
-                                title: 'Points Total', 
-                                className: 'text-center',
-                                sortable: true 
-                            },
-                            { 
-                                key: 'ScoreTotal', 
-                                title: 'Score Total', 
-                                className: 'text-center',
-                                sortable: true 
-                            },
-                            { 
-                                key: 'ScoreAverageTotal', 
-                                title: 'Score Average Total', 
-                                className: 'text-center',
-                                sortable: true 
-                            }
-                        ],
-                        headerGroups: [
-                            [
-                                { title: 'League Table', colspan: 1 },
-                                { title: `Match Day ${selectedMatchDay || ''}`, colspan: 3 },
-                                { title: 'Season Standings', colspan: 3 }
-                            ]
-                        ],
-                        rowNumbering: true,
-                        positionChange: true
-                    };
-                    
-                    document.getElementById('leagueTable').innerHTML = createTable(tableConfig);
-
-                    // Add sorting functionality
-                    document.querySelectorAll('th.sortable').forEach(th => {
-                        th.addEventListener('click', () => {
-                            const sortKey = th.dataset.sort;
-                            sortTable(sortKey);
-                        });
-                    });
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    document.getElementById('leagueTable').innerHTML = 
-                        `<div class="alert alert-danger">
-                            Error loading table data: ${error.message}
-                            <br>
-                            Please try again or contact support if the problem persists.
-                        </div>`;
-                });
-        } else {
-            document.getElementById('leagueTable').innerHTML = 
-                '<div class="alert alert-info">Please select both season and league</div>';
-        }
-    }
 
     function sortTable(sortKey) {
         const data = currentData.standings;  // Store the current data globally
@@ -244,7 +140,7 @@ document.addEventListener('DOMContentLoaded', function() {
         updateTableDisplay(data);
     }
 
-    function updateMatchDayButtons() {
+    function updateButtonsWeek() {
         const selectedSeason = document.querySelector('input[name="season"]:checked')?.value;
         const selectedLeague = document.querySelector('input[name="league"]:checked')?.value;
         const currentMatchDay = document.querySelector('input[name="matchDay"]:checked')?.value;
@@ -273,9 +169,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                     
                     // Update table with selected match day
-                    updateLeagueStandingsTable();
-                    updateHistoryTable();
-                    updateTeamWeekDetails();
+                    updateTableLeagueStandings();
+                    updateTableLeagueHistory();
+                    updateTableTeamDetails();
                 });
         }
     }
@@ -428,7 +324,7 @@ if (document.querySelector('input[name="season"]:checked') &&
 }
 
 
-function updateTeamWeekDetails() {
+function updateTableTeamDetails() {
     const selectedSeason = document.querySelector('input[name="season"]:checked')?.value;
     const selectedLeague = document.querySelector('input[name="league"]:checked')?.value;
     const currentWeek = document.querySelector('input[name="matchDay"]:checked')?.value;
@@ -496,7 +392,7 @@ function updateTeamWeekDetails() {
         });
 }
 
-function updatePositionTable(data) {
+function updateTablePosition(data) {
     const table = document.getElementById('positionHistoryTable');
     
     // Update headers
@@ -538,7 +434,7 @@ function updatePositionTable(data) {
     });
 }
 
-function updateHistoryTable() {
+function updateTableLeagueHistory() {
     const selectedSeason = document.querySelector('input[name="season"]:checked')?.value;
     const selectedLeague = document.querySelector('input[name="league"]:checked')?.value;
     const currentWeek = document.querySelector('input[name="matchDay"]:checked')?.value;
@@ -568,7 +464,7 @@ function updateHistoryTable() {
 
 }
 
-function updateLeagueStandingsTable() {
+function updateTableLeagueStandings() {
     const selectedSeason = document.querySelector('input[name="season"]:checked')?.value;
     const selectedLeague = document.querySelector('input[name="league"]:checked')?.value;
     const currentWeek = document.querySelector('input[name="matchDay"]:checked')?.value;
@@ -637,7 +533,7 @@ function setupEventListeners() {
     filters.forEach(input => {
         input.addEventListener('change', () => {
             console.log(`Filter changed: ${input.name} = ${input.value}`);
-            updateTeamWeekDetails();
+            updateTableTeamDetails();
         });
     });
 }
@@ -646,10 +542,10 @@ function setupEventListeners() {
 document.addEventListener('DOMContentLoaded', () => {
     console.log("DOM Content Loaded - Setting up team details");
     setupEventListeners();
-    updateTeamWeekDetails();
+    updateTableTeamDetails();
 });
 
-function updateTeamButtons() {
+function updateButtonsTeams() {
     const selectedSeason = document.querySelector('input[name="season"]:checked')?.value;
     const selectedLeague = document.querySelector('input[name="league"]:checked')?.value;
     const currentTeam = document.querySelector('input[name="team"]:checked')?.value;
@@ -676,25 +572,25 @@ function updateTeamButtons() {
                 }
                 
                 // Update relevant tables/charts
-                updateLeagueStandingsTable();
-                updateHistoryTable();
-                updateTeamWeekDetails();
+                updateTableLeagueStandings();
+                updateTableLeagueHistory();
+                updateTableTeamDetails();
 
                 // Add listeners to new team buttons
                 document.querySelectorAll('input[name="team"]')
-                    .forEach(input => input.addEventListener('change', updateTeamWeekDetails));
+                    .forEach(input => input.addEventListener('change', updateTableTeamDetails));
             });
     }
 }
 
 // Add event listeners
 document.querySelectorAll('input[name="season"], input[name="league"]')
-    .forEach(input => input.addEventListener('change', updateTeamButtons));
+    .forEach(input => input.addEventListener('change', updateButtonsTeams));
 
 // Add event listeners for team selection
 document.addEventListener('change', function(event) {
     if (event.target.name === 'team') {
-        updateTeamWeekDetails();
+        updateTableTeamDetails();
     }
 });
 </script>
