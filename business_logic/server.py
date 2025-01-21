@@ -100,9 +100,10 @@ class Server:
             depth = 0
         # history should not be deeper than the current week
         depth = min(depth, week)
-        print([i for i in range(week-depth, week+1)])
+        
         if debug_output:
             print("after validation: week: " + str(week) + " | depth: " + str(depth))
+            print([i for i in range(week-depth, week+1)])
         data_league_history = pd.DataFrame()
         for week_current in range(week-depth, week+1):
             if debug_output:

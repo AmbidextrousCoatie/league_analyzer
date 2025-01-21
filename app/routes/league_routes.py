@@ -4,6 +4,7 @@ from data_access.schema import Columns, ColumnsExtra
 from business_logic.statistics import query_database
 from data_access.adapters.data_adapter_factory import DataAdapterSelector
 import traceback
+from app.services.data_dict import DataDict
 
 bp = Blueprint('league', __name__)
 league_service = LeagueService()
@@ -34,18 +35,18 @@ def get_table():
     try:
         season = request.args.get('season')
         league = request.args.get('league')
-        #match_day should be int
-        match_day = int(request.args.get('match_day'))
+        #week should be int
+        week = int(request.args.get('week'))
         
-        print(f"Received request with: season={season}, league={league}, match_day={match_day}")
+        print(f"Received request with: season={season}, league={league}, week={week}")
         
         if not season or not league:
             return jsonify({"error": "Season and league are required"}), 400
 
-        #week_data = league_service.get_league_week(league=league, season=season, week=match_day)
+        #week_data = league_service.get_league_week(league=league, season=season, week=week)
         #print(f"Generated week data: {week_data}")
 
-        league_table_data = league_service.get_league_standings_table(league=league, season=season, week=match_day)
+        league_table_data = league_service.get_league_standings_table_deprecated(league=league, season=season, week=week)
 
         if not league_table_data:
             return jsonify({"message": "No data found for these filters"}), 404
@@ -81,15 +82,20 @@ def get_available_matchdays():
         print(f"Error getting available match days: {str(e)}")
         return jsonify({"error": str(e)}), 500
 
+
 @bp.route('/league/get_league_history')
 def get_league_history():
     try:
         # Get query parameters
-        print("GOTCHA!")
+        # print("GOTCHA!")
         season = request.args.get('season')
         league = request.args.get('league')
         week = request.args.get('week')
         
+        print(f"League History: Received request with: season={season}, league={league}, week={week}")
+        
+
+
         if not all([season, league]):
             return jsonify({'error': 'Missing required parameters'}), 400
             
@@ -104,26 +110,45 @@ def get_league_history():
             debug_output=True
         )
 
-        transformed_data = {
-            'headerGroups': [
-                {'title': group[0], 'colspan': group[1]} 
-                for group in table_data['headerGroups']
-            ],
-            'columns': [
-                {'title': col, 'key': str(i)} 
-                for i, col in enumerate(table_data['columns'])
-            ],
-            'data': [
-                {str(i): value for i, value in enumerate(row)}
-                for row in table_data['data']
-            ],
-            'rowNumbering': True
-        }
+        transformed_data = DataDict().transform_dict(table_data)
 
-        print(transformed_data)
-        return jsonify(transformed_data)  # Make sure to jsonify the response
+        print(transformed_data.to_dict())
+        return jsonify(transformed_data.to_dict())  # Make sure to jsonify the response
         
     except Exception as e:
         print(f"Error: {str(e)}")
         return jsonify({'error': str(e)}), 500
 
+@bp.route('/league/get_league_standings')
+def get_league_standings():
+    try:
+        season = request.args.get('season')
+        league = request.args.get('league')
+        #week should be int
+        week = int(request.args.get('week'))
+        #print("get_league_standings")
+        print(f"League Standings: Received request with: season={season}, league={league}, week={week}")
+        
+        if not season or not league:
+            return jsonify({"error": "Season and league are required"}), 400
+
+        #week_data = league_service.get_league_week(league=league, season=season, week=week)
+        #print(f"Generated week data: {week_data}")
+
+        league_table_data = league_service.get_league_standings_table(league=league, season=season, week=week)
+
+        transformed_data = DataDict().transform_dict(league_table_data)
+        #print(transformed_data)
+        
+        transformed_data.make_sortable([1,2,3,4,5,6])
+
+
+        if not transformed_data:
+            return jsonify({"message": "No data found for these filters"}), 404
+        #print(jsonify(league_table_data))
+        return jsonify(transformed_data.to_dict())
+    except Exception as e:
+        import traceback
+        print(f"Error in get_league_standings: {str(e)}")
+        print(f"Traceback: {traceback.format_exc()}")  # This will show the full error trace
+        return jsonify({"error": str(e)}), 500

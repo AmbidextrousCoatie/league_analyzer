@@ -32,7 +32,7 @@ class Columns:
 @dataclass
 class ColumnsExtra:
     position: str = '#'
-    score_average: str = 'ScoreAverage'
+    score_average: str = 'Average'
     score_average_total: str = 'ScoreAverageTotal'
     score_total: str = 'ScoreTotal'
     points_total: str = 'PointsTotal'

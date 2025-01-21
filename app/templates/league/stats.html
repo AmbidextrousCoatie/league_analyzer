@@ -45,7 +45,8 @@
 
             <!-- Content Section -->
             <div class="col-md-8">
-                <div id="leagueTable">
+                <h5>League Standings 2.0</h5>
+                <div id="leagueTableStandings">
                     <!-- Table will be dynamically inserted here -->
                 </div>
             </div>
@@ -53,14 +54,14 @@
     </div>
 </div>
 
-
-<div class="card"></div>
+<!-- League History Table -->
+<div class="card">
     <div class="card-header">
         <h5>League History</h5>
     </div>
     <div class="card-body">
         <div id="leagueTableHistory">
-            <!-- Table will be dynamically inserted here -->
+            <!-- History table will be dynamically inserted here -->
         </div>
     </div>
 </div>
@@ -90,14 +91,23 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
+    // Handle league selection
+    document.querySelectorAll('input[name="matchDay"]').forEach(radio => {
+        radio.addEventListener('change', function() {
+            if (this.checked) {
+                updateMatchDayButtons();
+            }
+        });
+    });
+
     // Handle match day selection
     document.addEventListener('change', function(e) {
         if (e.target.name === 'matchDay') {
-            updateTable();
-            updateHistoryTable();
-            
+            updateMatchDayButtons();
         }
     });
+
+
 
     // Add event listeners to update when selection changes
     document.querySelectorAll('input[name="season"], input[name="league"], input[name="matchDay"]')
@@ -112,7 +122,7 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('leagueTable').innerHTML = 
                 '<div class="alert alert-info">Loading data...</div>';
             
-            fetch(`/league/get_table?league=${selectedLeague}&season=${selectedSeason}&match_day=${selectedMatchDay || ''}`)
+            fetch(`/league/get_table?league=${selectedLeague}&season=${selectedSeason}&week=${selectedMatchDay || ''}`)
                 .then(response => {
                     if (!response.ok) {
                         throw new Error(`HTTP error! status: ${response.status}`);
@@ -245,7 +255,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                     
                     // Update table with selected match day
-                    updateTable();
+                    updateLeagueStandingsTable();
+                    updateHistoryTable();
                 });
         }
     }
@@ -481,7 +492,7 @@ function updateHistoryTable() {
         .then(data => {
             // Create table configuration
             const tableConfig = {
-                id: 'leagueTableHistory_',
+                id: 'leagueTableHistory',
                 headerGroups: data.headerGroups,
                 columns: data.columns,
                 data: data.data,
@@ -496,11 +507,61 @@ function updateHistoryTable() {
 
 }
 
+function updateLeagueStandingsTable() {
+    const selectedSeason = document.querySelector('input[name="season"]:checked')?.value;
+    const selectedLeague = document.querySelector('input[name="league"]:checked')?.value;
+    const currentWeek = document.querySelector('input[name="matchDay"]:checked')?.value;
+    
+    console.log('Attempting to update standings table with:', {
+        season: selectedSeason,
+        league: selectedLeague,
+        week: currentWeek
+    });
+    
+    if (!selectedSeason || !selectedLeague || !currentWeek) {
+        console.log("Missing required selection");
+        return;
+    }
+    
+    const url = `/league/get_league_standings?season=${selectedSeason}&league=${selectedLeague}&week=${currentWeek}&depth=${currentWeek}`;
+    console.log('Fetching from URL:', url);
+    
+    fetch(url)
+        .then(response => {
+            console.log('Response status:', response.status);
+            return response.json();
+        })
+        .then(data => {
+            console.log('Received data:', data);
+            const tableConfig = {
+                id: 'leagueTableStandings',
+                headerGroups: data.headerGroups,
+                columns: data.columns,
+                data: data.data,
+                sortable: true
+            };
+
+            const tableHtml = createTable(tableConfig);
+            document.getElementById('leagueTableStandings').innerHTML = tableHtml;
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            document.getElementById('leagueTableStandings').innerHTML = 
+                `<div class="alert alert-danger">Error loading standings: ${error.message}</div>`;
+        });
+}
+
+
+
 // Add event listeners
 document.querySelectorAll('input[name="season"], input[name="league"], input[name="matchDay"]')
     .forEach(input => input.addEventListener('change', updateHistoryTable));
 
+document.querySelectorAll('input[name="season"], input[name="league"], input[name="matchDay"]')
+    .forEach(input => input.addEventListener('change', updateLeagueStandingsTable));
+
 // Initial load
 document.addEventListener('DOMContentLoaded', updateHistoryTable);
+document.addEventListener('DOMContentLoaded', updateLeagueStandingsTable);
 </script>
 {% endblock %}
