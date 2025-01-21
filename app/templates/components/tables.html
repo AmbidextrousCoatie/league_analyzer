@@ -48,7 +48,7 @@ function createTable(config) {
             ` : ''}
             ${columns.map(col => `
                 <td class="${col.className || ''}" style="${col.style || ''}">${
-                    col.formatter ? col.formatter(row[col.key], row) : (row[col.key] || '-')
+                    col.formatter ? col.formatter(row[col.key], row) : (row[col.key] || '0')
                 }</td>
             `).join('')}
         </tr>`;

@@ -41,6 +41,14 @@
                         {% endfor %}
                     </div>
                 </div>
+
+                <!-- Team Selection -->
+                <div class="mb-2">
+                    <h5>Team</h5>
+                    <div class="btn-group-vertical w-100" role="group" id="teamButtons">
+                        <!-- Team buttons will be dynamically inserted here -->
+                    </div>
+                </div>
             </div>
 
             <!-- Content Section -->
@@ -65,6 +73,21 @@
         </div>
     </div>
 </div>
+
+<!-- League Team Table -->
+<div class="card">
+    <div class="card-header">
+        <h5>Team Results for Aschaffenburg 55</h5>
+        <div id="teamDetailsMetadata" class="text-muted small"></div>
+    </div>
+    <div class="card-body">
+        <div id="teamTableWeekDetails">
+            <!-- Team table will be dynamically inserted here -->
+            <div class="alert alert-info">Select season, league, and match day to view team details</div>
+        </div>
+    </div>
+</div>
+
 
 {% endblock %}
 
@@ -107,11 +130,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-
-
-    // Add event listeners to update when selection changes
-    document.querySelectorAll('input[name="season"], input[name="league"], input[name="matchDay"]')
-    .forEach(input => input.addEventListener('change', updatePositionHistory));
 
     function updateTable() {
         const selectedSeason = document.querySelector('input[name="season"]:checked')?.value;
@@ -257,6 +275,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     // Update table with selected match day
                     updateLeagueStandingsTable();
                     updateHistoryTable();
+                    updateTeamWeekDetails();
                 });
         }
     }
@@ -408,32 +427,74 @@ if (document.querySelector('input[name="season"]:checked') &&
 }
 }
 
-function updatePositionHistory() {
-    return
+
+function updateTeamWeekDetails() {
     const selectedSeason = document.querySelector('input[name="season"]:checked')?.value;
     const selectedLeague = document.querySelector('input[name="league"]:checked')?.value;
     const currentWeek = document.querySelector('input[name="matchDay"]:checked')?.value;
-    
+    const team = document.querySelector('input[name="team"]:checked')?.value;
+
+    console.log("Updating team week details...");
     console.log("Season:", selectedSeason);
     console.log("League:", selectedLeague);
     console.log("Week:", currentWeek);
-    
+    console.log("Team:", team);
+
     if (!selectedSeason || !selectedLeague || !currentWeek) {
         console.log("Missing required selection");
+        document.getElementById('teamTableWeekDetails').innerHTML = 
+            '<div class="alert alert-warning">Please select season, league, and match day</div>';
         return;
     }
+
+
+    document.querySelector('#teamTableWeekDetails').closest('.card')
+        .querySelector('.card-header h5').textContent = `Results for Team ${team} in week ${currentWeek}`;
     
-    const depth = parseInt(currentWeek);  // Convert to number
+
+    document.getElementById('teamTableWeekDetails').innerHTML = 
+        '<div class="text-center"><div class="spinner-border" role="status"></div></div>';
     
-    fetch(`/league/get_position_history?season=${selectedSeason}&league=${selectedLeague}&week=${currentWeek}&depth=${currentWeek}`)
-        .then(response => response.json())
-        .then(data => {
-            updateHistoryTable(data);
+    fetch(`/league/get_team_week_details?season=${selectedSeason}&league=${selectedLeague}&team=${team}&week=${currentWeek}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
         })
-        .catch(error => console.error('Error:', error));
+        .then(response => {
+            console.log("Received data:", response);
+            
+            if (!response.config) {
+                throw new Error('Invalid response structure: missing config');
+            }
+
+            // Convert formatter strings to functions
+            response.config.columns.forEach(col => {
+                if (typeof col.formatter === 'string') {
+                    try {
+                        // Create a proper function from the string
+                        col.formatter = new Function('value', 'row', `return ${col.formatter}`);
+                    } catch (e) {
+                        console.error(`Error creating formatter for column ${col.key}:`, e);
+                        col.formatter = value => value; // Fallback formatter
+                    }
+                }
+            });
+
+            // Create the table
+            const tableHtml = createTable(response.config);
+            document.getElementById('teamTableWeekDetails').innerHTML = tableHtml;
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            document.getElementById('teamTableWeekDetails').innerHTML = 
+                `<div class="alert alert-danger">
+                    Error loading team details: ${error.message}<br>
+                    Please try again or contact support if the problem persists.
+                </div>`;
+        });
 }
-
-
 
 function updatePositionTable(data) {
     const table = document.getElementById('positionHistoryTable');
@@ -552,7 +613,7 @@ function updateLeagueStandingsTable() {
 }
 
 
-
+/*
 // Add event listeners
 document.querySelectorAll('input[name="season"], input[name="league"], input[name="matchDay"]')
     .forEach(input => input.addEventListener('change', updateHistoryTable));
@@ -560,8 +621,81 @@ document.querySelectorAll('input[name="season"], input[name="league"], input[nam
 document.querySelectorAll('input[name="season"], input[name="league"], input[name="matchDay"]')
     .forEach(input => input.addEventListener('change', updateLeagueStandingsTable));
 
+document.querySelectorAll('input[name="season"], input[name="league"], input[name="matchDay"]')
+    .forEach(input => input.addEventListener('change', updateTeamWeekDetails));
+
+
 // Initial load
 document.addEventListener('DOMContentLoaded', updateHistoryTable);
 document.addEventListener('DOMContentLoaded', updateLeagueStandingsTable);
+document.addEventListener('DOMContentLoaded', updateTeamWeekDetails);
+*/
+// Event listeners for filter changes
+function setupEventListeners() {
+    const filters = document.querySelectorAll('input[name="season"], input[name="league"], input[name="matchDay"], input[name="team"]');
+    
+    filters.forEach(input => {
+        input.addEventListener('change', () => {
+            console.log(`Filter changed: ${input.name} = ${input.value}`);
+            updateTeamWeekDetails();
+        });
+    });
+}
+
+// Initial load
+document.addEventListener('DOMContentLoaded', () => {
+    console.log("DOM Content Loaded - Setting up team details");
+    setupEventListeners();
+    updateTeamWeekDetails();
+});
+
+function updateTeamButtons() {
+    const selectedSeason = document.querySelector('input[name="season"]:checked')?.value;
+    const selectedLeague = document.querySelector('input[name="league"]:checked')?.value;
+    const currentTeam = document.querySelector('input[name="team"]:checked')?.value;
+    
+    if (selectedSeason && selectedLeague) {
+        fetch(`/league/get_available_teams?season=${selectedSeason}&league=${selectedLeague}`)
+            .then(response => response.json())
+            .then(teams => {
+                const teamButtons = document.getElementById('teamButtons');
+                
+                // Create team buttons
+                const buttonsHtml = teams.map(team => `
+                    <input type="radio" class="btn-check" name="team" id="team_${team}" value="${team}">
+                    <label class="btn btn-outline-primary" for="team_${team}">${team}</label>
+                `).join('');
+                
+                teamButtons.innerHTML = buttonsHtml;
+                
+                // Select team: keep current if available, otherwise take first
+                if (currentTeam && teams.includes(currentTeam)) {
+                    document.getElementById(`team_${currentTeam}`).checked = true;
+                } else if (teams.length > 0) {
+                    document.getElementById(`team_${teams[0]}`).checked = true;
+                }
+                
+                // Update relevant tables/charts
+                updateLeagueStandingsTable();
+                updateHistoryTable();
+                updateTeamWeekDetails();
+
+                // Add listeners to new team buttons
+                document.querySelectorAll('input[name="team"]')
+                    .forEach(input => input.addEventListener('change', updateTeamWeekDetails));
+            });
+    }
+}
+
+// Add event listeners
+document.querySelectorAll('input[name="season"], input[name="league"]')
+    .forEach(input => input.addEventListener('change', updateTeamButtons));
+
+// Add event listeners for team selection
+document.addEventListener('change', function(event) {
+    if (event.target.name === 'team') {
+        updateTeamWeekDetails();
+    }
+});
 </script>
 {% endblock %}

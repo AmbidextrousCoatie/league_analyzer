@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 from data_access.adapters.data_adapter_factory import DataAdapterFactory, DataAdapterSelector   
 from typing import List
 from data_access.schema import Columns, ColumnsExtra
@@ -126,6 +127,15 @@ class Server:
         for current_week in range(week-depth, week):
             pass
 
+    def get_team_week(self, league_name: str, season: str, team_name: str,week: int) -> pd.DataFrame:
+        filters_eq = {Columns.league_name: league_name, Columns.team_name: team_name, Columns.season: season, Columns.week: week}
+        
+        
+        columns = [Columns.score, Columns.points, Columns.week]
+
+
+        return self.data_adapter.get_filtered_data(columns=columns, filters_eq=filters_eq)
+
     def get_league_week(self, league_name: str, season: str, week: int) -> pd.DataFrame:
         """
         High level database query.
@@ -210,4 +220,236 @@ class Server:
         data_league[Columns.points] += data_team[Columns.points]
         data_league[ColumnsExtra.score_average] = round(data_player[Columns.score] / number_of_games, 2)
         #print(data_league)
+
+    def get_team_week_details(self, league_name: str, season: str, team_name: str, week: int) -> dict:
+        """Get detailed team results for a specific week including individual and team stats"""
+        
+        # Get individual player results
+        player_filters = {
+            Columns.league_name: league_name,
+            Columns.season: season,
+            Columns.team_name: team_name,
+            Columns.week: week,
+            Columns.computed_data: False
+        }
+        
+        player_opponent_filters = {
+            Columns.league_name: league_name,
+            Columns.season: season,
+            Columns.team_name_opponent: team_name,
+            Columns.week: week,
+            Columns.computed_data: False
+        }
+
+        player_columns = [
+            Columns.player_name,
+            Columns.score,
+            Columns.points,
+            Columns.team_name_opponent,
+            Columns.match_number,
+            Columns.position, 
+            Columns.week
+        ]
+        
+        player_data = self.data_adapter.get_filtered_data(
+            columns=player_columns,
+            filters_eq=player_filters
+        )
+        print("player_data: \n" + str(player_data))
+        
+        player_opponent_data = self.data_adapter.get_filtered_data(
+            columns=player_columns,
+            filters_eq=player_opponent_filters
+        )
+        print("player_opponent_data: \n" + str(player_opponent_data))
+
+        # Get team results
+        team_filters = {
+            Columns.league_name: league_name,
+            Columns.season: season,
+            Columns.team_name: team_name,
+            Columns.week: week,
+            Columns.computed_data: True
+        }
+
+        team_opponent_filters = {
+            Columns.league_name: league_name,
+            Columns.season: season,
+            Columns.team_name_opponent: team_name,
+            Columns.week: week,
+            Columns.computed_data: True
+        }
+        
+        columns_team = [Columns.score, Columns.points, Columns.team_name, Columns.team_name_opponent, Columns.week]
+
+
+
+        team_data = self.data_adapter.get_filtered_data(
+            columns=columns_team,
+            filters_eq=team_filters
+        )
+        print("team_data: \n" + str(team_data))
+        
+
+        team_opponent_data = self.data_adapter.get_filtered_data(
+            columns=columns_team,
+            filters_eq=team_opponent_filters
+        )
+        print("team_opponent_data: \n" + str(team_opponent_data))
+
+        # Get number of games
+        n_games = len(player_data[Columns.team_name_opponent].unique())
+        
+        # Prepare player rows
+        rows = []
+        # Group by player to get their games
+        player_groups = player_data.groupby(Columns.player_name)
+        
+        for player_name, player_games in player_groups:
+            player_row = {
+                'type': 'player',
+                'Position': int(player_games[Columns.position].iloc[0]),  # Get player's position
+                'Name': player_name
+            }
+            
+            # Add each game's scores and points
+            for game_idx, (_, game) in enumerate(player_games.iterrows(), 1):
+                player_row[f'Score_{game_idx}'] = int(game[Columns.score])
+                player_row[f'Points_{game_idx}'] = float(round(game[Columns.points], 1))
+                
+            # Add totals
+
+            player_row.update({
+                'Points_Total': float(round(player_games[Columns.points].sum(), 1)),
+                'Score_Total': int(player_games[Columns.score].sum()),
+                'Score_Average': float(round(player_games[Columns.score].mean(), 2)) if not np.isnan(player_games[Columns.score].mean()) else 0
+            })
+            
+            rows.append(player_row)
+        
+        # Add team row
+        team_row = {
+            'type': 'team',
+            'Position': '-',
+            'Name': team_name
+        }
+
+        opponent_row = {
+            'type': 'opponent',
+            'Position': '-',
+            'Name': 'Opponents'
+        }
+        
+        # Add team scores and points for each game
+        for game_idx, (_, game) in enumerate(team_data.iterrows(), 1):
+            team_row[f'Score_{game_idx}'] = int(game[Columns.score])
+            team_row[f'Points_{game_idx}'] = float(round(game[Columns.points], 1))
+        
+
+        # Add opponent scores and points for each game
+        for game_idx, (_, game) in enumerate(team_opponent_data.iterrows(), 1):
+            opponent_row[f'Score_{game_idx}'] = int(game[Columns.score])
+            opponent_row[f'Points_{game_idx}'] = float(round(game[Columns.points], 1))
+
+        # Add team totals
+        team_row.update({
+            'Points_Total': float(round(team_data[Columns.points].sum(), 1)),
+            'Score_Total': int(team_data[Columns.score].sum()),
+            'Score_Average': float(round(player_data[Columns.score].mean(), 2)) if not np.isnan(team_data[Columns.score].mean()) else 0
+        })
+
+        # Add opponent totals
+        opponent_row.update({
+            'Points_Total': float(round(team_opponent_data[Columns.points].sum(), 1)),
+            'Score_Total': int(team_opponent_data[Columns.score].sum()),
+            'Score_Average': float(round(team_opponent_data[Columns.score].mean(), 2)) if not np.isnan(team_opponent_data[Columns.score].mean()) else 0
+        })
+        
+        rows.append(team_row)
+        rows.append(opponent_row)
+
+        # Prepare header groups for the table
+        header_groups = [
+            { 'title': 'Player', 'colspan': 2 }
+        ]
+        
+        # Add game columns
+        for game_idx in range(1, n_games + 1):
+            header_groups.append({ 
+                'title': f'Game {game_idx}', 
+                'colspan': 2 
+            })
+        
+        # Add totals column
+        header_groups.append({ 
+            'title': 'Total', 
+            'colspan': 3 
+        })
+
+        # Create columns based on number of games
+        columns = [
+            {
+                'key': 'Position',
+                'title': 'Pos',
+                'className': 'text-center'
+            },
+            {
+                'key': 'Name',
+                'title': 'Name',
+                'className': 'text-start'
+            }
+        ]
+        
+        # Add columns for each game
+        for game_idx in range(1, n_games + 1):
+            columns.extend([
+                {
+                    'key': f'Score_{game_idx}',
+                    'title': 'Score',
+                    'className': 'text-center'
+                },
+                {
+                    'key': f'Points_{game_idx}',
+                    'title': 'Pts',
+                    'className': 'text-center'
+                }
+            ])
+        
+        # Add total columns
+        columns.extend([
+            {
+                'key': 'Points_Total',
+                'title': 'Points',
+                'className': 'text-center'
+            },
+            {
+                'key': 'Score_Total',
+                'title': 'Score',
+                'className': 'text-center'
+            },
+            {
+                'key': 'Score_Average',
+                'title': 'Avg',
+                'className': 'text-center',
+                'formatter': '(value || 0).toFixed(1)'
+            }
+        ])
+
+        # Create the complete table configuration matching the component's expected structure
+        table_config = {
+            'data': rows,  # The actual data rows
+            'columns': columns,  # Column definitions
+            'headerGroups': header_groups,  # Header group definitions
+            'rowNumbering': False,  # Disable row numbers
+            'positionChange': False,  # Disable position change indicators
+            'metadata': {  # Additional metadata
+                'league': league_name,
+                'season': season,
+                'week': week,
+                'location': 'TBD'
+            }
+        }
+        print(table_config)
+        return table_config
+
 

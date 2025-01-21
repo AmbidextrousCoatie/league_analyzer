@@ -99,7 +99,7 @@ class DataAdapterPandas(DataAdapter):
         
         try:
             # Get unique weeks, sort them, and convert to list
-            weeks = sorted(self.df[Columns.week].unique().tolist())
+            weeks = sorted(filtered_df[Columns.week].unique().tolist())
             # Filter out None/NaN values if any
             weeks = [week for week in weeks if week is not None]
             #print(f"Available weeks: {weeks}")  # Debug output

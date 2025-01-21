@@ -30,9 +30,9 @@ class LeagueService:
         """Returns all possible leagues"""
         return self.server.get_leagues()
 
-    def get_weeks(self):
+    def get_weeks(self, league_name:str=None, season:str=None):
         """Returns all possible match days"""
-        return self.server.get_weeks()
+        return self.server.get_weeks(league_name=league_name, season=season)
 
     def get_teams_in_league_season(self, league_name:str, season:str, debug_output:bool=False) -> List[str]:
         return self.server.get_teams_in_league_season(league_name=league_name, season=season, debug_output=debug_output)
@@ -76,9 +76,9 @@ class LeagueService:
             if debug_output:
                 print("team : " + str(team))
                 print(group)
-                points = float(round(group[Columns.points].sum(), 1))
-                score = int(group[Columns.score].sum())
-                score_average = float(round(group[ColumnsExtra.score_average].sum() / len(group), 2))
+            points = float(round(group[Columns.points].sum(), 1))
+            score = int(group[Columns.score].sum())
+            score_average = float(round(group[ColumnsExtra.score_average].sum() / len(group), 2))
 
             for row in group.to_dict('records'):
                 rows_to_extract = [row[col] for col in columns_per_day]
@@ -132,6 +132,14 @@ class LeagueService:
         #print(data_collected)
 
         return data_collected 
+
+
+    def get_team_week_details(self, league:str, season:str, team:str, week:int) -> Response:
+        return(self.server.get_team_week_details(league_name=league, season=season, team_name=team, week=week))
+
+        
+
+
 
     def get_league_standings_table_deprecated(self, league:str, season:str, week:int=None, depth:int=None) -> Response:     
         """Get standings of a leagaue up to a specific match day"""

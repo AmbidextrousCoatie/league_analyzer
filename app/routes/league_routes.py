@@ -58,6 +58,16 @@ def get_table():
         print(f"Traceback: {traceback.format_exc()}")  # This will show the full error trace
         return jsonify({"error": str(e)}), 500
 
+
+@bp.route('/league/get_available_teams')
+def get_available_teams():
+    try:
+        season = request.args.get('season')
+        league = request.args.get('league')
+        return jsonify(league_service.get_teams_in_league_season(league, season))
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 @bp.route('/league/get_available_matchdays')
 def get_available_matchdays():
     try:
@@ -67,15 +77,9 @@ def get_available_matchdays():
         if not season or not league:
             return jsonify({"error": "Season and league are required"}), 400
             
-        filters = {
-            Columns.season: season,
-            Columns.league_name: league,
-            Columns.input_data: True
-        }
-        
         # Get available match days for this combination
         #df_filtered = query_database(league_service.df, filters)
-        available_matchdays = league_service.get_weeks()
+        available_matchdays = league_service.get_weeks(league_name=league, season=season)
         
         return jsonify({"matchdays": available_matchdays})
     except Exception as e:
@@ -92,7 +96,7 @@ def get_league_history():
         league = request.args.get('league')
         week = request.args.get('week')
         
-        print(f"League History: Received request with: season={season}, league={league}, week={week}")
+        print(f"League History - Received request with: season={season}, league={league}, week={week}")
         
 
 
@@ -107,12 +111,12 @@ def get_league_history():
             season=season,
             week=week,
             depth=week,
-            debug_output=True
+            debug_output=False
         )
 
         transformed_data = DataDict().transform_dict(table_data)
 
-        print(transformed_data.to_dict())
+        # print(transformed_data.to_dict())
         return jsonify(transformed_data.to_dict())  # Make sure to jsonify the response
         
     except Exception as e:
@@ -127,7 +131,7 @@ def get_league_standings():
         #week should be int
         week = int(request.args.get('week'))
         #print("get_league_standings")
-        print(f"League Standings: Received request with: season={season}, league={league}, week={week}")
+        print(f"League Standings - Received request with: season={season}, league={league}, week={week}")
         
         if not season or not league:
             return jsonify({"error": "Season and league are required"}), 400
@@ -152,3 +156,20 @@ def get_league_standings():
         print(f"Error in get_league_standings: {str(e)}")
         print(f"Traceback: {traceback.format_exc()}")  # This will show the full error trace
         return jsonify({"error": str(e)}), 500
+
+@bp.route('/league/get_team_week_details')
+def get_team_week_details():
+    
+    season = request.args.get('season')
+    week = request.args.get('week')
+    team = request.args.get('team')
+    league = request.args.get('league')
+    
+    print(f"Team Week Details - Received request with: season={season}, league={league}, week={week}")
+
+    week = int(request.args.get('week'))
+    print(f"League: {league}, Season: {season}, Team: {team}, Week: {week}")
+    details = league_service.get_team_week_details(league, season, team, week)
+    print(details)
+
+    return jsonify({'config': details})

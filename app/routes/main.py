@@ -26,7 +26,7 @@ def league_stats(analysis):
 @bp.route('/team/<analysis>')
 def team_stats(analysis):
     season = session.get('selected_season', 'all')
-    return render_template('team.html', analysis=analysis, season=season)
+    return render_template('team/stats.html', analysis=analysis, season=season)
 
 @bp.route('/player/<analysis>')
 def player_stats(analysis):
