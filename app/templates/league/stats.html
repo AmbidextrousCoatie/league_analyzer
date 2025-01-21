@@ -88,6 +88,25 @@
     </div>
 </div>
 
+<!-- Add the new card after the history table card -->
+<div class="card mt-3">
+    <div class="card-header">
+        <h5>Points per Week</h5>
+    </div>
+    <div class="card-body">
+        <canvas id="pointsChart"></canvas>
+    </div>
+</div>
+
+<!-- Add after the points per week chart -->
+<div class="card mt-3">
+    <div class="card-header">
+        <h5>Cumulative Points Development</h5>
+    </div>
+    <div class="card-body">
+        <canvas id="cumulativePointsChart"></canvas>
+    </div>
+</div>
 
 {% endblock %}
 
@@ -172,6 +191,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     updateTableLeagueStandings();
                     updateTableLeagueHistory();
                     updateTableTeamDetails();
+                    
                 });
         }
     }
@@ -459,9 +479,12 @@ function updateTableLeagueHistory() {
             // Call the createTable function from components/tables.html
             const tableHtml = createTable(tableConfig);
             document.getElementById('leagueTableHistory').innerHTML = tableHtml;
+            
+            // Update chart
+            updatePointsChart(data);
+            updateCumulativePointsChart(data);
         })
         .catch(error => console.error('Error:', error));
-
 }
 
 function updateTableLeagueStandings() {
@@ -593,5 +616,157 @@ document.addEventListener('change', function(event) {
         updateTableTeamDetails();
     }
 });
+
+function updatePointsChart(data) {
+    // Get the canvas element
+    const canvas = document.getElementById('pointsChart');
+    
+    // Destroy existing chart if it exists
+    if (window.pointsChart instanceof Chart) {
+        window.pointsChart.destroy();
+    }
+    
+    // Extract teams and their point progression
+    const teams = [...new Set(data.data.map(row => row[0]))];  // Get unique team names
+    const weekCount = (data.headerGroups.length - 2);  // Subtract Team and Total columns
+    
+    // Create datasets for each team
+    const datasets = teams.map(team => {
+        const teamData = data.data.find(row => row[0] === team);
+        const points = [];
+        
+        // Extract only points (every 3rd value, starting from index 3)
+        for (let i = 0; i < weekCount; i++) {
+            const pointsIndex = (i * 2) + 2;  // Skip team name, and take every 3rd value (Score, Average, Points)
+            points.push(teamData[pointsIndex]);  // +2 to get to Points after Score and Average
+        }
+        
+        // Generate a random color for the team
+        const color = `hsl(${Math.random() * 360}, 70%, 50%)`;
+        
+        return {
+            label: team,
+            data: points,
+            borderColor: color,
+            backgroundColor: color,
+            tension: 0.1
+        };
+    });
+
+    // Create new chart
+    const ctx = canvas.getContext('2d');
+    window.pointsChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: Array.from({length: weekCount}, (_, i) => `Week ${i + 1}`),
+            datasets: datasets
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Points Development Over Time'
+                },
+                legend: {
+                    position: 'right'
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Points'
+                    }
+                },
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Week'
+                    }
+                }
+            }
+        }
+    });
+}
+
+function updateCumulativePointsChart(data) {
+    // Get the canvas element
+    const canvas = document.getElementById('cumulativePointsChart');
+    
+    // Destroy existing chart if it exists
+    if (window.cumulativePointsChart instanceof Chart) {
+        window.cumulativePointsChart.destroy();
+    }
+    
+    // Extract teams and their point progression
+    const teams = [...new Set(data.data.map(row => row[0]))];
+    const weekCount = (data.headerGroups.length - 2);
+    
+    // Create datasets for each team
+    const datasets = teams.map(team => {
+        const teamData = data.data.find(row => row[0] === team);
+        const points = [];
+        let cumulativePoints = 0;
+        
+        // Extract points and accumulate them
+        for (let i = 0; i < weekCount; i++) {
+            const pointsIndex = (i * 2) + 2;
+            const weekPoints = parseFloat(teamData[pointsIndex]); // +2 to get Points after Score and Average
+            cumulativePoints += weekPoints;
+            points.push(cumulativePoints);
+        }
+        
+        // Generate a random color for the team (use same color as previous chart)
+        const color = `hsl(${Math.random() * 360}, 70%, 50%)`;
+        
+        return {
+            label: team,
+            data: points,
+            borderColor: color,
+            backgroundColor: color,
+            tension: 0.1
+        };
+    });
+
+    // Create new chart
+    const ctx = canvas.getContext('2d');
+    window.cumulativePointsChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: Array.from({length: weekCount}, (_, i) => `Week ${i + 1}`),
+            datasets: datasets
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Cumulative Points Over Time'
+                },
+                legend: {
+                    position: 'right'
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Total Points'
+                    }
+                },
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Week'
+                    }
+                }
+            }
+        }
+    });
+}
+
 </script>
 {% endblock %}
