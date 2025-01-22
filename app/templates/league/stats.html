@@ -11,61 +11,36 @@
     <div class="card-body">
         <div class="row">
             <!-- Navigation Section -->
-            <div class="col-md-2">
+            <div class="col-md-6">
                 <div class="mb-2">
                     <h5>Season</h5>
-                    <div class="btn-group-vertical w-100" role="group" id="seasonButtons">
+                    <div class="btn-group-horizontal w-100" role="group" id="seasonButtons">
                         {% for season in seasons %}
                         <input type="radio" class="btn-check" name="season" id="season_{{ season }}" value="{{ season }}">
                         <label class="btn btn-outline-primary text-start" for="season_{{ season }}">{{ season }}</label>
                         {% endfor %}
                     </div>
                 </div>
-
+            </div>
+            <div class="col-md-6">
                 <div class="mb-2">
                     <h5>League</h5>
-                    <div class="btn-group-vertical w-100" role="group" id="leagueButtons">
+                    <div class="btn-group-horizontal w-100" role="group" id="leagueButtons">
                         {% for league in leagues %}
                         <input type="radio" class="btn-check" name="league" id="league_{{ league }}" value="{{ league }}">
                         <label class="btn btn-outline-primary text-start" for="league_{{ league }}">{{ league }}</label>
                         {% endfor %}
                     </div>
                 </div>
-
-                <div class="mb-2">
-                    <h5>Match Day</h5>
-                    <div class="btn-group" role="group" id="matchDayButtons">
-                        {% for week in weeks %}
-                        <input type="radio" class="btn-check" name="matchDay" id="matchDay_{{ week }}" value="{{ week }}">
-                        <label class="btn btn-outline-primary" for="matchDay_{{ week }}">{{ week }}</label>
-                        {% endfor %}
-                    </div>
-                </div>
-
-                <!-- Team Selection -->
-                <div class="mb-2">
-                    <h5>Team</h5>
-                    <div class="btn-group-vertical w-100" role="group" id="teamButtons">
-                        <!-- Team buttons will be dynamically inserted here -->
-                    </div>
-                </div>
             </div>
-
-            <!-- Content Section -->
-            <div class="col-md-8">
-                <h5>League Standings 2.0</h5>
-                <div id="leagueTableStandings">
-                    <!-- Table will be dynamically inserted here -->
-                </div>
-            </div>
-        </div>
+        </div> 
     </div>
 </div>
 
 <!-- League History Table -->
 <div class="card">
     <div class="card-header">
-        <h5>League History</h5>
+        <h5>League Standings</h5>
     </div>
     <div class="card-body">
         <div id="leagueTableHistory">
@@ -74,6 +49,65 @@
     </div>
 </div>
 
+<!-- Points Charts Container -->
+<div class="card mb-3">
+    <div class="card-header">
+        <h5>Points over Time</h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <!-- Points per Week Chart -->
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <h5>Points per Week</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="pointsChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Cumulative Points Chart -->
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <h5>Cumulative Points Development</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="cumulativePointsChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Shared Legend -->
+        <div class="row mt-3">
+            <div class="col-12">
+                <div id="sharedLegend" class="d-flex justify-content-center flex-wrap">
+                    <!-- Legend will be dynamically inserted here -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="mb-2">
+    <h5>Match Day</h5>
+    <div class="btn-group" role="group" id="matchDayButtons">
+        {% for week in weeks %}
+        <input type="radio" class="btn-check" name="matchDay" id="matchDay_{{ week }}" value="{{ week }}">
+        <label class="btn btn-outline-primary" for="matchDay_{{ week }}">{{ week }}</label>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Team Selection -->
+<div class="mb-2">
+    <h5>Team</h5>
+    <div class="btn-group-vertical w-100" role="group" id="teamButtons">
+        <!-- Team buttons will be dynamically inserted here -->
+    </div>
+</div>
 <!-- League Team Table -->
 <div class="card">
     <div class="card-header">
@@ -88,23 +122,22 @@
     </div>
 </div>
 
-<!-- Add the new card after the history table card -->
-<div class="card mt-3">
-    <div class="card-header">
-        <h5>Points per Week</h5>
-    </div>
-    <div class="card-body">
-        <canvas id="pointsChart"></canvas>
-    </div>
-</div>
 
-<!-- Add after the points per week chart -->
-<div class="card mt-3">
+
+
+<div class="card">
     <div class="card-header">
-        <h5>Cumulative Points Development</h5>
+        <h4>League Standings + single week</h4>
     </div>
     <div class="card-body">
-        <canvas id="cumulativePointsChart"></canvas>
+        <div class="row">
+            <!-- Content Section -->
+            <div class="col-md-8">
+                <div id="leagueTableStandings">
+                    <!-- Table will be dynamically inserted here -->
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -198,6 +231,28 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 let positionChart = null;
+
+// Color mapping function
+const teamColors = {};
+
+function getTeamColor(team) {
+    if (!teamColors[team]) {
+        // Generate and store a color for this team
+        teamColors[team] = `hsl(${Object.keys(teamColors).length * 137.508}deg, 70%, 50%)`;
+    }
+    return teamColors[team];
+}
+
+function updateSharedLegend(teams) {
+    const legendHtml = teams.map(team => `
+        <div class="mx-3 mb-2 d-flex align-items-center">
+            <div style="width: 20px; height: 20px; background-color: ${getTeamColor(team)}; margin-right: 8px;"></div>
+            <span>${team}</span>
+        </div>
+    `).join('');
+    
+    document.getElementById('sharedLegend').innerHTML = legendHtml;
+}
 
 function updatePositionChart() {
     const selectedSeason = document.querySelector('input[name="season"]:checked')?.value;
@@ -642,7 +697,7 @@ function updatePointsChart(data) {
         }
         
         // Generate a random color for the team
-        const color = `hsl(${Math.random() * 360}, 70%, 50%)`;
+        const color = getTeamColor(team);
         
         return {
             label: team,
@@ -669,7 +724,7 @@ function updatePointsChart(data) {
                     text: 'Points Development Over Time'
                 },
                 legend: {
-                    position: 'right'
+                    display: false  // Hide individual chart legend
                 }
             },
             scales: {
@@ -689,6 +744,9 @@ function updatePointsChart(data) {
             }
         }
     });
+    
+    // Update shared legend
+    updateSharedLegend(teams);
 }
 
 function updateCumulativePointsChart(data) {
@@ -719,7 +777,7 @@ function updateCumulativePointsChart(data) {
         }
         
         // Generate a random color for the team (use same color as previous chart)
-        const color = `hsl(${Math.random() * 360}, 70%, 50%)`;
+        const color = getTeamColor(team);
         
         return {
             label: team,
@@ -746,7 +804,7 @@ function updateCumulativePointsChart(data) {
                     text: 'Cumulative Points Over Time'
                 },
                 legend: {
-                    position: 'right'
+                    display: false  // Hide individual chart legend
                 }
             },
             scales: {
