@@ -826,5 +826,124 @@ function updateCumulativePointsChart(data) {
     });
 }
 
+function createTable(config) {
+    const {
+        data,
+        columns,
+        headerGroups = [],  // This contains the actual colspan values
+        rowNumbering = true,
+        positionChange = false
+    } = config;
+
+    let currentData = [...data];
+
+    // Get colors for groups using #2196F3 as end color
+    const getGroupColors = () => {
+        const endColor = '#7ec2f8';  // Bootstrap primary blue
+        const startRGB = [255, 255, 255];  // white
+        const endRGB = hexToRgb(endColor);
+        
+        return headerGroups.map((_, index) => {
+            if (index === 0) return 'rgb(255, 255, 255)';  // First group is white
+            if (index === headerGroups.length - 1) return endColor;  // Last group is primary blue
+            
+            const factor = index / (headerGroups.length - 1);
+            const r = Math.round(startRGB[0] + (endRGB[0] - startRGB[0]) * factor);
+            const g = Math.round(startRGB[1] + (endRGB[1] - startRGB[1]) * factor);
+            const b = Math.round(startRGB[2] + (endRGB[2] - startRGB[2]) * factor);
+            
+            return `rgb(${r}, ${g}, ${b})`;
+        });
+    };
+
+    const hexToRgb = (hex) => {
+        hex = hex.replace(/^#/, '');
+        const bigint = parseInt(hex, 16);
+        const r = (bigint >> 16) & 255;
+        const g = (bigint >> 8) & 255;
+        const b = bigint & 255;
+        return [r, g, b];
+    };
+
+    const colors = getGroupColors();
+
+    // Create mappings for column colors and last group columns
+    const columnColors = {};
+    const lastGroupColumns = {};
+    let currentColumn = 0;
+    headerGroups.forEach((group, groupIndex) => {
+        const isLastGroup = groupIndex === headerGroups.length - 1;
+        const colspan = group.colspan || 1;  // Get actual colspan from the group
+        for (let i = 0; i < colspan; i++) {
+            columnColors[currentColumn] = colors[groupIndex];
+            lastGroupColumns[currentColumn] = isLastGroup;
+            currentColumn++;
+        }
+    });
+
+    const createHeaderGroups = () => {
+        if (!headerGroups || headerGroups.length === 0) return '';
+        
+        return `
+            <tr>
+                ${headerGroups.map((group, index) => `
+                    <th class="text-center" 
+                        colspan="${group.colspan || 1}" 
+                        style="background-color: ${colors[index]}; 
+                               color: ${index === headerGroups.length - 1 ? 'white' : 'black'};">
+                        ${group.title || ''}
+                    </th>
+                `).join('')}
+            </tr>
+        `;
+    };
+
+    const createColumnHeaders = () => {
+        return `
+            <tr>
+                ${columns.map((col, index) => `
+                    <th class="text-center" 
+                        style="background-color: ${columnColors[index]};
+                               color: ${lastGroupColumns[index] ? 'white' : 'black'};
+                               font-weight: ${lastGroupColumns[index] ? 'bold' : 'normal'};">
+                        ${col.title || ''}
+                    </th>
+                `).join('')}
+            </tr>
+        `;
+    };
+
+    const createTableRows = () => {
+        return currentData.map((row, rowIndex) => `
+            <tr>
+                ${columns.map((col, colIndex) => `
+                    <td class="text-center" 
+                        style="background-color: ${columnColors[colIndex]};
+                               color: ${lastGroupColumns[colIndex] ? 'white' : 'black'};
+                               font-weight: ${lastGroupColumns[colIndex] ? 'bold' : 'normal'};
+                               border-right: ${(colIndex < columns.length - 1 && 
+                                              columnColors[colIndex] !== columnColors[colIndex + 1]) 
+                                             ? '2px solid #dee2e6' 
+                                             : '1px solid #dee2e6'};">
+                        ${row[colIndex] !== undefined ? row[colIndex] : ''}
+                    </td>
+                `).join('')}
+            </tr>
+        `).join('');
+    };
+
+    return `
+        <table class="table">
+            <thead>
+                ${createHeaderGroups()}
+                ${createColumnHeaders()}
+            </thead>
+            <tbody>
+                ${createTableRows()}
+            </tbody>
+        </table>
+    `;
+}
+
 </script>
 {% endblock %}
