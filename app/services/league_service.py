@@ -45,7 +45,7 @@ class LeagueService:
         if debug_output:
             print("get_league_history_table")
             print("league_name: " + league_name + " season: " + season + " week: " + str(week) + " depth: " + str(depth))
-        data = self.server.get_league_history(league_name=league_name, season=season, week=week, depth=depth, debug_output=debug_output)
+        data = self.server.get_league_history(league_name=league_name, season=season, week=week, depth=-1, debug_output=debug_output)
         # find all weeks
         weeks = data[Columns.week].unique()
         # groupby week

@@ -59,17 +59,8 @@ def get_table():
         return jsonify({"error": str(e)}), 500
 
 
-@bp.route('/league/get_available_teams')
-def get_available_teams():
-    try:
-        season = request.args.get('season')
-        league = request.args.get('league')
-        return jsonify(league_service.get_teams_in_league_season(league, season))
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-@bp.route('/league/get_available_matchdays')
-def get_available_matchdays():
+@bp.route('/api/league/available_weeks')
+def get_available_weeks():
     try:
         season = request.args.get('season')
         league = request.args.get('league')
@@ -77,15 +68,24 @@ def get_available_matchdays():
         if not season or not league:
             return jsonify({"error": "Season and league are required"}), 400
             
-        # Get available match days for this combination
-        #df_filtered = query_database(league_service.df, filters)
-        available_matchdays = league_service.get_weeks(league_name=league, season=season)
-        
-        return jsonify({"matchdays": available_matchdays})
+        weeks = league_service.get_weeks(league_name=league, season=season)
+        return jsonify(weeks)
     except Exception as e:
-        print(f"Error getting available match days: {str(e)}")
         return jsonify({"error": str(e)}), 500
 
+@bp.route('/api/league/available_teams')
+def get_available_teams():
+    try:
+        season = request.args.get('season')
+        league = request.args.get('league')
+        
+        if not season or not league:
+            return jsonify({"error": "Season and league are required"}), 400
+            
+        teams = league_service.get_teams_in_league_season(league, season)
+        return jsonify(teams)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 @bp.route('/league/get_league_history')
 def get_league_history():
@@ -94,24 +94,25 @@ def get_league_history():
         # print("GOTCHA!")
         season = request.args.get('season')
         league = request.args.get('league')
-        week = request.args.get('week')
+        #week = request.args.get('week')
         
-        print(f"League History - Received request with: season={season}, league={league}, week={week}")
+        #print(f"League History - Received request with: season={season}, league={league}, week={week}")
+        print(f"League History - Received request with: season={season}, league={league}")
         
 
 
         if not all([season, league]):
             return jsonify({'error': 'Missing required parameters'}), 400
             
-        week = int(week) if week is not None else 0
+        #week = int(week) if week is not None else 0
         
         # Use LeagueService
         table_data = league_service.get_league_history_table(
             league_name=league,
             season=season,
-            week=week,
-            depth=week,
-            debug_output=False
+            week=None,
+            depth=None,
+            debug_output=True
         )
 
         transformed_data = DataDict().transform_dict(table_data)
@@ -170,6 +171,22 @@ def get_team_week_details():
     week = int(request.args.get('week'))
     print(f"League: {league}, Season: {season}, Team: {team}, Week: {week}")
     details = league_service.get_team_week_details(league, season, team, week)
-    print(details)
+    #print(details)
 
     return jsonify({'config': details})
+
+@bp.route('/api/league/available_seasons')
+def get_available_seasons():
+    try:
+        seasons = league_service.get_seasons()
+        return jsonify(seasons)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@bp.route('/api/league/available_leagues')
+def get_available_leagues():
+    try:
+        leagues = league_service.get_leagues()
+        return jsonify(leagues)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500

@@ -97,9 +97,15 @@ class Server:
         """
         if debug_output:
             print("Entering: week: " + str(week) + " | depth: " + str(depth))
+ 
+        if week is None:
+            week = int(max(self.get_weeks(league_name=league_name, season=season)))
+        # history should not be deeper than the current week
         if depth is None:
             depth = 0
-        # history should not be deeper than the current week
+        if depth == -1:
+            depth = week
+ 
         depth = min(depth, week)
         
         if debug_output:
@@ -221,7 +227,7 @@ class Server:
         data_league[ColumnsExtra.score_average] = round(data_player[Columns.score] / number_of_games, 2)
         #print(data_league)
 
-    def get_team_week_details(self, league_name: str, season: str, team_name: str, week: int) -> dict:
+    def get_team_week_details(self, league_name: str, season: str, team_name: str, week: int, debug_output: bool=False) -> dict:
         """Get detailed team results for a specific week including individual and team stats"""
         
         # Get individual player results
@@ -255,13 +261,15 @@ class Server:
             columns=player_columns,
             filters_eq=player_filters
         )
-        print("player_data: \n" + str(player_data))
+        if debug_output:
+            print("player_data: \n" + str(player_data))
         
         player_opponent_data = self.data_adapter.get_filtered_data(
             columns=player_columns,
             filters_eq=player_opponent_filters
         )
-        print("player_opponent_data: \n" + str(player_opponent_data))
+        if debug_output:
+            print("player_opponent_data: \n" + str(player_opponent_data))
 
         # Get team results
         team_filters = {
@@ -288,14 +296,16 @@ class Server:
             columns=columns_team,
             filters_eq=team_filters
         )
-        print("team_data: \n" + str(team_data))
+        if debug_output:
+            print("team_data: \n" + str(team_data))
         
 
         team_opponent_data = self.data_adapter.get_filtered_data(
             columns=columns_team,
             filters_eq=team_opponent_filters
         )
-        print("team_opponent_data: \n" + str(team_opponent_data))
+        if debug_output:
+            print("team_opponent_data: \n" + str(team_opponent_data))
 
         # Get number of games
         n_games = len(player_data[Columns.team_name_opponent].unique())
@@ -449,7 +459,9 @@ class Server:
                 'location': 'TBD'
             }
         }
-        print(table_config)
+        if debug_output:
+            print(table_config)
         return table_config
+
 
 
