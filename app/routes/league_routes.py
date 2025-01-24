@@ -30,34 +30,6 @@ def get_combinations():
         print(f"Error in get_combinations: {str(e)}")
         return jsonify({"error": str(e)}), 500
 
-@bp.route('/league/get_table')
-def get_table():
-    try:
-        season = request.args.get('season')
-        league = request.args.get('league')
-        #week should be int
-        week = int(request.args.get('week'))
-        
-        print(f"Received request with: season={season}, league={league}, week={week}")
-        
-        if not season or not league:
-            return jsonify({"error": "Season and league are required"}), 400
-
-        #week_data = league_service.get_league_week(league=league, season=season, week=week)
-        #print(f"Generated week data: {week_data}")
-
-        league_table_data = league_service.get_league_standings_table_deprecated(league=league, season=season, week=week)
-
-        if not league_table_data:
-            return jsonify({"message": "No data found for these filters"}), 404
-        #print(jsonify(league_table_data))
-        return jsonify(league_table_data)
-    except Exception as e:
-        import traceback
-        print(f"Error in get_table: {str(e)}")
-        print(f"Traceback: {traceback.format_exc()}")  # This will show the full error trace
-        return jsonify({"error": str(e)}), 500
-
 
 @bp.route('/api/league/available_weeks')
 def get_available_weeks():
@@ -112,7 +84,7 @@ def get_league_history():
             season=season,
             week=None,
             depth=None,
-            debug_output=True
+            debug_output=False
         )
 
         transformed_data = DataDict().transform_dict(table_data)
@@ -124,14 +96,14 @@ def get_league_history():
         print(f"Error: {str(e)}")
         return jsonify({'error': str(e)}), 500
 
-@bp.route('/league/get_league_standings')
-def get_league_standings():
+@bp.route('/league/get_league_week')
+def get_league_week():
     try:
         season = request.args.get('season')
         league = request.args.get('league')
         #week should be int
         week = int(request.args.get('week'))
-        #print("get_league_standings")
+        #print("get_league_week")
         print(f"League Standings - Received request with: season={season}, league={league}, week={week}")
         
         if not season or not league:
@@ -140,12 +112,15 @@ def get_league_standings():
         #week_data = league_service.get_league_week(league=league, season=season, week=week)
         #print(f"Generated week data: {week_data}")
 
-        league_table_data = league_service.get_league_standings_table(league=league, season=season, week=week)
+        league_table_data = league_service.get_league_week_table(league=league, season=season, week=week)
 
         transformed_data = DataDict().transform_dict(league_table_data)
         #print(transformed_data)
         
         transformed_data.make_sortable([1,2,3,4,5,6])
+
+        league_service.get_honor_scores(league=league, season=season, week=week, team_name=None, player_name=None, 
+                                        individual_scores=3, team_scores=3, indivdual_averages=2, team_averages=2)
 
 
         if not transformed_data:
@@ -154,7 +129,7 @@ def get_league_standings():
         return jsonify(transformed_data.to_dict())
     except Exception as e:
         import traceback
-        print(f"Error in get_league_standings: {str(e)}")
+        print(f"Error in get_league_week: {str(e)}")
         print(f"Traceback: {traceback.format_exc()}")  # This will show the full error trace
         return jsonify({"error": str(e)}), 500
 
@@ -166,12 +141,12 @@ def get_team_week_details():
     team = request.args.get('team')
     league = request.args.get('league')
     
-    print(f"Team Week Details - Received request with: season={season}, league={league}, week={week}")
+    print(f"Team Week Details - Received request with: season={season}, league={league}, week={week}, team={team}")
 
     week = int(request.args.get('week'))
-    print(f"League: {league}, Season: {season}, Team: {team}, Week: {week}")
+    
     details = league_service.get_team_week_details(league, season, team, week)
-    #print(details)
+    print(details)
 
     return jsonify({'config': details})
 
@@ -189,4 +164,25 @@ def get_available_leagues():
         leagues = league_service.get_leagues()
         return jsonify(leagues)
     except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@bp.route('/league/get_honor_scores')
+def get_honor_scores():
+    try:
+        season = request.args.get('season')
+        league = request.args.get('league')
+        week = int(request.args.get('week'))
+        
+        honor_scores = league_service.get_honor_scores(
+            league=league, 
+            season=season, 
+            week=week, 
+            individual_scores=3, 
+            team_scores=3, 
+            indivdual_averages=3, 
+            team_averages=3
+        )
+        return jsonify(honor_scores)
+    except Exception as e:
+        print(f"Error in get_honor_scores: {str(e)}")
         return jsonify({"error": str(e)}), 500

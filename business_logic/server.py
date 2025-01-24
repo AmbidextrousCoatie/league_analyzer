@@ -36,6 +36,42 @@ class Server:
         return self.data_adapter.get_weeks(league_name=league_name, season=season)
     
 
+    def get_honor_scores(self, league_name:str=None, season:str=None, week:int=None, team_name:str=None, player_name:str=None, individual_scores:int=1, team_scores:int=1, indivdual_averages:int=1, team_averages:int=1) -> pd.DataFrame:
+        filters_eq = {Columns.league_name: league_name, Columns.season: season, Columns.week: week, Columns.team_name: team_name, Columns.player_name: player_name}
+        columns = [Columns.team_name, Columns.player_name, Columns.score, Columns.input_data, Columns.players_per_team]
+
+        data = self.data_adapter.get_filtered_data(columns=columns, filters_eq=filters_eq)
+
+
+        # individual scores
+        if individual_scores > 0:
+            individual_scores_df = data[data[Columns.input_data]==True][[Columns.player_name, Columns.score]].sort_values(by=Columns.score, ascending=False).head(individual_scores).copy()
+
+        # team scores
+        if team_scores > 0:
+            team_scores_df = data[data[Columns.input_data]==False][[Columns.team_name, Columns.score]].sort_values(by=Columns.score, ascending=False).head(team_scores).copy()
+
+        # individual averages - now including player name in result
+        if indivdual_averages > 0:
+            individual_averages_df = (data[data[Columns.input_data]==True]
+                                    .groupby(Columns.player_name)[[Columns.score]]
+                                    .mean()
+                                    .sort_values(by=Columns.score, ascending=False)
+                                    .head(indivdual_averages)
+                                    .reset_index()  # This keeps the player_name column
+                                    .copy())
+
+        # team averages - now including team name in result
+        if team_averages > 0:
+            team_averages_df = (data[data[Columns.input_data]==False]
+                            .groupby(Columns.team_name)[[Columns.score]]
+                            .mean()
+                            .sort_values(by=Columns.score, ascending=False)
+                            .head(team_averages)
+                            .reset_index()  # This keeps the team_name column
+                            .copy())
+        return individual_scores_df, team_scores_df, individual_averages_df, team_averages_df
+
     def get_teams_in_league_season(self, league_name:str, season:str, debug_output:bool=False) -> List[str]:
         filters = {Columns.league_name: league_name, Columns.season: season}
         

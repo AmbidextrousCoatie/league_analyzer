@@ -41,6 +41,22 @@ class LeagueService:
         """Get results of a league on a specific match day"""
         return self.server.get_league_week(league_name=league, season=season, week=week).to_dict('records')
 
+    def get_honor_scores(self, league:str=None, season:str=None, week:int=None, team_name:str=None, player_name:str=None, individual_scores:int=1, team_scores:int=1, indivdual_averages:int=1, team_averages:int=1) -> Response:
+        
+        individual_scores_df, team_scores_df, individual_averages_df, team_averages_df = self.server.get_honor_scores(
+            league_name=league, season=season, week=week, team_name=team_name, player_name=player_name, 
+            individual_scores=individual_scores, team_scores=team_scores, indivdual_averages=indivdual_averages, team_averages=team_averages)
+
+        honor_scores = dict()
+        honor_scores['individual_scores'] = individual_scores_df.to_dict('records')
+        honor_scores['team_scores'] = team_scores_df.to_dict('records')
+        honor_scores['individual_averages'] = individual_averages_df.to_dict('records')
+        honor_scores['team_averages'] = team_averages_df.to_dict('records') 
+
+        return honor_scores
+
+
+
     def get_league_history_table(self, league_name:str, season:str, week:int=None, depth:int=None, debug_output:bool=False) -> Response:    
         if debug_output:
             print("get_league_history_table")
@@ -96,7 +112,7 @@ class LeagueService:
             return pd.DataFrame().to_dict('records')
 
 
-    def get_league_standings_table(self, league:str, season:str, week:int=None, depth:int=None) -> Response:     
+    def get_league_week_table(self, league:str, season:str, week:int=None, depth:int=None) -> Response:     
         """Get standings of a leagaue up to a specific match day"""
         #print(" >>>>>>>>>>>>>>>>>>>> doing history just for testing")
         #self.get_league_history_table(league, season, week, 3)
@@ -141,12 +157,12 @@ class LeagueService:
 
 
 
-    def get_league_standings_table_deprecated(self, league:str, season:str, week:int=None, depth:int=None) -> Response:     
+    def get_league_week_table_deprecated(self, league:str, season:str, week:int=None, depth:int=None) -> Response:     
         """Get standings of a leagaue up to a specific match day"""
         #print(" >>>>>>>>>>>>>>>>>>>> doing history just for testing")
         #self.get_league_history_table(league, season, week, 3)
         #print(" <<<<<<<<<<<<<<<<<<<< done with history")
-        league_standings_data = self.server.get_league_standings(league_name=league, season=season, week=week)
+        league_standings_data = self.server.get_league_week(league_name=league, season=season, week=week)
         league_week_data = self.server.get_league_week(league_name=league, season=season, week=week)
 
         
@@ -171,7 +187,7 @@ class LeagueService:
         data_week = self.server.get_league_week(league_name=league, season=season, week=week)
 
         # Apply base filters
-        return self.server.get_league_standings(league_name=league, season=season, week=week).to_dict('records')
+        return self.server.get_league_week(league_name=league, season=season, week=week).to_dict('records')
 
 
 

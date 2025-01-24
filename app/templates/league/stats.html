@@ -82,43 +82,69 @@
 <!--//////////////////////////////////////////////////////////////////////////-->
 <!--//////////////////////////////////////////////////////////////////////////-->   
 
-    <div class="card"></div>
-        <div class="card-header">
+    <div class="card">
+       <div class="card-header">
             <h5>League Standings - Single Week</h5>
         </div>
         <div class="card-body">
             <!-- Selection Area -->
             <div class="row mb-3">
-                <div class="col-md-6">
+                <div class="col-md-4">
                     <h5>Week</h5>
-                    <div id="weekButtons" class="btn-group-horizontal w-100">
+                    <div id="buttonsWeek" class="btn-group-horizontal w-100">
                         <!-- Weeks will be inserted here -->
                     </div>
                 </div>
-                <div class="col-md-6">
+                <div class="col-md-8">
                     <h5>Team</h5>
-                    <div id="teamButtons" class="btn-group-horizontal w-100">
+                    <div id="buttonsTeam" class="btn-group-horizontal w-100">
                         <!-- Teams will be inserted here -->
                     </div>
                 </div>
             </div>
-        </div>
-        <div class="card-header"></div>
-            <h5>Results for Week ###</h4>
+        
+        <div id="weekHeader" class="card-header">
+            <h5>Results for Week ###</h5>
         </div>
         <div class="card-body">
             <!-- Selection Area -->
-
+        
             <!-- Message Area -->
-            <div id="weekTeamMessage" class="alert alert-info">
+            <div id="weekMessage" class="alert alert-info">
                 Please select a week and team to view details.
             </div>
-
+        
             <!-- Content Area -->
             <div class="row">
                 <div class="col-md-8">
-                    <div id="leagueTableWeek" style="display: none">
+                    <div id="tableLeagueWeek" style="display: none">
                         <!-- Table will be dynamically inserted here -->
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div id="honorScores" class="card">
+                        <div class="card-header">
+                            <h5>Honor Scores</h5>
+                        </div>
+                        <div class="card-body">
+                            <!-- Make sure these IDs exist -->
+                            <div class="mb-3">
+                                <h6>Top Individual Scores</h6>
+                                <div id="individualScores"></div>
+                            </div>
+                            <div class="mb-3">
+                                <h6>Top Team Scores</h6>
+                                <div id="teamScores"></div>
+                            </div>
+                            <div class="mb-3">
+                                <h6>Best Individual Averages</h6>
+                                <div id="individualAverages"></div>
+                            </div>
+                            <div class="mb-3">
+                                <h6>Best Team Averages</h6>
+                                <div id="teamAverages"></div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -182,7 +208,7 @@ function updateSharedLegend(teams) {
 function updatePositionChart() {
     const selectedSeason = document.querySelector('input[name="season"]:checked')?.value;
     const selectedLeague = document.querySelector('input[name="league"]:checked')?.value;
-    const currentWeek = document.querySelector('input[name="matchDay"]:checked')?.value;
+    const currentWeek = document.querySelector('input[name="week"]:checked')?.value;
     
     if (selectedSeason && selectedLeague) {
         fetch(`/league/get_position_history?season=${selectedSeason}&league=${selectedLeague}&week=${currentWeek}&depth=${currentWeek}`)
@@ -207,12 +233,12 @@ function updatePositionChart() {
                 positionChart = new Chart(document.getElementById('positionChart'), {
                     type: 'line',
                     data: {
-                        labels: data.matchDays,
+                        labels: data.weeks,
                         datasets: data.teams.map(team => ({
                             label: team,
                             data: data.data
                                 .filter(d => d.team === team)
-                                .sort((a, b) => a.matchDay - b.matchDay)
+                                .sort((a, b) => a.week - b.week)
                                 .map(d => d.position),
                             borderColor: teamColors[team],
                             backgroundColor: teamColors[team],
@@ -282,7 +308,7 @@ function updatePositionChart() {
                                         const team = context.dataset.label;
                                         const position = context.parsed.y;
                                         const points = data.data.find(d => 
-                                            d.team === team && d.matchDay === context.parsed.x
+                                            d.team === team && d.week === context.parsed.x
                                         ).points;
                                         return `${team}: Position ${position} (${points} pts)`;
                                     }
@@ -316,7 +342,7 @@ function updatePositionChart() {
 function updateTableTeamDetails() {
     const selectedSeason = document.querySelector('input[name="season"]:checked')?.value;
     const selectedLeague = document.querySelector('input[name="league"]:checked')?.value;
-    const currentWeek = document.querySelector('input[name="matchDay"]:checked')?.value;
+    const currentWeek = document.querySelector('input[name="week"]:checked')?.value;
     const team = document.querySelector('input[name="team"]:checked')?.value;
 
     console.log("Updating team week details...");
@@ -354,30 +380,31 @@ function updateTableTeamDetails() {
                 throw new Error('Invalid response structure: missing config');
             }
 
-            // Convert formatter strings to functions
-            response.config.columns.forEach(col => {
-                if (typeof col.formatter === 'string') {
-                    try {
-                        // Create a proper function from the string
-                        col.formatter = new Function('value', 'row', `return ${col.formatter}`);
-                    } catch (e) {
-                        console.error(`Error creating formatter for column ${col.key}:`, e);
-                        col.formatter = value => value; // Fallback formatter
-                    }
-                }
+            // Transform the data into array format
+            const transformedData = response.config.data.map(row => {
+                // Create an array matching the column order
+                return response.config.columns.map(col => row[col.key]);
             });
 
+            const tableConfig = {
+                id: 'teamTableWeekDetails',
+                headerGroups: response.config.headerGroups,
+                columns: response.config.columns,
+                data: transformedData,  // Use transformed data
+                rowNumbering: response.config.rowNumbering || false,
+                positionChange: response.config.positionChange || false
+            };
+
+            console.log("Transformed data:", transformedData);
+
             // Create the table
-            const tableHtml = createTable(response.config);
+            const tableHtml = createTable(tableConfig);
             document.getElementById('teamTableWeekDetails').innerHTML = tableHtml;
         })
         .catch(error => {
             console.error('Error:', error);
             document.getElementById('teamTableWeekDetails').innerHTML = 
-                `<div class="alert alert-danger">
-                    Error loading team details: ${error.message}<br>
-                    Please try again or contact support if the problem persists.
-                </div>`;
+                `<div class="alert alert-danger">Error loading team details: ${error.message}</div>`;
         });
 }
 
@@ -423,19 +450,15 @@ function updateTablePosition(data) {
     });
 }
 
-function updateTableLeagueHistory() {
+function updateSectionLeagueStandings() {
     const selectedSeason = document.querySelector('input[name="season"]:checked')?.value;
     const selectedLeague = document.querySelector('input[name="league"]:checked')?.value;
-    //const currentWeek = document.querySelector('input[name="matchDay"]:checked')?.value;
     
     if (!selectedSeason || !selectedLeague) {
-    
-    //if (!selectedSeason || !selectedLeague || !currentWeek) {
         console.log("Missing required selection");
         return;
     }
-    
-    //fetch(`/league/get_league_history?season=${selectedSeason}&league=${selectedLeague}&week=${currentWeek}&depth=${currentWeek}`)
+
     fetch(`/league/get_league_history?season=${selectedSeason}&league=${selectedLeague}`)
         .then(response => response.json())
         .then(data => {
@@ -459,12 +482,14 @@ function updateTableLeagueHistory() {
         .catch(error => console.error('Error:', error));
 }
 
-function updateTableLeagueStandings() {
+function updateTableLeagueWeek() {
     const selectedSeason = document.querySelector('input[name="season"]:checked')?.value;
     const selectedLeague = document.querySelector('input[name="league"]:checked')?.value;
-    const currentWeek = document.querySelector('input[name="matchDay"]:checked')?.value;
+    const currentWeek = document.querySelector('input[name="week"]:checked')?.value;
     
-    console.log('Attempting to update standings table with:', {
+
+    
+    console.log('Attempting to update TableLeagueWeek with:', {
         season: selectedSeason,
         league: selectedLeague,
         week: currentWeek
@@ -475,7 +500,7 @@ function updateTableLeagueStandings() {
         return;
     }
     
-    const url = `/league/get_league_standings?season=${selectedSeason}&league=${selectedLeague}&week=${currentWeek}&depth=${currentWeek}`;
+    const url = `/league/get_league_week?season=${selectedSeason}&league=${selectedLeague}&week=${currentWeek}&depth=${1}`;
     console.log('Fetching from URL:', url);
     
     fetch(url)
@@ -486,7 +511,7 @@ function updateTableLeagueStandings() {
         .then(data => {
             console.log('Received data:', data);
             const tableConfig = {
-                id: 'leagueTableWeek',
+                id: 'tableLeagueWeek',
                 headerGroups: data.headerGroups,
                 columns: data.columns,
                 data: data.data,
@@ -494,11 +519,11 @@ function updateTableLeagueStandings() {
             };
 
             const tableHtml = createTable(tableConfig);
-            document.getElementById('leagueTableWeek').innerHTML = tableHtml;
+            document.getElementById('tableLeagueWeek').innerHTML = tableHtml;
         })
         .catch(error => {
             console.error('Error:', error);
-            document.getElementById('leagueTableWeek').innerHTML = 
+            document.getElementById('tableLeagueWeek').innerHTML = 
                 `<div class="alert alert-danger">Error loading standings: ${error.message}</div>`;
         });
 }
@@ -531,8 +556,8 @@ function updateButtonsTeams() {
                 }
                 
                 // Update relevant tables/charts
-                //updateTableLeagueStandings();
-                //SupdateTableLeagueHistory();
+                //updateTableLeagueWeek();
+                //updateSectionLeagueStandings();
                 //updateTableTeamDetails();
 
                 // Add listeners to new team buttons
@@ -541,7 +566,6 @@ function updateButtonsTeams() {
             });
     }
 }
-
 
 function updatePointsChart(data) {
     // Get the canvas element
@@ -852,7 +876,8 @@ function handleSelectionChange() {
     if (selectedSeason && selectedLeague) {
         messageArea.style.display = 'none';
         tableArea.style.display = 'block';
-        updateTableLeagueHistory();
+        updateSectionLeagueStandings();
+        
     } else {
         messageArea.style.display = 'block';
         tableArea.style.display = 'none';
@@ -869,27 +894,27 @@ function updateAvailableOptions() {
         fetch(`/api/league/available_weeks?season=${selectedSeason}&league=${selectedLeague}`)
             .then(response => response.json())
             .then(weeks => {
-                const weekButtons = weeks.map(week => `
+                const buttonsWeek = weeks.map(week => `
                     <input type="radio" class="btn-check" name="week" id="week_${week}" value="${week}">
                     <label class="btn btn-outline-primary" for="week_${week}">${week}</label>
                 `).join('');
-                document.getElementById('weekButtons').innerHTML = weekButtons;
+                document.getElementById('buttonsWeek').innerHTML = buttonsWeek;
             });
 
         // Update available teams
         fetch(`/api/league/available_teams?season=${selectedSeason}&league=${selectedLeague}`)
             .then(response => response.json())
             .then(teams => {
-                const teamButtons = teams.map(team => `
+                const buttonsTeam = teams.map(team => `
                     <input type="radio" class="btn-check" name="team" id="team_${team}" value="${team}">
                     <label class="btn btn-outline-primary" for="team_${team}">${team}</label>
                 `).join('');
-                document.getElementById('teamButtons').innerHTML = teamButtons;
+                document.getElementById('buttonsTeam').innerHTML = buttonsTeam;
             });
     } else {
         // Clear buttons if no season/league selected
-        document.getElementById('weekButtons').innerHTML = '';
-        document.getElementById('teamButtons').innerHTML = '';
+        document.getElementById('buttonsWeek').innerHTML = '';
+        document.getElementById('buttonsTeam').innerHTML = '';
     }
 }
 
@@ -898,21 +923,103 @@ function handleWeekTeamSelection() {
     const selectedWeek = document.querySelector('input[name="week"]:checked')?.value;
     const selectedTeam = document.querySelector('input[name="team"]:checked')?.value;
     
-    const messageArea = document.getElementById('weekTeamMessage');
-    const standingsTable = document.getElementById('leagueTableWeek');
+    const messageArea = document.getElementById('weekMessage');
+    const standingsTable = document.getElementById('tableLeagueWeek');
     
     if (selectedWeek) {
         messageArea.style.display = 'none';
         standingsTable.style.display = 'block';
-        updateTableLeagueStandings();
+        
+        updateTableLeagueWeek();
+
         
         if (selectedTeam) {
-            updateTeamWeekDetails();
+            updateTableTeamDetails();
         }
     } else {
         messageArea.style.display = 'block';
         standingsTable.style.display = 'none';
     }
+}
+
+// Handle week selection changes
+function handleWeekSelection() {
+    const selectedWeek = document.querySelector('input[name="week"]:checked')?.value;
+    const selectedSeason = document.querySelector('input[name="season"]:checked')?.value;
+    const selectedLeague = document.querySelector('input[name="league"]:checked')?.value;
+    
+    console.log("Week selection changed:", {
+        week: selectedWeek,
+        season: selectedSeason,
+        league: selectedLeague
+    });
+    
+    if (selectedWeek && selectedSeason && selectedLeague) {
+        // Check if elements exist before updating
+        const weekMessage = document.getElementById('weekMessage');
+        const tableLeagueWeek = document.getElementById('tableLeagueWeek');
+        
+        if (weekMessage) {
+            weekMessage.style.display = 'none';
+        } else {
+            console.error('weekMessage element not found');
+        }
+        
+        if (tableLeagueWeek) {
+            tableLeagueWeek.style.display = 'block';
+        } else {
+            console.error('tableLeagueWeek element not found');
+        }
+        
+        // Update league standings
+        //handleLeagueStandings();
+        
+        // Update honor scores
+        updateHonorScores();
+    }
+}
+
+function updateHonorScores() {
+    const selectedSeason = document.querySelector('input[name="season"]:checked')?.value;
+    const selectedLeague = document.querySelector('input[name="league"]:checked')?.value;
+    const selectedWeek = document.querySelector('input[name="week"]:checked')?.value;
+    
+    if (!selectedSeason || !selectedLeague || !selectedWeek) {
+        return;
+    }
+    
+    fetch(`/league/get_honor_scores?season=${selectedSeason}&league=${selectedLeague}&week=${selectedWeek}`)
+        .then(response => response.json())
+        .then(data => {
+            // Individual Scores
+            document.getElementById('individualScores').innerHTML = data.individual_scores
+                .map(item => `<div class="d-flex justify-content-between">
+                    <span>${item.Player}</span>
+                    <span class="fw-bold">${item.Score}</span>
+                </div>`).join('');
+            
+            // Team Scores
+            document.getElementById('teamScores').innerHTML = data.team_scores
+                .map(item => `<div class="d-flex justify-content-between">
+                    <span>${item.Team}</span>
+                    <span class="fw-bold">${item.Score}</span>
+                </div>`).join('');
+            
+            // Individual Averages
+            document.getElementById('individualAverages').innerHTML = data.individual_averages
+                .map(item => `<div class="d-flex justify-content-between">
+                    <span>${item.Player}</span>
+                    <span class="fw-bold">${item.Score.toFixed(1)}</span>
+                </div>`).join('');
+            
+            // Team Averages
+            document.getElementById('teamAverages').innerHTML = data.team_averages
+                .map(item => `<div class="d-flex justify-content-between">
+                    <span>${item.Team}</span>
+                    <span class="fw-bold">${item.Score.toFixed(1)}</span>
+                </div>`).join('');
+        })
+        .catch(error => console.error('Error:', error));
 }
 
 // Set up event listeners
@@ -927,7 +1034,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         // Listen for week/team selection changes
         if (event.target.name === 'week' || event.target.name === 'team') {
+            updateTableTeamDetails();
+            updateTableLeagueWeek();
+            
             handleWeekTeamSelection();
+            handleWeekSelection();
         }
     });
 });
