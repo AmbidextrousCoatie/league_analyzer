@@ -83,12 +83,14 @@ class LeagueService:
         columns_total = [ColumnsExtra.score_total, ColumnsExtra.points_total, ColumnsExtra.score_average_total]
         
         data_collected_by_team['headerGroups'] = [[Columns.team_name, 2]] + [['Week' + str(w), len(columns_per_day) ] for w in weeks] + [["Season Total", len(columns_per_day) +1]]
-        data_collected_by_team['columns'] = [Columns.team_name] + columns_per_day * max(weeks) + columns_per_day + [ColumnsExtra.score_average]
+        data_collected_by_team['columns'] = ['Pos', Columns.team_name] + columns_per_day * max(weeks) + columns_per_day + [ColumnsExtra.score_average]
         data_collected_by_team['data'] = []
 
         data_per_team = data.groupby(Columns.team_name)
-        for team, group in data_per_team:
-            team_row = [team]
+        data_per_team = sorted(data_per_team, key=lambda x: x[1][Columns.points].sum(), reverse=True)
+
+        for idx, (team, group) in enumerate(data_per_team):
+            team_row = [idx+1, team]
             if debug_output:
                 print("team : " + str(team))
                 print(group)
@@ -125,19 +127,25 @@ class LeagueService:
                                                           Columns.points: ColumnsExtra.points_total,
                                                           Columns.score: ColumnsExtra.score_total})
         league_standings_data = pd.merge(league_standings_data, league_week_data, on=Columns.team_name)
-        #print("league_standings_data")
-        #print(league_standings_data)
+        print("league_standings_data")
+        print(league_standings_data)
+
+
+        league_standings_data = league_standings_data.sort_values(by=[Columns.points])
 
         data_collected = dict()
         columns_to_show_week = [Columns.score, Columns.points, ColumnsExtra.score_average]
         columns_to_show_season = [ColumnsExtra.score_total, ColumnsExtra.points_total, ColumnsExtra.score_average_total]
         
         data_collected['headerGroups'] = [[Columns.team_name, 2]] + [['Week' + str(week), len(columns_to_show_week)]] + [["Season Total", len(columns_to_show_season)]]
-        data_collected['columns'] = [Columns.team_name] + columns_to_show_week + columns_to_show_week
+        data_collected['columns'] = ['Pos', Columns.team_name] + columns_to_show_week + columns_to_show_week
         data_collected['data'] = []
 
-        for team, group in league_standings_data.groupby(Columns.team_name):
-            team_row = [team]
+        league_standing_data_groups = league_standings_data.groupby(Columns.team_name)
+        league_standing_data_groups = sorted(league_standing_data_groups, key=lambda x: x[1][Columns.points].iloc[0], reverse=True)
+
+        for idx, (team, group) in enumerate(league_standing_data_groups):
+            team_row = [idx+1, team]
             for row in group.to_dict('records'):
                 rows_to_extract = [row[col] for col in columns_to_show_week]
                 team_row.extend(rows_to_extract)

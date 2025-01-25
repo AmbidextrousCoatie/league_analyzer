@@ -119,10 +119,7 @@ def get_league_week():
         
         transformed_data.make_sortable([1,2,3,4,5,6])
 
-        league_service.get_honor_scores(league=league, season=season, week=week, team_name=None, player_name=None, 
-                                        individual_scores=3, team_scores=3, indivdual_averages=2, team_averages=2)
-
-
+        
         if not transformed_data:
             return jsonify({"message": "No data found for these filters"}), 404
         #print(jsonify(league_table_data))
@@ -146,8 +143,7 @@ def get_team_week_details():
     week = int(request.args.get('week'))
     
     details = league_service.get_team_week_details(league, season, team, week)
-    print(details)
-
+    
     return jsonify({'config': details})
 
 @bp.route('/api/league/available_seasons')

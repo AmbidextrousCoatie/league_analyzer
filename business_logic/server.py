@@ -350,6 +350,7 @@ class Server:
         rows = []
         # Group by player to get their games
         player_groups = player_data.groupby(Columns.player_name)
+        player_groups = sorted(player_groups, key=lambda x: x[1][Columns.position].iloc[0])
         
         for player_name, player_games in player_groups:
             player_row = {

@@ -95,12 +95,6 @@
                         <!-- Weeks will be inserted here -->
                     </div>
                 </div>
-                <div class="col-md-8">
-                    <h5>Team</h5>
-                    <div id="buttonsTeam" class="btn-group-horizontal w-100">
-                        <!-- Teams will be inserted here -->
-                    </div>
-                </div>
             </div>
         
         <div id="weekHeader" class="card-header">
@@ -157,6 +151,14 @@
 
 <!-- League Team Table -->
 <div class="card">
+    <div class="row mb-3">
+        <div class="col-md-8">
+            <h5>Team</h5>
+            <div id="buttonsTeam" class="btn-group-horizontal w-100">
+                <!-- Teams will be inserted here -->
+            </div>
+        </div>
+    </div>
     <div class="card-header">
         <h5>Team Results for Aschaffenburg 55</h5>
         <div id="teamDetailsMetadata" class="text-muted small"></div>
@@ -587,7 +589,7 @@ function updatePointsChart(data) {
         
         // Extract only points (every 3rd value, starting from index 3)
         for (let i = 0; i < weekCount; i++) {
-            const pointsIndex = (i * 2) + 2;  // Skip team name, and take every 3rd value (Score, Average, Points)
+            const pointsIndex = (i * 2) + 3;  // Skip pos, team name & first score, take every 3rd value (Score, Average, Points)
             points.push(teamData[pointsIndex]);  // +2 to get to Points after Score and Average
         }
         
@@ -665,7 +667,7 @@ function updateCumulativePointsChart(data) {
         
         // Extract points and accumulate them
         for (let i = 0; i < weekCount; i++) {
-            const pointsIndex = (i * 2) + 2;
+            const pointsIndex = (i * 2) + 3;  // Skip pos, team name & first score, take every 3rd value (Score, Average, Points)
             const weekPoints = parseFloat(teamData[pointsIndex]); // +2 to get Points after Score and Average
             cumulativePoints += weekPoints;
             points.push(cumulativePoints);
