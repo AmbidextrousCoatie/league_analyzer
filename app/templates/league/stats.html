@@ -76,6 +76,32 @@
                 </div>
             </div>
         </div>
+        <!-- After your existing charts and shared legend -->
+<div class="row mb-3">
+    <!-- Team Averages Chart -->
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5>Team Averages per Week</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="teamAveragesChart"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Team Positions Chart -->
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5>Team Position Evolution</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="teamPositionsChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
     </div>
 <!---/div-->
 
@@ -170,6 +196,7 @@
         </div>
     </div>
 </div>
+
 
 
 <div class="card">
@@ -879,6 +906,8 @@ function handleSelectionChange() {
         messageArea.style.display = 'none';
         tableArea.style.display = 'block';
         updateSectionLeagueStandings();
+        updateSectionTeamAverages();
+        updateSectionTeamPositions();
         
     } else {
         messageArea.style.display = 'block';
@@ -1024,7 +1053,114 @@ function updateHonorScores() {
         .catch(error => console.error('Error:', error));
 }
 
-// Set up event listeners
+function updateTeamAveragesChart() {
+    const selectedTeam = document.querySelector('input[name="team"]:checked')?.value;
+    const selectedSeason = document.querySelector('input[name="season"]:checked')?.value;
+    const selectedLeague = document.querySelector('input[name="league"]:checked')?.value;
+    
+    if (!selectedTeam || !selectedSeason || !selectedLeague) return;
+
+    fetch(`/league/get_team_averages?season=${selectedSeason}&league=${selectedLeague}&team=${selectedTeam}`)
+        .then(response => response.json())
+        .then(data => {
+            const ctx = document.getElementById('teamAveragesChart').getContext('2d');
+            
+            // Destroy existing chart if it exists
+            if (window.teamAveragesChart instanceof Chart) {
+                window.teamAveragesChart.destroy();
+            }
+            
+            window.teamAveragesChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: data.map(d => `Week ${d.week}`),
+                    datasets: [{
+                        label: 'Average Points',
+                        data: data.map(d => d.average),
+                        borderColor: '#6FAED4',
+                        backgroundColor: '#6FAED4',
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: `Average Points for ${selectedTeam}`
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        });
+}
+
+function updateTeamPositionsChart() {
+    const selectedTeam = document.querySelector('input[name="team"]:checked')?.value;
+    const selectedSeason = document.querySelector('input[name="season"]:checked')?.value;
+    const selectedLeague = document.querySelector('input[name="league"]:checked')?.value;
+    
+    if (!selectedTeam || !selectedSeason || !selectedLeague) return;
+
+    fetch(`/league/get_team_positions?season=${selectedSeason}&league=${selectedLeague}&team=${selectedTeam}`)
+        .then(response => response.json())
+        .then(data => {
+            const ctx = document.getElementById('teamPositionsChart').getContext('2d');
+            
+            // Destroy existing chart if it exists
+            if (window.teamPositionsChart instanceof Chart) {
+                window.teamPositionsChart.destroy();
+            }
+            
+            window.teamPositionsChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: data.map(d => `Week ${d.week}`),
+                    datasets: [{
+                        label: 'Position',
+                        data: data.map(d => d.position),
+                        borderColor: '#6FAED4',
+                        backgroundColor: '#6FAED4',
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: `Position Evolution for ${selectedTeam}`
+                        }
+                    },
+                    scales: {
+                        y: {
+                            reverse: true,  // Reverse Y axis so position 1 is at the top
+                            beginAtZero: false,
+                            ticks: {
+                                stepSize: 1
+                            }
+                        }
+                    }
+                }
+            });
+        });
+}
+
+// Add to your existing event listeners
+document.querySelectorAll('input[name="team"], input[name="season"], input[name="league"]')
+    .forEach(input => {
+        input.addEventListener('change', () => {
+            updateTeamAveragesChart();
+            updateTeamPositionsChart();
+        });
+    });
+
+// Initial load
 document.addEventListener('DOMContentLoaded', () => {
     initializePage();
     
@@ -1043,6 +1179,9 @@ document.addEventListener('DOMContentLoaded', () => {
             handleWeekSelection();
         }
     });
+
+    updateTeamAveragesChart();
+    updateTeamPositionsChart();
 });
 </script>
 {% endblock %}

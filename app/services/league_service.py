@@ -161,7 +161,15 @@ class LeagueService:
     def get_team_week_details(self, league:str, season:str, team:str, week:int) -> Response:
         return(self.server.get_team_week_details(league_name=league, season=season, team_name=team, week=week))
 
-        
+    def get_team_positions_during_season(self, league_name: str, season: str, team_name: str) -> dict:
+        """Get team positions for each week during the season."""
+        df = self.server.get_team_positions_during_season(league_name, season, team_name)
+        return df.to_dict(orient='records')
+
+    def get_team_averages_during_season(self, league_name: str, season: str, team_name: str) -> dict:
+        """Get team average points for each week during the season."""
+        df = self.server.get_team_averages_during_season(league_name, season, team_name)
+        return df.to_dict(orient='records')       
 
 
 

@@ -263,6 +263,39 @@ class Server:
         data_league[ColumnsExtra.score_average] = round(data_player[Columns.score] / number_of_games, 2)
         #print(data_league)
 
+
+    def get_team_positions_during_season(self, league_name: str, season: str, team_name: str) -> pd.DataFrame:
+        """Get team positions for each week during the season."""
+        # Get all weekly standings
+        standings = self.get_league_standings(league_name, season)
+        
+        # Extract position for specified team for each week
+        positions = []
+        weeks = sorted(standings['week'].unique())
+        
+        for week in weeks:
+            week_data = standings[standings['week'] == week]
+            team_pos = week_data[week_data['team'] == team_name]['position'].iloc[0]
+            positions.append({'week': week, 'position': team_pos})
+        
+        return pd.DataFrame(positions)
+
+    def get_team_averages_during_season(self, league_name: str, season: str, team_name: str) -> pd.DataFrame:
+        """Get team average points for each week during the season."""
+        # Get all weekly standings
+        standings = self.get_league_standings(league_name, season)
+        
+        # Extract average for specified team for each week
+        averages = []
+        weeks = sorted(standings['week'].unique())
+        
+        for week in weeks:
+            week_data = standings[standings['week'] == week]
+            team_avg = week_data[week_data['team'] == team_name]['average'].iloc[0]
+            averages.append({'week': week, 'average': team_avg})
+        
+        return pd.DataFrame(averages)
+
     def get_team_week_details(self, league_name: str, season: str, team_name: str, week: int, debug_output: bool=False) -> dict:
         """Get detailed team results for a specific week including individual and team stats"""
         
