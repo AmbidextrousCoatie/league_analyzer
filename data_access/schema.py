@@ -34,8 +34,11 @@ class Columns:
 class ColumnsExtra:
     position: str = '#'
     score_average: str = 'Average'
-    score_average_total: str = 'ScoreAverageTotal'
-    score_total: str = 'ScoreTotal'
-    points_total: str = 'PointsTotal'
+    score_average_weekly: str = 'ScoreAverageWeekly'
+    score_weekly: str = 'ScoreWeekly'
+    points_weekly: str = 'PointsWeekly'
     position_change: str = 'PositionChange'
-    points_cumulated: str = 'PointsCumulated'
+    points_cumulative: str = 'PointsCumulative'
+    position_weekly: str = 'PositionWeekly'
+    position_cumulative: str = 'PositionCumulative'
+

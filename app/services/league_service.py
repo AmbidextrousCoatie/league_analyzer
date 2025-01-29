@@ -80,7 +80,7 @@ class LeagueService:
         
         data_collected_by_team = dict()
         columns_per_day = [Columns.score, Columns.points]
-        columns_total = [ColumnsExtra.score_total, ColumnsExtra.points_total, ColumnsExtra.score_average_total]
+        columns_total = [ColumnsExtra.score_weekly, ColumnsExtra.points_weekly, ColumnsExtra.score_average_weekly]
         
         data_collected_by_team['headerGroups'] = [[Columns.team_name, 2]] + [['Week' + str(w), len(columns_per_day) ] for w in weeks] + [["Season Total", len(columns_per_day) +1]]
         data_collected_by_team['columns'] = ['Pos', Columns.team_name] + columns_per_day * max(weeks) + columns_per_day + [ColumnsExtra.score_average]
@@ -123,9 +123,9 @@ class LeagueService:
         league_week_data = self.server.get_league_week(league_name=league, season=season, week=week)
 
         
-        league_standings_data = league_standings_data.rename(columns={ColumnsExtra.score_average: ColumnsExtra.score_average_total, 
-                                                          Columns.points: ColumnsExtra.points_total,
-                                                          Columns.score: ColumnsExtra.score_total})
+        league_standings_data = league_standings_data.rename(columns={ColumnsExtra.score_average: ColumnsExtra.score_average_weekly, 
+                                                          Columns.points: ColumnsExtra.points_weekly,
+                                                          Columns.score: ColumnsExtra.score_weekly})
         league_standings_data = pd.merge(league_standings_data, league_week_data, on=Columns.team_name)
         #print("league_standings_data")
         #print(league_standings_data)
@@ -135,7 +135,7 @@ class LeagueService:
 
         data_collected = dict()
         columns_to_show_week = [Columns.score, Columns.points, ColumnsExtra.score_average]
-        columns_to_show_season = [ColumnsExtra.score_total, ColumnsExtra.points_total, ColumnsExtra.score_average_total]
+        columns_to_show_season = [ColumnsExtra.score_weekly, ColumnsExtra.points_weekly, ColumnsExtra.score_average_weekly]
         
         data_collected['headerGroups'] = [[Columns.team_name, 2]] + [['Week' + str(week), len(columns_to_show_week)]] + [["Season Total", len(columns_to_show_season)]]
         data_collected['columns'] = ['Pos', Columns.team_name] + columns_to_show_week + columns_to_show_week
@@ -161,12 +161,62 @@ class LeagueService:
     def get_team_week_details(self, league:str, season:str, team:str, week:int) -> Response:
         return(self.server.get_team_week_details(league_name=league, season=season, team_name=team, week=week))
 
+
+
+    def sort_by_cumulative_points_in_last_available_week(self, df):
+        # Get the last week's data and sort by PointsCumulative
+        last_week = df[df[Columns.week] == df[Columns.week].max()]
+        final_order = last_week.sort_values(ColumnsExtra.points_cumulative, ascending=False)[Columns.team_name].tolist()
+        
+        # Create a categorical type with the desired order
+        df[Columns.team_name] = pd.Categorical(df[Columns.team_name], categories=final_order, ordered=True)
+        
+        # Sort by Week and then Team (which now follows the final standings order)
+        sorted_df = df.sort_values([Columns.week, Columns.team_name])
+        
+        return sorted_df
+
+
     def get_team_positions_during_season(self, league_name: str, season: str) -> dict:
         """Get team positions for each week during the season."""
-        df = self.server.get_team_positions_during_season(league_name, season)
-        print("league_service.get_team_positions_during_season")
-        print(df)
-        return df.to_dict(orient='records')
+        rankings = self.server.get_team_positions_during_season(league_name, season)
+        #print("league_service.get_team_positions_during_season")
+        #print(rankings)
+
+        rankings = self.sort_by_cumulative_points_in_last_available_week(rankings)
+        #print(rankings)
+
+        
+        rankings_grouped = rankings.groupby(Columns.team_name, observed=True)
+        
+        rankings_dict = dict()
+        rankings_dict['weekly'] = dict()
+        rankings_dict['cumulative'] = dict()
+
+
+        for team, group in rankings_grouped:
+            rankings_dict['weekly'][team] = group[ColumnsExtra.position_weekly].tolist()
+            rankings_dict['cumulative'][team] = group[ColumnsExtra.position_cumulative].tolist()
+
+        return rankings_dict
+        print(rankings_dict)
+
+        weekly_pivot = rankings.pivot(index=Columns.team_name, columns=Columns.week, values=ColumnsExtra.position_weekly)
+        weekly_pivot.columns = [f'Week {w} Pos' for w in weekly_pivot.columns]
+
+        cumulative_pivot = rankings.pivot(index=Columns.team_name, columns=Columns.week, values=ColumnsExtra.position_cumulative)
+        cumulative_pivot.columns = [f'Week {w} Cum' for w in cumulative_pivot.columns]
+
+        
+
+        for team, group in rankings_grouped:
+            rankings_dict['weekly'][team] = group[ColumnsExtra.position_weekly].tolist()
+            rankings_dict['cumulative'][team] = group[ColumnsExtra.position_cumulative].tolist()
+
+        print(weekly_pivot)
+        print(cumulative_pivot)
+
+        return rankings_dict
 
     def get_team_averages_during_season(self, league_name: str, season: str) -> dict:
         """Get team average points for each week during the season."""
@@ -184,9 +234,9 @@ class LeagueService:
         league_week_data = self.server.get_league_week(league_name=league, season=season, week=week)
 
         
-        league_standings_data = league_standings_data.rename(columns={ColumnsExtra.score_average: ColumnsExtra.score_average_total, 
-                                                          Columns.points: ColumnsExtra.points_total,
-                                                          Columns.score: ColumnsExtra.score_total})
+        league_standings_data = league_standings_data.rename(columns={ColumnsExtra.score_average: ColumnsExtra.score_average_weekly, 
+                                                          Columns.points: ColumnsExtra.points_weekly,
+                                                          Columns.score: ColumnsExtra.score_weekly})
         league_standings_data = pd.merge(league_standings_data, league_week_data, on=Columns.team_name)
         #print(league_standings_data)
         return league_standings_data.to_dict('records') 
@@ -222,8 +272,8 @@ class LeagueService:
             table_data.append(table_row)
 
             if cumulative:
-                table_row[ColumnsExtra.points_total] = row[ColumnsExtra.points_total]
-                table_row[ColumnsExtra.average_score_total] = row[ColumnsExtra.average_score_total]
+                table_row[ColumnsExtra.points_weekly] = row[ColumnsExtra.points_weekly]
+                table_row[ColumnsExtra.average_score_weekly] = row[ColumnsExtra.average_score_weekly]
 
 
         #team_data = [{'Team': 'Team1', 'TotalPoints': 100, 'Average': 190, 'positionChange': +1, 'MatchPoints': 70, 'MatchAverage': 180},

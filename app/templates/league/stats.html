@@ -12,13 +12,13 @@
         <!-- Selection Area -->
         <div class="row mb-3">
             <div class="col-md-6">
-                <h5>Season</h5>
+                <h5>Saison</h5>
                 <div id="buttonsSeason" class="btn-group-horizontalw-100">
                     <!-- Seasons will be inserted here -->
                 </div>
             </div>
             <div class="col-md-6">
-                <h5>League</h5>
+                <h5>Liga</h5>
                 <div id="buttonsLeague" class="btn-group-horizontal w-100">
                     <!-- Leagues will be inserted here -->
                 </div>
@@ -30,11 +30,11 @@
 <!-- League History Table -->
 <div class="card">
     <div class="card-header">
-        <h5>League Standings - Season</h5>
+        <h5>Saisonübersicht</h5>
     </div>
     <!-- Message Area -->
     <div id="selectionMessage" class="alert alert-info">
-        Please select a valid season and league combination.
+        Bitte wählen Sie eine Kombintation aus Saison und Liga.
     </div>
 
     <!-- Table Area -->
@@ -48,7 +48,7 @@
             <div class="col-md-6">
                 <div class="card h-100">
                     <div class="card-header">
-                        <h5>Points per Week</h5>
+                        <h5>Punkte pro Spieltag</h5>
                     </div>
                     <div class="card-body">
                         <canvas id="pointsChart"></canvas>
@@ -60,7 +60,7 @@
             <div class="col-md-6">
                 <div class="card h-100">
                     <div class="card-header">
-                        <h5>Cumulative Points Development</h5>
+                        <h5>Gesamtpunkte im Saisonverlauf</h5>
                     </div>
                     <div class="card-body">
                         <canvas id="cumulativePointsChart"></canvas>
@@ -82,10 +82,10 @@
             <div class="col-md-6">
                 <div class="card h-100">
                     <div class="card-header">
-                        <h5>Team Averages per Week</h5>
+                        <h5>Platzierung pro Spieltag</h5>
                     </div>
                     <div class="card-body">
-                        <canvas id="teamAveragesChart"></canvas>
+                        <canvas id="chartTeamPositionWeekly"></canvas>
                     </div>
                 </div>
             </div>
@@ -94,7 +94,7 @@
             <div class="col-md-6">
                 <div class="card h-100">
                     <div class="card-header">
-                        <h5>Team Position Evolution</h5>
+                        <h5>Platzierung im Saisonverlauf</h5>
                     </div>
                     <div class="card-body">
                         <canvas id="teamPositionsChart"></canvas>
@@ -111,7 +111,7 @@
 
     <div class="card">
        <div class="card-header">
-            <h5>League Standings - Single Week</h5>
+            <h5>Ligaergebnisse - Spieltag</h5>
         </div>
         <div class="card-body">
             <!-- Selection Area -->
@@ -125,14 +125,14 @@
             </div>
         
         <div id="weekHeader" class="card-header">
-            <h5>Results for Week ###</h5>
+            <h5>Ergebnisse für Spieltag ###</h5>
         </div>
         <div class="card-body">
             <!-- Selection Area -->
         
             <!-- Message Area -->
             <div id="weekMessage" class="alert alert-info">
-                Please select a week and team to view details.
+                Bitte wählen Sie einen Spieltag und ein Team aus.
             </div>
         
             <!-- Content Area -->
@@ -187,13 +187,13 @@
             </div>
         </div>
         <div class="card-header">
-            <h5>Team Results for Aschaffenburg 55</h5>
+            <h5>Spielzettel für Aschaffenburg 55</h5>
             <div id="teamDetailsMetadata" class="text-muted small"></div>
         </div>
         <div class="card-body">
             <div id="teamTableWeekDetails">
                 <!-- Team table will be dynamically inserted here -->
-                <div class="alert alert-info">Select season, league, and match day to view team details</div>
+                <div class="alert alert-info">Bitte wählen Sie eine Saison, eine Liga und einen Spieltag aus um den Spielzettel für ein Team anzeigen zu können.</div>
             </div>
         </div>
     </div>  
@@ -602,12 +602,12 @@ function updatePointsChart(data) {
     }
     
     // Extract teams and their point progression
-    const teams = [...new Set(data.data.map(row => row[0]))];  // Get unique team names
+    const teams = [...new Set(data.data.map(row => row[1]))];  // Get unique team names
     const weekCount = (data.headerGroups.length - 2);  // Subtract Team and Total columns
     
     // Create datasets for each team
     const datasets = teams.map(team => {
-        const teamData = data.data.find(row => row[0] === team);
+        const teamData = data.data.find(row => row[1] === team);
         const points = [];
         
         // Extract only points (every 3rd value, starting from index 3)
@@ -669,15 +669,6 @@ function updatePointsChart(data) {
     updateSharedLegend(teams);
 }
 
-function updateCumulativePositionChart(data) {
-    const canvas = document.getElementById('teamPositionsChart');
-    
-    if (window.teamPositionsChart instanceof Chart) {
-        window.teamPositionsChart.destroy();
-    }
-
-
-}
 
 
 function updateCumulativePointsChart(data) {
@@ -690,12 +681,12 @@ function updateCumulativePointsChart(data) {
     }
     
     // Extract teams and their point progression
-    const teams = [...new Set(data.data.map(row => row[0]))];
+    const teams = [...new Set(data.data.map(row => row[1]))];
     const weekCount = (data.headerGroups.length - 2);
     
     // Create datasets for each team
     const datasets = teams.map(team => {
-        const teamData = data.data.find(row => row[0] === team);
+        const teamData = data.data.find(row => row[1] === team);
         const points = [];
         let cumulativePoints = 0;
         
@@ -916,7 +907,8 @@ function handleSelectionChange() {
         updateSectionLeagueStandings();
         //updateTeamAveragesChart();
         //updateSectionTeamAverages();
-        updateTeamPositionsChart();
+        updateChartTeamPositionWeekly();
+        updateChartTeamPositionCumulated();
         //updateSectionTeamPositions();
         
     } else {
@@ -1114,8 +1106,7 @@ function updateTeamAveragesChart() {
         });
 }
 
-function updateTeamPositionsChart() {
-    
+function updateChartTeamPositionCumulated() {
     const selectedSeason = document.querySelector('input[name="season"]:checked')?.value;
     const selectedLeague = document.querySelector('input[name="league"]:checked')?.value;
     
@@ -1131,24 +1122,99 @@ function updateTeamPositionsChart() {
                 window.teamPositionsChart.destroy();
             }
             
+            // Create datasets for each team
+            const datasets = Object.entries(data.cumulative).map(([team, positions]) => ({
+                label: team,
+                data: positions,
+                borderColor: getTeamColor(team),
+                backgroundColor: getTeamColor(team),
+                tension: 0.1
+            }));
+
+            // Create labels for weeks (1 to number of weeks)
+            const weeks = Array.from(
+                { length: Object.values(data.cumulative)[0].length }, 
+                (_, i) => `Week ${i + 1}`
+            );
+            
             window.teamPositionsChart = new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: data.map(d => `Week ${d.week}`),
-                    datasets: [{
-                        label: 'Position',
-                        data: data.map(d => d.position),
-                        borderColor: '#6FAED4',
-                        backgroundColor: '#6FAED4',
-                        tension: 0.1
-                    }]
+                    labels: weeks,
+                    datasets: datasets
                 },
                 options: {
                     responsive: true,
                     plugins: {
                         title: {
                             display: true,
-                            text: `Position Evolution for ${selectedTeam}`
+                            text: 'Team Positions Over Time'
+                        },
+                        legend: {
+                            display: false  // Explicitly disable the legend
+                        }
+                    },
+                    scales: {
+                        y: {
+                            reverse: true,  // Reverse Y axis so position 1 is at the top
+                            beginAtZero: false,
+                            ticks: {
+                                stepSize: 1
+                            }
+                        }
+                    }
+                }
+            });
+        });
+}
+
+
+function updateChartTeamPositionWeekly() {
+    const selectedSeason = document.querySelector('input[name="season"]:checked')?.value;
+    const selectedLeague = document.querySelector('input[name="league"]:checked')?.value;
+    
+    if (!selectedSeason || !selectedLeague) return;
+
+    fetch(`/league/get_team_positions?season=${selectedSeason}&league=${selectedLeague}`)
+        .then(response => response.json())
+        .then(data => {
+            const ctx = document.getElementById('chartTeamPositionWeekly').getContext('2d');
+            
+            // Destroy existing chart if it exists
+            if (window.chartTeamPositionWeekly instanceof Chart) {
+                window.chartTeamPositionWeekly.destroy();
+            }
+            
+            // Create datasets for each team
+            const datasets = Object.entries(data.weekly).map(([team, positions]) => ({
+                label: team,
+                data: positions,
+                borderColor: getTeamColor(team),
+                backgroundColor: getTeamColor(team),
+                tension: 0.1
+            }));
+
+            // Create labels for weeks (1 to number of weeks)
+            const weeks = Array.from(
+                { length: Object.values(data.weekly)[0].length }, 
+                (_, i) => `Week ${i + 1}`
+            );
+            
+            window.chartTeamPositionWeekly = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: weeks,
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Team Positions in each individual week'
+                        },
+                        legend: {
+                            display: false  // Explicitly disable the legend
                         }
                     },
                     scales: {
@@ -1169,8 +1235,9 @@ function updateTeamPositionsChart() {
 document.querySelectorAll('input[name="team"], input[name="season"], input[name="league"]')
     .forEach(input => {
         input.addEventListener('change', () => {
-            updateTeamAveragesChart();
-            updateTeamPositionsChart();
+            //updateTeamAveragesChart();
+            updateChartTeamPositionWeekly();
+            updateChartTeamPositionCumulated();
         });
     });
 
@@ -1195,8 +1262,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    updateTeamAveragesChart();
-    updateTeamPositionsChart();
+    //updateTeamAveragesChart();
+    updateChartTeamPositionWeekly();
+    updateChartTeamPositionCumulated();
 });
 </script>
 {% endblock %}

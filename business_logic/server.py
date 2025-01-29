@@ -269,14 +269,49 @@ class Server:
         Returns DataFrame with teams as rows and weeks as columns."""
         # Get all weekly standings
         #standings = self.get_league_standings(league_name, season)
-        standings = self.get_league_history(league_name, season, depth=-1, debug_output=True)
-        standings[ColumnsExtra.points_cumulated] = standings.groupby(Columns.team_name)[Columns.points].cumsum()
+        standings = self.get_league_history(league_name, season, depth=-1, debug_output=False)[[Columns.team_name, Columns.points, Columns.week, ColumnsExtra.score_average]]
+        
+        weekly_ranks = standings.sort_values([Columns.week, Columns.points, ColumnsExtra.score_average], ascending=[True, False, False])
+        weekly_ranks[ColumnsExtra.position_weekly] = weekly_ranks.groupby(Columns.week)[Columns.points].rank(ascending=False, method='min')
+        #print("weekly_ranks")
+        #print(weekly_ranks)
+        # 2. Cumulative rankings (based on total points up to each week)
+        # First, get cumulative points for each team
+        cumulative = weekly_ranks.sort_values(Columns.week)
+        cumulative[ColumnsExtra.points_cumulative] = cumulative.groupby(Columns.team_name)[Columns.points].cumsum()
+        
+        # Then, rank teams based on cumulative points within each week
+        cumulative[ColumnsExtra.position_cumulative] = cumulative.groupby(Columns.week)[ColumnsExtra.points_cumulative].rank(ascending=False, method='min')
+        
+        # Combine all information
+        result = cumulative.sort_values([Columns.week, Columns.points], ascending=[True, False])
+        #print("result")
+        #print(result)
+        result = result[[Columns.team_name, Columns.week, Columns.points, ColumnsExtra.position_weekly, ColumnsExtra.points_cumulative, ColumnsExtra.position_cumulative]]
+        
+
+        #print(result)   
+        return result
+
+
+        standings = standings.groupby(Columns.week) 
+
+        print("###############################")
+        data_cumulated = pd.DataFrame()
+        for week, data in standings:
+            #data_cumulated = data_cumulated.append(data)
+            print("week: " + str(week))
+            print(data.sort_values(by=Columns.team_name, ascending=False))
+        print("###############################")
+
+
+        standings[ColumnsExtra.points_cumulative] = standings.groupby(Columns.team_name)[Columns.points].cumsum()
         print(standings)
 
         # Extract positions for all teams for each week
         positions = []
         weeks = sorted(standings[Columns.week].unique())
-        for output_name, column_name in [('Points', Columns.points), ('PointsCumulated',ColumnsExtra.points_cumulated)]:
+        for output_name, column_name in [('Points', Columns.points), ('PointsCumulated',ColumnsExtra.points_cumulative)]:
             for week in weeks:
                 # Get week data and sort by points to determine positions
                 week_data = standings[standings[Columns.week] == week].sort_values(
@@ -285,7 +320,7 @@ class Server:
                 ).reset_index(drop=True)
 
                 week_data_cumulated = standings[standings[Columns.week] == week].sort_values(
-                    by=ColumnsExtra.points_cumulated, 
+                    by=ColumnsExtra.points_cumulative, 
                     ascending=False
                 ).reset_index(drop=True)
                 
