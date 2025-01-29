@@ -1,3 +1,11 @@
 import pathlib
+import os
 
-path_to_csv_data = pathlib.Path(".\\database\\data\\bowling_ergebnisse.csv").absolute()
+# Use os.path.join for cross-platform compatibility
+path_to_csv_data = pathlib.Path(
+    os.path.join(
+        "database",
+        "data",
+        "bowling_ergebnisse.csv"
+    )
+).absolute()
