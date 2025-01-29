@@ -127,8 +127,8 @@ class LeagueService:
                                                           Columns.points: ColumnsExtra.points_total,
                                                           Columns.score: ColumnsExtra.score_total})
         league_standings_data = pd.merge(league_standings_data, league_week_data, on=Columns.team_name)
-        print("league_standings_data")
-        print(league_standings_data)
+        #print("league_standings_data")
+        #print(league_standings_data)
 
 
         league_standings_data = league_standings_data.sort_values(by=[Columns.points])
@@ -161,14 +161,16 @@ class LeagueService:
     def get_team_week_details(self, league:str, season:str, team:str, week:int) -> Response:
         return(self.server.get_team_week_details(league_name=league, season=season, team_name=team, week=week))
 
-    def get_team_positions_during_season(self, league_name: str, season: str, team_name: str) -> dict:
+    def get_team_positions_during_season(self, league_name: str, season: str) -> dict:
         """Get team positions for each week during the season."""
-        df = self.server.get_team_positions_during_season(league_name, season, team_name)
+        df = self.server.get_team_positions_during_season(league_name, season)
+        print("league_service.get_team_positions_during_season")
+        print(df)
         return df.to_dict(orient='records')
 
-    def get_team_averages_during_season(self, league_name: str, season: str, team_name: str) -> dict:
+    def get_team_averages_during_season(self, league_name: str, season: str) -> dict:
         """Get team average points for each week during the season."""
-        df = self.server.get_team_averages_during_season(league_name, season, team_name)
+        df = self.server.get_team_averages_during_season(league_name, season)
         return df.to_dict(orient='records')       
 
 

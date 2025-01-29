@@ -188,23 +188,23 @@ def get_team_positions():
     try:
         season = request.args.get('season')
         league = request.args.get('league')
-        team = request.args.get('team')
-        
+           
 
-        print(f"Team Positions - Received request with: season={season}, league={league}, team={team}")
-        if not all([season, league, team]):
+        print(f"Team Positions - Received request with: season={season}, league={league}")
+        if not all([season, league]):
             return jsonify({'error': 'Missing required parameters'}), 400
             
         positions = league_service.get_team_positions_during_season(
             league_name=league,
-            season=season,
-            team=team
+            season=season
         )
         
+        print(positions)
         return jsonify(positions)
         
     except Exception as e:
         print(f"Error in get_team_positions: {str(e)}")
+        print(traceback.format_exc())
         return jsonify({'error': str(e)}), 500
 
 @bp.route('/league/get_team_averages')
@@ -212,15 +212,15 @@ def get_team_averages():
     try:
         season = request.args.get('season')
         league = request.args.get('league')
-        team = request.args.get('team')
         
-        if not all([season, league, team]):
+        print(f"Team Averages - Received request with: season={season}, league={league}")
+
+        if not all([season, league]):
             return jsonify({'error': 'Missing required parameters'}), 400
             
         averages = league_service.get_team_averages_during_season(
             league_name=league,
-            season=season,
-            team=team
+            season=season
         )
         
         return jsonify(averages)

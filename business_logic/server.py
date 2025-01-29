@@ -264,37 +264,79 @@ class Server:
         #print(data_league)
 
 
-    def get_team_positions_during_season(self, league_name: str, season: str, team_name: str) -> pd.DataFrame:
-        """Get team positions for each week during the season."""
+    def get_team_positions_during_season(self, league_name: str, season: str, cumulated: bool=False) -> pd.DataFrame:
+        """Get team positions for each week during the season for all teams.
+        Returns DataFrame with teams as rows and weeks as columns."""
         # Get all weekly standings
-        standings = self.get_league_standings(league_name, season)
-        
-        # Extract position for specified team for each week
-        positions = []
-        weeks = sorted(standings['week'].unique())
-        
-        for week in weeks:
-            week_data = standings[standings['week'] == week]
-            team_pos = week_data[week_data['team'] == team_name]['position'].iloc[0]
-            positions.append({'week': week, 'position': team_pos})
-        
-        return pd.DataFrame(positions)
+        #standings = self.get_league_standings(league_name, season)
+        standings = self.get_league_history(league_name, season, depth=-1, debug_output=True)
+        standings[ColumnsExtra.points_cumulated] = standings.groupby(Columns.team_name)[Columns.points].cumsum()
+        print(standings)
 
-    def get_team_averages_during_season(self, league_name: str, season: str, team_name: str) -> pd.DataFrame:
-        """Get team average points for each week during the season."""
+        # Extract positions for all teams for each week
+        positions = []
+        weeks = sorted(standings[Columns.week].unique())
+        for output_name, column_name in [('Points', Columns.points), ('PointsCumulated',ColumnsExtra.points_cumulated)]:
+            for week in weeks:
+                # Get week data and sort by points to determine positions
+                week_data = standings[standings[Columns.week] == week].sort_values(
+                    by=Columns.points, 
+                    ascending=False
+                ).reset_index(drop=True)
+
+                week_data_cumulated = standings[standings[Columns.week] == week].sort_values(
+                    by=ColumnsExtra.points_cumulated, 
+                    ascending=False
+                ).reset_index(drop=True)
+                
+                # Add position and team data for each team in this week
+                for index, row in week_data.iterrows():
+                    positions.append({
+                        'week': week,
+                        'team': row[Columns.team_name],
+                        'points': index + 1,  # position is 1-based
+                        'points_cumulated': week_data_cumulated.index[index] + 1
+                    })
+        
+        # Convert to wide format: teams as rows, weeks as columns
+        positions_df = pd.DataFrame(positions)
+        print(positions_df)
+        positions_wide = positions_df.pivot(
+            index='team',
+            columns='week',
+            position_per_week=ColumnsExtra.position
+        )
+        
+        return positions_wide
+
+    def get_team_averages_during_season(self, league_name: str, season: str) -> pd.DataFrame:
+        """Get team average points for each week during the season for all teams.
+        Returns DataFrame with teams as rows and weeks as columns."""
         # Get all weekly standings
         standings = self.get_league_standings(league_name, season)
         
-        # Extract average for specified team for each week
+        # Extract averages for all teams for each week
         averages = []
         weeks = sorted(standings['week'].unique())
         
         for week in weeks:
             week_data = standings[standings['week'] == week]
-            team_avg = week_data[week_data['team'] == team_name]['average'].iloc[0]
-            averages.append({'week': week, 'average': team_avg})
+            for _, row in week_data.iterrows():
+                averages.append({
+                    'week': week,
+                    'team': row['team'],
+                    'average': row['average']
+                })
         
-        return pd.DataFrame(averages)
+        # Convert to wide format: teams as rows, weeks as columns
+        averages_df = pd.DataFrame(averages)
+        averages_wide = averages_df.pivot(
+            index='team',
+            columns='week',
+            values='average'
+        )
+        
+        return averages_wide
 
     def get_team_week_details(self, league_name: str, season: str, team_name: str, week: int, debug_output: bool=False) -> dict:
         """Get detailed team results for a specific week including individual and team stats"""

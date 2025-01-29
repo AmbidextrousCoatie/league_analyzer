@@ -77,32 +77,33 @@
             </div>
         </div>
         <!-- After your existing charts and shared legend -->
-<div class="row mb-3">
-    <!-- Team Averages Chart -->
-    <div class="col-md-6">
-        <div class="card h-100">
-            <div class="card-header">
-                <h5>Team Averages per Week</h5>
+        <div class="row">
+            <!-- Team Averages Chart -->
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <h5>Team Averages per Week</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="teamAveragesChart"></canvas>
+                    </div>
+                </div>
             </div>
-            <div class="card-body">
-                <canvas id="teamAveragesChart"></canvas>
+            
+            <!-- Team Positions Chart -->
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <h5>Team Position Evolution</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="teamPositionsChart"></canvas>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
-    
-    <!-- Team Positions Chart -->
-    <div class="col-md-6">
-        <div class="card h-100">
-            <div class="card-header">
-                <h5>Team Position Evolution</h5>
-            </div>
-            <div class="card-body">
-                <canvas id="teamPositionsChart"></canvas>
-            </div>
-        </div>
-    </div>
-</div>
-    </div>
+</div>  
 <!---/div-->
 
 <!--//////////////////////////////////////////////////////////////////////////-->
@@ -175,32 +176,27 @@
 <!-- Team Selection -->
 <div class="mb-2">
 
-<!-- League Team Table -->
-<div class="card">
-    <div class="row mb-3">
-        <div class="col-md-8">
-            <h5>Team</h5>
-            <div id="buttonsTeam" class="btn-group-horizontal w-100">
-                <!-- Teams will be inserted here -->
+    <!-- League Team Table -->
+    <div class="card">
+        <div class="row mb-3">
+            <div class="col-md-8">
+                <h5>Team</h5>
+                <div id="buttonsTeam" class="btn-group-horizontal w-100">
+                    <!-- Teams will be inserted here -->
+                </div>
             </div>
         </div>
-    </div>
-    <div class="card-header">
-        <h5>Team Results for Aschaffenburg 55</h5>
-        <div id="teamDetailsMetadata" class="text-muted small"></div>
-    </div>
-    <div class="card-body">
-        <div id="teamTableWeekDetails">
-            <!-- Team table will be dynamically inserted here -->
-            <div class="alert alert-info">Select season, league, and match day to view team details</div>
+        <div class="card-header">
+            <h5>Team Results for Aschaffenburg 55</h5>
+            <div id="teamDetailsMetadata" class="text-muted small"></div>
         </div>
-    </div>
-</div>
-
-
-
-<div class="card">
-    
+        <div class="card-body">
+            <div id="teamTableWeekDetails">
+                <!-- Team table will be dynamically inserted here -->
+                <div class="alert alert-info">Select season, league, and match day to view team details</div>
+            </div>
+        </div>
+    </div>  
 </div>
 
 {% endblock %}
@@ -673,6 +669,17 @@ function updatePointsChart(data) {
     updateSharedLegend(teams);
 }
 
+function updateCumulativePositionChart(data) {
+    const canvas = document.getElementById('teamPositionsChart');
+    
+    if (window.teamPositionsChart instanceof Chart) {
+        window.teamPositionsChart.destroy();
+    }
+
+
+}
+
+
 function updateCumulativePointsChart(data) {
     // Get the canvas element
     const canvas = document.getElementById('cumulativePointsChart');
@@ -871,6 +878,7 @@ function createTable(config) {
 
 // Initialize the page
 function initializePage() {
+    console.log("Initializing page...");
     // Load available seasons
     fetch('/api/league/available_seasons')
         .then(response => response.json())
@@ -906,8 +914,10 @@ function handleSelectionChange() {
         messageArea.style.display = 'none';
         tableArea.style.display = 'block';
         updateSectionLeagueStandings();
-        updateSectionTeamAverages();
-        updateSectionTeamPositions();
+        //updateTeamAveragesChart();
+        //updateSectionTeamAverages();
+        updateTeamPositionsChart();
+        //updateSectionTeamPositions();
         
     } else {
         messageArea.style.display = 'block';
@@ -920,27 +930,32 @@ function updateAvailableOptions() {
     const selectedSeason = document.querySelector('input[name="season"]:checked')?.value;
     const selectedLeague = document.querySelector('input[name="league"]:checked')?.value;
 
+    console.log("Updating available options for:", {
+        season: selectedSeason,
+        league: selectedLeague
+    });
+
     if (selectedSeason && selectedLeague) {
         // Update available weeks
         fetch(`/api/league/available_weeks?season=${selectedSeason}&league=${selectedLeague}`)
             .then(response => response.json())
             .then(weeks => {
-                const buttonsWeek = weeks.map(week => `
+                const weekButtons = weeks.map(week => `
                     <input type="radio" class="btn-check" name="week" id="week_${week}" value="${week}">
                     <label class="btn btn-outline-primary" for="week_${week}">${week}</label>
                 `).join('');
-                document.getElementById('buttonsWeek').innerHTML = buttonsWeek;
+                document.getElementById('buttonsWeek').innerHTML = weekButtons;
             });
 
         // Update available teams
         fetch(`/api/league/available_teams?season=${selectedSeason}&league=${selectedLeague}`)
             .then(response => response.json())
             .then(teams => {
-                const buttonsTeam = teams.map(team => `
+                const teamButtons = teams.map(team => `
                     <input type="radio" class="btn-check" name="team" id="team_${team}" value="${team}">
                     <label class="btn btn-outline-primary" for="team_${team}">${team}</label>
                 `).join('');
-                document.getElementById('buttonsTeam').innerHTML = buttonsTeam;
+                document.getElementById('buttonsTeam').innerHTML = teamButtons;
             });
     } else {
         // Clear buttons if no season/league selected
@@ -1054,13 +1069,12 @@ function updateHonorScores() {
 }
 
 function updateTeamAveragesChart() {
-    const selectedTeam = document.querySelector('input[name="team"]:checked')?.value;
     const selectedSeason = document.querySelector('input[name="season"]:checked')?.value;
     const selectedLeague = document.querySelector('input[name="league"]:checked')?.value;
     
-    if (!selectedTeam || !selectedSeason || !selectedLeague) return;
+    if (!selectedSeason || !selectedLeague) return;
 
-    fetch(`/league/get_team_averages?season=${selectedSeason}&league=${selectedLeague}&team=${selectedTeam}`)
+    fetch(`/league/get_team_averages?season=${selectedSeason}&league=${selectedLeague}`)
         .then(response => response.json())
         .then(data => {
             const ctx = document.getElementById('teamAveragesChart').getContext('2d');
@@ -1101,13 +1115,13 @@ function updateTeamAveragesChart() {
 }
 
 function updateTeamPositionsChart() {
-    const selectedTeam = document.querySelector('input[name="team"]:checked')?.value;
+    
     const selectedSeason = document.querySelector('input[name="season"]:checked')?.value;
     const selectedLeague = document.querySelector('input[name="league"]:checked')?.value;
     
-    if (!selectedTeam || !selectedSeason || !selectedLeague) return;
+    if (!selectedSeason || !selectedLeague) return;
 
-    fetch(`/league/get_team_positions?season=${selectedSeason}&league=${selectedLeague}&team=${selectedTeam}`)
+    fetch(`/league/get_team_positions?season=${selectedSeason}&league=${selectedLeague}`)
         .then(response => response.json())
         .then(data => {
             const ctx = document.getElementById('teamPositionsChart').getContext('2d');
@@ -1169,6 +1183,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (event.target.name === 'season' || event.target.name === 'league') {
             handleSelectionChange();
             updateAvailableOptions();
+            console.log('Updating available options after season/league change');
         }
         // Listen for week/team selection changes
         if (event.target.name === 'week' || event.target.name === 'team') {
