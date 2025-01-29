@@ -41,11 +41,27 @@ class LeagueService:
         """Get results of a league on a specific match day"""
         return self.server.get_league_week(league_name=league, season=season, week=week).to_dict('records')
 
+    def get_honor_scores(self, league:str=None, season:str=None, week:int=None, team_name:str=None, player_name:str=None, individual_scores:int=1, team_scores:int=1, indivdual_averages:int=1, team_averages:int=1) -> Response:
+        
+        individual_scores_df, team_scores_df, individual_averages_df, team_averages_df = self.server.get_honor_scores(
+            league_name=league, season=season, week=week, team_name=team_name, player_name=player_name, 
+            individual_scores=individual_scores, team_scores=team_scores, indivdual_averages=indivdual_averages, team_averages=team_averages)
+
+        honor_scores = dict()
+        honor_scores['individual_scores'] = individual_scores_df.to_dict('records')
+        honor_scores['team_scores'] = team_scores_df.to_dict('records')
+        honor_scores['individual_averages'] = individual_averages_df.to_dict('records')
+        honor_scores['team_averages'] = team_averages_df.to_dict('records') 
+
+        return honor_scores
+
+
+
     def get_league_history_table(self, league_name:str, season:str, week:int=None, depth:int=None, debug_output:bool=False) -> Response:    
         if debug_output:
             print("get_league_history_table")
             print("league_name: " + league_name + " season: " + season + " week: " + str(week) + " depth: " + str(depth))
-        data = self.server.get_league_history(league_name=league_name, season=season, week=week, depth=depth, debug_output=debug_output)
+        data = self.server.get_league_history(league_name=league_name, season=season, week=week, depth=-1, debug_output=debug_output)
         # find all weeks
         weeks = data[Columns.week].unique()
         # groupby week
@@ -67,12 +83,14 @@ class LeagueService:
         columns_total = [ColumnsExtra.score_total, ColumnsExtra.points_total, ColumnsExtra.score_average_total]
         
         data_collected_by_team['headerGroups'] = [[Columns.team_name, 2]] + [['Week' + str(w), len(columns_per_day) ] for w in weeks] + [["Season Total", len(columns_per_day) +1]]
-        data_collected_by_team['columns'] = [Columns.team_name] + columns_per_day * max(weeks) + columns_per_day + [ColumnsExtra.score_average]
+        data_collected_by_team['columns'] = ['Pos', Columns.team_name] + columns_per_day * max(weeks) + columns_per_day + [ColumnsExtra.score_average]
         data_collected_by_team['data'] = []
 
         data_per_team = data.groupby(Columns.team_name)
-        for team, group in data_per_team:
-            team_row = [team]
+        data_per_team = sorted(data_per_team, key=lambda x: x[1][Columns.points].sum(), reverse=True)
+
+        for idx, (team, group) in enumerate(data_per_team):
+            team_row = [idx+1, team]
             if debug_output:
                 print("team : " + str(team))
                 print(group)
@@ -96,7 +114,7 @@ class LeagueService:
             return pd.DataFrame().to_dict('records')
 
 
-    def get_league_standings_table(self, league:str, season:str, week:int=None, depth:int=None) -> Response:     
+    def get_league_week_table(self, league:str, season:str, week:int=None, depth:int=None) -> Response:     
         """Get standings of a leagaue up to a specific match day"""
         #print(" >>>>>>>>>>>>>>>>>>>> doing history just for testing")
         #self.get_league_history_table(league, season, week, 3)
@@ -112,16 +130,22 @@ class LeagueService:
         #print("league_standings_data")
         #print(league_standings_data)
 
+
+        league_standings_data = league_standings_data.sort_values(by=[Columns.points])
+
         data_collected = dict()
         columns_to_show_week = [Columns.score, Columns.points, ColumnsExtra.score_average]
         columns_to_show_season = [ColumnsExtra.score_total, ColumnsExtra.points_total, ColumnsExtra.score_average_total]
         
         data_collected['headerGroups'] = [[Columns.team_name, 2]] + [['Week' + str(week), len(columns_to_show_week)]] + [["Season Total", len(columns_to_show_season)]]
-        data_collected['columns'] = [Columns.team_name] + columns_to_show_week + columns_to_show_week
+        data_collected['columns'] = ['Pos', Columns.team_name] + columns_to_show_week + columns_to_show_week
         data_collected['data'] = []
 
-        for team, group in league_standings_data.groupby(Columns.team_name):
-            team_row = [team]
+        league_standing_data_groups = league_standings_data.groupby(Columns.team_name)
+        league_standing_data_groups = sorted(league_standing_data_groups, key=lambda x: x[1][Columns.points].iloc[0], reverse=True)
+
+        for idx, (team, group) in enumerate(league_standing_data_groups):
+            team_row = [idx+1, team]
             for row in group.to_dict('records'):
                 rows_to_extract = [row[col] for col in columns_to_show_week]
                 team_row.extend(rows_to_extract)
@@ -137,16 +161,26 @@ class LeagueService:
     def get_team_week_details(self, league:str, season:str, team:str, week:int) -> Response:
         return(self.server.get_team_week_details(league_name=league, season=season, team_name=team, week=week))
 
-        
+    def get_team_positions_during_season(self, league_name: str, season: str) -> dict:
+        """Get team positions for each week during the season."""
+        df = self.server.get_team_positions_during_season(league_name, season)
+        print("league_service.get_team_positions_during_season")
+        print(df)
+        return df.to_dict(orient='records')
+
+    def get_team_averages_during_season(self, league_name: str, season: str) -> dict:
+        """Get team average points for each week during the season."""
+        df = self.server.get_team_averages_during_season(league_name, season)
+        return df.to_dict(orient='records')       
 
 
 
-    def get_league_standings_table_deprecated(self, league:str, season:str, week:int=None, depth:int=None) -> Response:     
+    def get_league_week_table_deprecated(self, league:str, season:str, week:int=None, depth:int=None) -> Response:     
         """Get standings of a leagaue up to a specific match day"""
         #print(" >>>>>>>>>>>>>>>>>>>> doing history just for testing")
         #self.get_league_history_table(league, season, week, 3)
         #print(" <<<<<<<<<<<<<<<<<<<< done with history")
-        league_standings_data = self.server.get_league_standings(league_name=league, season=season, week=week)
+        league_standings_data = self.server.get_league_week(league_name=league, season=season, week=week)
         league_week_data = self.server.get_league_week(league_name=league, season=season, week=week)
 
         
@@ -171,7 +205,7 @@ class LeagueService:
         data_week = self.server.get_league_week(league_name=league, season=season, week=week)
 
         # Apply base filters
-        return self.server.get_league_standings(league_name=league, season=season, week=week).to_dict('records')
+        return self.server.get_league_week(league_name=league, season=season, week=week).to_dict('records')
 
 
 

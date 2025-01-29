@@ -33,7 +33,8 @@ class DataAdapterPandas(DataAdapter):
             for column, value in filters_eq.items():
                 if print_debug:
                     print(column + " == " + str(value))
-                filtered_df = filtered_df[filtered_df[column] == value]
+                if value is not None:
+                    filtered_df = filtered_df[filtered_df[column] == value]
             if print_debug:
                 print(f"DataFrame shape after filtering: {filtered_df.shape}")  
 
@@ -41,7 +42,8 @@ class DataAdapterPandas(DataAdapter):
             for column, value in filters_lt.items():
                 if print_debug:
                     print(column + " < " + str(value))
-                filtered_df = filtered_df[filtered_df[column] < value]
+                if value is not None:
+                    filtered_df = filtered_df[filtered_df[column] < value]
             if print_debug:
                 print(f"DataFrame shape after filtering: {filtered_df.shape}")  
 
@@ -49,7 +51,8 @@ class DataAdapterPandas(DataAdapter):
             for column, value in filters_gt.items():
                 if print_debug:
                     print(column + " > " + str(value))
-                filtered_df = filtered_df[filtered_df[column] > value]
+                if value is not None:
+                    filtered_df = filtered_df[filtered_df[column] > value]
             if print_debug:
                 print(f"DataFrame shape after filtering: {filtered_df.shape}")  
 

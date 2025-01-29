@@ -38,4 +38,4 @@ class ColumnsExtra:
     score_total: str = 'ScoreTotal'
     points_total: str = 'PointsTotal'
     position_change: str = 'PositionChange'
-    
+    points_cumulated: str = 'PointsCumulated'

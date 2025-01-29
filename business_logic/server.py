@@ -36,6 +36,42 @@ class Server:
         return self.data_adapter.get_weeks(league_name=league_name, season=season)
     
 
+    def get_honor_scores(self, league_name:str=None, season:str=None, week:int=None, team_name:str=None, player_name:str=None, individual_scores:int=1, team_scores:int=1, indivdual_averages:int=1, team_averages:int=1) -> pd.DataFrame:
+        filters_eq = {Columns.league_name: league_name, Columns.season: season, Columns.week: week, Columns.team_name: team_name, Columns.player_name: player_name}
+        columns = [Columns.team_name, Columns.player_name, Columns.score, Columns.input_data, Columns.players_per_team]
+
+        data = self.data_adapter.get_filtered_data(columns=columns, filters_eq=filters_eq)
+
+
+        # individual scores
+        if individual_scores > 0:
+            individual_scores_df = data[data[Columns.input_data]==True][[Columns.player_name, Columns.score]].sort_values(by=Columns.score, ascending=False).head(individual_scores).copy()
+
+        # team scores
+        if team_scores > 0:
+            team_scores_df = data[data[Columns.input_data]==False][[Columns.team_name, Columns.score]].sort_values(by=Columns.score, ascending=False).head(team_scores).copy()
+
+        # individual averages - now including player name in result
+        if indivdual_averages > 0:
+            individual_averages_df = (data[data[Columns.input_data]==True]
+                                    .groupby(Columns.player_name)[[Columns.score]]
+                                    .mean()
+                                    .sort_values(by=Columns.score, ascending=False)
+                                    .head(indivdual_averages)
+                                    .reset_index()  # This keeps the player_name column
+                                    .copy())
+
+        # team averages - now including team name in result
+        if team_averages > 0:
+            team_averages_df = (data[data[Columns.input_data]==False]
+                            .groupby(Columns.team_name)[[Columns.score]]
+                            .mean()
+                            .sort_values(by=Columns.score, ascending=False)
+                            .head(team_averages)
+                            .reset_index()  # This keeps the team_name column
+                            .copy())
+        return individual_scores_df, team_scores_df, individual_averages_df, team_averages_df
+
     def get_teams_in_league_season(self, league_name:str, season:str, debug_output:bool=False) -> List[str]:
         filters = {Columns.league_name: league_name, Columns.season: season}
         
@@ -97,9 +133,15 @@ class Server:
         """
         if debug_output:
             print("Entering: week: " + str(week) + " | depth: " + str(depth))
+ 
+        if week is None:
+            week = int(max(self.get_weeks(league_name=league_name, season=season)))
+        # history should not be deeper than the current week
         if depth is None:
             depth = 0
-        # history should not be deeper than the current week
+        if depth == -1:
+            depth = week
+ 
         depth = min(depth, week)
         
         if debug_output:
@@ -221,7 +263,82 @@ class Server:
         data_league[ColumnsExtra.score_average] = round(data_player[Columns.score] / number_of_games, 2)
         #print(data_league)
 
-    def get_team_week_details(self, league_name: str, season: str, team_name: str, week: int) -> dict:
+
+    def get_team_positions_during_season(self, league_name: str, season: str, cumulated: bool=False) -> pd.DataFrame:
+        """Get team positions for each week during the season for all teams.
+        Returns DataFrame with teams as rows and weeks as columns."""
+        # Get all weekly standings
+        #standings = self.get_league_standings(league_name, season)
+        standings = self.get_league_history(league_name, season, depth=-1, debug_output=True)
+        standings[ColumnsExtra.points_cumulated] = standings.groupby(Columns.team_name)[Columns.points].cumsum()
+        print(standings)
+
+        # Extract positions for all teams for each week
+        positions = []
+        weeks = sorted(standings[Columns.week].unique())
+        for output_name, column_name in [('Points', Columns.points), ('PointsCumulated',ColumnsExtra.points_cumulated)]:
+            for week in weeks:
+                # Get week data and sort by points to determine positions
+                week_data = standings[standings[Columns.week] == week].sort_values(
+                    by=Columns.points, 
+                    ascending=False
+                ).reset_index(drop=True)
+
+                week_data_cumulated = standings[standings[Columns.week] == week].sort_values(
+                    by=ColumnsExtra.points_cumulated, 
+                    ascending=False
+                ).reset_index(drop=True)
+                
+                # Add position and team data for each team in this week
+                for index, row in week_data.iterrows():
+                    positions.append({
+                        'week': week,
+                        'team': row[Columns.team_name],
+                        'points': index + 1,  # position is 1-based
+                        'points_cumulated': week_data_cumulated.index[index] + 1
+                    })
+        
+        # Convert to wide format: teams as rows, weeks as columns
+        positions_df = pd.DataFrame(positions)
+        print(positions_df)
+        positions_wide = positions_df.pivot(
+            index='team',
+            columns='week',
+            position_per_week=ColumnsExtra.position
+        )
+        
+        return positions_wide
+
+    def get_team_averages_during_season(self, league_name: str, season: str) -> pd.DataFrame:
+        """Get team average points for each week during the season for all teams.
+        Returns DataFrame with teams as rows and weeks as columns."""
+        # Get all weekly standings
+        standings = self.get_league_standings(league_name, season)
+        
+        # Extract averages for all teams for each week
+        averages = []
+        weeks = sorted(standings['week'].unique())
+        
+        for week in weeks:
+            week_data = standings[standings['week'] == week]
+            for _, row in week_data.iterrows():
+                averages.append({
+                    'week': week,
+                    'team': row['team'],
+                    'average': row['average']
+                })
+        
+        # Convert to wide format: teams as rows, weeks as columns
+        averages_df = pd.DataFrame(averages)
+        averages_wide = averages_df.pivot(
+            index='team',
+            columns='week',
+            values='average'
+        )
+        
+        return averages_wide
+
+    def get_team_week_details(self, league_name: str, season: str, team_name: str, week: int, debug_output: bool=False) -> dict:
         """Get detailed team results for a specific week including individual and team stats"""
         
         # Get individual player results
@@ -255,13 +372,15 @@ class Server:
             columns=player_columns,
             filters_eq=player_filters
         )
-        print("player_data: \n" + str(player_data))
+        if debug_output:
+            print("player_data: \n" + str(player_data))
         
         player_opponent_data = self.data_adapter.get_filtered_data(
             columns=player_columns,
             filters_eq=player_opponent_filters
         )
-        print("player_opponent_data: \n" + str(player_opponent_data))
+        if debug_output:
+            print("player_opponent_data: \n" + str(player_opponent_data))
 
         # Get team results
         team_filters = {
@@ -288,14 +407,16 @@ class Server:
             columns=columns_team,
             filters_eq=team_filters
         )
-        print("team_data: \n" + str(team_data))
+        if debug_output:
+            print("team_data: \n" + str(team_data))
         
 
         team_opponent_data = self.data_adapter.get_filtered_data(
             columns=columns_team,
             filters_eq=team_opponent_filters
         )
-        print("team_opponent_data: \n" + str(team_opponent_data))
+        if debug_output:
+            print("team_opponent_data: \n" + str(team_opponent_data))
 
         # Get number of games
         n_games = len(player_data[Columns.team_name_opponent].unique())
@@ -304,6 +425,7 @@ class Server:
         rows = []
         # Group by player to get their games
         player_groups = player_data.groupby(Columns.player_name)
+        player_groups = sorted(player_groups, key=lambda x: x[1][Columns.position].iloc[0])
         
         for player_name, player_games in player_groups:
             player_row = {
@@ -449,7 +571,9 @@ class Server:
                 'location': 'TBD'
             }
         }
-        print(table_config)
+        if debug_output:
+            print(table_config)
         return table_config
+
 
 
