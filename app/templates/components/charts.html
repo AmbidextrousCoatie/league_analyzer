@@ -1,0 +1,59 @@
+<script>
+// Global object to store team colors
+const teamColors = {};
+
+function getTeamColor(team) {
+    if (!teamColors[team]) {
+        // Generate and store a color for this team
+        teamColors[team] = `hsl(${Object.keys(teamColors).length * 137.508}deg, 70%, 50%)`;
+    }
+    return teamColors[team];
+}
+
+function createLineChart(data, chartId, title, labels) {
+    const ctx = document.getElementById(chartId).getContext('2d');
+    
+    // Destroy existing chart if it exists
+    if (window[chartId + 'Instance'] instanceof Chart) {
+        window[chartId + 'Instance'].destroy();
+    }
+    
+    // Create datasets for each team
+    const datasets = Object.entries(data).map(([team, values]) => ({
+        label: team,
+        data: values,
+        borderColor: getTeamColor(team),
+        backgroundColor: getTeamColor(team),
+        tension: 0.1
+    }));
+    
+    window[chartId + 'Instance'] = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: datasets
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                title: {
+                    display: true,
+                    text: title
+                },
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    reverse: true,
+                    beginAtZero: false,
+                    ticks: {
+                        stepSize: 1
+                    }
+                }
+            }
+        }
+    });
+}
+</script>

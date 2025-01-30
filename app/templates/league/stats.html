@@ -1,8 +1,9 @@
 {% extends "base.html" %}
 
 {% block content %}
-    {% from "components/tables.html" import create_table %}
-    {{ create_table({}) }}
+    {% include "components/tables.html" %}
+    {% include "components/charts.html" %}
+
 
 <div class="card">
     <div class="card-header">
@@ -97,7 +98,7 @@
                         <h5>Platzierung im Saisonverlauf</h5>
                     </div>
                     <div class="card-body">
-                        <canvas id="teamPositionsChart"></canvas>
+                        <canvas id="chartTeamPositionCumulated"></canvas>
                     </div>
                 </div>
             </div>
@@ -208,16 +209,6 @@
 
 let positionChart = null;
 
-// Color mapping function
-const teamColors = {};
-
-function getTeamColor(team) {
-    if (!teamColors[team]) {
-        // Generate and store a color for this team
-        teamColors[team] = `hsl(${Object.keys(teamColors).length * 137.508}deg, 70%, 50%)`;
-    }
-    return teamColors[team];
-}
 
 function updateSharedLegend(teams) {
     const legendHtml = teams.map(team => `
@@ -907,9 +898,7 @@ function handleSelectionChange() {
         updateSectionLeagueStandings();
         //updateTeamAveragesChart();
         //updateSectionTeamAverages();
-        updateChartTeamPositionWeekly();
-        updateChartTeamPositionCumulated();
-        //updateSectionTeamPositions();
+        updateChartsLeague();
         
     } else {
         messageArea.style.display = 'block';
@@ -1106,138 +1095,51 @@ function updateTeamAveragesChart() {
         });
 }
 
-function updateChartTeamPositionCumulated() {
+
+function updateChartsLeague() {
     const selectedSeason = document.querySelector('input[name="season"]:checked')?.value;
     const selectedLeague = document.querySelector('input[name="league"]:checked')?.value;
     
     if (!selectedSeason || !selectedLeague) return;
 
+    console.log("Updating charts for:", {
+        season: selectedSeason,
+        league: selectedLeague
+    });
+
+    // Fetch and create position charts
     fetch(`/league/get_team_positions?season=${selectedSeason}&league=${selectedLeague}`)
         .then(response => response.json())
         .then(data => {
-            const ctx = document.getElementById('teamPositionsChart').getContext('2d');
-            
-            // Destroy existing chart if it exists
-            if (window.teamPositionsChart instanceof Chart) {
-                window.teamPositionsChart.destroy();
-            }
-            
-            // Create datasets for each team
-            const datasets = Object.entries(data.cumulative).map(([team, positions]) => ({
-                label: team,
-                data: positions,
-                borderColor: getTeamColor(team),
-                backgroundColor: getTeamColor(team),
-                tension: 0.1
-            }));
+            // Create labels based on number of weeks
+            const numWeeks = Object.values(data.weekly)[0].length;
+            const labels = Array.from({length: numWeeks}, (_, i) => `Spieltag ${i + 1}`);
 
-            // Create labels for weeks (1 to number of weeks)
-            const weeks = Array.from(
-                { length: Object.values(data.cumulative)[0].length }, 
-                (_, i) => `Week ${i + 1}`
+            // Create weekly positions chart
+            createLineChart(
+                data.weekly,
+                'chartTeamPositionWeekly',
+                'Platzierung pro Spieltag',
+                labels
             );
-            
-            window.teamPositionsChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: weeks,
-                    datasets: datasets
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        title: {
-                            display: true,
-                            text: 'Team Positions Over Time'
-                        },
-                        legend: {
-                            display: false  // Explicitly disable the legend
-                        }
-                    },
-                    scales: {
-                        y: {
-                            reverse: true,  // Reverse Y axis so position 1 is at the top
-                            beginAtZero: false,
-                            ticks: {
-                                stepSize: 1
-                            }
-                        }
-                    }
-                }
-            });
+
+            // Create cumulative positions chart
+            createLineChart(
+                data.cumulative,
+                'chartTeamPositionCumulated',
+                'Platzierung im Saisonverlauf',
+                labels
+            );
         });
 }
 
-
-function updateChartTeamPositionWeekly() {
-    const selectedSeason = document.querySelector('input[name="season"]:checked')?.value;
-    const selectedLeague = document.querySelector('input[name="league"]:checked')?.value;
-    
-    if (!selectedSeason || !selectedLeague) return;
-
-    fetch(`/league/get_team_positions?season=${selectedSeason}&league=${selectedLeague}`)
-        .then(response => response.json())
-        .then(data => {
-            const ctx = document.getElementById('chartTeamPositionWeekly').getContext('2d');
-            
-            // Destroy existing chart if it exists
-            if (window.chartTeamPositionWeekly instanceof Chart) {
-                window.chartTeamPositionWeekly.destroy();
-            }
-            
-            // Create datasets for each team
-            const datasets = Object.entries(data.weekly).map(([team, positions]) => ({
-                label: team,
-                data: positions,
-                borderColor: getTeamColor(team),
-                backgroundColor: getTeamColor(team),
-                tension: 0.1
-            }));
-
-            // Create labels for weeks (1 to number of weeks)
-            const weeks = Array.from(
-                { length: Object.values(data.weekly)[0].length }, 
-                (_, i) => `Week ${i + 1}`
-            );
-            
-            window.chartTeamPositionWeekly = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: weeks,
-                    datasets: datasets
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        title: {
-                            display: true,
-                            text: 'Team Positions in each individual week'
-                        },
-                        legend: {
-                            display: false  // Explicitly disable the legend
-                        }
-                    },
-                    scales: {
-                        y: {
-                            reverse: true,  // Reverse Y axis so position 1 is at the top
-                            beginAtZero: false,
-                            ticks: {
-                                stepSize: 1
-                            }
-                        }
-                    }
-                }
-            });
-        });
-}
 
 // Add to your existing event listeners
 document.querySelectorAll('input[name="team"], input[name="season"], input[name="league"]')
     .forEach(input => {
         input.addEventListener('change', () => {
-            //updateTeamAveragesChart();
-            updateChartTeamPositionWeekly();
-            updateChartTeamPositionCumulated();
+
+            updateChartsLeague();
         });
     });
 
@@ -1262,9 +1164,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    //updateTeamAveragesChart();
-    updateChartTeamPositionWeekly();
-    updateChartTeamPositionCumulated();
+
+    updateChartsLeague();
 });
 </script>
 {% endblock %}
