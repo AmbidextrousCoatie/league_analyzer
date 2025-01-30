@@ -10,7 +10,7 @@ function getTeamColor(team) {
     return teamColors[team];
 }
 
-function createLineChart(data, chartId, title, labels) {
+function createLineChart(data, chartId, title, labels, reverse_y) {
     const ctx = document.getElementById(chartId).getContext('2d');
     
     // Destroy existing chart if it exists
@@ -46,7 +46,7 @@ function createLineChart(data, chartId, title, labels) {
             },
             scales: {
                 y: {
-                    reverse: true,
+                    reverse: reverse_y,
                     beginAtZero: false,
                     ticks: {
                         stepSize: 1

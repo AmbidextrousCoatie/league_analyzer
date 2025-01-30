@@ -177,9 +177,33 @@ class LeagueService:
         return sorted_df
 
 
+    def get_team_points_during_season(self, league_name: str, season: str) -> dict:
+        """Get team points for each week during the season."""
+        rankings = self.server.get_team_positions_and_points_during_season(league_name, season)
+        #print("league_service.get_team_positions_during_season")
+        #print(rankings)
+
+        rankings = self.sort_by_cumulative_points_in_last_available_week(rankings)
+        #print(rankings)
+
+        
+        rankings_grouped = rankings.groupby(Columns.team_name, observed=True)
+        
+        rankings_dict = dict()
+        rankings_dict['weekly'] = dict()
+        rankings_dict['cumulative'] = dict()
+
+
+        for team, group in rankings_grouped:
+            rankings_dict['weekly'][team] = group[Columns.points].tolist()
+            rankings_dict['cumulative'][team] = group[ColumnsExtra.points_cumulative].tolist()
+
+        return rankings_dict
+
+
     def get_team_positions_during_season(self, league_name: str, season: str) -> dict:
         """Get team positions for each week during the season."""
-        rankings = self.server.get_team_positions_during_season(league_name, season)
+        rankings = self.server.get_team_positions_and_points_during_season(league_name, season)
         #print("league_service.get_team_positions_during_season")
         #print(rankings)
 

@@ -52,7 +52,7 @@
                         <h5>Punkte pro Spieltag</h5>
                     </div>
                     <div class="card-body">
-                        <canvas id="pointsChart"></canvas>
+                        <canvas id="chartTeamPointsWeekly"></canvas>
                     </div>
                 </div>
             </div>
@@ -64,7 +64,7 @@
                         <h5>Gesamtpunkte im Saisonverlauf</h5>
                     </div>
                     <div class="card-body">
-                        <canvas id="cumulativePointsChart"></canvas>
+                        <canvas id="chartTeamPointsCumulated"></canvas>
                     </div>
                 </div>
             </div>
@@ -492,8 +492,8 @@ function updateSectionLeagueStandings() {
             document.getElementById('leagueTableHistory').innerHTML = tableHtml;
             
             // Update chart
-            updatePointsChart(data);
-            updateCumulativePointsChart(data);
+            //updatePointsChart(data);
+            //updateCumulativePointsChart(data);
         })
         .catch(error => console.error('Error:', error));
 }
@@ -583,161 +583,6 @@ function updateButtonsTeams() {
     }
 }
 
-function updatePointsChart(data) {
-    // Get the canvas element
-    const canvas = document.getElementById('pointsChart');
-    
-    // Destroy existing chart if it exists
-    if (window.pointsChart instanceof Chart) {
-        window.pointsChart.destroy();
-    }
-    
-    // Extract teams and their point progression
-    const teams = [...new Set(data.data.map(row => row[1]))];  // Get unique team names
-    const weekCount = (data.headerGroups.length - 2);  // Subtract Team and Total columns
-    
-    // Create datasets for each team
-    const datasets = teams.map(team => {
-        const teamData = data.data.find(row => row[1] === team);
-        const points = [];
-        
-        // Extract only points (every 3rd value, starting from index 3)
-        for (let i = 0; i < weekCount; i++) {
-            const pointsIndex = (i * 2) + 3;  // Skip pos, team name & first score, take every 3rd value (Score, Average, Points)
-            points.push(teamData[pointsIndex]);  // +2 to get to Points after Score and Average
-        }
-        
-        // Generate a random color for the team
-        const color = getTeamColor(team);
-        
-        return {
-            label: team,
-            data: points,
-            borderColor: color,
-            backgroundColor: color,
-            tension: 0.1
-        };
-    });
-
-    // Create new chart
-    const ctx = canvas.getContext('2d');
-    window.pointsChart = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: Array.from({length: weekCount}, (_, i) => `Week ${i + 1}`),
-            datasets: datasets
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                title: {
-                    display: true,
-                    text: 'Points Development Over Time'
-                },
-                legend: {
-                    display: false  // Hide individual chart legend
-                }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    title: {
-                        display: true,
-                        text: 'Points'
-                    }
-                },
-                x: {
-                    title: {
-                        display: true,
-                        text: 'Week'
-                    }
-                }
-            }
-        }
-    });
-    
-    // Update shared legend
-    updateSharedLegend(teams);
-}
-
-
-
-function updateCumulativePointsChart(data) {
-    // Get the canvas element
-    const canvas = document.getElementById('cumulativePointsChart');
-    
-    // Destroy existing chart if it exists
-    if (window.cumulativePointsChart instanceof Chart) {
-        window.cumulativePointsChart.destroy();
-    }
-    
-    // Extract teams and their point progression
-    const teams = [...new Set(data.data.map(row => row[1]))];
-    const weekCount = (data.headerGroups.length - 2);
-    
-    // Create datasets for each team
-    const datasets = teams.map(team => {
-        const teamData = data.data.find(row => row[1] === team);
-        const points = [];
-        let cumulativePoints = 0;
-        
-        // Extract points and accumulate them
-        for (let i = 0; i < weekCount; i++) {
-            const pointsIndex = (i * 2) + 3;  // Skip pos, team name & first score, take every 3rd value (Score, Average, Points)
-            const weekPoints = parseFloat(teamData[pointsIndex]); // +2 to get Points after Score and Average
-            cumulativePoints += weekPoints;
-            points.push(cumulativePoints);
-        }
-        
-        // Generate a random color for the team (use same color as previous chart)
-        const color = getTeamColor(team);
-        
-        return {
-            label: team,
-            data: points,
-            borderColor: color,
-            backgroundColor: color,
-            tension: 0.1
-        };
-    });
-
-    // Create new chart
-    const ctx = canvas.getContext('2d');
-    window.cumulativePointsChart = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: Array.from({length: weekCount}, (_, i) => `Week ${i + 1}`),
-            datasets: datasets
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                title: {
-                    display: true,
-                    text: 'Cumulative Points Over Time'
-                },
-                legend: {
-                    display: false  // Hide individual chart legend
-                }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    title: {
-                        display: true,
-                        text: 'Total Points'
-                    }
-                },
-                x: {
-                    title: {
-                        display: true,
-                        text: 'Week'
-                    }
-                }
-            }
-        }
-    });
-}
 
 function createTable(config) {
     const {
@@ -862,7 +707,7 @@ function createTable(config) {
 function initializePage() {
     console.log("Initializing page...");
     // Load available seasons
-    fetch('/api/league/available_seasons')
+    fetch('/league/get_available_seasons')
         .then(response => response.json())
         .then(seasons => {
             const buttonsSeason = seasons.map(season => `
@@ -873,7 +718,7 @@ function initializePage() {
         });
 
     // Load available leagues
-    fetch('/api/league/available_leagues')
+    fetch('/league/get_available_leagues')
         .then(response => response.json())
         .then(leagues => {
             const buttonsLeague = leagues.map(league => `
@@ -896,8 +741,6 @@ function handleSelectionChange() {
         messageArea.style.display = 'none';
         tableArea.style.display = 'block';
         updateSectionLeagueStandings();
-        //updateTeamAveragesChart();
-        //updateSectionTeamAverages();
         updateChartsLeague();
         
     } else {
@@ -918,7 +761,7 @@ function updateAvailableOptions() {
 
     if (selectedSeason && selectedLeague) {
         // Update available weeks
-        fetch(`/api/league/available_weeks?season=${selectedSeason}&league=${selectedLeague}`)
+        fetch(`/league/get_available_weeks?season=${selectedSeason}&league=${selectedLeague}`)
             .then(response => response.json())
             .then(weeks => {
                 const weekButtons = weeks.map(week => `
@@ -929,7 +772,7 @@ function updateAvailableOptions() {
             });
 
         // Update available teams
-        fetch(`/api/league/available_teams?season=${selectedSeason}&league=${selectedLeague}`)
+        fetch(`/league/get_available_teams?season=${selectedSeason}&league=${selectedLeague}`)
             .then(response => response.json())
             .then(teams => {
                 const teamButtons = teams.map(team => `
@@ -1106,7 +949,13 @@ function updateChartsLeague() {
         season: selectedSeason,
         league: selectedLeague
     });
-
+    
+    fetch(`/league/get_available_teams?season=${selectedSeason}&league=${selectedLeague}`)
+            .then(response => response.json())
+            .then(teams => {
+                updateSharedLegend(teams);
+            });
+    
     // Fetch and create position charts
     fetch(`/league/get_team_positions?season=${selectedSeason}&league=${selectedLeague}`)
         .then(response => response.json())
@@ -1120,7 +969,8 @@ function updateChartsLeague() {
                 data.weekly,
                 'chartTeamPositionWeekly',
                 'Platzierung pro Spieltag',
-                labels
+                labels, 
+                true   
             );
 
             // Create cumulative positions chart
@@ -1128,7 +978,35 @@ function updateChartsLeague() {
                 data.cumulative,
                 'chartTeamPositionCumulated',
                 'Platzierung im Saisonverlauf',
-                labels
+                labels,
+                true
+            );
+        });
+
+        // Fetch and create points charts
+        fetch(`/league/get_team_points?season=${selectedSeason}&league=${selectedLeague}`)
+        .then(response => response.json())
+        .then(data => {
+            // Create labels based on number of weeks
+            const numWeeks = Object.values(data.weekly)[0].length;
+            const labels = Array.from({length: numWeeks}, (_, i) => `Spieltag ${i + 1}`);
+
+            // Create weekly positions chart
+            createLineChart(
+                data.weekly,
+                'chartTeamPointsWeekly',
+                'Punkte pro Spieltag',
+                labels,
+                false
+            );
+
+            // Create cumulative positions chart
+            createLineChart(
+                data.cumulative,
+                'chartTeamPointsCumulated',
+                'Punkte im Saisonverlauf',
+                labels,
+                false
             );
         });
 }

@@ -264,7 +264,7 @@ class Server:
         #print(data_league)
 
 
-    def get_team_positions_during_season(self, league_name: str, season: str, cumulated: bool=False) -> pd.DataFrame:
+    def get_team_positions_and_points_during_season(self, league_name: str, season: str, cumulated: bool=False) -> pd.DataFrame:
         """Get team positions for each week during the season for all teams.
         Returns DataFrame with teams as rows and weeks as columns."""
         # Get all weekly standings

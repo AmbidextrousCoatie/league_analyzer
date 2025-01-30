@@ -31,7 +31,7 @@ def get_combinations():
         return jsonify({"error": str(e)}), 500
 
 
-@bp.route('/api/league/available_weeks')
+@bp.route('/league/get_available_weeks')
 def get_available_weeks():
     try:
         season = request.args.get('season')
@@ -45,7 +45,7 @@ def get_available_weeks():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-@bp.route('/api/league/available_teams')
+@bp.route('/league/get_available_teams')
 def get_available_teams():
     try:
         season = request.args.get('season')
@@ -55,6 +55,9 @@ def get_available_teams():
             return jsonify({"error": "Season and league are required"}), 400
             
         teams = league_service.get_teams_in_league_season(league, season)
+        print("############################")
+        print(teams)
+        print("############################")
         return jsonify(teams)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
@@ -146,7 +149,7 @@ def get_team_week_details():
     
     return jsonify({'config': details})
 
-@bp.route('/api/league/available_seasons')
+@bp.route('/league/get_available_seasons')
 def get_available_seasons():
     try:
         seasons = league_service.get_seasons()
@@ -154,7 +157,7 @@ def get_available_seasons():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-@bp.route('/api/league/available_leagues')
+@bp.route('/league/get_available_leagues')
 def get_available_leagues():
     try:
         leagues = league_service.get_leagues()
@@ -182,6 +185,31 @@ def get_honor_scores():
     except Exception as e:
         print(f"Error in get_honor_scores: {str(e)}")
         return jsonify({"error": str(e)}), 500
+
+@bp.route('/league/get_team_points')
+def get_team_points():
+    try:
+        season = request.args.get('season')
+        league = request.args.get('league')
+           
+
+        print(f"Team Points - Received request with: season={season}, league={league}")
+        if not all([season, league]):
+            return jsonify({'error': 'Missing required parameters'}), 400
+            
+        points = league_service.get_team_points_during_season(
+            league_name=league,
+            season=season
+        )
+        
+        print(points)
+        return jsonify(points)
+        
+    except Exception as e:
+        print(f"Error in get_team_positions: {str(e)}")
+        print(traceback.format_exc())
+        return jsonify({'error': str(e)}), 500
+
 
 @bp.route('/league/get_team_positions')
 def get_team_positions():
