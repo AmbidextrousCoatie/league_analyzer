@@ -45,23 +45,23 @@
 
     <div class="card-body">
         <div class="row">
-            <!-- Points per Week Chart -->
+
+            <!-- Positions over the course of the season -->
             <div class="col-md-6">
                 <div class="card h-100">
                     <div class="card-header">
-                        <h5>Punkte pro Spieltag</h5>
+                        <h5>Platzierung im Saisonverlauf</h5>
                     </div>
                     <div class="card-body">
-                        <canvas id="chartTeamPointsWeekly"></canvas>
+                        <canvas id="chartTeamPositionCumulated"></canvas>
                     </div>
                 </div>
-            </div>
-            
+            </div>            
             <!-- Cumulative Points Chart -->
             <div class="col-md-6">
                 <div class="card h-100">
                     <div class="card-header">
-                        <h5>Gesamtpunkte im Saisonverlauf</h5>
+                        <h5>Punkte im Saisonverlauf</h5>
                     </div>
                     <div class="card-body">
                         <canvas id="chartTeamPointsCumulated"></canvas>
@@ -79,7 +79,18 @@
         </div>
         <!-- After your existing charts and shared legend -->
         <div class="row">
-            <!-- Team Averages Chart -->
+            <!-- Points per Week Chart -->
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <h5>Punkte pro Spieltag</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="chartTeamPointsWeekly"></canvas>
+                    </div>
+                </div>
+            </div>
+            <!-- Position per Week Chart -->
             <div class="col-md-6">
                 <div class="card h-100">
                     <div class="card-header">
@@ -91,17 +102,7 @@
                 </div>
             </div>
             
-            <!-- Team Positions Chart -->
-            <div class="col-md-6">
-                <div class="card h-100">
-                    <div class="card-header">
-                        <h5>Platzierung im Saisonverlauf</h5>
-                    </div>
-                    <div class="card-body">
-                        <canvas id="chartTeamPositionCumulated"></canvas>
-                    </div>
-                </div>
-            </div>
+
         </div>
     </div>
 </div>  
