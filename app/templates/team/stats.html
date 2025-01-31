@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+
+{% block content %}
+    {% from "components/tables.html" import create_table %}
+    {% include 'components/charts.html' %}
+
+    <div id="selectionMessage" class="alert alert-danger fs-4">
+        Bitte wählen Sie ein Team.
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h4>Team Statistics</h4>
+        </div>
+        <div class="card-body">
+            <!-- Selection Area -->
+            <div class="row">
+                <div class="col-md-3">
+                    <h5>Team</h5>
+                    <select id="teamSelect" class="form-select">
+                        <option value="">Bitte wählen...</option>
+                    </select>
+                </div>
+                <div class="col-md-9">
+                    <h5>Saison</h5>
+                    <div id="buttonsSeason" class="btn-group-horizontal w-100">
+                        <!-- Seasons will be inserted here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <h5>Spieltag</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="buttonsWeek" class="btn-group-vertical w-100">
+                            <!-- Buttons will be inserted here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initial load of teams
+            fetch('/team/get_teams')
+                .then(response => response.json())
+                .then(teams => {
+                    updateTeamSelect(teams);
+                });
+        });
+
+        function updateTeamSelect(teams) {
+            const select = document.getElementById('teamSelect');
+            select.innerHTML = `
+                <option value="">Bitte wählen...</option>
+                ${teams.map(team => `
+                    <option value="${team}">${team}</option>
+                `).join('')}
+            `;
+
+            // Remove old event listener first to prevent duplicates
+            const newSelect = select.cloneNode(true);
+            select.parentNode.replaceChild(newSelect, select);
+
+            // Add event listener to new select
+            newSelect.addEventListener('change', function() {
+                const selectedTeam = this.value;
+                console.log('Selected team:', selectedTeam); // Debug log
+                if (selectedTeam) {
+                    updateSeasonButtons(selectedTeam);
+                    updateMessageVisibility();
+                }
+            });
+        }
+
+        function updateSeasonButtons(teamName) {
+            fetch(`/team/get_available_seasons?team_name=${teamName}`)
+                .then(response => response.json())
+                .then(seasons => {
+                    const container = document.getElementById('buttonsSeason');
+                    container.innerHTML = ['Alle', ...seasons].map(season => `
+                        <input type="radio" class="btn-check" name="season" id="season_${season}" value="${season}"
+                               ${season === 'Alle' ? 'checked' : ''}>
+                        <label class="btn btn-outline-primary" for="season_${season}">${season}</label>
+                    `).join('');
+
+                    // Add event listeners
+                    document.querySelectorAll('input[name="season"]').forEach(radio => {
+                        radio.addEventListener('change', function() {
+                            const selectedTeam = document.getElementById('teamSelect').value;
+                            updateWeekButtons(selectedTeam, this.value);
+                        });
+                    });
+                });
+        }
+
+        function updateWeekButtons(teamName, season) {
+            fetch(`/team/get_available_weeks?team_name=${teamName}&season=${season}`)
+                .then(response => response.json())
+                .then(weeks => {
+                    const container = document.getElementById('buttonsWeek');
+                    container.innerHTML = weeks.map(week => `
+                        <input type="radio" class="btn-check" name="week" id="week_${week}" value="${week}">
+                        <label class="btn btn-outline-primary" for="week_${week}">${week}</label>
+                    `).join('');
+                });
+        }
+
+        function updateMessageVisibility() {
+            const selectedTeam = document.getElementById('teamSelect').value;
+            const message = document.getElementById('selectionMessage');
+            
+            if (selectedTeam) {
+                message.style.display = 'none';
+            } else {
+                message.style.display = 'block';
+            }
+        }
+    </script>
+{% endblock %} 

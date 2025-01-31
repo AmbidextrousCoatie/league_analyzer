@@ -14,13 +14,13 @@ class Server:
     def get_player_data(self, player_name: str) -> pd.DataFrame:
         return self.data_adapter.get_player_data(player_name)
     
-    def get_seasons(self) -> List[str]:
-        return self.data_adapter.get_seasons()
+    def get_seasons(self, team_name: str=None) -> List[str]:
+        return self.data_adapter.get_seasons(team_name=team_name)
     
     def get_leagues(self, season: str=None) -> List[str]:
         return self.data_adapter.get_leagues(season=season)
     
-    def get_weeks(self, league_name: str=None, season: str=None) -> List[int]:
+    def get_weeks(self, league_name: str=None, season: str=None, team_name: str=None) -> List[int]:
         """
         Fetches the weeks all available weeks in the database, filtered by league_name and season if provided.
         If league_name and season are provided, the weeks are fetched for the given league and season.
@@ -33,7 +33,7 @@ class Server:
         Returns:
             List[int]: The weeks.
         """
-        return self.data_adapter.get_weeks(league_name=league_name, season=season)
+        return self.data_adapter.get_weeks(league_name=league_name, season=season, team_name=team_name)
     
 
     def get_honor_scores(self, league_name:str=None, season:str=None, week:int=None, team_name:str=None, player_name:str=None, individual_scores:int=1, team_scores:int=1, indivdual_averages:int=1, team_averages:int=1) -> pd.DataFrame:
@@ -78,7 +78,7 @@ class Server:
         columns = [Columns.team_name]
         if debug_output:
             print ("get_teams_in_league_season: filter:" + str(filters) + " | columns:" + str(columns))
-        return self.data_adapter.get_filtered_data(columns=columns, filters_eq=filters)[Columns.team_name].unique().tolist()
+        return sorted(self.data_adapter.get_filtered_data(columns=columns, filters_eq=filters)[Columns.team_name].unique().tolist())
 
     def aggregate_league_table(self, data_individual: pd.DataFrame, data_team: pd.DataFrame, week:int, debug: bool=False) -> pd.DataFrame:
         """

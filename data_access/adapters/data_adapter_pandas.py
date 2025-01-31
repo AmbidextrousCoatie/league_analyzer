@@ -64,11 +64,12 @@ class DataAdapterPandas(DataAdapter):
                 print(f"DataFrame shape after extracting columns: {filtered_df.shape}")  
         return filtered_df
     
-    def get_seasons(self, league_name: str=None) -> List[str]:
-        if league_name is not None:
-            return self.df[self.df[Columns.league_name] == league_name][Columns.season].unique().tolist()
-        else:
-            return self.df[Columns.season].unique().tolist()
+    def get_seasons(self, league_name: str=None, team_name: str=None) -> List[str]:
+        filters_eq = dict()
+        filters_eq[Columns.league_name] = league_name
+        filters_eq[Columns.team_name] = team_name
+        return self.get_filtered_data(columns=[Columns.season], filters_eq=filters_eq)[Columns.season].unique().tolist()
+
     
     def get_leagues(self, season: str=None) -> List[str]:
         if season is not None:
@@ -76,7 +77,7 @@ class DataAdapterPandas(DataAdapter):
         else:
             return self.df[Columns.league_name].unique().tolist()
     
-    def get_weeks(self, league_name: str=None, season: str=None) -> List[int]:
+    def get_weeks(self, league_name: str=None, season: str=None, team_name: str=None) -> List[int]:
         """
         Fetches the weeks all available weeks in the database, filtered by league_name and season if provided.
         If league_name and season are provided, the weeks are fetched for the given league and season.
@@ -96,6 +97,9 @@ class DataAdapterPandas(DataAdapter):
 
         if season is not None:
             filters_eq[Columns.season] = season
+
+        if team_name is not None:
+            filters_eq[Columns.team_name] = team_name
 
         if filters_eq is not None:
             filtered_df = self.get_filtered_data(columns=[Columns.week], filters_eq=filters_eq)
