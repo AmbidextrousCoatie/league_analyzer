@@ -223,29 +223,19 @@ class LeagueService:
             rankings_dict['cumulative'][team] = group[ColumnsExtra.position_cumulative].tolist()
 
         return rankings_dict
-        print(rankings_dict)
 
-        weekly_pivot = rankings.pivot(index=Columns.team_name, columns=Columns.week, values=ColumnsExtra.position_weekly)
-        weekly_pivot.columns = [f'Week {w} Pos' for w in weekly_pivot.columns]
-
-        cumulative_pivot = rankings.pivot(index=Columns.team_name, columns=Columns.week, values=ColumnsExtra.position_cumulative)
-        cumulative_pivot.columns = [f'Week {w} Cum' for w in cumulative_pivot.columns]
-
-        
-
-        for team, group in rankings_grouped:
-            rankings_dict['weekly'][team] = group[ColumnsExtra.position_weekly].tolist()
-            rankings_dict['cumulative'][team] = group[ColumnsExtra.position_cumulative].tolist()
-
-        print(weekly_pivot)
-        print(cumulative_pivot)
-
-        return rankings_dict
 
     def get_team_averages_during_season(self, league_name: str, season: str) -> dict:
         """Get team average points for each week during the season."""
-        df = self.server.get_team_averages_during_season(league_name, season)
-        return df.to_dict(orient='records')       
+        teams_and_averages = self.server.get_team_averages_during_season(league_name, season).groupby(Columns.team_name)
+        
+        averages = dict()
+        averages['averages'] = dict()
+        
+        for team, group in teams_and_averages:
+            averages['averages'][team] = group[ColumnsExtra.score_average].tolist()
+
+        return averages      
 
 
 

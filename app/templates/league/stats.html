@@ -34,7 +34,7 @@
         <h5>Saisonübersicht</h5>
     </div>
     <!-- Message Area -->
-    <div id="selectionMessage" class="alert alert-info">
+    <div id="selectionMessage" class="alert alert-danger" style="font-size: 1.5rem; font-weight: bold;">
         Bitte wählen Sie eine Kombintation aus Saison und Liga.
     </div>
 
@@ -44,8 +44,8 @@
     </div>
 
     <div class="card-body">
+        <!-- Position Charts -->
         <div class="row">
-
             <!-- Positions over the course of the season -->
             <div class="col-md-6">
                 <div class="card h-100">
@@ -57,7 +57,7 @@
                     </div>
                 </div>
             </div>            
-            <!-- Cumulative Points Chart -->
+            <!-- Points over the course of the season -->
             <div class="col-md-6">
                 <div class="card h-100">
                     <div class="card-header">
@@ -77,7 +77,7 @@
                 </div>
             </div>
         </div>
-        <!-- After your existing charts and shared legend -->
+        <!-- Points Charts -->
         <div class="row">
             <!-- Points per Week Chart -->
             <div class="col-md-6">
@@ -101,8 +101,39 @@
                     </div>
                 </div>
             </div>
-            
-
+        </div>
+        <!-- Shared Legend -->
+        <div class="row mt-3">
+            <div class="col-12">
+                <div id="sharedLegendMiddle" class="d-flex justify-content-center flex-wrap">
+                    <!-- Legend will be dynamically inserted here -->
+                </div>
+            </div>
+        </div>
+        <!-- misc Charts -->
+        <div class="row">
+            <!-- Average per Week Chart -->
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <h5>Schnitt pro Spieltag</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="chartTeamAverageScoreWeekly"></canvas>
+                    </div>
+                </div>
+            </div>
+            <!-- Points vs Average -->
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <h5>Schnitt vs. Punkte</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="chartTeamPointsVsAverage"></canvas>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>  
@@ -134,7 +165,7 @@
         
             <!-- Message Area -->
             <div id="weekMessage" class="alert alert-info">
-                Bitte wählen Sie einen Spieltag und ein Team aus.
+                Bitte wählen Sie einen Spieltag aus.
             </div>
         
             <!-- Content Area -->
@@ -195,7 +226,7 @@
         <div class="card-body">
             <div id="teamTableWeekDetails">
                 <!-- Team table will be dynamically inserted here -->
-                <div class="alert alert-info">Bitte wählen Sie eine Saison, eine Liga und einen Spieltag aus um den Spielzettel für ein Team anzeigen zu können.</div>
+                <div class="alert alert-info">Bitte wählen Sie ein Team, aus um den Spielzettel anzuzeigen.</div>
             </div>
         </div>
     </div>  
@@ -220,6 +251,7 @@ function updateSharedLegend(teams) {
     `).join('');
     
     document.getElementById('sharedLegend').innerHTML = legendHtml;
+    document.getElementById('sharedLegendMiddle').innerHTML = legendHtml;
 }
 
 function updatePositionChart() {
@@ -1008,6 +1040,33 @@ function updateChartsLeague() {
                 'Punkte im Saisonverlauf',
                 labels,
                 false
+            );
+        });
+
+        fetch(`/league/get_team_averages?season=${selectedSeason}&league=${selectedLeague}`)
+        .then(response => response.json())
+        .then(data => {
+            
+            const numWeeks = Object.values(data.averages)[0].length;
+            const labels = Array.from({length: numWeeks}, (_, i) => `Spieltag ${i + 1}`);
+
+            createLineChart(
+                data.averages,
+                'chartTeamAverageScoreWeekly',
+                'Schnitt pro Spieltag',
+                labels,
+                false
+            );
+        });
+
+
+        fetch(`/league/get_team_points_vs_average?season=${selectedSeason}&league=${selectedLeague}`)
+        .then(response => response.json())
+        .then(data => {
+            createScatterChart(
+                data,
+                'chartTeamPointsVsAverage',
+                'Schnitt vs. Punkte'
             );
         });
 }

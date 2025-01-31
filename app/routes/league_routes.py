@@ -55,9 +55,7 @@ def get_available_teams():
             return jsonify({"error": "Season and league are required"}), 400
             
         teams = league_service.get_teams_in_league_season(league, season)
-        print("############################")
-        print(teams)
-        print("############################")
+
         return jsonify(teams)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
@@ -202,7 +200,7 @@ def get_team_points():
             season=season
         )
         
-        print(points)
+        #print(points)
         return jsonify(points)
         
     except Exception as e:
@@ -210,6 +208,46 @@ def get_team_points():
         print(traceback.format_exc())
         return jsonify({'error': str(e)}), 500
 
+
+
+@bp.route('/league/get_team_points_vs_average')
+def get_team_points_vs_average():
+    try:
+        season = request.args.get('season')
+        league = request.args.get('league')
+           
+
+        print(f"Team Points vs Average - Received request with: season={season}, league={league}")
+        if not all([season, league]):
+            return jsonify({'error': 'Missing required parameters'}), 400
+            
+        points_raw = league_service.get_team_points_during_season(
+            league_name=league,
+            season=season
+        )["weekly"]
+
+        averages_raw = league_service.get_team_averages_during_season(
+            league_name=league,
+            season=season
+        )["averages"]
+       
+        print(points_raw)
+        print(averages_raw)
+
+        points_vs_average = dict()
+
+        for team, points in points_raw.items():
+            averages = averages_raw[team]
+            points_vs_average[team] = [[points[i] , averages[i]] for i in range(len(points))]
+       
+        print("############################")
+        print(points_vs_average)    
+        print("############################")
+        return jsonify(points_vs_average)
+        
+    except Exception as e:
+        print(f"Error in get_team_positions: {str(e)}")
+        print(traceback.format_exc())
 
 @bp.route('/league/get_team_positions')
 def get_team_positions():
@@ -250,9 +288,10 @@ def get_team_averages():
             league_name=league,
             season=season
         )
-        
+        #print(averages)
         return jsonify(averages)
         
     except Exception as e:
         print(f"Error in get_team_averages: {str(e)}")
+        print(traceback.format_exc())
         return jsonify({'error': str(e)}), 500
