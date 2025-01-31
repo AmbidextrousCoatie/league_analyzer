@@ -56,4 +56,100 @@ function createLineChart(data, chartId, title, labels, reverse_y) {
         }
     });
 }
+
+function createScatterChart(data, chartId, title) {
+    const ctx = document.getElementById(chartId).getContext('2d');
+    
+    // Destroy existing chart if it exists
+    if (window[chartId + 'Instance'] instanceof Chart) {
+        window[chartId + 'Instance'].destroy();
+    }
+    
+    // Collect all points for regression
+    const allPoints = Object.values(data).flat();
+    const xs = allPoints.map(point => point[0]);
+    const ys = allPoints.map(point => point[1]);
+    
+    // Calculate regression line
+    const n = xs.length;
+    const sumX = xs.reduce((a, b) => a + b, 0);
+    const sumY = ys.reduce((a, b) => a + b, 0);
+    const sumXY = xs.reduce((sum, x, i) => sum + x * ys[i], 0);
+    const sumXX = xs.reduce((sum, x) => sum + x * x, 0);
+    
+    const slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
+    const intercept = (sumY - slope * sumX) / n;
+    
+    // Create regression line points
+    const minX = Math.min(...xs);
+    const maxX = Math.max(...xs);
+    const regressionLine = {
+        label: 'Regression',
+        data: [
+            {x: minX, y: slope * minX + intercept},
+            {x: maxX, y: slope * maxX + intercept}
+        ],
+        type: 'line',
+        borderColor: '#000000',
+        borderWidth: 1,
+        borderDash: [5, 5],
+        pointRadius: 0,
+        fill: false
+    };
+    
+    // Create datasets for each team
+    const datasets = Object.entries(data).map(([team, points]) => ({
+        label: team,
+        data: points.map(point => ({x: point[0], y: point[1]})),
+        borderColor: getTeamColor(team),
+        backgroundColor: getTeamColor(team),
+        pointRadius: 5
+    }));
+    
+    // Add regression line to datasets
+    datasets.push(regressionLine);
+    
+    window[chartId + 'Instance'] = new Chart(ctx, {
+        type: 'scatter',
+        data: {
+            datasets: datasets
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                title: {
+                    display: true,
+                    text: title
+                },
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            if (context.dataset.type === 'line') {
+                                return ''; // Hide tooltip for regression line
+                            }
+                            return `${context.dataset.label}: (${context.parsed.x.toFixed(1)}, ${context.parsed.y.toFixed(1)})`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Punkte'
+                    }
+                },
+                y: {
+                    title: {
+                        display: true,
+                        text: 'Schnitt'
+                    }
+                }
+            }
+        }
+    });
+}
 </script>
