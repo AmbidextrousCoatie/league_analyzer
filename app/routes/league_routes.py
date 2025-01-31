@@ -238,7 +238,7 @@ def get_team_points_vs_average():
 
         for team, points in points_raw.items():
             averages = averages_raw[team]
-            points_vs_average[team] = [[points[i] , averages[i]] for i in range(len(points))]
+            points_vs_average[team] = [[averages[i] , points[i]] for i in range(len(points))]
        
         print("############################")
         print(points_vs_average)    

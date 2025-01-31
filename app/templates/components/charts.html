@@ -57,7 +57,7 @@ function createLineChart(data, chartId, title, labels, reverse_y) {
     });
 }
 
-function createScatterChart(data, chartId, title) {
+function createScatterChart(data, chartId, title, axis_labels) {
     const ctx = document.getElementById(chartId).getContext('2d');
     
     // Destroy existing chart if it exists
@@ -139,13 +139,13 @@ function createScatterChart(data, chartId, title) {
                 x: {
                     title: {
                         display: true,
-                        text: 'Punkte'
+                        text: axis_labels.x
                     }
                 },
                 y: {
                     title: {
                         display: true,
-                        text: 'Schnitt'
+                        text: axis_labels.y
                     }
                 }
             }

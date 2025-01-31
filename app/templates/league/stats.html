@@ -127,7 +127,7 @@
             <div class="col-md-6">
                 <div class="card h-100">
                     <div class="card-header">
-                        <h5>Schnitt vs. Punkte</h5>
+                        <h5>Punkte vs. Schnitt</h5>
                     </div>
                     <div class="card-body">
                         <canvas id="chartTeamPointsVsAverage"></canvas>
@@ -203,16 +203,9 @@
                 </div>
             </div>
         </div>
-    </div>
-</div>
 
-<!-- Team Selection -->
-<div class="mb-2">
-
-    <!-- League Team Table -->
-    <div class="card">
         <div class="row mb-3">
-            <div class="col-md-8">
+            <div class="col-md-12">
                 <h5>Team</h5>
                 <div id="buttonsTeam" class="btn-group-horizontal w-100">
                     <!-- Teams will be inserted here -->
@@ -1063,10 +1056,12 @@ function updateChartsLeague() {
         fetch(`/league/get_team_points_vs_average?season=${selectedSeason}&league=${selectedLeague}`)
         .then(response => response.json())
         .then(data => {
+            axis_labels = ['Punkte', 'Schnitt']
             createScatterChart(
                 data,
                 'chartTeamPointsVsAverage',
-                'Schnitt vs. Punkte'
+                'Punkte vs. Schnitt',
+                axis_labels
             );
         });
 }
