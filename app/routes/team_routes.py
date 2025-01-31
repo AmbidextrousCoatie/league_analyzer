@@ -55,3 +55,37 @@ def get_available_weeks():
         print(f"Error in get_available_seasons: {str(e)}")
         return jsonify({'error': str(e)}), 500
 
+@bp.route('/team/get_team_history')
+def get_team_history():
+    try:
+        team_name = request.args.get('team_name')
+        if not team_name:
+            return jsonify({'error': 'Missing team_name parameter'}), 400
+            
+        # Example response structure:
+        # {
+        #     "18/19": {"league_name": "Liga A", "final_position": 3},
+        #     "19/20": {"league_name": "Liga A", "final_position": 8},
+        #     "20/21": {"league_name": "Liga B", "final_position": 1}
+        # }
+        history = team_service.get_team_history(team_name=team_name)
+        print(history)
+        return jsonify(history)
+        
+    except Exception as e:
+        print(f"Error in get_team_history: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
+
+@bp.route('/team/get_average_per_season')
+def get_average_per_season():
+    try:
+        team_name = request.args.get('team_name')
+        if not team_name:
+            return jsonify({'error': 'Missing team_name parameter'}), 400
+        data = team_service.get_average_per_season(team_name=team_name)
+        print(data)
+        return jsonify(data)
+    except Exception as e:
+        print(f"Error in get_average_per_season: {str(e)}")
+        return jsonify({'error': str(e)}), 500

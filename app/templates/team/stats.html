@@ -1,8 +1,7 @@
 {% extends "base.html" %}
-
 {% block content %}
-    {% from "components/tables.html" import create_table %}
-    {% include 'components/charts.html' %}
+    {% include "components/tables.html" %}
+    {% include "components/charts.html" %}
 
     <div id="selectionMessage" class="alert alert-danger fs-4">
         Bitte wählen Sie ein Team.
@@ -45,6 +44,45 @@
         </div>
     </div>
 
+    <div class="row mt-4">
+        <!-- Chart -->
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Platzierungsverlauf</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="chartTeamHistory"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Table -->
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Historische Platzierungen</h5>
+                </div>
+                <div class="card-body">
+                    <div id="tableTeamHistory"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Durchschnittliche Leistung pro Saison</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="chartTeamAverage"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // Initial load of teams
@@ -75,6 +113,8 @@
                 if (selectedTeam) {
                     updateSeasonButtons(selectedTeam);
                     updateMessageVisibility();
+                    updateTeamHistory(selectedTeam);
+                    updateTeamAverages(selectedTeam);
                 }
             });
         }
@@ -121,6 +161,84 @@
             } else {
                 message.style.display = 'block';
             }
+        }
+
+        function updateTeamHistory(teamName) {
+            fetch(`/team/get_team_history?team_name=${teamName}`)
+                .then(response => response.json())
+                .then(data => {
+                    const seasons = Object.keys(data);
+                    const positions = seasons.map(season => data[season].final_position);
+                    
+                    // Chart creation
+                    const ctx = document.getElementById('chartTeamHistory').getContext('2d');
+                    if (window.teamHistoryChart instanceof Chart) {
+                        window.teamHistoryChart.destroy();
+                    }
+                    
+                    window.teamHistoryChart = new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: seasons,
+                            datasets: [{
+                                label: teamName,
+                                data: positions,
+                                borderColor: getTeamColor(teamName),
+                                backgroundColor: getTeamColor(teamName),
+                                tension: 0.1
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            scales: {
+                                y: {
+                                    reverse: true,
+                                    beginAtZero: false
+                                }
+                            },
+                            plugins: {
+                                title: {
+                                    display: true,
+                                    text: 'Platzierungsverlauf'
+                                }
+                            }
+                        }
+                    });
+
+                    // Transform data for table
+                    const tableConfig = {
+                        data: seasons.map(season => [
+                            season,
+                            data[season].league_name,
+                            data[season].final_position
+                        ]),
+                        columns: [
+                            { title: 'Saison' },
+                            { title: 'Liga' },
+                            { title: 'Platzierung' }
+                        ],
+                        headerGroups: []
+                    };
+
+                    document.getElementById('tableTeamHistory').innerHTML = createTable(tableConfig);
+                });
+        }
+
+        function updateTeamAverages(teamName) {
+            fetch(`/team/get_average_per_season?team_name=${teamName}`)
+                .then(response => response.json())
+                .then(data => {
+                    const seasons = Object.keys(data);
+                    const averages = seasons.map(season => data[season]);
+                    
+                    createLineChart(
+                        {[teamName]: averages},
+                        'chartTeamAverage',
+                        'Durchschnittliche Leistung',
+                        seasons,
+                        false  // Don't reverse Y-axis for averages
+                    );
+                });
         }
     </script>
 {% endblock %} 

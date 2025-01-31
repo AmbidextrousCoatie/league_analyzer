@@ -17,8 +17,8 @@ class Server:
     def get_seasons(self, team_name: str=None) -> List[str]:
         return self.data_adapter.get_seasons(team_name=team_name)
     
-    def get_leagues(self, season: str=None) -> List[str]:
-        return self.data_adapter.get_leagues(season=season)
+    def get_leagues(self, season: str=None, team_name: str=None) -> List[str]:
+        return self.data_adapter.get_leagues(season=season, team_name=team_name)
     
     def get_weeks(self, league_name: str=None, season: str=None, team_name: str=None) -> List[int]:
         """
@@ -33,8 +33,27 @@ class Server:
         Returns:
             List[int]: The weeks.
         """
-        return self.data_adapter.get_weeks(league_name=league_name, season=season, team_name=team_name)
+        return self.data_adapter.get_weeks(league_name=league_name, season=season)
     
+
+    def get_final_position_in_league(self, team_name: str, season: str, league_name: str) -> int:
+        filters_eq = {Columns.season: season, Columns.league_name: league_name}
+        columns_to_fetch = [Columns.team_name, Columns.points]
+        league_season_data = self.data_adapter.get_filtered_data(columns=columns_to_fetch, filters_eq=filters_eq)   
+
+        team_rank = league_season_data.groupby(Columns.team_name)[Columns.points].sum().rank(ascending=False)
+
+        return int(team_rank[team_name])    
+
+
+    def get_average_per_season(self, team_name: str=None) -> pd.DataFrame:
+        filters_eq = {Columns.team_name: team_name, Columns.computed_data: False}
+        columns_to_fetch = [Columns.team_name, Columns.score, Columns.season]
+        league_season_data = self.data_adapter.get_filtered_data(columns=columns_to_fetch, filters_eq=filters_eq)   
+
+        team_average = league_season_data.groupby(Columns.season)[Columns.score].mean()
+        return team_average.to_dict()    
+
 
     def get_honor_scores(self, league_name:str=None, season:str=None, week:int=None, team_name:str=None, player_name:str=None, individual_scores:int=1, team_scores:int=1, indivdual_averages:int=1, team_averages:int=1) -> pd.DataFrame:
         filters_eq = {Columns.league_name: league_name, Columns.season: season, Columns.week: week, Columns.team_name: team_name, Columns.player_name: player_name}

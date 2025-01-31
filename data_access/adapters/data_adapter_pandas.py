@@ -34,7 +34,10 @@ class DataAdapterPandas(DataAdapter):
                 if print_debug:
                     print(column + " == " + str(value))
                 if value is not None:
-                    filtered_df = filtered_df[filtered_df[column] == value]
+                    if isinstance(value, list):
+                        filtered_df = filtered_df[filtered_df[column].isin(value)]
+                    else:
+                        filtered_df = filtered_df[filtered_df[column] == value]
             if print_debug:
                 print(f"DataFrame shape after filtering: {filtered_df.shape}")  
 
@@ -71,11 +74,11 @@ class DataAdapterPandas(DataAdapter):
         return self.get_filtered_data(columns=[Columns.season], filters_eq=filters_eq)[Columns.season].unique().tolist()
 
     
-    def get_leagues(self, season: str=None) -> List[str]:
-        if season is not None:
-            return self.df[self.df[Columns.season] == season][Columns.league_name].unique().tolist()
-        else:
-            return self.df[Columns.league_name].unique().tolist()
+    def get_leagues(self, season: str=None, team_name: str=None) -> List[str]:
+        filters_eq = dict()
+        filters_eq[Columns.season] = season
+        filters_eq[Columns.team_name] = team_name
+        return self.get_filtered_data(columns=[Columns.league_name], filters_eq=filters_eq)[Columns.league_name].unique().tolist()
     
     def get_weeks(self, league_name: str=None, season: str=None, team_name: str=None) -> List[int]:
         """
