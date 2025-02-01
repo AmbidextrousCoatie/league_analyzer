@@ -96,12 +96,12 @@ def get_random_skill(league_skill):
     skill_low = 0
     skill_high = 10
 
-    if league_skill - 2 > skill_low:
-        skill_low = league_skill - 2
-    if league_skill + 2 < skill_high:
-        skill_high = league_skill + 2
+    if league_skill - 1 > skill_low:
+        skill_low = league_skill - 1
+    if league_skill + 1.5 < skill_high:
+        skill_high = league_skill + 1.5
 
-    return random.randint(skill_low*10, skill_high*10) / 10.0
+    return round(random.uniform(skill_low, skill_high), 1)
 
 
 def get_random_team_name(team_city=None, team_number=None):
@@ -290,6 +290,26 @@ for day_num, day in enumerate(pairings, start=1):
             print(f"    {pairing[0]} vs {pairing[1]}")
     print()
 
+def transfer_teams_after_season(league_major, league_minor, number_of_teams_transferred):
+    print(league_major)
+    
+    teams_promoted_out, _ = league_minor.get_names_of_teams_that_will_change_leagues(number_of_teams_transferred, 0)
+    _, teams_demoted_out = league_major.get_names_of_teams_that_will_change_leagues(0, number_of_teams_transferred)
+    teams_going_to_minor_league = league_major.eject_team_from_league(teams_demoted_out)
+    teams_going_to_major_league = league_minor.eject_team_from_league(teams_promoted_out)
+    
+    print("Aufsteiger:")
+    for team in teams_going_to_major_league:
+        print(team.get_name())
+    print("Absteiger:")
+    for team in teams_going_to_minor_league:
+        
+        print(team.get_name())
+    league_major.add_team_to_league(teams_going_to_major_league)
+    league_minor.add_team_to_league(teams_going_to_minor_league)
+
+    print(league_major)
+
 
 
 def simulate_season(teams, weeks, number_of_players_per_team, name, season):
@@ -310,7 +330,9 @@ def simulate_season(teams, weeks, number_of_players_per_team, name, season):
         #print("\n week: ", week)
         teams_with_good_day = [random.randint(0, 1) for i in range(len(teams))]
         players_with_good_day = [random.randint(0, number_of_players_per_team-1) for i in range(len(teams_with_good_day) )]
-    
+        teams_with_bad_day = [random.randint(0, 1) for i in range(len(teams))]
+        players_with_bad_day = [random.randint(0, number_of_players_per_team-1) for i in range(len(teams_with_good_day) )]
+        
         alley = get_random_alley(teams, week)
         # iterate over all pairings
         for round_number, pairings in enumerate(round_robin_rounds):
@@ -331,10 +353,12 @@ def simulate_season(teams, weeks, number_of_players_per_team, name, season):
                 for player_number in range(number_of_players_per_team):
                     player = team.players[player_number]
                     player_has_good_day = teams_with_good_day[team_id] and players_with_good_day[team_id] == player_number
+                    player_has_bad_day = teams_with_bad_day[team_id] and players_with_bad_day[team_id] == player_number
                     player_opponent = team_opponent.players[player_number]  
                     player_opponent_has_good_day = teams_with_good_day[opponent_id] and players_with_good_day[opponent_id] == player_number
-                    player_score = teams[team_id].players[player_number].simulate_score(team_is_home_alley, player_has_good_day)
-                    opponent_score = teams[opponent_id].players[player_number].simulate_score(opponent_is_home_alley, player_opponent_has_good_day)
+                    player_opponent_has_bad_day = teams_with_bad_day[opponent_id] and players_with_bad_day[opponent_id] == player_number
+                    player_score = teams[team_id].players[player_number].simulate_score(team_is_home_alley, player_has_good_day, player_has_bad_day)
+                    opponent_score = teams[opponent_id].players[player_number].simulate_score(opponent_is_home_alley, player_opponent_has_good_day, player_opponent_has_bad_day)
 
                     cols_match = [
                         [season, week+1, "n/a", name, number_of_players_per_team, alley, round_number, match_number, 
