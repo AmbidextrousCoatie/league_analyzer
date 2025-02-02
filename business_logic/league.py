@@ -1,5 +1,16 @@
 import pandas as pd
 
+
+levels = {
+    "1. Bundesliga": 1,
+    "2. Bundesliga": 2,
+    "BayL": 3,
+    "LL1 Nord": 4,
+    "BZL 2 Nord": 5,
+    "Bezirksliga": 6,
+    "Kreisliga": 7,
+}
+
 class League:
 
     def __init__(self, league_name, number_of_teams, number_of_players_per_team, weeks=None, skill_level: int = 7):

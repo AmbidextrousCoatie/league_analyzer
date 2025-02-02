@@ -168,9 +168,12 @@
                 .then(response => response.json())
                 .then(data => {
                     const seasons = Object.keys(data);
-                    const positions = seasons.map(season => data[season].final_position);
+                    const combinedPositions = seasons.map(season => {
+                        const leagueLevel = data[season].league_level;
+                        const position = data[season].final_position;
+                        return (leagueLevel - 1) * 10 + position;
+                    });
                     
-                    // Chart creation
                     const ctx = document.getElementById('chartTeamHistory').getContext('2d');
                     if (window.teamHistoryChart instanceof Chart) {
                         window.teamHistoryChart.destroy();
@@ -182,10 +185,16 @@
                             labels: seasons,
                             datasets: [{
                                 label: teamName,
-                                data: positions,
+                                data: combinedPositions,
                                 borderColor: getTeamColor(teamName),
-                                backgroundColor: getTeamColor(teamName),
-                                tension: 0.1
+                                backgroundColor: 'transparent',
+                                tension: 0.1,
+                                pointRadius: 15,
+                                pointHoverRadius: 17,
+                                pointStyle: 'circle',
+                                pointBackgroundColor: 'white',
+                                pointBorderColor: getTeamColor(teamName),
+                                pointBorderWidth: 2
                             }]
                         },
                         options: {
@@ -193,16 +202,94 @@
                             scales: {
                                 y: {
                                     reverse: true,
-                                    beginAtZero: false
+                                    beginAtZero: false,
+                                    min: 1,
+                                    max: 70,
+                                    ticks: {
+                                        autoSkip: false,
+                                        stepSize: 1,
+                                        callback: function(value) {
+                                            const midPoints = [5, 15, 25, 35, 45, 55, 65];
+                                            if (midPoints.includes(value)) {
+                                                const leagueNames = {
+                                                    1: "1. Bundesliga",
+                                                    2: "2. Bundesliga",
+                                                    3: "BayL",
+                                                    4: "LL1 Nord",
+                                                    5: "BZL 2 Nord",
+                                                    6: "Bezirksliga",
+                                                    7: "Kreisliga"
+                                                };
+                                                const leagueLevel = Math.floor((value - 1) / 10) + 1;
+                                                return leagueNames[leagueLevel];
+                                            }
+                                            return '';
+                                        },
+                                        font: {
+                                            size: 12
+                                        },
+                                        color: '#000'
+                                    },
+                                    grid: {
+                                        color: (context) => {
+                                            const value = context.tick.value;
+                                            return value % 10 === 0 ? 'rgba(0, 0, 0, 0.1)' : 'transparent';
+                                        }
+                                    }
                                 }
                             },
                             plugins: {
                                 title: {
                                     display: true,
                                     text: 'Platzierungsverlauf'
+                                },
+                                tooltip: {
+                                    enabled: true
+                                },
+                                legend: {
+                                    display: true
+                                },
+                                customLabels: {
+                                    afterDatasetsDraw(chart) {
+                                        const {ctx} = chart;
+                                        const meta = chart.getDatasetMeta(0);
+                                        
+                                        meta.data.forEach((point, index) => {
+                                            const season = seasons[index];
+                                            const position = data[season].final_position;
+                                            
+                                            ctx.save();
+                                            ctx.textAlign = 'center';
+                                            ctx.textBaseline = 'middle';
+                                            ctx.font = 'bold 12px Arial';
+                                            ctx.fillStyle = getTeamColor(teamName);
+                                            ctx.fillText(position.toString(), point.x, point.y);
+                                            ctx.restore();
+                                        });
+                                    }
                                 }
                             }
-                        }
+                        },
+                        plugins: [{
+                            id: 'customLabels',
+                            afterDatasetsDraw(chart) {
+                                const {ctx} = chart;
+                                const meta = chart.getDatasetMeta(0);
+                                
+                                meta.data.forEach((point, index) => {
+                                    const season = seasons[index];
+                                    const position = data[season].final_position;
+                                    
+                                    ctx.save();
+                                    ctx.textAlign = 'center';
+                                    ctx.textBaseline = 'middle';
+                                    ctx.font = 'bold 12px Arial';
+                                    ctx.fillStyle = getTeamColor(teamName);
+                                    ctx.fillText(position.toString(), point.x, point.y);
+                                    ctx.restore();
+                                });
+                            }
+                        }]
                     });
 
                     // Transform data for table

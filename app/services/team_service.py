@@ -7,6 +7,7 @@ import pandas as pd
 from typing import List
 from business_logic.server import Server
 from flask import jsonify, Response
+from business_logic.league import levels
 
 class TeamService:
     # fetches dataframes from server
@@ -53,6 +54,6 @@ class TeamService:
                 return {}
             final_position = self.server.get_final_position_in_league(team_name=team_name, league_name=league_name, season=season)
 
-            history[season] = {"league_name": league_name, "final_position": final_position}
+            history[season] = {"league_name": league_name, "final_position": final_position, 'league_level': levels[league_name]}
 
         return history
