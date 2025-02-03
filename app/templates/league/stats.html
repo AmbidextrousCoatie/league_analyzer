@@ -504,22 +504,7 @@ function updateSectionLeagueStandings() {
     fetch(`/league/get_league_history?season=${selectedSeason}&league=${selectedLeague}`)
         .then(response => response.json())
         .then(data => {
-            // Create table configuration
-            const tableConfig = {
-                id: 'leagueTableHistory',
-                headerGroups: data.headerGroups,
-                columns: data.columns,
-                data: data.data,
-                sortable: true
-            };
-
-            // Call the createTable function from components/tables.html
-            const tableHtml = createTable(tableConfig);
-            document.getElementById('leagueTableHistory').innerHTML = tableHtml;
-            
-            // Update chart
-            //updatePointsChart(data);
-            //updateCumulativePointsChart(data);
+            createTableTabulator('leagueTableHistory', data);
         })
         .catch(error => console.error('Error:', error));
 }

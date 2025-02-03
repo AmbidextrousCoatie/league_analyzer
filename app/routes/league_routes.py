@@ -88,10 +88,11 @@ def get_league_history():
             debug_output=False
         )
 
-        transformed_data = DataDict().transform_dict(table_data)
+        #print(table_data)
+        #transformed_data = DataDict().transform_dict(table_data)
 
         # print(transformed_data.to_dict())
-        return jsonify(transformed_data.to_dict())  # Make sure to jsonify the response
+        return jsonify(table_data)  # Make sure to jsonify the response
         
     except Exception as e:
         print(f"Error: {str(e)}")
@@ -231,8 +232,8 @@ def get_team_points_vs_average():
             season=season
         )["averages"]
        
-        print(points_raw)
-        print(averages_raw)
+        #print(points_raw)
+        #print(averages_raw)
 
         points_vs_average = dict()
 
@@ -240,9 +241,9 @@ def get_team_points_vs_average():
             averages = averages_raw[team]
             points_vs_average[team] = [[averages[i] , points[i]] for i in range(len(points))]
        
-        print("############################")
-        print(points_vs_average)    
-        print("############################")
+        #print("############################")
+        #print(points_vs_average)    
+        #print("############################")
         return jsonify(points_vs_average)
         
     except Exception as e:

@@ -68,6 +68,7 @@ class LeagueService:
         
         data_collected_by_week = dict()
         data_per_week = data.groupby(Columns.week)
+        data_per_team = data.groupby(Columns.team_name)
 
         # collect by week
         for week, group in data_per_week:
@@ -78,8 +79,68 @@ class LeagueService:
         # concat all weeks
         # collect by team    
         
+        data_table = dict()
+        ## Table Columns
+
+        # doing the static part 
+        data_table['columns'] = [
+                     { 'title': 'Ranking', 'frozen': 'left', 'columns': [
+                        { 'title': "Pos", 'field': "pos", 'width': 70 },
+                        { 'title': "Team", 'field': "team" } ]
+                        }]
+        # add dynamic columns for each week
+
+
+        for week in weeks:
+            data_table['columns'].append({'title': "Week " + str(week), 
+                                          'columns': [
+                                            { 'title': "Score", 'field': "week" + str(week) + "_score" },
+                                            { 'title': "Points", 'field': "week" + str(week) + "_points" }
+                                          ]})
+
+        # add static columns for seasons summary
+        data_table['columns'].append({'title': "Season Total",
+                                      'columns': [
+                                            { 'title': "Score", 'field': "season_total_score" },
+                                            { 'title': "Points", 'field': "season_total_points" },
+                                            { 'title': "Average", 'field': "season_total_average" }
+                                          ]})
+
+
+
+
+
+
+
+        # add data row by row
+        data_table['data'] = []
+
+
+        for idx, (team, group) in enumerate(data_per_team): 
+            team_row = [idx+1, team]
+            for week in weeks:
+                team_row.append(int(group[group[Columns.week] == week][Columns.score].sum()))
+                team_row.append(int(group[group[Columns.week] == week][Columns.points].sum()))
+            
+            # add total points
+            team_row.append(int(group[Columns.score].sum()))
+            team_row.append(int(group[Columns.points].sum()))
+
+            team_row.append(round(float(group[ColumnsExtra.score_average].sum() / len(group)), 2))
+            data_table['data'].append(team_row)
+
+        
+
+
+        if debug_output:
+            print(data_table)
+
+        return data_table
+
+
         data_collected_by_team = dict()
         columns_per_day = [Columns.score, Columns.points]
+
         columns_total = [ColumnsExtra.score_weekly, ColumnsExtra.points_weekly, ColumnsExtra.score_average_weekly]
         
         data_collected_by_team['headerGroups'] = [[Columns.team_name, 2]] + [['Week' + str(w), len(columns_per_day) ] for w in weeks] + [["Season Total", len(columns_per_day) +1]]
