@@ -141,7 +141,7 @@ const getGroupColors = (headerGroups) => {
         if (index === 0) return 'rgb(255, 255, 255)';  // First group is white
         if (index === headerGroups.length - 1) return endColor;  // Last group is primary blue
         
-        const factor = (index - 1) / (headerGroups.length - 1) * (0.9-0.1) + 0.1;
+        const factor = index / (headerGroups.length - 1) * (0.8-0.2) + 0.2;
         const r = Math.round(startRGB[0] + (endRGB[0] - startRGB[0]) * factor);
         const g = Math.round(startRGB[1] + (endRGB[1] - startRGB[1]) * factor);
         const b = Math.round(startRGB[2] + (endRGB[2] - startRGB[2]) * factor);
