@@ -123,226 +123,132 @@ function createTable(config) {
 
 
 function createTableTabulator(tableId, data) {
-        // Check if the data has columns and data
-        if (!data || !data.columns || !data.data) {
-            console.error('Invalid data format');
-            return;
-        }
+    // Check if the data has columns and data
+    if (!data || !data.columns || !data.data) {
+        console.error('Invalid data format');
+        return;
+    }
 
-        // Transform the data from array format to object format
-        const transformedData = data.data.map(row => {
-            const obj = {};
-            data.columns.forEach(colGroup => {
-                if (colGroup.columns) {
-                    colGroup.columns.forEach(col => {
+    // Transform the data from array format to object format
+    const transformedData = data.data.map(row => {
+        const obj = {};
+        data.columns.forEach(colGroup => {
+            if (colGroup.columns) {
+                colGroup.columns.forEach(col => {
                         obj[col.field] = row.shift(); // Remove the first element and assign it to the field
-                    });
-                }
-            });
-            return obj;
-        });
-
-        // Process columns to ensure frozen properties are set
-        const processedColumns = data.columns.map(col => {
-            const newCol = { ...col };
-            if (newCol.columns) {
-                newCol.columns = newCol.columns.map(subCol => ({ ...subCol })); // Clone sub-columns
+                });
             }
-            return newCol;
         });
-
-        // Destroy existing instance if it exists
-        if (window[tableId + 'Instance']) {
-            window[tableId + 'Instance'].destroy();
-        }
-
-        // Create new Tabulator instance
-        window[tableId + 'Instance'] = new Tabulator(`#${tableId}`, {
-            data: transformedData,
-            columns: processedColumns,
-            layout: "fitDataStretch",
-            responsiveLayout: false,
-            pagination: false,
-            movableColumns: false,
-            tooltips: true,
-            headerSort: true,
-            height: "400px",
-            columnDefaults: {
-                resizable: true,
-                formatter: "plaintext",
-                minWidth: 80,
-                maxWidth: 200,
-                headerHozAlign: "center",
-                hozAlign: "center"
-            },
-            rowHeight: 40,
-            theme: "bootstrap",
-            cssClass: "custom-tabulator"
-        });
-
-        console.log(`Table "${tableId}" successfully created/updated`);
-    }
-
-
-function createTableTabulator_old(tableId, data) {
-    console.log(Tabulator.version);
-    try {
-        // Get all field names from column definitions
-        const fields = [];
-        function extractFields(columns) {
-            columns.forEach(col => {
-                if (col.field) {
-                    fields.push(col.field);
-                }
-                if (col.columns) {
-                    extractFields(col.columns);
-                }
-            });
-        }
-        extractFields(data.columns);
-
-        // Transform array data into object format dynamically
-        const transformedData = data.data.map(row => {
-            const obj = {};
-            fields.forEach((field, index) => {
-                obj[field] = row[index];
-            });
             return obj;
-        });
+    });
 
-        // Always destroy existing instance
-        if (window[tableId + 'Instance']) {
-            window[tableId + 'Instance'].destroy();
+    // Process columns to ensure frozen properties are set
+    const processedColumns = data.columns.map(col => {
+        const newCol = { ...col };
+        if (newCol.columns) {
+            newCol.columns = newCol.columns.map(subCol => ({ ...subCol })); // Clone sub-columns
         }
+        return newCol;
+    });
 
-        // Create new Tabulator instance
-        window[tableId + 'Instance'] = new Tabulator("#" + tableId, {
-            data: transformedData,
-            columns: data.columns,
-            layout: "fitDataStretch",
-            responsiveLayout: false,
-            pagination: false,
-            movableColumns: false,
-            tooltips: true,
-            headerSort: true,
-            height: "400px",
-            columnDefaults: {
-                resizable: true,
-                formatter: "plaintext",
-                minWidth: 80,
-                maxWidth: 200,
-                headerHozAlign: "center",
-                hozAlign: "center"
-            },
-            rowHeight: 40,
-            theme: "bootstrap",
-            cssClass: "custom-tabulator"
-        });
-
-        console.log(`Table "${tableId}" successfully created/updated`);
-    } catch (error) {
-        console.error('Error creating/updating table:', error);
-        element.innerHTML = '<div class="alert alert-danger">Error loading table. Please try again.</div>';
+    // Destroy existing instance if it exists
+    if (window[tableId + 'Instance']) {
+        window[tableId + 'Instance'].destroy();
     }
+
+    // Create new Tabulator instance
+    window[tableId + 'Instance'] = new Tabulator(`#${tableId}`, {
+        data: transformedData,
+        columns: processedColumns,
+        layout: "fitDataStretch",
+        responsiveLayout: false,
+        pagination: false,
+        movableColumns: false,
+        tooltips: false, // Disable tooltips
+        height: "auto", // Set height to auto
+        columnDefaults: {
+        resizable: true,
+        formatter: "plaintext",
+        minWidth: 50,
+        maxWidth: 200,
+        headerHozAlign: "center",
+        hozAlign: "center"
+        },
+        rowHeight: 40, // Set a default row height
+        theme: "bootstrap",
+        cssClass: "custom-tabulator"
+    });
+
+    console.log(`Table "${tableId}" successfully created/updated`);
 }
+
 </script>
 
 <style>
 /* Custom Tabulator Styling */
+/* General Table Styles */
 .custom-tabulator {
-    border: none;
-    background-color: var(--bs-body-bg);
-    font-family: var(--bs-body-font-family);
+    border: none; /* Remove default borders */
+    background-color: transparent; /* Make background transparent */
+    font-family: 'Your Custom Font', sans-serif; /* Use your site's font */
 }
 
-/* Header styling */
+/* Header Styles */
 .custom-tabulator .tabulator-header {
-    background-color: var(--bs-primary);
-    color: white;
-    font-weight: 500;
-    border: none;
-    position: sticky !important;
-    top: 0;
-    z-index: 10;
+    background-color: #f8f9fa; /* Light background for header */
+    color: #343a40; /* Dark text color */
+    font-weight: bold; /* Bold header text */
+    border-bottom: 2px solid #dee2e6; /* Subtle border */
 }
 
-/* Frozen columns */
-.custom-tabulator .tabulator-frozen {
-    position: sticky !important;
+/* Column Styles */
+.custom-tabulator .tabulator-col {
+    border-right: 1px solid #dee2e6; /* Subtle column borders */
 }
 
-.custom-tabulator .tabulator-frozen.tabulator-frozen-left {
-    left: 0;
-    border-right: 2px solid var(--bs-primary);
-    z-index: 2;
+.custom-tabulator .tabulator-col .tabulator-col-content {
+    padding: 10px; /* Add padding for better spacing */
 }
 
-.custom-tabulator .tabulator-frozen.tabulator-frozen-right {
-    right: 0;
-    border-left: 2px solid var(--bs-primary);
-    z-index: 2;
-}
-
-/* Frozen headers need higher z-index */
-.custom-tabulator .tabulator-header .tabulator-frozen {
-    z-index: 11;
-}
-
-/* Rest of the styling */
+/* Row Styles */
 .custom-tabulator .tabulator-row {
-    border-bottom: 1px solid var(--bs-border-color);
+    border-bottom: 1px solid #dee2e6; /* Subtle row borders */
 }
 
 .custom-tabulator .tabulator-row.tabulator-row-even {
-    background-color: rgba(var(--bs-primary-rgb), 0.05);
+    background-color: #f9f9f9; /* Light gray for even rows */
 }
 
 .custom-tabulator .tabulator-row.tabulator-row-odd {
-    background-color: var(--bs-body-bg);
+    background-color: #ffffff; /* White for odd rows */
 }
 
+/* Hover Effects */
 .custom-tabulator .tabulator-row:hover {
-    background-color: rgba(var(--bs-primary-rgb), 0.1);
+    background-color: #e9ecef; /* Light hover effect */
 }
 
-/* Scrollbars */
+/* Frozen Column Styles */
+.custom-tabulator .tabulator-frozen {
+    background-color: #ffffff; /* Background for frozen columns */
+    z-index: 10; /* Ensure frozen columns are above others */
+}
+
+/* Scrollbar Styles */
 .custom-tabulator .tabulator-tableHolder::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
+    width: 8px; /* Width of the scrollbar */
 }
 
 .custom-tabulator .tabulator-tableHolder::-webkit-scrollbar-track {
-    background: var(--bs-body-bg);
+    background: #f1f1f1; /* Track color */
 }
 
 .custom-tabulator .tabulator-tableHolder::-webkit-scrollbar-thumb {
-    background: var(--bs-primary);
-    border-radius: 4px;
+    background: #888; /* Thumb color */
+    border-radius: 4px; /* Rounded corners */
 }
 
-/* Add horizontal scroll indicator */
-.custom-tabulator .tabulator-tableHolder {
-    overflow-x: auto;
-    scrollbar-width: thin;
-}
-
-/* Ensure table container takes full width */
-.custom-tabulator {
-    width: 100% !important;
-    margin: 0;
-    padding: 0;
-}
-
-/* Prevent column wrapping */
-.custom-tabulator .tabulator-cell {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-/* Hide ghost columns */
-.custom-tabulator .tabulator-col.tabulator-frozen[style*="visibility: hidden"],
-.custom-tabulator .tabulator-cell.tabulator-frozen[style*="visibility: hidden"] {
-    display: none !important;
+.custom-tabulator .tabulator-tableHolder::-webkit-scrollbar-thumb:hover {
+    background: #555; /* Darker thumb on hover */
 }
 </style> 
