@@ -122,6 +122,34 @@ function createTable(config) {
 }
 
 
+// Function to convert hex color to RGB
+const hexToRgb = (hex) => {
+    const bigint = parseInt(hex.slice(1), 16);
+    const r = (bigint >> 16) & 255;
+    const g = (bigint >> 8) & 255;
+    const b = bigint & 255;
+    return [r, g, b];
+};
+
+// Function to get colors for groups
+const getGroupColors = (headerGroups) => {
+    const endColor = '#2196F3';  // Bootstrap primary blue
+    const startRGB = [255, 255, 255];  // white
+    const endRGB = hexToRgb(endColor);
+    
+    return headerGroups.map((_, index) => {
+        if (index === 0) return 'rgb(255, 255, 255)';  // First group is white
+        if (index === headerGroups.length - 1) return endColor;  // Last group is primary blue
+        
+        const factor = (index - 1) / (headerGroups.length - 1) * (0.9-0.1) + 0.1;
+        const r = Math.round(startRGB[0] + (endRGB[0] - startRGB[0]) * factor);
+        const g = Math.round(startRGB[1] + (endRGB[1] - startRGB[1]) * factor);
+        const b = Math.round(startRGB[2] + (endRGB[2] - startRGB[2]) * factor);
+        
+        return `rgb(${r}, ${g}, ${b})`;
+    });
+};
+
 function createTableTabulator(tableId, data) {
     // Check if the data has columns and data
     if (!data || !data.columns || !data.data) {
@@ -132,21 +160,41 @@ function createTableTabulator(tableId, data) {
     // Transform the data from array format to object format
     const transformedData = data.data.map(row => {
         const obj = {};
+        let index = 0; // Initialize index to track the position in the row array
+
+        // Loop through each column group
         data.columns.forEach(colGroup => {
             if (colGroup.columns) {
+                // Loop through each column in the group
                 colGroup.columns.forEach(col => {
-                        obj[col.field] = row.shift(); // Remove the first element and assign it to the field
+                    obj[col.field] = row[index]; // Assign the value from the row to the object
+                    index++; // Increment index for the next field
                 });
             }
         });
-            return obj;
+        return obj; // Return the transformed object
     });
 
-    // Process columns to ensure frozen properties are set
-    const processedColumns = data.columns.map(col => {
+    // Process columns to ensure frozen properties are set and add group indices
+    const processedColumns = data.columns.map((col, index) => {
         const newCol = { ...col };
         if (newCol.columns) {
-            newCol.columns = newCol.columns.map(subCol => ({ ...subCol })); // Clone sub-columns
+            const color = getGroupColors(data.columns)[index];
+            const isLastGroup = index === data.columns.length - 1;  // Check if this is the last group
+            newCol.cssClass = `group-${index}`;
+            // Apply the color to all child columns
+            newCol.columns = newCol.columns.map(subCol => ({ 
+                ...subCol,
+                formatter: function(cell, formatterParams, onRendered) {
+                    cell.getElement().style.backgroundColor = color;
+                    // Check if this is the last group
+                    if (isLastGroup) {
+                        cell.getElement().style.color = 'white';
+                        cell.getElement().style.fontWeight = 'bold';
+                    }
+                    return cell.getValue();
+                }
+            }));
         }
         return newCol;
     });
@@ -156,6 +204,22 @@ function createTableTabulator(tableId, data) {
         window[tableId + 'Instance'].destroy();
     }
 
+    // Function to create a lighter version of a color
+    const getLighterColor = (color) => {
+        // If color is in rgb format, convert it
+        let rgb;
+        if (color.startsWith('rgb')) {
+            rgb = color.match(/\d+/g).map(Number);
+        } else if (color.startsWith('#')) {
+            rgb = hexToRgb(color);
+        }
+        
+        return rgb;
+        // Make it 85% lighter
+        //const lighter = rgb.map(c => Math.round(c + (255 - c) * 0.85));
+        //return `rgb(${lighter[0]}, ${lighter[1]}, ${lighter[2]})`;
+    };
+
     // Create new Tabulator instance
     window[tableId + 'Instance'] = new Tabulator(`#${tableId}`, {
         data: transformedData,
@@ -164,19 +228,56 @@ function createTableTabulator(tableId, data) {
         responsiveLayout: false,
         pagination: false,
         movableColumns: false,
-        tooltips: false, // Disable tooltips
-        height: "auto", // Set height to auto
+        tooltips: false,
+        height: "auto",
         columnDefaults: {
-        resizable: true,
-        formatter: "plaintext",
-        minWidth: 50,
-        maxWidth: 200,
-        headerHozAlign: "center",
-        hozAlign: "center"
+            resizable: true,
+            formatter: "plaintext",
+            minWidth: 50,
+            maxWidth: 200,
+            headerHozAlign: "center",
+            hozAlign: "center"
         },
-        rowHeight: 40, // Set a default row height
+        rowHeight: 40,
         theme: "bootstrap",
-        cssClass: "custom-tabulator"
+        cssClass: "custom-tabulator",
+        columnHeaderVertAlign: "middle",
+        columnHeaderStyling: function(column) {
+            if (column.getParentColumn()) {
+                const parentTitle = column.getParentColumn().getDefinition().title;
+                const groupIndex = data.columns.findIndex(col => col.title === parentTitle);
+                const colors = getGroupColors(data.columns);
+                return {backgroundColor: colors[groupIndex]};
+            }
+        }
+    });
+
+    // Apply header colors after table is fully rendered
+    window[tableId + 'Instance'].on("tableBuilt", function() {
+        setTimeout(() => {
+            const headers = document.querySelectorAll(`#${tableId} .tabulator-col-group`);
+            const colors = getGroupColors(data.columns);
+            
+            headers.forEach((header, index) => {
+                const color = colors[index];
+                const isLastGroup = index === data.columns.length - 1;
+                
+                // Apply color to header
+                header.style.setProperty('background-color', color, 'important');
+                
+                // Apply styles to header and all its children
+                const elements = [header, ...header.querySelectorAll('*')];
+                elements.forEach(element => {
+                    element.style.setProperty('background-color', color, 'important');
+                    if (isLastGroup) {
+                        element.style.setProperty('color', 'white', 'important');
+                        element.style.setProperty('font-weight', 'bold', 'important');
+                    }
+                });
+            });
+
+            console.log('Colors applied to headers');
+        }, 100);
     });
 
     console.log(`Table "${tableId}" successfully created/updated`);
@@ -251,4 +352,23 @@ function createTableTabulator(tableId, data) {
 .custom-tabulator .tabulator-tableHolder::-webkit-scrollbar-thumb:hover {
     background: #555; /* Darker thumb on hover */
 }
+
+/* Add this to your CSS file or style section */
+.tabulator-col-group {
+    background-color: white !important;
+}
+
+.tabulator-col-group[data-group-index="0"] {
+    background-color: rgb(255, 255, 255) !important;
+}
+
+.tabulator-col-group[data-group-index="1"] {
+    background-color: rgb(242, 247, 251) !important;
+}
+
+.tabulator-col-group[data-group-index="2"] {
+    background-color: rgb(229, 239, 247) !important;
+}
+
+/* Add more rules based on your number of groups */
 </style> 
