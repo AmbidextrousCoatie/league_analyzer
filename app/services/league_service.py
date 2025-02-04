@@ -138,43 +138,6 @@ class LeagueService:
         return data_table
 
 
-        data_collected_by_team = dict()
-        columns_per_day = [Columns.score, Columns.points]
-
-        columns_total = [ColumnsExtra.score_weekly, ColumnsExtra.points_weekly, ColumnsExtra.score_average_weekly]
-        
-        data_collected_by_team['headerGroups'] = [[Columns.team_name, 2]] + [['Week' + str(w), len(columns_per_day) ] for w in weeks] + [["Season Total", len(columns_per_day) +1]]
-        data_collected_by_team['columns'] = ['Pos', Columns.team_name] + columns_per_day * max(weeks) + columns_per_day + [ColumnsExtra.score_average]
-        data_collected_by_team['data'] = []
-
-        data_per_team = data.groupby(Columns.team_name)
-        data_per_team = sorted(data_per_team, key=lambda x: x[1][Columns.points].sum(), reverse=True)
-
-        for idx, (team, group) in enumerate(data_per_team):
-            team_row = [idx+1, team]
-            if debug_output:
-                print("team : " + str(team))
-                print(group)
-            points = float(round(group[Columns.points].sum(), 1))
-            score = int(group[Columns.score].sum())
-            score_average = float(round(group[ColumnsExtra.score_average].sum() / len(group), 2))
-
-            for row in group.to_dict('records'):
-                rows_to_extract = [row[col] for col in columns_per_day]
-                team_row.extend(rows_to_extract)
-                #rows_to_extract = [row[col] for col in columns_total]
-                
-            team_row.extend([score, points, score_average])
-            data_collected_by_team['data'].append(team_row)
-        #print(data_collected_by_week)
-        if debug_output:
-            print("collected data by team: " + str(data_collected_by_team))   
-        if data_collected_by_team is not None:
-            return data_collected_by_team
-        else:
-            return pd.DataFrame().to_dict('records')
-
-
     def get_league_week_table(self, league:str, season:str, week:int=None, depth:int=None) -> Response:     
         """Get standings of a leagaue up to a specific match day"""
         #print(" >>>>>>>>>>>>>>>>>>>> doing history just for testing")

@@ -387,11 +387,7 @@ function updateTableTeamDetails() {
     const currentWeek = document.querySelector('input[name="week"]:checked')?.value;
     const team = document.querySelector('input[name="team"]:checked')?.value;
 
-    console.log("Updating team week details...");
-    console.log("Season:", selectedSeason);
-    console.log("League:", selectedLeague);
-    console.log("Week:", currentWeek);
-    console.log("Team:", team);
+    console.log("Updating team week details... League: ", selectedLeague, " Season: ", selectedSeason, " Week: ", currentWeek, " Team: ", team);
 
     if (!selectedSeason || !selectedLeague || !currentWeek) {
         console.log("Missing required selection");
@@ -416,7 +412,7 @@ function updateTableTeamDetails() {
             return response.json();
         })
         .then(response => {
-            console.log("Received data:", response);
+            //console.log("Received data:", response);
             
             if (!response.config) {
                 throw new Error('Invalid response structure: missing config');
@@ -437,7 +433,7 @@ function updateTableTeamDetails() {
                 positionChange: response.config.positionChange || false
             };
 
-            console.log("Transformed data:", transformedData);
+            //console.log("Transformed data:", transformedData);
 
             // Create the table
             const tableHtml = createTable(tableConfig);
@@ -536,7 +532,7 @@ function updateTableLeagueWeek() {
             return response.json();
         })
         .then(data => {
-            console.log('Received data:', data);
+            //console.log('Received data:', data);
             const tableConfig = {
                 id: 'tableLeagueWeek',
                 headerGroups: data.headerGroups,

@@ -93,27 +93,20 @@ class PlayerService:
     def get_lifetime_stats(self, player_name):
         """Get lifetime statistics for a player."""
         # Get all games for the player
-        print("Service: Get lifetime stats: player_name: " + str(player_name))
-       
+               
         games_df = self.server.get_games_for_player(player_name)
         
         if games_df.empty:
             return None
-        
-
-
+ 
         overall_average = games_df[Columns.score].mean()
-
 
         # first handle the seasons stats
         data_grouped = games_df.groupby(Columns.season)
         season_stats = []
         last_seasons_average = None
         for i, (season, data) in enumerate(data_grouped):
-            print("index: " + str(i) + " season: " + str(season) + " data:\n" + str(data))
             
-
-
             total_games = len(data)
             total_pins = data[Columns.score].sum()
             average = total_pins / total_games
@@ -134,12 +127,6 @@ class PlayerService:
             best_game = data[data[Columns.score] == data[Columns.score].max()].iloc[0]   
             worst_game = data[data[Columns.score] == data[Columns.score].min()].iloc[0]
             
-            print("best_game: " + str(best_game))
-            print("best_game.at[Columns.score]: " + str(best_game.at[Columns.score]))
-            print("best_game.get(Columns.score): " + str(best_game.get(Columns.score)))
-
-
-
             season_stats.append({
                 'season': season,
                 'games': int(total_games),
@@ -159,11 +146,6 @@ class PlayerService:
                     'date': 'tbd',
                     'event': f"{worst_game.at[Columns.league_name]} Week {worst_game.at[Columns.week]}"       
                 }
-
-
-
-
-
             })
 
         collected_data = dict(seasons=season_stats)
@@ -228,5 +210,5 @@ class PlayerService:
             }
 
         }
-        print(collected_data)
+
         return collected_data
