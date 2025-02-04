@@ -3,10 +3,12 @@ from data_access.pd_dataframes import fetch_column, fetch_data
 from data_access.schema import Columns
 from app.services.data_manager import DataManager
 from business_logic.statistics import calculate_score_average_player, calculate_games_count_player
+from business_logic.server import Server
 
 class PlayerService:
     def __init__(self):
         self.data_manager = DataManager()
+        self.server = Server()
 
     def get_all_players(self):
         players = fetch_column(
@@ -87,3 +89,144 @@ class PlayerService:
         
         return all_players
 
+
+    def get_lifetime_stats(self, player_name):
+        """Get lifetime statistics for a player."""
+        # Get all games for the player
+        print("Service: Get lifetime stats: player_name: " + str(player_name))
+       
+        games_df = self.server.get_games_for_player(player_name)
+        
+        if games_df.empty:
+            return None
+        
+
+
+        overall_average = games_df[Columns.score].mean()
+
+
+        # first handle the seasons stats
+        data_grouped = games_df.groupby(Columns.season)
+        season_stats = []
+        last_seasons_average = None
+        for i, (season, data) in enumerate(data_grouped):
+            print("index: " + str(i) + " season: " + str(season) + " data:\n" + str(data))
+            
+
+
+            total_games = len(data)
+            total_pins = data[Columns.score].sum()
+            average = total_pins / total_games
+            
+            # Calculate deviation from overall average
+            dev_from_avg = average - overall_average
+            
+            # Calculate change from previous season
+            if last_seasons_average is not None:
+                vs_last_season = average - last_seasons_average
+                
+            else:
+                vs_last_season = 0.0
+            
+            last_seasons_average = average
+
+            # Find best and worst games
+            best_game = data[data[Columns.score] == data[Columns.score].max()].iloc[0]   
+            worst_game = data[data[Columns.score] == data[Columns.score].min()].iloc[0]
+            
+            print("best_game: " + str(best_game))
+            print("best_game.at[Columns.score]: " + str(best_game.at[Columns.score]))
+            print("best_game.get(Columns.score): " + str(best_game.get(Columns.score)))
+
+
+
+            season_stats.append({
+                'season': season,
+                'games': int(total_games),
+                'total_pins': int(total_pins),
+                'average': float(round(average, 2)),
+                'dev_from_avg': float(round(dev_from_avg, 2)),
+                'vs_last_season': vs_last_season,
+
+                'best_game': {
+                    'score': int(best_game.at[Columns.score]),
+                    'date': 'tbd',
+                    'event': f"{best_game.at[Columns.league_name]} Week {best_game.at[Columns.week]}"
+                },
+
+                'worst_game': {
+                    'score': int(worst_game.at[Columns.score]),
+                    'date': 'tbd',
+                    'event': f"{worst_game.at[Columns.league_name]} Week {worst_game.at[Columns.week]}"       
+                }
+
+
+
+
+
+            })
+
+        collected_data = dict(seasons=season_stats)
+
+        # calculate the lifetime stats
+
+
+        
+        # Calculate basic stats
+        total_games = len(games_df)
+        total_pins = games_df[Columns.score].sum()
+        avg_score = total_pins / total_games if total_games > 0 else 0
+        
+        # Find best and worst games
+        best_game = games_df[games_df[Columns.score] == games_df[Columns.score].max()].iloc[0]
+        worst_game = games_df[games_df[Columns.score] == games_df[Columns.score].min()].iloc[0]
+        
+        season_means = data_grouped[Columns.score].mean()
+
+        # Find season with best mean
+        best_season = season_means.idxmax()  # Gets the season name
+        best_season_avg = season_means.max()  # Gets the actual average
+
+        # For most improved, calculate differences between consecutive seasons
+        season_improvements = season_means.diff()  # Calculates difference to previous season
+        most_improved_season = season_improvements.idxmax()  # Gets the season name
+        most_improved_improvement = season_improvements.max()
+
+        
+
+        collected_data['lifetime'] = {
+            'total_games': int(total_games),
+            'total_pins': int(total_pins),
+            'average_score': float(round(avg_score, 2)),
+
+
+            'best_game': {
+
+                'score': int(best_game.at[Columns.score]),
+                'date': 'tbd',
+                'event': f"{best_game.at[Columns.season]} {best_game.at[Columns.league_name]} Week {best_game.at[Columns.week]}"
+
+
+
+            },
+            'worst_game': {
+                'score': int(worst_game.at[Columns.score]),
+                'date': 'tbd',
+                'event': f"{worst_game.at[Columns.season]} {worst_game.at[Columns.league_name]} Week {worst_game.at[Columns.week]}"
+
+
+
+            },
+            'best_season': {
+                'season': best_season,
+                'average': float(round(best_season_avg, 2))    
+            },
+
+            'most_improved': {
+                'season': most_improved_season,
+                'improvement': float(round(most_improved_improvement, 2))
+            }
+
+        }
+        print(collected_data)
+        return collected_data

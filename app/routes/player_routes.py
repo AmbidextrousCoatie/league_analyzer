@@ -19,3 +19,15 @@ def get_stats():
     player_id = request.args.get('player_id')
     stats = player_service.get_personal_stats(player_id)
     return jsonify(stats)
+
+@bp.route('/get_lifetime_stats')
+def get_lifetime_stats():
+    print("get_lifetime_stats")
+    player_name = request.args.get('player_name')
+    if not player_name:
+        return jsonify({'error': 'Player name is required'}), 400
+    
+    
+    stats = player_service.get_lifetime_stats(player_name)  # This will now return both lifetime and season stats
+    print(stats)
+    return jsonify(stats)

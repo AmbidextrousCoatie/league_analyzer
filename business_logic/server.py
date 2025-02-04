@@ -574,5 +574,14 @@ class Server:
             print(table_config)
         return table_config
 
+    def get_games_for_player(self, player_name: str) -> pd.DataFrame:
+        """Get all games for a player"""
+        print("player_name: " + str(player_name))
+        player_filters = {
+            Columns.player_name: player_name
+        }
 
+
+        columns = [Columns.player_id, Columns.player_name, Columns.date, Columns.week, Columns.season, Columns.league_name, Columns.team_name, Columns.score, Columns.points]
+        return self.data_adapter.get_filtered_data(columns=columns, filters_eq=player_filters)
 
