@@ -40,5 +40,5 @@ class ColumnsExtra:
     position_change: str = 'PositionChange'
     points_cumulative: str = 'PointsCumulative'
     position_weekly: str = 'PositionWeekly'
-    position_cumulative: str = 'PositionCumulative'
-
+    position_cumulative: str = 'PositionCumulative' 
+    margin: str = 'WinMargin'

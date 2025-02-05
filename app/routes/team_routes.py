@@ -69,9 +69,10 @@ def get_team_history():
         #     "20/21": {"league_name": "Liga B", "final_position": 1}
         # }
         history = team_service.get_team_history(team_name=team_name)
-        print(history)
+
         return jsonify(history)
         
+
     except Exception as e:
         print(f"Error in get_team_history: {str(e)}")
         return jsonify({'error': str(e)}), 500
@@ -88,4 +89,18 @@ def get_average_per_season():
         return jsonify(data)
     except Exception as e:
         print(f"Error in get_average_per_season: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
+
+@bp.route('/team/get_special_matches')
+def get_special_matches():
+    try:
+        team_name = request.args.get('team_name')
+        if not team_name:
+            return jsonify({'error': 'Missing team_name parameter'}), 400
+        special_matches = team_service.get_special_matches(team_name=team_name)
+        print(special_matches)
+        return jsonify(special_matches)
+    except Exception as e:
+        print(f"Error in get_special_matches: {str(e)}")
         return jsonify({'error': str(e)}), 500

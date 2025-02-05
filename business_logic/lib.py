@@ -106,7 +106,7 @@ def calculate_point3(df):
                 continue
             team_name = team_names[0]
             opponent_name = team_names[1]
-            
+            players_per_team = match_dfs.get_group(team_name)[Columns.players_per_team].values[0]
             team_positions = match_dfs.get_group(team_name)[Columns.position].values
             opponent_positions = match_dfs.get_group(opponent_name)[Columns.position].values
 
@@ -167,15 +167,19 @@ def calculate_point3(df):
                 Columns.week: week,
                 Columns.date: date,
                 Columns.league_name: league,
+                Columns.players_per_team: players_per_team,
                 Columns.location: location,
+                Columns.round_number: round_number,
+                Columns.match_number: match,
                 Columns.team_name: team_name,
+                Columns.position: None,
                 Columns.player_name: 'Team Total',
                 Columns.player_id: None,
-                Columns.match_number: match,
+
                 Columns.team_name_opponent: opponent_name,
-                Columns.position: None,
                 Columns.score: score_team_total,
                 Columns.points: points_team,
+
                 Columns.input_data: False,
                 Columns.computed_data: True
             })
@@ -185,21 +189,22 @@ def calculate_point3(df):
                 Columns.week: week,
                 Columns.date: date,
                 Columns.league_name: league,
+                Columns.players_per_team: players_per_team,
                 Columns.location: location,
+                Columns.round_number: round_number,
+                Columns.match_number: match,
                 Columns.team_name: opponent_name,
+                Columns.position: None,
                 Columns.player_name: 'Team Total',
                 Columns.player_id: None,
-                Columns.match_number: match,
+
                 Columns.team_name_opponent: team_name,
-                Columns.position: None,
                 Columns.score: score_opponent_total,
                 Columns.points: points_opponent,
+
                 Columns.input_data: False,
                 Columns.computed_data: True
             })
-
-
-
             
             pbar.update(1)
     

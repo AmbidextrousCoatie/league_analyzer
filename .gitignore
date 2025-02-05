@@ -84,3 +84,9 @@ database/__pycache__/config.cpython-312.pyc
 app/routes/__pycache__/league_routes.cpython-312.pyc
 app/services/__pycache__/data_dict.cpython-310.pyc
 app/routes/__pycache__/league_routes.cpython-312.pyc
+app/routes/__pycache__/league_routes.cpython-312.pyc
+app/routes/__pycache__/team_routes.cpython-310.pyc
+app/routes/__pycache__/team_routes.cpython-312.pyc
+app/services/__pycache__/data_dict.cpython-312.pyc
+app/services/__pycache__/team_service.cpython-310.pyc
+app/services/__pycache__/team_service.cpython-312.pyc

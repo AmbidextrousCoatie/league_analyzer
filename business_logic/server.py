@@ -583,3 +583,73 @@ class Server:
         columns = [Columns.player_id, Columns.player_name, Columns.date, Columns.week, Columns.season, Columns.league_name, Columns.team_name, Columns.score, Columns.points]
         return self.data_adapter.get_filtered_data(columns=columns, filters_eq=player_filters)
 
+    def get_special_matches(self, team_name: str=None, amount: int=3):
+
+        columns = [Columns.week, Columns.season, Columns.league_name, Columns.round_number, Columns.team_name, Columns.score, Columns.points, Columns.team_name_opponent]
+        filters_team = {
+            Columns.team_name: team_name,
+            Columns.computed_data: True
+        }
+
+
+        filters_opponent = {
+            Columns.team_name_opponent: team_name,
+            Columns.computed_data: True
+        }
+
+        data_team = self.data_adapter.get_filtered_data(columns=columns, filters_eq=filters_team)
+        data_opponent = self.data_adapter.get_filtered_data(columns=columns, filters_eq=filters_opponent)
+
+        # merge data_team and data_opponent
+        data_combined = pd.concat([data_team, data_opponent])
+        data_matches = data_combined.groupby([Columns.season, Columns.week, Columns.round_number])
+        
+        
+        # determin win margins
+        data_team[ColumnsExtra.margin] = int(0)
+        for (season, week, round_number), group in data_matches:
+            #print(name)
+            #print(group)
+
+
+            team_score = group[group[Columns.team_name] == team_name][Columns.score].iloc[0]
+            
+            # Get the score when the team was playing as opponent
+            opponent_score = group[group[Columns.team_name_opponent] == team_name][Columns.score].iloc[0]
+            print(team_score, " : ", opponent_score, " (", team_score - opponent_score, ")")
+
+            data_team.loc[(data_team[Columns.season] == season) & (data_team[Columns.week] == week) & (data_team[Columns.round_number] == round_number), ColumnsExtra.margin] = team_score - opponent_score
+
+        # highest scores
+        highest_scores = data_team.sort_values(by=Columns.score, ascending=False).head(amount)
+
+        # lowest scores
+        lowest_scores = data_team.sort_values(by=Columns.score, ascending=True).head(amount)
+
+        # biggest win margin
+        biggest_win_margin = data_team.sort_values(by=ColumnsExtra.margin, ascending=False).head(amount)
+
+        # biggest loss margin
+        biggest_loss_margin = data_team.sort_values(by=ColumnsExtra.margin, ascending=True).head(amount)
+
+        # highest scoring match ( own score + opponent score )
+        #highest_scoring_match = data_team.sort_values(by=2 * Columns.score - ColumnsExtra.margin, ascending=False).head(amount)
+
+        # lowest scoring match ( own score + opponent score )
+        #lowest_scoring_match = data_team.sort_values(by=2 * Columns.score - ColumnsExtra.margin, ascending=True).head(amount)
+
+        # compose dictionary
+        special_matches = {
+            'highest_scores': highest_scores.to_dict(orient='records'),
+            'lowest_scores': lowest_scores.to_dict(orient='records'),
+            'biggest_win_margin': biggest_win_margin.to_dict(orient='records'),
+            'biggest_loss_margin': biggest_loss_margin.to_dict(orient='records')
+            #'highest_scoring_match': highest_scoring_match.to_dict(orient='records'),
+            #'lowest_scoring_match': lowest_scoring_match.to_dict(orient='records'),
+        }
+
+        print(special_matches)      
+
+        
+        """Returns the special matches for a given team"""
+        return special_matches

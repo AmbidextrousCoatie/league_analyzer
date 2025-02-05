@@ -57,3 +57,8 @@ class TeamService:
             history[season] = {"league_name": league_name, "final_position": final_position, 'league_level': levels[league_name]}
 
         return history
+    
+
+    def get_special_matches(self, team_name: str=None):
+        """Returns the special matches for a given team"""
+        return self.server.get_special_matches(team_name=team_name)
