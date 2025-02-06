@@ -65,10 +65,13 @@ class LeagueService:
         # find all weeks
         weeks = data[Columns.week].unique()
         # groupby week
-        
+
         data_collected_by_week = dict()
         data_per_week = data.groupby(Columns.week)
         data_per_team = data.groupby(Columns.team_name)
+
+
+        team_order = self.get_team_positions_during_season(league_name, season)['order']
 
         # collect by week
         for week, group in data_per_week:
@@ -115,8 +118,9 @@ class LeagueService:
         # add data row by row
         data_table['data'] = []
 
-
-        for idx, (team, group) in enumerate(data_per_team): 
+        for idx, team in enumerate(team_order):
+            group = data_per_team.get_group(team)
+        #for idx, (team, group) in enumerate(data_per_team): 
             team_row = [idx+1, team]
             for week in weeks:
                 team_row.append(int(group[group[Columns.week] == week][Columns.score].sum()))
@@ -216,11 +220,13 @@ class LeagueService:
         rankings_dict = dict()
         rankings_dict['weekly'] = dict()
         rankings_dict['cumulative'] = dict()
+        rankings_dict['order'] = []
 
 
         for team, group in rankings_grouped:
             rankings_dict['weekly'][team] = group[Columns.points].tolist()
             rankings_dict['cumulative'][team] = group[ColumnsExtra.points_cumulative].tolist()
+            rankings_dict['order'].append(team)
 
         return rankings_dict
 
@@ -240,11 +246,12 @@ class LeagueService:
         rankings_dict = dict()
         rankings_dict['weekly'] = dict()
         rankings_dict['cumulative'] = dict()
-
+        rankings_dict['order'] = []
 
         for team, group in rankings_grouped:
             rankings_dict['weekly'][team] = group[ColumnsExtra.position_weekly].tolist()
             rankings_dict['cumulative'][team] = group[ColumnsExtra.position_cumulative].tolist()
+            rankings_dict['order'].append(team)
 
         return rankings_dict
 

@@ -60,11 +60,20 @@ function createLineChart_vanilla(data, chartId, title, labels, reverse_y) {
     });
 }
 
-function createLineChart(data, containerId, title, labels, invertYAxis = false, yAxisRange = null) {
-    // Get container
+function createLineChart(data, order, containerId, title, labels, invertYAxis = false, yAxisRange = null) {
     const container = document.getElementById(containerId);
     
-    // Initialize ECharts instance with device pixel ratio
+    // Dispose of existing chart instance if it exists
+    const existingChart = echarts.getInstanceByDom(container);
+    if (existingChart) {
+        existingChart.dispose();
+    }
+    
+    if (order == null) {
+        order = Object.keys(data)
+    }
+    
+    // Initialize new chart instance
     const chart = echarts.init(container, null, {
         devicePixelRatio: window.devicePixelRatio,
         renderer: 'canvas'
@@ -73,22 +82,22 @@ function createLineChart(data, containerId, title, labels, invertYAxis = false, 
     // Calculate y-axis range if requested
     let yMin, yMax;
     if (yAxisRange === 'auto') {
-        const allValues = Object.values(data).flat();
+        const allValues = order.map(team => data[team]).flat();
         yMin = Math.min(...allValues) - 10;
         yMax = Math.max(...allValues) + 10;
     }
 
     if (yAxisRange === 'exact') {
-        const allValues = Object.values(data).flat();
+        const allValues = order.map(team => data[team]).flat();
         yMin = Math.min(...allValues);
         yMax = Math.max(...allValues);
     }
     
-    // Create series from the data
-    const series = Object.entries(data).map(([team, values]) => ({
+    // Create series from the data using the specified order
+    const series = order.map(team => ({
         name: team,
         type: 'line',
-        data: values,
+        data: data[team],
         lineStyle: {
             color: getTeamColor(team),
             width: 2
@@ -96,17 +105,11 @@ function createLineChart(data, containerId, title, labels, invertYAxis = false, 
         itemStyle: {
             color: getTeamColor(team)
         },
-        //symbol: 'circle',
-        //symbolSize: 8,
         smooth: false
     }));
     
     // Chart options
     const chartOptions = {
-        /*title: {
-            text: title,
-            left: 'center'
-        },*/
         tooltip: {
             trigger: 'axis'
         },
@@ -124,14 +127,8 @@ function createLineChart(data, containerId, title, labels, invertYAxis = false, 
             type: 'category',
             data: labels,
             axisLine: {
-                lineStyle: {
-                    width: 2
-                }
-            },
-            axisLine: {
                 show: false
             },
-
             splitLine: {
                 show: !invertYAxis
             }
@@ -141,19 +138,25 @@ function createLineChart(data, containerId, title, labels, invertYAxis = false, 
             inverse: invertYAxis,
             min: yMin,
             max: yMax,
-
         },
         series: series,
         animation: false
     };
     
-    // Set the chart options
-    chart.setOption(chartOptions);
+    // Set the chart options with clear flag
+    chart.setOption(chartOptions, true);
     
-    // Handle window resize
-    window.addEventListener('resize', () => {
+    // Clean up old resize listener if it exists
+    if (container._echartResizeHandler) {
+        window.removeEventListener('resize', container._echartResizeHandler);
+    }
+    
+    // Add new resize listener
+    const resizeHandler = () => {
         chart.resize();
-    });
+    };
+    window.addEventListener('resize', resizeHandler);
+    container._echartResizeHandler = resizeHandler;
     
     return chart;
 }
@@ -255,9 +258,11 @@ function createScatterChart_vanilla(data, chartId, title, axis_labels) {
 }
 
 
-function createScatterChartMultiAxis(data, containerId, title, labels) {
+function createScatterChartMultiAxis(data, order, containerId, title, labels) {
     const container = document.getElementById(containerId);
     
+    console.log('Order:', order);
+
     // Dispose of existing chart instance if it exists
     const existingChart = echarts.getInstanceByDom(container);
     if (existingChart) {
@@ -270,7 +275,7 @@ function createScatterChartMultiAxis(data, containerId, title, labels) {
         renderer: 'canvas'
     });
     
-    const teams = Object.keys(data);
+    const teams = order;
     const singleAxis = [];
     const series = [];
     
@@ -279,13 +284,13 @@ function createScatterChartMultiAxis(data, containerId, title, labels) {
         const isLastTeam = idx === teams.length - 1;
         
         singleAxis.push({
-            left: 20,
-            right: 20,
+            left: 40,
+            right: 40,
             type: 'category',
             boundaryGap: false,
             data: labels,
-            top: (idx * 95) / teams.length + '%',
-            height: (95 / teams.length) + '%',
+            top: (idx * 90) / teams.length + '%',
+            height: (90 / teams.length) + '%',
             axisLabel: {
                 show: isLastTeam,
                 interval: 0
@@ -300,7 +305,12 @@ function createScatterChartMultiAxis(data, containerId, title, labels) {
                 }
             },
             splitLine: {
-                show: false
+                show: true,           // Show grid lines
+                lineStyle: {
+                    type: 'dashed',   // Make them dashed
+                    opacity: 0.3,     // Make them semi-transparent
+                    color: '#222'     // Light grey color
+                }
             }
         });
         
@@ -313,7 +323,7 @@ function createScatterChartMultiAxis(data, containerId, title, labels) {
             type: 'scatter',
             data: seriesData,
             symbolSize: function(dataItem) {
-                return Math.max(dataItem[1] * 2, 10);
+                return Math.max(dataItem[1] / teams.length * 7, 10);
             },
             itemStyle: {
                 color: getTeamColor(team)

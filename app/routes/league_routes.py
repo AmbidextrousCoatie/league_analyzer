@@ -205,7 +205,7 @@ def get_team_points():
         return jsonify(points)
         
     except Exception as e:
-        print(f"Error in get_team_positions: {str(e)}")
+        print(f"Error in get_team_points: {str(e)}")
         print(traceback.format_exc())
         return jsonify({'error': str(e)}), 500
 

@@ -837,12 +837,12 @@ function updateChartsLeague() {
         league: selectedLeague
     });
     
-    fetch(`/league/get_available_teams?season=${selectedSeason}&league=${selectedLeague}`)
+    /*fetch(`/league/get_available_teams?season=${selectedSeason}&league=${selectedLeague}`)
             .then(response => response.json())
             .then(teams => {
                 updateSharedLegend(teams);
             });
-    
+    */
     // Fetch and create position charts
     fetch(`/league/get_team_positions?season=${selectedSeason}&league=${selectedLeague}`)
         .then(response => response.json())
@@ -854,6 +854,7 @@ function updateChartsLeague() {
             // Create weekly positions chart
            createLineChart(
                 data.weekly,
+                data.order,
                 'chartTeamPositionWeekly',
                 'Platzierung pro Spieltag',
                 labels, 
@@ -864,12 +865,17 @@ function updateChartsLeague() {
             // Create cumulative positions chart
             createLineChart(
                 data.cumulative,
+                data.order,
                 'chartTeamPositionCumulated',
                 'Platzierung im Saisonverlauf',
                 labels,
                 true,
                 'exact'
             );
+
+
+            console.log('Team order:', data.order);
+            updateSharedLegend(data.order);
         });
 
         // Fetch and create points charts
@@ -881,30 +887,36 @@ function updateChartsLeague() {
             const labels = Array.from({length: numWeeks}, (_, i) => `Spieltag ${i + 1}`);
 
             // Create weekly positions chart
-            /* createLineChart(
+            /*
+            createLineChart(
                 data.weekly,
+                data.order,
                 'chartTeamPointsWeekly',
                 'Punkte pro Spieltag',
                 labels,
                 false
             ); */
 
+
             createScatterChartMultiAxis(
                 data.weekly,
+                data.order,
                 'chartTeamPointsWeekly',
                 'Punkte pro Spieltag',
                 labels
             );
 
-
             // Create cumulative positions chart
             createLineChart(
                 data.cumulative,
+                data.order,
                 'chartTeamPointsCumulated',
                 'Punkte im Saisonverlauf',
                 labels,
                 false
             );
+
+
         });
 
         fetch(`/league/get_team_averages?season=${selectedSeason}&league=${selectedLeague}`)
@@ -916,6 +928,7 @@ function updateChartsLeague() {
 
             createLineChart(
                 data.averages,
+                null,
                 'chartTeamAverageScoreWeekly',
                 'Schnitt pro Spieltag',
                 labels,
