@@ -1,4 +1,5 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.6.0/dist/echarts.min.js"></script>
 
 <script>
 // Global object to store team colors
@@ -12,7 +13,7 @@ function getTeamColor(team) {
     return teamColors[team];
 }
 
-function createLineChart(data, chartId, title, labels, reverse_y) {
+function createLineChart_vanilla(data, chartId, title, labels, reverse_y) {
     const ctx = document.getElementById(chartId).getContext('2d');
     
     // Destroy existing chart if it exists
@@ -59,7 +60,105 @@ function createLineChart(data, chartId, title, labels, reverse_y) {
     });
 }
 
-function createScatterChart(data, chartId, title, axis_labels) {
+function createLineChart(data, containerId, title, labels, invertYAxis = false, yAxisRange = null) {
+    // Get container
+    const container = document.getElementById(containerId);
+    
+    // Initialize ECharts instance with device pixel ratio
+    const chart = echarts.init(container, null, {
+        devicePixelRatio: window.devicePixelRatio,
+        renderer: 'canvas'
+    });
+    
+    // Calculate y-axis range if requested
+    let yMin, yMax;
+    if (yAxisRange === 'auto') {
+        const allValues = Object.values(data).flat();
+        yMin = Math.min(...allValues) - 10;
+        yMax = Math.max(...allValues) + 10;
+    }
+
+    if (yAxisRange === 'exact') {
+        const allValues = Object.values(data).flat();
+        yMin = Math.min(...allValues);
+        yMax = Math.max(...allValues);
+    }
+    
+    // Create series from the data
+    const series = Object.entries(data).map(([team, values]) => ({
+        name: team,
+        type: 'line',
+        data: values,
+        lineStyle: {
+            color: getTeamColor(team),
+            width: 2
+        },
+        itemStyle: {
+            color: getTeamColor(team)
+        },
+        //symbol: 'circle',
+        //symbolSize: 8,
+        smooth: false
+    }));
+    
+    // Chart options
+    const chartOptions = {
+        /*title: {
+            text: title,
+            left: 'center'
+        },*/
+        tooltip: {
+            trigger: 'axis'
+        },
+        legend: {
+            show: false
+        },
+        grid: {
+            top: '10%',
+            right: '5%',
+            bottom: '10%',
+            left: '5%',
+            containLabel: true
+        },
+        xAxis: {
+            type: 'category',
+            data: labels,
+            axisLine: {
+                lineStyle: {
+                    width: 2
+                }
+            },
+            axisLine: {
+                show: false
+            },
+
+            splitLine: {
+                show: !invertYAxis
+            }
+        },
+        yAxis: {
+            type: 'value',
+            inverse: invertYAxis,
+            min: yMin,
+            max: yMax,
+
+        },
+        series: series,
+        animation: false
+    };
+    
+    // Set the chart options
+    chart.setOption(chartOptions);
+    
+    // Handle window resize
+    window.addEventListener('resize', () => {
+        chart.resize();
+    });
+    
+    return chart;
+}
+
+function createScatterChart_vanilla(data, chartId, title, axis_labels) {
     const ctx = document.getElementById(chartId).getContext('2d');
     
     // Destroy existing chart if it exists
@@ -154,4 +253,107 @@ function createScatterChart(data, chartId, title, axis_labels) {
         }
     });
 }
+
+
+function createScatterChartMultiAxis(data, containerId, title, labels) {
+    const container = document.getElementById(containerId);
+    
+    // Dispose of existing chart instance if it exists
+    const existingChart = echarts.getInstanceByDom(container);
+    if (existingChart) {
+        existingChart.dispose();
+    }
+    
+    // Initialize new chart instance
+    const chart = echarts.init(container, null, {
+        devicePixelRatio: window.devicePixelRatio,
+        renderer: 'canvas'
+    });
+    
+    const teams = Object.keys(data);
+    const singleAxis = [];
+    const series = [];
+    
+    // Configure for each team
+    teams.forEach(function (team, idx) {
+        const isLastTeam = idx === teams.length - 1;
+        
+        singleAxis.push({
+            left: 20,
+            right: 20,
+            type: 'category',
+            boundaryGap: false,
+            data: labels,
+            top: (idx * 95) / teams.length + '%',
+            height: (95 / teams.length) + '%',
+            axisLabel: {
+                show: isLastTeam,
+                interval: 0
+            },
+            axisTick: {
+                show: false
+            },
+            axisLine: {
+                show: isLastTeam,
+                lineStyle: {
+                    color: isLastTeam ? '#333' : 'transparent'
+                }
+            },
+            splitLine: {
+                show: false
+            }
+        });
+        
+        const seriesData = data[team].map((value, index) => [index, value]);
+        
+        series.push({
+            name: team,
+            singleAxisIndex: idx,
+            coordinateSystem: 'singleAxis',
+            type: 'scatter',
+            data: seriesData,
+            symbolSize: function(dataItem) {
+                return Math.max(dataItem[1] * 2, 10);
+            },
+            itemStyle: {
+                color: getTeamColor(team)
+            }
+        });
+    });
+    
+    const chartOptions = {
+        /*title: {
+            text: title,
+            left: 'center',
+            top: 0
+        },*/
+        tooltip: {
+            position: 'top',
+            formatter: function(params) {
+                return `${teams[params.seriesIndex]}<br/>
+                        ${labels[params.data[0]]}<br/>
+                        Punkte: ${params.data[1]}`;
+            }
+        },
+        singleAxis: singleAxis,
+        series: series
+    };
+    
+    chart.setOption(chartOptions, true);  // Added true for clear previous option
+    
+    // Clean up old resize listener if it exists
+    if (container._echartResizeHandler) {
+        window.removeEventListener('resize', container._echartResizeHandler);
+    }
+    
+    // Add new resize listener
+    const resizeHandler = () => {
+        chart.resize();
+    };
+    window.addEventListener('resize', resizeHandler);
+    container._echartResizeHandler = resizeHandler;
+    
+    return chart;
+}
+
 </script>

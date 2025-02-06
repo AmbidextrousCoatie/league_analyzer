@@ -53,7 +53,7 @@
                         <h5>Platzierung im Saisonverlauf</h5>
                     </div>
                     <div class="card-body">
-                        <canvas id="chartTeamPositionCumulated"></canvas>
+                        <div id="chartTeamPositionCumulated" style="width: 100%; min-width: 100%; height: 300px;"></div>
                     </div>
                 </div>
             </div>            
@@ -64,7 +64,7 @@
                         <h5>Punkte im Saisonverlauf</h5>
                     </div>
                     <div class="card-body">
-                        <canvas id="chartTeamPointsCumulated"></canvas>
+                        <div id="chartTeamPointsCumulated" style="width: 100%; min-width: 100%; height: 300px;"></div>
                     </div>
                 </div>
             </div>
@@ -86,7 +86,7 @@
                         <h5>Punkte pro Spieltag</h5>
                     </div>
                     <div class="card-body">
-                        <canvas id="chartTeamPointsWeekly"></canvas>
+                        <div id="chartTeamPointsWeekly" style="width: 100%; min-width: 100%; height: 300px;"></div>
                     </div>
                 </div>
             </div>
@@ -97,7 +97,7 @@
                         <h5>Platzierung pro Spieltag</h5>
                     </div>
                     <div class="card-body">
-                        <canvas id="chartTeamPositionWeekly"></canvas>
+                        <div id="chartTeamPositionWeekly" style="width: 100%; min-width: 100%; height: 300px;"></div>
                     </div>
                 </div>
             </div>
@@ -119,7 +119,7 @@
                         <h5>Schnitt pro Spieltag</h5>
                     </div>
                     <div class="card-body">
-                        <canvas id="chartTeamAverageScoreWeekly"></canvas>
+                        <div id="chartTeamAverageScoreWeekly" style="width: 100%; min-width: 100%; height: 300px;"></div>
                     </div>
                 </div>
             </div>
@@ -852,12 +852,13 @@ function updateChartsLeague() {
             const labels = Array.from({length: numWeeks}, (_, i) => `Spieltag ${i + 1}`);
 
             // Create weekly positions chart
-            createLineChart(
+           createLineChart(
                 data.weekly,
                 'chartTeamPositionWeekly',
                 'Platzierung pro Spieltag',
                 labels, 
-                true   
+                true,
+                'exact'
             );
 
             // Create cumulative positions chart
@@ -866,7 +867,8 @@ function updateChartsLeague() {
                 'chartTeamPositionCumulated',
                 'Platzierung im Saisonverlauf',
                 labels,
-                true
+                true,
+                'exact'
             );
         });
 
@@ -879,13 +881,21 @@ function updateChartsLeague() {
             const labels = Array.from({length: numWeeks}, (_, i) => `Spieltag ${i + 1}`);
 
             // Create weekly positions chart
-            createLineChart(
+            /* createLineChart(
                 data.weekly,
                 'chartTeamPointsWeekly',
                 'Punkte pro Spieltag',
                 labels,
                 false
+            ); */
+
+            createScatterChartMultiAxis(
+                data.weekly,
+                'chartTeamPointsWeekly',
+                'Punkte pro Spieltag',
+                labels
             );
+
 
             // Create cumulative positions chart
             createLineChart(
@@ -909,7 +919,8 @@ function updateChartsLeague() {
                 'chartTeamAverageScoreWeekly',
                 'Schnitt pro Spieltag',
                 labels,
-                false
+                false,
+                'auto'
             );
         });
 
@@ -918,7 +929,7 @@ function updateChartsLeague() {
         .then(response => response.json())
         .then(data => {
             axis_labels = ['Punkte', 'Schnitt']
-            createScatterChart(
+            createScatterChart_vanilla(
                 data,
                 'chartTeamPointsVsAverage',
                 'Punkte vs. Schnitt',
