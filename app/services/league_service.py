@@ -88,7 +88,7 @@ class LeagueService:
         # doing the static part 
         data_table['columns'] = [
                      { 'title': 'Ranking', 'frozen': 'left', 'columns': [
-                        { 'title': "Pos", 'field': "pos", 'width': 70 },
+                        { 'title': "#", 'field': "pos" },
                         { 'title': "Team", 'field': "team" } ]
                         }]
         # add dynamic columns for each week
@@ -97,16 +97,16 @@ class LeagueService:
         for week in weeks:
             data_table['columns'].append({'title': "Week " + str(week), 
                                           'columns': [
-                                            { 'title': "Score", 'field': "week" + str(week) + "_score" },
-                                            { 'title': "Points", 'field': "week" + str(week) + "_points" }
+                                            { 'title': "Pins", 'field': "week" + str(week) + "_score" },
+                                            { 'title': "Pts.", 'field': "week" + str(week) + "_points" }
                                           ]})
 
         # add static columns for seasons summary
         data_table['columns'].append({'title': "Season Total",
                                       'columns': [
-                                            { 'title': "Score", 'field': "season_total_score" },
-                                            { 'title': "Points", 'field': "season_total_points" },
-                                            { 'title': "Average", 'field': "season_total_average" }
+                                            { 'title': "Pins", 'field': "season_total_score" },
+                                            { 'title': "Pts.", 'field': "season_total_points" },
+                                            { 'title': "Avg.", 'field': "season_total_average" }
                                           ]})
 
 

@@ -176,49 +176,44 @@ function createTableTabulator(tableId, data) {
     });
 
     // Process columns to ensure frozen properties are set and add group indices
-    const processedColumns = data.columns.map((col, index) => {
-        const newCol = { ...col };
-        if (newCol.columns) {
-            const color = getGroupColors(data.columns)[index];
-            const isLastGroup = index === data.columns.length - 1;  // Check if this is the last group
-            newCol.cssClass = `group-${index}`;
-            // Apply the color to all child columns
-            newCol.columns = newCol.columns.map(subCol => ({ 
-                ...subCol,
-                formatter: function(cell, formatterParams, onRendered) {
-                    cell.getElement().style.backgroundColor = color;
-                    // Check if this is the last group
-                    if (isLastGroup) {
-                        cell.getElement().style.color = 'white';
-                        cell.getElement().style.fontWeight = 'bold';
-                    }
-                    return cell.getValue();
+    const processedColumns = data.columns.map((colGroup, groupIndex) => {
+        const newColGroup = { ...colGroup };
+        
+        if (newColGroup.columns) {
+            newColGroup.columns = newColGroup.columns.map((subCol, subIndex) => {
+                const newSubCol = { ...subCol };
+
+                // Add subtle vertical lines between column groups
+                if (subIndex < newColGroup.columns.length - 1) {
+                    newSubCol.cssClass = 'border-right'; // Add a class for right border
                 }
-            }));
+
+                // Set the formatter for the first column to apply color
+                if (subIndex === 0 && groupIndex === 0) { // Assuming the first column is the position
+                    newSubCol.formatter = function(cell) {
+                        const team = cell.getRow().getData().team; // Assuming 'team' is the field for the second column
+                        const color = getTeamColor(team); // Get the color for the team
+                        const value = cell.getValue(); // Get the cell value
+
+                        // Create a colored circle with the content inside
+                        return `<div style="display: flex; align-items: center;">
+                                    <div style="width: 20px; height: 20px; border-radius: 50%; background-color: ${color}; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">
+                                        ${value}
+                                    </div>
+                                </div>`;
+                    };
+                }
+
+                return newSubCol;
+            });
         }
-        return newCol;
+        return newColGroup;
     });
 
     // Destroy existing instance if it exists
     if (window[tableId + 'Instance']) {
         window[tableId + 'Instance'].destroy();
     }
-
-    // Function to create a lighter version of a color
-    const getLighterColor = (color) => {
-        // If color is in rgb format, convert it
-        let rgb;
-        if (color.startsWith('rgb')) {
-            rgb = color.match(/\d+/g).map(Number);
-        } else if (color.startsWith('#')) {
-            rgb = hexToRgb(color);
-        }
-        
-        return rgb;
-        // Make it 85% lighter
-        //const lighter = rgb.map(c => Math.round(c + (255 - c) * 0.85));
-        //return `rgb(${lighter[0]}, ${lighter[1]}, ${lighter[2]})`;
-    };
 
     // Create new Tabulator instance
     window[tableId + 'Instance'] = new Tabulator(`#${tableId}`, {
@@ -230,57 +225,238 @@ function createTableTabulator(tableId, data) {
         movableColumns: false,
         tooltips: false,
         height: "auto",
-        columnDefaults: {
-            resizable: true,
-            formatter: "plaintext",
-            minWidth: 50,
-            maxWidth: 200,
-            headerHozAlign: "center",
-            hozAlign: "center"
-        },
         rowHeight: 40,
         theme: "bootstrap",
         cssClass: "custom-tabulator",
         columnHeaderVertAlign: "middle",
-        columnHeaderStyling: function(column) {
-            if (column.getParentColumn()) {
-                const parentTitle = column.getParentColumn().getDefinition().title;
-                const groupIndex = data.columns.findIndex(col => col.title === parentTitle);
-                const colors = getGroupColors(data.columns);
-                return {backgroundColor: colors[groupIndex]};
+    });
+
+    console.log(`Table "${tableId}" successfully created/updated`);
+}
+
+function createTableBootstrap(containerId, tableData, columns = null, groupBy = null) {
+    console.log('Creating Bootstrap table with:', {
+        containerId,
+        tableData,
+        columns,
+        groupBy
+    });
+
+    // Parse tableData if it's a string
+    if (typeof tableData === 'string') {
+        try {
+            tableData = JSON.parse(tableData);
+        } catch (e) {
+            console.error('Failed to parse data:', e);
+            return;
+        }
+    }
+
+    // Extract columns and data from tableData if they exist
+    if (tableData.columns && tableData.data) {
+        columns = tableData.columns;
+        tableData = tableData.data;
+    }
+
+    console.log('Processed data:', {
+        columns,
+        tableData
+    });
+
+    // Check if all required parameters are present
+    if (!containerId || !tableData || !columns) {
+        console.error('Missing required parameters:', { containerId, tableData, columns });
+        return;
+    }
+
+    const container = document.getElementById(containerId);
+    if (!container) {
+        console.error('Container not found:', containerId);
+        return;
+    }
+
+    // Clear existing content
+    container.innerHTML = '';
+
+    // Create table wrapper for horizontal scroll
+    const tableWrapper = document.createElement('div');
+    tableWrapper.className = 'table-responsive';
+    
+    const table = document.createElement('table');
+    table.className = 'table table-striped table-hover';
+    
+    // Create header
+    const thead = document.createElement('thead');
+    const headerRow = document.createElement('tr');
+    
+    // Handle column groups if present
+    if (columns[0] && columns[0].children) {
+        // Add group headers
+        const groupHeaderRow = document.createElement('tr');
+        columns.forEach(group => {
+            const th = document.createElement('th');
+            th.textContent = group.title || '';
+            th.colSpan = group.children ? group.children.length : 1;
+            groupHeaderRow.appendChild(th);
+        });
+        thead.appendChild(groupHeaderRow);
+
+        // Add sub-headers
+        const subHeaderRow = document.createElement('tr');
+        columns.forEach(group => {
+            if (group.children) {
+                group.children.forEach(col => {
+                    const th = document.createElement('th');
+                    th.textContent = col.title || '';
+                    if (col.width) {
+                        th.style.minWidth = col.width;
+                    }
+                    subHeaderRow.appendChild(th);
+                });
             }
+        });
+        thead.appendChild(subHeaderRow);
+    } else {
+        // Simple columns without groups
+        columns.forEach(col => {
+            const th = document.createElement('th');
+            th.textContent = col.title || '';
+            if (col.width) {
+                th.style.minWidth = col.width;
+            }
+            headerRow.appendChild(th);
+        });
+        thead.appendChild(headerRow);
+    }
+    
+    table.appendChild(thead);
+    
+    // Create body
+    const tbody = document.createElement('tbody');
+    
+    // Get flat columns for data mapping
+    const flatColumns = columns.reduce((acc, col) => {
+        if (col.children) {
+            return [...acc, ...col.children];
+        }
+        return [...acc, col];
+    }, []);
+
+    // Add rows
+    tableData.forEach(row => {
+        const tr = document.createElement('tr');
+        flatColumns.forEach(col => {
+            const td = document.createElement('td');
+            td.textContent = row[col.field] || '';
+            tr.appendChild(td);
+        });
+        tbody.appendChild(tr);
+    });
+    
+    table.appendChild(tbody);
+    tableWrapper.appendChild(table);
+    container.appendChild(tableWrapper);
+    
+    return table;
+}
+
+function createTableBootstrap2(tableId, data) {
+    // Check if the data has columns and data
+    if (!data || !data.columns || !data.data) {
+        console.error('Invalid data format');
+        return;
+    }
+
+    // Transform the data from array format to object format
+    const transformedData = data.data.map(row => {
+        const obj = {};
+        let index = 0; // Initialize index to track the position in the row array
+
+        // Loop through each column group
+        data.columns.forEach(colGroup => {
+            if (colGroup.columns) {
+                // Loop through each column in the group
+                colGroup.columns.forEach(col => {
+                    obj[col.field] = row[index]; // Assign the value from the row to the object
+                    index++; // Increment index for the next field
+                });
+            }
+        });
+        return obj; // Return the transformed object
+    });
+
+    // Create table wrapper for horizontal scroll
+    const tableWrapper = document.createElement('div');
+    tableWrapper.className = 'table-responsive';
+
+    // Create table
+    const table = document.createElement('table');
+    table.className = 'table table-striped table-hover';
+
+    // Create header
+    const thead = document.createElement('thead');
+
+    // Add group headers
+    const groupHeaderRow = document.createElement('tr');
+    data.columns.forEach(colGroup => {
+        const th = document.createElement('th');
+        th.textContent = colGroup.title || '';
+        th.colSpan = colGroup.columns ? colGroup.columns.length : 1;
+        groupHeaderRow.appendChild(th);
+    });
+    thead.appendChild(groupHeaderRow);
+
+    // Add sub-headers
+    const subHeaderRow = document.createElement('tr');
+    data.columns.forEach(colGroup => {
+        if (colGroup.columns) {
+            colGroup.columns.forEach((col, index) => {
+                const th = document.createElement('th');
+                th.textContent = col.title || '';
+                // Add subtle vertical lines between column groups
+                if (index < colGroup.columns.length - 1) {
+                    th.style.borderRight = '1px solid #dee2e6'; // Bootstrap's default border color
+                }
+                subHeaderRow.appendChild(th);
+            });
         }
     });
+    thead.appendChild(subHeaderRow);
+    
+    table.appendChild(thead);
 
-    // Apply header colors after table is fully rendered
-    /*
-    window[tableId + 'Instance'].on("tableBuilt", function() {
-        setTimeout(() => {
-            const headers = document.querySelectorAll(`#${tableId} .tabulator-col-group`);
-            const colors = getGroupColors(data.columns);
-            
-            headers.forEach((header, index) => {
-                const color = colors[index];
-                const isLastGroup = index === data.columns.length - 1;
-                
-                // Apply color to header
-                header.style.setProperty('background-color', color, 'important');
-                
-                // Apply styles to header and all its children
-                const elements = [header, ...header.querySelectorAll('*')];
-                elements.forEach(element => {
-                    element.style.setProperty('background-color', color, 'important');
-                    if (isLastGroup) {
-                        element.style.setProperty('color', 'white', 'important');
-                        element.style.setProperty('font-weight', 'bold', 'important');
+    // Create body
+    const tbody = document.createElement('tbody');
+
+    // Add rows
+    transformedData.forEach(rowData => {
+        const tr = document.createElement('tr');
+        data.columns.forEach(colGroup => {
+            if (colGroup.columns) {
+                colGroup.columns.forEach((col, index) => {
+                    const td = document.createElement('td');
+                    td.textContent = rowData[col.field] || ''; // Use the transformed data
+
+                    // Freeze the first two columns
+                    if (index < 2) {
+                        td.style.position = 'sticky';
+                        td.style.left = `${index * 100}px`; // Adjust based on your layout
+                        td.style.zIndex = '1'; // Ensure it stays above other content
+                        td.style.backgroundColor = '#fff'; // Background color to prevent transparency
                     }
-                });
-            });
 
-            console.log('Colors applied to headers');
-        }, 100);
+                    tr.appendChild(td);
+                });
+            }
+        });
+        tbody.appendChild(tr);
     });
-    */
+
+    table.appendChild(tbody);
+    tableWrapper.appendChild(table);
+    document.getElementById(tableId).innerHTML = ''; // Clear existing content
+    document.getElementById(tableId).appendChild(tableWrapper); // Append new table
+
     console.log(`Table "${tableId}" successfully created/updated`);
 }
 
@@ -371,5 +547,18 @@ function createTableTabulator(tableId, data) {
     background-color: rgb(229, 239, 247) !important;
 }
 
+
+.border-right {
+    border-right: 1px solid #dee2e6; /* Bootstrap's default border color */
+}
+
+.table-responsive {
+    overflow-x: auto; /* Enable horizontal scrolling */
+}
+
+th {
+    position: relative; /* Required for sticky positioning */
+    background-color: #f8f9fa; /* Header background color */
+}
 /* Add more rules based on your number of groups */
 </style> 

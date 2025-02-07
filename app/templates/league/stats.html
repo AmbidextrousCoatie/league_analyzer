@@ -238,7 +238,9 @@ let positionChart = null;
 function updateSharedLegend(teams) {
     const legendHtml = teams.map(team => `
         <div class="mx-3 mb-2 d-flex align-items-center">
-            <div style="width: 20px; height: 20px; background-color: ${getTeamColor(team)}; margin-right: 8px;"></div>
+            <div style="width: 20px; height: 20px; border-radius: 50%; background-color: ${getTeamColor(team)}; margin-right: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">
+                
+            </div>
             <span>${team}</span>
         </div>
     `).join('');
@@ -501,6 +503,7 @@ function updateSectionLeagueStandings() {
         .then(response => response.json())
         .then(data => {
             createTableTabulator('leagueTableHistory', data);
+            //createTableBootstrap2('leagueTableHistory', data);
         })
         .catch(error => console.error('Error:', error));
 }
