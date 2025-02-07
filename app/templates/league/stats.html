@@ -158,7 +158,7 @@
             </div>
         
         <div id="weekHeader" class="card-header">
-            <h5>Ergebnisse für Spieltag ###</h5>
+            <h5>Ergebnisse für Spieltag Bitte wählen</h5>
         </div>
         <div class="card-body">
             <!-- Selection Area -->
@@ -212,18 +212,19 @@
                 </div>
             </div>
         </div>
-        <div class="card-header">
-            <h5>Spielzettel für Aschaffenburg 55</h5>
-            <div id="teamDetailsMetadata" class="text-muted small"></div>
-        </div>
-        <div class="card-body">
-            <div id="teamTableWeekDetails">
-                <!-- Team table will be dynamically inserted here -->
-                <div class="alert alert-info">Bitte wählen Sie ein Team, aus um den Spielzettel anzuzeigen.</div>
+        <div class="card">
+            <div class="card-header">
+                <h5>Spielzettel für Team wählen</h5>
+                <div id="teamDetailsMetadata" class="text-muted small"></div>
             </div>
-        </div>
-    </div>  
-</div>
+            <div class="card-body">
+                <div id="teamTableWeekDetails">
+                    <!-- Team table will be dynamically inserted here -->
+                    <div class="alert alert-info">Bitte wählen Sie ein Team, aus um den Spielzettel anzuzeigen.</div>
+                </div>
+            </div>
+        </div>  
+    </div>
 
 {% endblock %}
 
@@ -400,8 +401,7 @@ function updateTableTeamDetails() {
 
 
     document.querySelector('#teamTableWeekDetails').closest('.card')
-        .querySelector('.card-header h5').textContent = `Results for Team ${team} in week ${currentWeek}`;
-    
+        .querySelector('.card-header h5').textContent = `Spielzettel für ${team} in Woche ${currentWeek}`;    
 
     document.getElementById('teamTableWeekDetails').innerHTML = 
         '<div class="text-center"><div class="spinner-border" role="status"></div></div>';
@@ -526,32 +526,13 @@ function updateTableLeagueWeek() {
         return;
     }
     
-    const url = `/league/get_league_week?season=${selectedSeason}&league=${selectedLeague}&week=${currentWeek}&depth=${1}`;
-    console.log('Fetching from URL:', url);
-    
-    fetch(url)
-        .then(response => {
-            console.log('Response status:', response.status);
-            return response.json();
-        })
+    fetch(`/league/get_league_week_table?season=${selectedSeason}&league=${selectedLeague}&week=${currentWeek}&depth=${1}`)
+        .then(response => response.json())
         .then(data => {
-            //console.log('Received data:', data);
-            const tableConfig = {
-                id: 'tableLeagueWeek',
-                headerGroups: data.headerGroups,
-                columns: data.columns,
-                data: data.data,
-                sortable: true
-            };
-
-            const tableHtml = createTable(tableConfig);
-            document.getElementById('tableLeagueWeek').innerHTML = tableHtml;
+            createTableTabulator('tableLeagueWeek', data);
+            //createTableBootstrap2('leagueTableHistory', data);
         })
-        .catch(error => {
-            console.error('Error:', error);
-            document.getElementById('tableLeagueWeek').innerHTML = 
-                `<div class="alert alert-danger">Error loading standings: ${error.message}</div>`;
-        });
+        .catch(error => console.error('Error:', error));
 }
 
 
@@ -729,6 +710,14 @@ function handleWeekSelection() {
             tableLeagueWeek.style.display = 'block';
         } else {
             console.error('tableLeagueWeek element not found');
+        }
+
+        // Update the week header
+        const weekHeader = document.getElementById('weekHeader').querySelector('h5');
+        if (weekHeader) {
+            weekHeader.textContent = `Ergebnisse für Spieltag ${selectedWeek} in der Saison ${selectedSeason}`;
+        } else {
+            console.error('weekHeader element not found');
         }
         
         // Update league standings

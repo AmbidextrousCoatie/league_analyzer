@@ -88,7 +88,11 @@ def get_league_history():
             debug_output=False
         )
 
-        #print(table_data)
+        
+        
+        print("::::::::::::::::::::::::::::")
+        print(table_data)
+        print("::::::::::::::::::::::::::::")
         #transformed_data = DataDict().transform_dict(table_data)
 
         # print(transformed_data.to_dict())
@@ -98,8 +102,8 @@ def get_league_history():
         print(f"Error: {str(e)}")
         return jsonify({'error': str(e)}), 500
 
-@bp.route('/league/get_league_week')
-def get_league_week():
+@bp.route('/league/get_league_week_table')
+def get_league_week_table():
     try:
         season = request.args.get('season')
         league = request.args.get('league')
@@ -115,17 +119,18 @@ def get_league_week():
         #print(f"Generated week data: {week_data}")
 
         league_table_data = league_service.get_league_week_table(league=league, season=season, week=week)
-
-        transformed_data = DataDict().transform_dict(league_table_data)
+        print("############################")
+        print(league_table_data)
+        #transformed_data = DataDict().transform_dict(league_table_data)
         #print(transformed_data)
         
-        transformed_data.make_sortable([1,2,3,4,5,6])
+        #transformed_data.make_sortable([1,2,3,4,5,6])
 
         
-        if not transformed_data:
+        if not league_table_data:
             return jsonify({"message": "No data found for these filters"}), 404
         #print(jsonify(league_table_data))
-        return jsonify(transformed_data.to_dict())
+        return jsonify(league_table_data)
     except Exception as e:
         import traceback
         print(f"Error in get_league_week: {str(e)}")

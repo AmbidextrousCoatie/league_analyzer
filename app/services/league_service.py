@@ -165,8 +165,29 @@ class LeagueService:
         columns_to_show_week = [Columns.score, Columns.points, ColumnsExtra.score_average]
         columns_to_show_season = [ColumnsExtra.score_weekly, ColumnsExtra.points_weekly, ColumnsExtra.score_average_weekly]
         
-        data_collected['headerGroups'] = [[Columns.team_name, 2]] + [['Week' + str(week), len(columns_to_show_week)]] + [["Season Total", len(columns_to_show_season)]]
-        data_collected['columns'] = ['Pos', Columns.team_name] + columns_to_show_week + columns_to_show_week
+        data_collected['columns'] = [
+                     { 'title': 'Ranking', 'frozen': 'left', 'columns': [
+                        { 'title': "#", 'field': "pos" },
+                        { 'title': "Team", 'field': "team" } ]
+                        }]
+        # add dynamic columns for each week
+
+        data_collected['columns'].append({'title': "Spieltag " + str(week), 
+                                        'columns': [
+                                        { 'title': "Pins", 'field': "week" + str(week) + "_score" },
+                                        { 'title': "Pts.", 'field': "week" + str(week) + "_points" },
+                                        { 'title': "Avg.", 'field': "week" + str(week) + "_average" }
+                                        ]})
+
+        # add static columns for seasons summary
+        data_collected['columns'].append({'title': "Season Total",
+                                      'columns': [
+                                            { 'title': "Pins", 'field': "season_total_score" },
+                                            { 'title': "Pts.", 'field': "season_total_points" },
+                                            { 'title': "Avg.", 'field': "season_total_average" }
+                                          ]})
+
+
         data_collected['data'] = []
 
         league_standing_data_groups = league_standings_data.groupby(Columns.team_name)
@@ -187,7 +208,11 @@ class LeagueService:
 
 
     def get_team_week_details(self, league:str, season:str, team:str, week:int) -> Response:
-        return(self.server.get_team_week_details(league_name=league, season=season, team_name=team, week=week))
+        data = self.server.get_team_week_details(league_name=league, season=season, team_name=team, week=week)
+        
+        print(data)
+        
+        return data
 
 
 
