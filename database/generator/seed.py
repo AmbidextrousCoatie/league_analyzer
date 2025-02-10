@@ -7,6 +7,8 @@ import sys
 import os
 import itertools
 from random import shuffle
+from datetime import datetime, timedelta
+import calendar
 
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
@@ -311,6 +313,40 @@ def transfer_teams_after_season(league_major, league_minor, number_of_teams_tran
     print(league_major)
 
 
+def generate_league_dates(season, league_size):
+    # Parse season start year from format "23/24" -> 2023
+    start_year = 2000 + int(season.split('/')[0])
+    
+    # Find first Sunday in October of start year
+    c = calendar.monthcalendar(start_year, 10)  # October
+    # Get the first Sunday (0-based index 6) that isn't 0
+    first_sunday = next(week[6] for week in c if week[6] != 0)
+    
+    # Create start date
+    start_date = datetime(start_year, 10, first_sunday)
+    
+    # Determine weeks between matches based on league size
+    if league_size == 6:
+        weeks_between = 5
+    elif league_size == 8:
+        weeks_between = 4
+    elif league_size == 10:
+        weeks_between = 3
+    else:
+        raise ValueError("Unsupported league size")
+    
+    # Number of match days needed (each team plays against every other team)
+    num_match_days = league_size - 1
+    
+    # Generate all dates
+    dates = []
+    current_date = start_date
+    for _ in range(num_match_days):
+        dates.append(current_date)
+        current_date += timedelta(weeks=weeks_between)
+    
+    return dates
+
 
 def simulate_season(teams, weeks, number_of_players_per_team, name, season):
 
@@ -326,15 +362,21 @@ def simulate_season(teams, weeks, number_of_players_per_team, name, season):
     # 50 % that on player in each team has a good day
     # select random 
     
-    for week in range(weeks):
+    dates = generate_league_dates(season, len(teams))
+
+    for week, date in enumerate(dates):
         #print("\n week: ", week)
+
+
         teams_with_good_day = [random.randint(0, 1) for i in range(len(teams))]
         players_with_good_day = [random.randint(0, number_of_players_per_team-1) for i in range(len(teams_with_good_day) )]
         teams_with_bad_day = [random.randint(0, 1) for i in range(len(teams))]
         players_with_bad_day = [random.randint(0, number_of_players_per_team-1) for i in range(len(teams_with_good_day) )]
         
+        
         alley = get_random_alley(teams, week)
         # iterate over all pairings
+
         for round_number, pairings in enumerate(round_robin_rounds):
             #print(pairings)
             match_number = 0
@@ -361,10 +403,10 @@ def simulate_season(teams, weeks, number_of_players_per_team, name, season):
                     opponent_score = teams[opponent_id].players[player_number].simulate_score(opponent_is_home_alley, player_opponent_has_good_day, player_opponent_has_bad_day)
 
                     cols_match = [
-                        [season, week+1, "n/a", name, number_of_players_per_team, alley, round_number, match_number, 
+                        [season, week+1, date, name, number_of_players_per_team, alley, round_number, match_number, 
                          team.team_name, player_number, player.get_full_name(), player.id, team_opponent.team_name, 
                          player_score, np.nan, True, False],
-                        [season, week+1, "n/a", name, number_of_players_per_team, alley, round_number, match_number, 
+                        [season, week+1, date, name, number_of_players_per_team, alley, round_number, match_number, 
                          team_opponent.team_name, player_number, player_opponent.get_full_name(), player_opponent.id, team.team_name,
                          opponent_score, np.nan, True, False]
                         ]

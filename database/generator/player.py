@@ -20,13 +20,14 @@ class DataGeneratorPlayer(Player):
 
         offset_due_to_skill = self.skill - 8.0
 
-        luck_or_lack_of = (random.random() - 0.5) * 15
+        luck_or_lack_of = (random.random() - 0.5) * 55
 
-        home_bonus = 11 if is_home_alley else 0
+        home_bonus = 9 if is_home_alley else 0
 
-        good_day_bonus = 17 if has_a_good_day else 0
-        bad_day_penalty = -17 if has_a_bad_day else 0
+        good_day_bonus = 15 if has_a_good_day else 0
+        bad_day_penalty = -23 if has_a_bad_day else 0
 
         score = base_score * (1 + offset_due_to_skill / 10) + luck_or_lack_of + home_bonus + good_day_bonus + bad_day_penalty
-
+        
+        score = min(score, 300)
         return int(score)

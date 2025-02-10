@@ -21,7 +21,7 @@ class DataGeneratorLeague(League):
             # print(team.get_name() + " " + str(skill_old) + " -> " + str(team.get_skill_raw()) + " (" + str(round(team.get_skill_raw() - skill_old, 2)) + ")")
 
     def set_last_seasons_order(self, sorted_teams):
-        print(sorted_teams)
+        #print(sorted_teams)
         self.last_seasons_order_names = sorted_teams
 
     def get_names_of_teams_that_will_change_leagues(self, amount_of_team_promoted, amount_of_teams_demoted):

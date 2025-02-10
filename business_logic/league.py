@@ -5,10 +5,11 @@ levels = {
     "1. Bundesliga": 1,
     "2. Bundesliga": 2,
     "BayL": 3,
-    "LL1 Nord": 4,
-    "BZL 2 Nord": 5,
-    "Bezirksliga": 6,
-    "Kreisliga": 7,
+    "LL 1 Nord": 4,
+    "BZOL 2 Nord": 5,
+    "BZL 2 Nord": 6,
+    "KL 1 Nord": 7,
+
 }
 
 class League:
