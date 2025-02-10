@@ -6,7 +6,7 @@
 <!--h1>Bowling Dashboard</h1-->
 <div class="row mt-4">
     <div class="col-md-6">
-        <div class="card">
+        <div class="card mb-4">
             <div class="card-header">
                 Info
             </div>
@@ -21,5 +21,47 @@
             </div>
         </div>
     </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                Letzte Events
+            </div>
+            <div class="card-body">
+                <ul class="list-group" id="latestEvents">
+                    <!-- Will be populated via JavaScript -->
+                </ul>
+            </div>
+        </div>
+    </div>
 </div>
+
+<!-- Add JavaScript for latest events -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    fetch('{{ url_for("league.get_latest_events") }}')
+        .then(response => response.json())
+        .then(data => {
+            const eventsList = document.getElementById('latestEvents');
+            if (data && Array.isArray(data)) {
+                eventsList.innerHTML = data.map(event => `
+                    <li class="list-group-item">
+                        <a href="{{ url_for('league.stats') }}?season=${encodeURIComponent(event.Season)}&league=${encodeURIComponent(event.League)}&week=${event.Week}" 
+                           class="text-decoration-none">
+                            ${event.Season} - ${event.League} - Woche ${event.Week}
+                            <small class="text-muted">(${event.Date})</small>
+                        </a>
+                    </li>
+                `).join('');
+            } else {
+                eventsList.innerHTML = '<li class="list-group-item">Keine Events gefunden</li>';
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching events:', error);
+            const eventsList = document.getElementById('latestEvents');
+            eventsList.innerHTML = '<li class="list-group-item text-danger">Fehler beim Laden der Events</li>';
+        });
+});
+</script>
 {% endblock %} 

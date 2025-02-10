@@ -16,11 +16,14 @@ class LeagueService:
     def __init__(self):
         self.server = Server()
 
+
     def get_valid_combinations(self):
+
         """Returns all existing combinations in the database"""
         combinations = self.df[[Columns.season, Columns.league_name, Columns.week]].drop_duplicates()
         print(combinations)
         return combinations.to_dict('records')
+
 
     def get_seasons(self):
         """Returns all possible seasons"""
@@ -254,6 +257,17 @@ class LeagueService:
             rankings_dict['order'].append(team)
 
         return rankings_dict
+
+
+    def get_latest_events(self, limit=10):
+        """Get the latest league events based on date."""
+        # Get unique combinations of season, league, week, and date
+        events = self.server.get_latest_events(limit).to_dict('records')
+        print("league_service.get_latest_events")
+        print(events)
+
+        return events
+    
 
 
     def get_team_positions_during_season(self, league_name: str, season: str) -> dict:

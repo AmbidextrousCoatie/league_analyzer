@@ -653,3 +653,12 @@ class Server:
         
         """Returns the special matches for a given team"""
         return special_matches
+    
+    def get_latest_events(self, limit=5) -> pd.DataFrame:
+        """Get the latest league events based on date."""
+        print("server.get_latest_events")
+
+        # Get unique combinations of season, league, week, and date
+        data =  self.data_adapter.get_latest_events(limit)
+        print(data)
+        return data

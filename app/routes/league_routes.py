@@ -255,6 +255,29 @@ def get_team_points_vs_average():
         print(f"Error in get_team_positions: {str(e)}")
         print(traceback.format_exc())
 
+@bp.route('/get_latest_events')
+def get_latest_events():
+    try:
+        # Get limit parameter with default value of 5
+        limit = request.args.get('limit', default=10, type=int)
+        
+        print(f"Latest Events - Received request with limit={limit}")
+        
+        # Validate limit
+        if limit <= 0:
+            return jsonify({'error': 'Limit must be greater than 0'}), 400
+            
+        events = league_service.get_latest_events(limit=limit)
+        print("league_routes.get_latest_events")
+        print(events)
+        print(f"Found {len(events)} latest events")
+        return jsonify(events)
+        
+    except Exception as e:
+        print(f"Error in get_latest_events: {str(e)}")
+        print(traceback.format_exc())
+        return jsonify({'error': str(e)}), 500
+
 @bp.route('/league/get_team_positions')
 def get_team_positions():
     try:

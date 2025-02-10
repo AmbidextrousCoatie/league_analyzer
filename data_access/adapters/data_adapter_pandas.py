@@ -158,4 +158,13 @@ class DataAdapterPandas(DataAdapter):
         return {'standings': team_data}
 
 
-        
+    def get_latest_events(self, limit=5):
+        """Get the latest league events based on date."""
+        # Get unique combinations of season, league, week, and date
+        print("hit bottom")
+        events = self.df[[Columns.season, Columns.league_name, Columns.week, Columns.date]].drop_duplicates()
+        print(events)
+        # Sort by date in descending order and get the latest events
+        latest_events = events.sort_values(by=Columns.date, ascending=False).head(limit)
+        print(latest_events)
+        return latest_events    
