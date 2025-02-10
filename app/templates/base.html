@@ -9,41 +9,123 @@
     <!-- Custom CSS -->
     <style>
         :root {
-            --primary-color: #2196F3;  /* Material Design Blue */
-            --secondary-color: #FF9800;  /* Warm orange */
-            --background-color: #f8f9fa;  /* Light gray background */
+            /* Color Palette */
+            --color-green-light: #a1e8c4;   /* Lightest green */
+            --color-green: #86e1b3;         /* Light green */
+            --color-blue-lightest: #7dcfe6; /* Light blue-green */
+            --color-blue-light: #4aa8c2;    /* Light blue */
+            --color-blue: #0a9dc7;          /* Dark blue */
+
+
+            /* Semantic Color Assignments */
+            --theme-primary: var(--color-blue);         /* Main UI elements like navbar, card headers */
+            --theme-secondary: var(--color-blue-light); /* Buttons, interactive elements */
+            --theme-accent: var(--color-blue-lightest); /* Highlights, accents */
+            --theme-warning: var(--color-green);        /* Warning states */
+            --theme-info: var(--color-green-light);     /* Info states */
+            
+            /* Background Colors */
+            --theme-background: #f8f9fa;
+            --theme-surface: #ffffff;
+            
+            /* Text Colors */
+            --theme-text-on-primary: #ffffff;
+            --theme-text-on-secondary: #ffffff;
+            --theme-text-on-light: var(--color-blue);
         }
 
         body {
-            background-color: var(--background-color);
+            background-color: var(--theme-background);
+            color: var(--theme-text-on-light);
         }
 
         .navbar {
-            background-color: var(--primary-color) !important;
+            background-color: var(--theme-primary) !important;
         }
 
         .navbar-brand, .nav-link {
-            color: white !important;
+            color: var(--theme-text-on-primary) !important;
         }
 
         .card {
-            border-color: var(--primary-color);
+            border-color: var(--theme-primary);
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            background-color: var(--theme-surface);
         }
 
         .card-header {
-            background-color: var(--primary-color);
-            color: white;
+            background-color: var(--theme-primary);
+            color: var(--theme-text-on-primary);
         }
 
+        /* Button Styles */
         .btn-primary {
-            background-color: var(--primary-color);
-            border-color: var(--primary-color);
+            background-color: var(--theme-secondary);
+            border-color: var(--theme-secondary);
+            color: var(--theme-text-on-secondary);
         }
 
         .btn-primary:hover {
-            background-color: #1976D2;  /* Slightly darker blue on hover */
-            border-color: #1976D2;
+            background-color: var(--theme-primary);
+            border-color: var(--theme-primary);
+            color: var(--theme-text-on-primary);
+        }
+
+        /* Outline Button Variants */
+        .btn-outline-primary {
+            color: var(--theme-secondary);
+            border-color: var(--theme-secondary);
+        }
+
+        .btn-outline-primary:hover {
+            background-color: var(--theme-secondary);
+            border-color: var(--theme-secondary);
+            color: var(--theme-text-on-secondary);
+        }
+
+        /* Active state for radio buttons */
+        .btn-check:checked + .btn-outline-primary {
+            background-color: var(--theme-secondary);
+            border-color: var(--theme-secondary);
+            color: var(--theme-text-on-secondary);
+        }
+
+        .btn-check:active + .btn-outline-primary, 
+        .btn-check:checked + .btn-outline-primary:focus {
+            background-color: var(--theme-secondary);
+            border-color: var(--theme-secondary);
+            color: var(--theme-text-on-secondary);
+        }
+
+        .btn-secondary {
+            background-color: var(--theme-accent);
+            border-color: var(--theme-accent);
+            color: var(--theme-text-on-light);
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--theme-warning);
+            border-color: var(--theme-warning);
+            color: var(--theme-text-on-light);
+        }
+
+        /* Alert Styles */
+        .alert-danger {
+            background-color: var(--theme-warning);
+            border-color: var(--theme-warning);
+            color: var(--theme-text-on-light);
+        }
+
+        .alert-info {
+            background-color: var(--theme-info);
+            border-color: var(--theme-info);
+            color: var(--theme-text-on-light);
+        }
+
+        .alert-warning {
+            background-color: var(--theme-warning);
+            border-color: var(--theme-warning);
+            color: var(--theme-text-on-light);
         }
     </style>
 </head>
