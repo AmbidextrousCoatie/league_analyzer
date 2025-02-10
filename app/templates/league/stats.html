@@ -502,7 +502,7 @@ function updateSectionLeagueStandings() {
     fetch(`/league/get_league_history?season=${selectedSeason}&league=${selectedLeague}`)
         .then(response => response.json())
         .then(data => {
-            createTableTabulator('leagueTableHistory', data);
+            createTableBootstrap3('leagueTableHistory', data);
             //createTableBootstrap2('leagueTableHistory', data);
         })
         .catch(error => console.error('Error:', error));
@@ -529,7 +529,9 @@ function updateTableLeagueWeek() {
     fetch(`/league/get_league_week_table?season=${selectedSeason}&league=${selectedLeague}&week=${currentWeek}&depth=${1}`)
         .then(response => response.json())
         .then(data => {
-            createTableTabulator('tableLeagueWeek', data);
+            createTableBootstrap3('tableLeagueWeek', data);
+            //createTableTabulator('tableLeagueWeek', data);
+            
             //createTableBootstrap2('leagueTableHistory', data);
         })
         .catch(error => console.error('Error:', error));

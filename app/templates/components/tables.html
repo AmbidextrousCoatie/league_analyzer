@@ -460,6 +460,235 @@ function createTableBootstrap2(tableId, data) {
     console.log(`Table "${tableId}" successfully created/updated`);
 }
 
+function createTableBootstrap3(tableId, data) {
+    // Check if the data has columns and data
+    if (!data || !data.columns || !data.data) {
+        console.error('Invalid data format');
+        return;
+    }
+
+    // Create table wrapper for horizontal scroll
+    const tableWrapper = document.createElement('div');
+    tableWrapper.className = 'table-responsive';
+
+    // Create table
+    const table = document.createElement('table');
+    table.className = 'table table-striped table-hover';
+    table.style.borderCollapse = 'collapse';
+
+    // Create header
+    const thead = document.createElement('thead');
+
+    // Add group headers
+    const groupHeaderRow = document.createElement('tr');
+    data.columns.forEach((colGroup, groupIndex) => {
+        const th = document.createElement('th');
+        th.textContent = colGroup.title || '';
+        th.colSpan = colGroup.columns ? colGroup.columns.length : 1;
+        th.style.padding = '8px';
+        th.style.textAlign = 'center';
+        th.className = 'align-middle';
+        
+        // Add vertical borders between groups
+        if (groupIndex > 0) {
+            th.style.borderLeft = '2px solid #264653';
+        }
+        
+        groupHeaderRow.appendChild(th);
+    });
+    thead.appendChild(groupHeaderRow);
+
+    // Add sub-headers with sort functionality
+    const subHeaderRow = document.createElement('tr');
+    let sortState = {};  // Track sort state for each column
+    const lastGroupIndex = data.columns.length - 1;  // Get the index of the last group
+
+    data.columns.forEach((colGroup, groupIndex) => {
+        if (colGroup.columns) {
+            colGroup.columns.forEach((col, index) => {
+                const th = document.createElement('th');
+                th.style.padding = '8px';
+                th.style.textAlign = 'center';
+                th.className = 'align-middle';
+                th.style.cursor = 'pointer';
+                
+                // Create header content with sort indicator
+                const headerContent = document.createElement('div');
+                headerContent.style.display = 'flex';
+                headerContent.style.alignItems = 'center';
+                headerContent.style.justifyContent = index === 1 && groupIndex === 0 ? 'flex-start' : 'center';
+                headerContent.style.gap = '8px';
+                
+                const titleSpan = document.createElement('span');
+                titleSpan.textContent = col.title || '';
+                // Make last group headers bold
+                if (groupIndex === lastGroupIndex) {
+                    titleSpan.style.fontWeight = 'bold';
+                }
+                headerContent.appendChild(titleSpan);
+                
+                const sortIcon = document.createElement('span');
+                sortIcon.style.width = '12px';
+                sortIcon.style.display = 'inline-block';
+                sortIcon.style.textAlign = 'center';
+                sortIcon.style.color = '#264653';
+                sortIcon.style.fontSize = '12px';
+                // Make last group sort icons bold
+                if (groupIndex === lastGroupIndex) {
+                    sortIcon.style.fontWeight = 'bold';
+                }
+                sortIcon.innerHTML = '⇕';
+                headerContent.appendChild(sortIcon);
+                
+                th.appendChild(headerContent);
+
+                // Special styling for Team column
+                if (groupIndex === 0 && index === 1) {
+                    th.style.minWidth = '200px';
+                    th.style.textAlign = 'left';
+                }
+
+                // Add vertical borders between groups
+                if (index === 0 && groupIndex > 0) {
+                    th.style.borderLeft = '2px solid #264653';
+                }
+
+                // Add sort functionality
+                const columnId = `${groupIndex}-${index}`;
+                th.addEventListener('click', () => {
+                    const currentSort = sortState[columnId] || 'none';
+                    const newSort = currentSort === 'asc' ? 'desc' : 'asc';
+                    
+                    // Reset all sort indicators
+                    document.querySelectorAll('th span:last-child').forEach(span => {
+                        span.innerHTML = '⇕';
+                    });
+                    
+                    // Update sort indicator
+                    sortIcon.innerHTML = newSort === 'asc' ? '↑' : '↓';
+                    
+                    // Update sort state
+                    sortState = { [columnId]: newSort };
+                    
+                    // Sort the data
+                    const dataIndex = columnIndices[groupIndex][index];
+                    const sortedData = [...data.data].sort((a, b) => {
+                        const aVal = a[dataIndex];
+                        const bVal = b[dataIndex];
+                        
+                        // Handle numeric values
+                        const aNum = Number(aVal);
+                        const bNum = Number(bVal);
+                        
+                        if (!isNaN(aNum) && !isNaN(bNum)) {
+                            return newSort === 'asc' ? aNum - bNum : bNum - aNum;
+                        }
+                        
+                        // Handle string values
+                        return newSort === 'asc' 
+                            ? String(aVal).localeCompare(String(bVal))
+                            : String(bVal).localeCompare(String(aVal));
+                    });
+                    
+                    // Update the table body
+                    updateTableBody(sortedData);
+                });
+
+                subHeaderRow.appendChild(th);
+            });
+        }
+    });
+    thead.appendChild(subHeaderRow);
+    table.appendChild(thead);
+
+    // Create body
+    const tbody = document.createElement('tbody');
+    table.appendChild(tbody);
+
+    // Calculate the starting index for each group
+    let columnIndices = [];
+    let currentIndex = 0;
+    data.columns.forEach(colGroup => {
+        if (colGroup.columns) {
+            const groupIndices = [];
+            colGroup.columns.forEach(() => {
+                groupIndices.push(currentIndex++);
+            });
+            columnIndices.push(groupIndices);
+        }
+    });
+
+    // Function to update table body with sorted data
+    function updateTableBody(tableData) {
+        tbody.innerHTML = '';
+        tableData.forEach(rowData => {
+            const tr = document.createElement('tr');
+            data.columns.forEach((colGroup, groupIndex) => {
+                if (colGroup.columns) {
+                    colGroup.columns.forEach((col, index) => {
+                        const td = document.createElement('td');
+                        const dataIndex = columnIndices[groupIndex][index];
+                        const value = rowData[dataIndex];
+
+                        td.style.padding = '8px';
+                        td.className = 'align-middle';
+
+                        // Add vertical borders between groups
+                        if (index === 0 && groupIndex > 0) {
+                            td.style.borderLeft = '2px solid #264653';
+                        }
+
+                        // Make last group text bold
+                        if (groupIndex === lastGroupIndex) {
+                            td.style.fontWeight = 'bold';
+                        }
+
+                        // Special handling for team names column
+                        if (groupIndex === 0 && index === 1) {
+                            td.style.textAlign = 'left';
+                            td.style.paddingLeft = '16px';
+                            td.style.minWidth = '200px';
+                            td.textContent = value;
+                        }
+                        // Position number column (first column)
+                        else if (index === 0 && groupIndex === 0) {
+                            td.style.textAlign = 'center';
+                            const team = rowData[1];
+                            const color = getTeamColor(team);
+                            td.innerHTML = `<div style="width: 24px; height: 24px; border-radius: 50%; background-color: ${color}; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; margin: 0 auto;">${value}</div>`;
+                        }
+                        // All other columns
+                        else {
+                            td.style.textAlign = 'center';
+                            td.textContent = value;
+                        }
+
+                        // Freeze the first two columns
+                        if (groupIndex === 0 && index < 2) {
+                            td.style.position = 'sticky';
+                            td.style.left = index === 0 ? '0' : '50px';
+                            td.style.zIndex = '1';
+                            td.style.backgroundColor = '#fff';
+                        }
+
+                        tr.appendChild(td);
+                    });
+                }
+            });
+            tbody.appendChild(tr);
+        });
+    }
+
+    // Initial table render
+    updateTableBody(data.data);
+
+    tableWrapper.appendChild(table);
+    document.getElementById(tableId).innerHTML = '';
+    document.getElementById(tableId).appendChild(tableWrapper);
+
+    console.log(`Table "${tableId}" successfully created/updated`);
+}
+
 </script>
 
 <style>
@@ -474,14 +703,14 @@ function createTableBootstrap2(tableId, data) {
 /* Header Styles */
 .custom-tabulator .tabulator-header {
     background-color: #f8f9fa; /* Light background for header */
-    color: #343a40; /* Dark text color */
+    color: #264653; /* Dark text color */
     font-weight: bold; /* Bold header text */
-    border-bottom: 2px solid #dee2e6; /* Subtle border */
+    border-bottom: 2px solid #264653; /* Subtle border */
 }
 
 /* Column Styles */
 .custom-tabulator .tabulator-col {
-    border-right: 1px solid #dee2e6; /* Subtle column borders */
+    border-right: 1px solid #264653; /* Subtle column borders */
 }
 
 .custom-tabulator .tabulator-col .tabulator-col-content {
@@ -490,7 +719,7 @@ function createTableBootstrap2(tableId, data) {
 
 /* Row Styles */
 .custom-tabulator .tabulator-row {
-    border-bottom: 1px solid #dee2e6; /* Subtle row borders */
+    border-bottom: 1px solid #264653; /* Subtle row borders */
 }
 
 .custom-tabulator .tabulator-row.tabulator-row-even {
@@ -503,7 +732,7 @@ function createTableBootstrap2(tableId, data) {
 
 /* Hover Effects */
 .custom-tabulator .tabulator-row:hover {
-    background-color: #e9ecef; /* Light hover effect */
+    background-color: rgba(38, 70, 83, 0.1); /* Light hover effect */
 }
 
 /* Frozen Column Styles */
@@ -522,12 +751,12 @@ function createTableBootstrap2(tableId, data) {
 }
 
 .custom-tabulator .tabulator-tableHolder::-webkit-scrollbar-thumb {
-    background: #888; /* Thumb color */
+    background: #264653; /* Thumb color */
     border-radius: 4px; /* Rounded corners */
 }
 
 .custom-tabulator .tabulator-tableHolder::-webkit-scrollbar-thumb:hover {
-    background: #555; /* Darker thumb on hover */
+    background: rgba(38, 70, 83, 0.8); /* Darker thumb on hover */
 }
 
 /* Add this to your CSS file or style section */
@@ -549,7 +778,7 @@ function createTableBootstrap2(tableId, data) {
 
 
 .border-right {
-    border-right: 1px solid #dee2e6; /* Bootstrap's default border color */
+    border-right: 1px solid #264653; /* Bootstrap's default border color */
 }
 
 .table-responsive {
