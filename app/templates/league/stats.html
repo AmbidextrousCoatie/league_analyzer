@@ -617,6 +617,43 @@ function initializePage() {
         updateHonorScores();
     }
 
+    // Function to load leagues
+    function loadLeagues() {
+        fetch('/league/get_available_leagues')
+            .then(response => response.json())
+            .then(leagues => {
+                const buttonsLeague = leagues.map(league => `
+                    <input type="radio" class="btn-check" name="league" id="league_${league}" 
+                           value="${league}" ${league === selectedLeague ? 'checked' : ''}>
+                    <label class="btn btn-outline-primary" for="league_${league}">${league}</label>
+                `).join('');
+                document.getElementById('buttonsLeague').innerHTML = buttonsLeague;
+                
+                if (selectedLeague && leagues.includes(selectedLeague)) {
+                    // First update available options
+                    updateAvailableOptions();
+                    
+                    // Then fetch weeks specifically for selected season and league
+                    fetch(`/league/get_available_weeks?season=${selectedSeason}&league=${selectedLeague}`)
+                        .then(response => response.json())
+                        .then(weeks => {
+                            const weekButtons = weeks.map(week => `
+                                <input type="radio" class="btn-check" name="week" id="week_${week}" 
+                                       value="${week}" ${week.toString() === selectedWeek ? 'checked' : ''}>
+                                <label class="btn btn-outline-primary" for="week_${week}">${week}</label>
+                            `).join('');
+                            document.getElementById('buttonsWeek').innerHTML = weekButtons;
+                            
+                            // After weeks are loaded, update all content
+                            if (selectedWeek && weeks.includes(parseInt(selectedWeek))) {
+                                updateAllContent();
+                                updateWeekContent();
+                            }
+                        });
+                }
+            });
+    }
+
     // Load available seasons
     fetch('/league/get_available_seasons')
         .then(response => response.json())
@@ -628,41 +665,15 @@ function initializePage() {
             `).join('');
             document.getElementById('buttonsSeason').innerHTML = buttonsSeason;
             
+            // Always load leagues, regardless of whether a season is selected
+            loadLeagues();
+            
+            // If we have a selected season, select it
             if (selectedSeason && seasons.includes(selectedSeason)) {
-                // Load available leagues
-                fetch('/league/get_available_leagues')
-                    .then(response => response.json())
-                    .then(leagues => {
-                        const buttonsLeague = leagues.map(league => `
-                            <input type="radio" class="btn-check" name="league" id="league_${league}" 
-                                   value="${league}" ${league === selectedLeague ? 'checked' : ''}>
-                            <label class="btn btn-outline-primary" for="league_${league}">${league}</label>
-                        `).join('');
-                        document.getElementById('buttonsLeague').innerHTML = buttonsLeague;
-                        
-                        if (selectedLeague && leagues.includes(selectedLeague)) {
-                            // First update available options
-                            updateAvailableOptions();
-                            
-                            // Then fetch weeks specifically for selected season and league
-                            fetch(`/league/get_available_weeks?season=${selectedSeason}&league=${selectedLeague}`)
-                                .then(response => response.json())
-                                .then(weeks => {
-                                    const weekButtons = weeks.map(week => `
-                                        <input type="radio" class="btn-check" name="week" id="week_${week}" 
-                                               value="${week}" ${week.toString() === selectedWeek ? 'checked' : ''}>
-                                        <label class="btn btn-outline-primary" for="week_${week}">${week}</label>
-                                    `).join('');
-                                    document.getElementById('buttonsWeek').innerHTML = weekButtons;
-                                    
-                                    // After weeks are loaded, update all content
-                                    if (selectedWeek && weeks.includes(parseInt(selectedWeek))) {
-                                        updateAllContent();
-                                        updateWeekContent();
-                                    }
-                                });
-                        }
-                    });
+                const seasonInput = document.querySelector(`input[name="season"][value="${selectedSeason}"]`);
+                if (seasonInput) {
+                    seasonInput.checked = true;
+                }
             }
         });
 
