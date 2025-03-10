@@ -12,12 +12,12 @@ league_service = LeagueService()
 @bp.route('/league/stats')
 def stats():
     try:
-        weeks = league_service.get_weeks()
-        print(f"Available weeks: {weeks}")  # Debug output
+        #weeks = league_service.get_weeks()
+        #print(f"Available weeks: {weeks}")  # Debug output
         return render_template('league/stats.html', 
                             seasons=league_service.get_seasons(),
-                            leagues=league_service.get_leagues(),
-                            weeks=weeks)
+                            leagues=league_service.get_leagues())
+                            #weeks=weeks)
     except Exception as e:
         print(f"Error in stats route: {str(e)}")
         return jsonify({"error": str(e)}), 500
@@ -107,30 +107,26 @@ def get_league_week_table():
     try:
         season = request.args.get('season')
         league = request.args.get('league')
-        #week should be int
+        # week should be int
         week = int(request.args.get('week'))
-        #print("get_league_week")
+        # print("get_league_week")
         print(f"League Standings - Received request with: season={season}, league={league}, week={week}")
         
         if not season or not league:
             return jsonify({"error": "Season and league are required"}), 400
 
-        #week_data = league_service.get_league_week(league=league, season=season, week=week)
-        #print(f"Generated week data: {week_data}")
-
-        league_table_data = league_service.get_league_week_table(league=league, season=season, week=week)
+        # Get the table data from the service
+        # This now returns a TableData object
+        table_data = league_service.get_league_week_table(season=season, league=league, week=week)
+        
         print("############################")
-        print(league_table_data)
-        #transformed_data = DataDict().transform_dict(league_table_data)
-        #print(transformed_data)
+        print(table_data)
         
-        #transformed_data.make_sortable([1,2,3,4,5,6])
-
-        
-        if not league_table_data:
+        if not table_data:
             return jsonify({"message": "No data found for these filters"}), 404
-        #print(jsonify(league_table_data))
-        return jsonify(league_table_data)
+        
+        # Convert TableData to dictionary and return as JSON
+        return jsonify(table_data.to_dict())
     except Exception as e:
         import traceback
         print(f"Error in get_league_week: {str(e)}")

@@ -9,7 +9,7 @@ class Server:
     # converts basic dataframes to aggregated dataframes
     # forwards aggregated dataframes to app
     def __init__(self):
-        self.data_adapter = DataAdapterFactory.get_adapter(DataAdapterSelector.PANDAS)
+        self.data_adapter = DataAdapterFactory.create_adapter(DataAdapterSelector.PANDAS)
 
     def get_player_data(self, player_name: str) -> pd.DataFrame:
         return self.data_adapter.get_player_data(player_name)

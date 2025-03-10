@@ -584,7 +584,7 @@ function initializePage() {
     const urlParams = new URLSearchParams(window.location.search);
     const selectedSeason = urlParams.get('season');
     const selectedLeague = urlParams.get('league');
-    const selectedWeek = urlParams.get('week');
+    const selectedWeek = null; //urlParams.get('week');
     
     console.log("URL parameters:", { season: selectedSeason, league: selectedLeague, week: selectedWeek });
 
