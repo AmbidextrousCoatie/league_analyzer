@@ -43,13 +43,13 @@ class LeagueQuery:
 
 @dataclass
 class TeamWeeklyPerformance:
-    """Domain model for team performance in a specific week"""
+    """Team performance for a specific week."""
     team_id: str
     team_name: str
     week: int
-    score: int  # Total pins
-    points: int  # League points
-    position: Optional[int] = None  # Ranking for that week
+    score: int
+    points: float
+    players_per_team: int = 4  # Default to 4 if not specified
     
     def to_dict(self) -> Dict[str, Any]:
         """Convert to a dictionary suitable for JSON serialization"""
@@ -59,7 +59,7 @@ class TeamWeeklyPerformance:
             "week": self.week,
             "score": self.score,
             "points": self.points,
-            "position": self.position
+            "players_per_team": self.players_per_team
         }
 
 @dataclass

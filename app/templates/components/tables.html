@@ -467,17 +467,51 @@ function createTableBootstrap3(tableId, data) {
         return;
     }
 
+    // Get table configuration
+    const config = data.config || {};
+    
     // Create table wrapper for horizontal scroll
     const tableWrapper = document.createElement('div');
     tableWrapper.className = 'table-responsive';
 
     // Create table
     const table = document.createElement('table');
-    table.className = 'table table-striped table-hover';
+    table.className = 'table';
+    if (config.striped) table.classList.add('table-striped');
+    if (config.hover) table.classList.add('table-hover');
+    if (config.compact) table.classList.add('table-sm');
     table.style.borderCollapse = 'collapse';
+
+    // Add title and description if provided
+    if (data.title || data.description) {
+        const titleDiv = document.createElement('div');
+        titleDiv.className = 'mb-3';
+        
+        if (data.title) {
+            const titleElement = document.createElement('h4');
+            titleElement.textContent = data.title;
+            titleElement.className = 'mb-1';
+            titleDiv.appendChild(titleElement);
+        }
+        
+        if (data.description) {
+            const descElement = document.createElement('p');
+            descElement.textContent = data.description;
+            descElement.className = 'text-muted';
+            titleDiv.appendChild(descElement);
+        }
+        
+        document.getElementById(tableId).appendChild(titleDiv);
+    }
 
     // Create header
     const thead = document.createElement('thead');
+    if (config.stickyHeader) {
+        thead.style.position = 'sticky';
+        thead.style.top = '0';
+        thead.style.zIndex = '2';
+        thead.style.backgroundColor = '#fff';
+    }
 
     // Add group headers
     const groupHeaderRow = document.createElement('tr');
@@ -494,6 +528,45 @@ function createTableBootstrap3(tableId, data) {
             th.style.borderLeft = '2px solid #264653';
         }
         
+        // Apply group styles
+        if (colGroup.style) {
+            Object.entries(colGroup.style).forEach(([key, value]) => {
+                th.style[key] = value;
+            });
+        }
+        
+        // Apply header styles
+        if (colGroup.headerStyle) {
+            Object.entries(colGroup.headerStyle).forEach(([key, value]) => {
+                th.style[key] = value;
+            });
+        }
+        
+        // Apply group width
+        if (colGroup.width) {
+            th.style.width = colGroup.width;
+        }
+        
+        // Freeze column group headers if the group is frozen
+        if (colGroup.frozen) {
+            th.style.position = 'sticky';
+            if (colGroup.frozen === 'left') {
+                // Calculate left position based on previous frozen groups
+                let leftPos = 0;
+                for (let g = 0; g < groupIndex; g++) {
+                    if (data.columns[g].frozen === 'left') {
+                        // Sum up widths of all columns in previous frozen groups
+                        data.columns[g].columns.forEach(c => {
+                            leftPos += parseInt(c.width || '100px');
+                        });
+                    }
+                }
+                th.style.left = `${leftPos}px`;
+            }
+            th.style.zIndex = '2';  // Higher than regular cells
+            th.style.backgroundColor = colGroup.style?.backgroundColor || '#fff';
+        }
+        
         groupHeaderRow.appendChild(th);
     });
     thead.appendChild(groupHeaderRow);
@@ -508,92 +581,127 @@ function createTableBootstrap3(tableId, data) {
             colGroup.columns.forEach((col, index) => {
                 const th = document.createElement('th');
                 th.style.padding = '8px';
-                th.style.textAlign = 'center';
+                th.style.textAlign = col.align || 'center';
                 th.className = 'align-middle';
-                th.style.cursor = 'pointer';
                 
-                // Create header content with sort indicator
-                const headerContent = document.createElement('div');
-                headerContent.style.display = 'flex';
-                headerContent.style.alignItems = 'center';
-                headerContent.style.justifyContent = index === 1 && groupIndex === 0 ? 'flex-start' : 'center';
-                headerContent.style.gap = '8px';
-                
-                const titleSpan = document.createElement('span');
-                titleSpan.textContent = col.title || '';
-                // Make last group headers bold
-                if (groupIndex === lastGroupIndex) {
-                    titleSpan.style.fontWeight = 'bold';
+                // Apply column width
+                if (col.width) {
+                    th.style.width = col.width;
                 }
-                headerContent.appendChild(titleSpan);
                 
-                const sortIcon = document.createElement('span');
-                sortIcon.style.width = '12px';
-                sortIcon.style.display = 'inline-block';
-                sortIcon.style.textAlign = 'center';
-                sortIcon.style.color = '#264653';
-                sortIcon.style.fontSize = '12px';
-                // Make last group sort icons bold
-                if (groupIndex === lastGroupIndex) {
-                    sortIcon.style.fontWeight = 'bold';
+                // Apply group styles to column headers
+                if (colGroup.style) {
+                    Object.entries(colGroup.style).forEach(([key, value]) => {
+                        th.style[key] = value;
+                    });
                 }
-                sortIcon.innerHTML = '⇕';
-                headerContent.appendChild(sortIcon);
                 
-                th.appendChild(headerContent);
-
-                // Special styling for Team column
-                if (groupIndex === 0 && index === 1) {
-                    th.style.minWidth = '200px';
-                    th.style.textAlign = 'left';
+                // Make sortable if specified
+                if (col.sortable !== false) {
+                    th.style.cursor = 'pointer';
+                    
+                    // Create header content with sort indicator
+                    const headerContent = document.createElement('div');
+                    headerContent.style.display = 'flex';
+                    headerContent.style.alignItems = 'center';
+                    headerContent.style.justifyContent = col.align === 'left' ? 'flex-start' : 
+                                                        col.align === 'right' ? 'flex-end' : 'center';
+                    headerContent.style.gap = '8px';
+                    
+                    const titleSpan = document.createElement('span');
+                    titleSpan.textContent = col.title || '';
+                    headerContent.appendChild(titleSpan);
+                    
+                    const sortIcon = document.createElement('span');
+                    sortIcon.style.width = '12px';
+                    sortIcon.style.height = '12px';
+                    sortIcon.style.display = 'inline-block';
+                    sortIcon.style.opacity = '0.5';
+                    sortIcon.innerHTML = '↕';  // Default sort icon
+                    headerContent.appendChild(sortIcon);
+                    
+                    th.appendChild(headerContent);
+                    
+                    // Add sort functionality
+                    const columnId = `${groupIndex}-${index}`;
+                    th.addEventListener('click', () => {
+                        // Toggle sort direction or set to asc if not sorted
+                        if (!sortState[columnId]) {
+                            sortState = {};  // Reset other sorts
+                            sortState[columnId] = 'asc';
+                        } else if (sortState[columnId] === 'asc') {
+                            sortState = {};  // Reset other sorts
+                            sortState[columnId] = 'desc';
+                        } else {
+                            delete sortState[columnId];  // Remove sort
+                        }
+                        
+                        // Update sort icons
+                        document.querySelectorAll('th span:last-child').forEach(icon => {
+                            icon.innerHTML = '↕';
+                            icon.style.opacity = '0.5';
+                        });
+                        
+                        if (sortState[columnId]) {
+                            sortIcon.innerHTML = sortState[columnId] === 'asc' ? '↑' : '↓';
+                            sortIcon.style.opacity = '1';
+                        }
+                        
+                        // Sort the data
+                        if (sortState[columnId]) {
+                            const flatIndex = getFlatColumnIndex(data.columns, groupIndex, index);
+                            const direction = sortState[columnId] === 'asc' ? 1 : -1;
+                            
+                            data.data.sort((a, b) => {
+                                const aVal = a[flatIndex];
+                                const bVal = b[flatIndex];
+                                
+                                // Handle different data types
+                                if (typeof aVal === 'number' && typeof bVal === 'number') {
+                                    return (aVal - bVal) * direction;
+                                } else {
+                                    const aStr = String(aVal || '');
+                                    const bStr = String(bVal || '');
+                                    return aStr.localeCompare(bStr) * direction;
+                                }
+                            });
+                        }
+                        
+                        // Update the table body
+                        updateTableBody(data.data);
+                    });
+                } else {
+                    th.textContent = col.title || '';
                 }
-
+                
                 // Add vertical borders between groups
                 if (index === 0 && groupIndex > 0) {
                     th.style.borderLeft = '2px solid #264653';
                 }
-
-                // Add sort functionality
-                const columnId = `${groupIndex}-${index}`;
-                th.addEventListener('click', () => {
-                    const currentSort = sortState[columnId] || 'none';
-                    const newSort = currentSort === 'asc' ? 'desc' : 'asc';
-                    
-                    // Reset all sort indicators
-                    document.querySelectorAll('th span:last-child').forEach(span => {
-                        span.innerHTML = '⇕';
-                    });
-                    
-                    // Update sort indicator
-                    sortIcon.innerHTML = newSort === 'asc' ? '↑' : '↓';
-                    
-                    // Update sort state
-                    sortState = { [columnId]: newSort };
-                    
-                    // Sort the data
-                    const dataIndex = columnIndices[groupIndex][index];
-                    const sortedData = [...data.data].sort((a, b) => {
-                        const aVal = a[dataIndex];
-                        const bVal = b[dataIndex];
-                        
-                        // Handle numeric values
-                        const aNum = Number(aVal);
-                        const bNum = Number(bVal);
-                        
-                        if (!isNaN(aNum) && !isNaN(bNum)) {
-                            return newSort === 'asc' ? aNum - bNum : bNum - aNum;
+                
+                // Freeze column headers if the group is frozen
+                if (colGroup.frozen) {
+                    th.style.position = 'sticky';
+                    if (colGroup.frozen === 'left') {
+                        // Calculate left position based on previous frozen columns
+                        let leftPos = 0;
+                        for (let g = 0; g < groupIndex; g++) {
+                            if (data.columns[g].frozen === 'left') {
+                                data.columns[g].columns.forEach(c => {
+                                    leftPos += parseInt(c.width || '100px');
+                                });
+                            }
                         }
-                        
-                        // Handle string values
-                        return newSort === 'asc' 
-                            ? String(aVal).localeCompare(String(bVal))
-                            : String(bVal).localeCompare(String(aVal));
-                    });
-                    
-                    // Update the table body
-                    updateTableBody(sortedData);
-                });
-
+                        // Add offset for current group's previous columns
+                        for (let i = 0; i < index; i++) {
+                            leftPos += parseInt(colGroup.columns[i].width || '100px');
+                        }
+                        th.style.left = `${leftPos}px`;
+                    }
+                    th.style.zIndex = '2';  // Higher than regular cells
+                    th.style.backgroundColor = colGroup.style?.backgroundColor || '#fff';
+                }
+                
                 subHeaderRow.appendChild(th);
             });
         }
@@ -605,90 +713,166 @@ function createTableBootstrap3(tableId, data) {
     const tbody = document.createElement('tbody');
     table.appendChild(tbody);
 
-    // Calculate the starting index for each group
-    let columnIndices = [];
-    let currentIndex = 0;
-    data.columns.forEach(colGroup => {
-        if (colGroup.columns) {
-            const groupIndices = [];
-            colGroup.columns.forEach(() => {
-                groupIndices.push(currentIndex++);
-            });
-            columnIndices.push(groupIndices);
+    // Helper function to get flat column index
+    function getFlatColumnIndex(columns, groupIndex, colIndex) {
+        let flatIndex = 0;
+        for (let g = 0; g < groupIndex; g++) {
+            flatIndex += columns[g].columns ? columns[g].columns.length : 1;
         }
-    });
+        return flatIndex + colIndex;
+    }
 
-    // Function to update table body with sorted data
+    // Function to update table body with current data
     function updateTableBody(tableData) {
-        tbody.innerHTML = '';
-        tableData.forEach(rowData => {
+        tbody.innerHTML = '';  // Clear existing rows
+        
+        tableData.forEach((rowData, rowIndex) => {
             const tr = document.createElement('tr');
+            
+            let colIndex = 0;  // Track the flat column index
+            
             data.columns.forEach((colGroup, groupIndex) => {
                 if (colGroup.columns) {
                     colGroup.columns.forEach((col, index) => {
                         const td = document.createElement('td');
-                        const dataIndex = columnIndices[groupIndex][index];
-                        const value = rowData[dataIndex];
-
                         td.style.padding = '8px';
-                        td.className = 'align-middle';
-
+                        td.style.textAlign = col.align || 'center';
+                        
+                        // Get the value for this cell
+                        const value = rowData[colIndex++];
+                        
+                        // Special handling for position column (first column of first group)
+                        if (groupIndex === 0 && index === 0) {
+                            // Use the position value (not team name) for the circle
+                            const color = getTeamColor(rowData[1]); // Still use team name for color
+                            td.innerHTML = `<div style="width: 24px; height: 24px; border-radius: 50%; background-color: ${color}; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; margin: 0 auto;">${value}</div>`;
+                        } else {
+                            td.textContent = value;
+                        }
+                        
+                        // Apply column styles
+                        if (col.style) {
+                            Object.entries(col.style).forEach(([key, value]) => {
+                                td.style[key] = value;
+                            });
+                        }
+                        
+                        // Apply group styles to cells
+                        if (colGroup.style) {
+                            Object.entries(colGroup.style).forEach(([key, value]) => {
+                                td.style[key] = value;
+                            });
+                        }
+                        
+                        // Format the value if specified
+                        if (col.format && typeof value === 'number') {
+                            try {
+                                td.textContent = col.format.replace('{:,}', value.toLocaleString())
+                                                         .replace('{:.1f}', value.toFixed(1))
+                                                         .replace('{:.2f}', value.toFixed(2));
+                            } catch (e) {
+                                console.error('Error formatting value:', e);
+                                td.textContent = value;
+                            }
+                        }
+                        
                         // Add vertical borders between groups
                         if (index === 0 && groupIndex > 0) {
                             td.style.borderLeft = '2px solid #264653';
                         }
-
-                        // Make last group text bold
-                        if (groupIndex === lastGroupIndex) {
-                            td.style.fontWeight = 'bold';
-                        }
-
-                        // Special handling for team names column
-                        if (groupIndex === 0 && index === 1) {
-                            td.style.textAlign = 'left';
-                            td.style.paddingLeft = '16px';
-                            td.style.minWidth = '200px';
-                            td.textContent = value;
-                        }
-                        // Position number column (first column)
-                        else if (index === 0 && groupIndex === 0) {
-                            td.style.textAlign = 'center';
-                            const team = rowData[1];
-                            const color = getTeamColor(team);
-                            td.innerHTML = `<div style="width: 24px; height: 24px; border-radius: 50%; background-color: ${color}; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; margin: 0 auto;">${value}</div>`;
-                        }
-                        // All other columns
-                        else {
-                            td.style.textAlign = 'center';
-                            td.textContent = value;
-                        }
-
-                        // Freeze the first two columns
-                        if (groupIndex === 0 && index < 2) {
+                        
+                        // Freeze columns if specified
+                        if (colGroup.frozen) {
                             td.style.position = 'sticky';
-                            td.style.left = index === 0 ? '0' : '50px';
+                            if (colGroup.frozen === 'left') {
+                                // Calculate left position based on previous frozen columns
+                                let leftPos = 0;
+                                for (let g = 0; g < groupIndex; g++) {
+                                    if (data.columns[g].frozen === 'left') {
+                                        data.columns[g].columns.forEach(c => {
+                                            leftPos += parseInt(c.width || '100px');
+                                        });
+                                    }
+                                }
+                                // Add offset for current group's previous columns
+                                for (let i = 0; i < index; i++) {
+                                    leftPos += parseInt(colGroup.columns[i].width || '100px');
+                                }
+                                td.style.left = `${leftPos}px`;
+                                
+                                // Remove ALL visual separation
+                                td.style.boxShadow = 'none';
+                                td.style.borderRight = 'none';
+                                td.style.borderLeft = 'none';
+                            }
                             td.style.zIndex = '1';
-                            td.style.backgroundColor = '#fff';
+                            td.style.backgroundColor = colGroup.style?.backgroundColor || '#fff';
                         }
-
+                        
                         tr.appendChild(td);
                     });
                 }
             });
+            
             tbody.appendChild(tr);
         });
     }
-
-    // Initial table render
+    
+    // Initial population of table body
     updateTableBody(data.data);
-
+    
     tableWrapper.appendChild(table);
-    document.getElementById(tableId).innerHTML = '';
+    document.getElementById(tableId).innerHTML = '';  // Clear existing content
     document.getElementById(tableId).appendChild(tableWrapper);
-
+    
     console.log(`Table "${tableId}" successfully created/updated`);
 }
 
+
+// Function to fetch and render a table with loading state
+function fetchAndRenderTable(tableId, url, params = {}) {
+    // Show loading spinner
+    const container = document.getElementById(tableId);
+    container.innerHTML = `
+        <div class="text-center p-5">
+            <div class="spinner-border text-primary" role="status"></div>
+            <p class="mt-2">Loading data...</p>
+        </div>
+    `;
+    
+    // Build query string from params
+    const queryString = Object.keys(params)
+        .map(key => `${encodeURIComponent(key)}=${encodeURIComponent(params[key])}`)
+        .join('&');
+    
+    // Fetch data
+    fetch(`${url}?${queryString}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            // Render the table with the fetched data
+            createTableBootstrap3(tableId, data);
+        })
+        .catch(error => {
+            console.error('Error fetching table data:', error);
+            // Show error message in the container
+            const container = document.getElementById(tableId);
+            container.innerHTML = `
+                <div class="alert alert-danger">
+                    <strong>Error:</strong> Failed to load table data. ${error.message}
+                </div>
+            `;
+        });
+}
+
+// Function to get team color (keep your existing implementation)
+function getTeamColor(teamName) {
+    // ... your existing getTeamColor function ...
+}
 </script>
 
 <style>
@@ -790,4 +974,28 @@ th {
     background-color: #f8f9fa; /* Header background color */
 }
 /* Add more rules based on your number of groups */
+
+/* Remove ALL visual separation between frozen and non-frozen columns */
+[style*="position: sticky"] {
+    box-shadow: none !important;
+    border-right: none !important;
+    border-left: none !important;
+}
+
+/* Remove any nth-child selectors that might be adding shadows */
+tr > td:nth-child(2)[style*="position: sticky"],
+tr > th:nth-child(2)[style*="position: sticky"] {
+    box-shadow: none !important;
+}
+
+/* Ensure no borders between position and team columns */
+tr > td:first-child,
+tr > th:first-child {
+    border-right: none !important;
+}
+
+tr > td:nth-child(2),
+tr > th:nth-child(2) {
+    border-left: none !important;
+}
 </style> 

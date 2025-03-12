@@ -10,7 +10,9 @@ class Column:
     sortable: bool = True
     filterable: bool = True
     width: Optional[str] = None
-    align: Optional[str] = None  # "left", "center", "right"
+    align: Optional[str] = "center"  # "left", "center", "right"
+    format: Optional[str] = None  # Format string for numbers, dates, etc.
+    style: Optional[Dict[str, str]] = None  # Custom CSS styles
 
 @dataclass
 class ColumnGroup:
@@ -18,6 +20,9 @@ class ColumnGroup:
     title: str
     columns: List[Column]
     frozen: Optional[str] = None  # 'left', 'right', or None
+    style: Optional[Dict[str, str]] = None  # Custom CSS styles for the group
+    header_style: Optional[Dict[str, str]] = None  # Custom CSS for header
+    width: Optional[str] = None  # Width for the entire group
 
 @dataclass
 class TableData:
@@ -26,6 +31,7 @@ class TableData:
     data: List[List[Any]]
     title: Optional[str] = None
     description: Optional[str] = None
+    config: Optional[Dict[str, Any]] = field(default_factory=dict)  # Table-wide configuration
     
     def to_dict(self) -> Dict[str, Any]:
         """Convert to a dictionary suitable for JSON serialization"""
@@ -33,14 +39,30 @@ class TableData:
             "columns": [
                 {
                     "title": group.title,
-                    "columns": [{"title": col.title, "field": col.field} for col in group.columns],
-                    **({"frozen": group.frozen} if group.frozen else {})
+                    "columns": [
+                        {
+                            "title": col.title, 
+                            "field": col.field,
+                            **({"sortable": col.sortable} if col.sortable is not None else {}),
+                            **({"filterable": col.filterable} if col.filterable is not None else {}),
+                            **({"width": col.width} if col.width else {}),
+                            **({"align": col.align} if col.align else {}),
+                            **({"format": col.format} if col.format else {}),
+                            **({"style": col.style} if col.style else {})
+                        } 
+                        for col in group.columns
+                    ],
+                    **({"frozen": group.frozen} if group.frozen else {}),
+                    **({"style": group.style} if group.style else {}),
+                    **({"headerStyle": group.header_style} if group.header_style else {}),
+                    **({"width": group.width} if group.width else {})
                 }
                 for group in self.columns
             ],
             "data": self.data,
             **({"title": self.title} if self.title else {}),
-            **({"description": self.description} if self.description else {})
+            **({"description": self.description} if self.description else {}),
+            **({"config": self.config} if self.config else {})
         }
 
 @dataclass

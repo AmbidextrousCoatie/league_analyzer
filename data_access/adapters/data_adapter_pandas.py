@@ -134,13 +134,13 @@ class DataAdapterPandas(DataAdapter):
     def get_weeks(self, season: str, league: str) -> List[int]:
         """Get available weeks for a season and league"""
         filters = {"Season": season, "League": league}
-        result = self.get_filtered_data__deprecated(filters=filters)
+        result = self.get_filtered_data__deprecated(filters_eq=filters)
         
         if result.empty:
             return []
         
         if "Week" in result.columns:
-            weeks = sorted(result["Week"].unique())
+            weeks = sorted(int(week) for week in result["Week"].unique())
             return weeks
         
         return []
@@ -163,7 +163,7 @@ class DataAdapterPandas(DataAdapter):
             filters["Team"] = query.team
         
         # Get filtered data
-        result = self.get_filtered_data__deprecated(filters=filters)
+        result = self.get_filtered_data__deprecated(filters_eq=filters)
         
         return result
 
@@ -313,17 +313,17 @@ class DataAdapterPandas(DataAdapter):
         if league_data.empty:
             return []
         
-        # Process data to get team performances
+        # Group by team and week to get team performances
         team_performances = {}
         
-        # Process each row in the DataFrame
+        # Process each row in the dataframe
         for _, row in league_data.iterrows():
-            # Extract team information
-            team_id = str(row.get('Team', ''))
-            team_name = row.get('Team', '')
-            week_num = row.get('Week', 0)
-            score = row.get('Score', 0)
-            points = row.get('Points', 0)
+            team_id = row[Columns.team_name]  # Using team name as ID for now
+            team_name = row[Columns.team_name]
+            week_num = row[Columns.week]
+            score = row[Columns.score]
+            points = row[Columns.points]
+            players_per_team = row.get(Columns.players_per_team, 4)  # Get players per team or default to 4
             
             # Initialize team data if not exists
             if team_id not in team_performances:
@@ -335,29 +335,32 @@ class DataAdapterPandas(DataAdapter):
                     'weekly_performances': {}
                 }
             
-            # Update team totals
-            team_data = team_performances[team_id]
-            team_data['total_score'] += score
-            team_data['total_points'] += points
-            
-            # Store weekly performance
-            if week_num not in team_data['weekly_performances']:
-                team_data['weekly_performances'][week_num] = {
+            # Initialize week data if not exists
+            if week_num not in team_performances[team_id]['weekly_performances']:
+                team_performances[team_id]['weekly_performances'][week_num] = {
                     'score': 0,
-                    'points': 0
+                    'points': 0,
+                    'players_per_team': players_per_team
                 }
             
-            week_data = team_data['weekly_performances'][week_num]
-            week_data['score'] += score
-            week_data['points'] += points
+            # Add score and points
+            team_performances[team_id]['weekly_performances'][week_num]['score'] += score
+            team_performances[team_id]['weekly_performances'][week_num]['points'] += points
+            
+            # Update team totals
+            team_performances[team_id]['total_score'] += score
+            team_performances[team_id]['total_points'] += points
         
         # Convert to TeamSeasonPerformance objects
         result = []
         for team_id, data in team_performances.items():
-            # Calculate average (assuming 4 games per week)
-            weekly_count = len(data['weekly_performances'])
-            games_played = weekly_count * 4  # Adjust based on your league structure
-            average = data['total_score'] / games_played if games_played > 0 else 0
+            # Calculate average (using players_per_team from each week)
+            total_games = 0
+            for week_num, week_data in data['weekly_performances'].items():
+                # Each player plays one game per week
+                total_games += week_data['players_per_team']
+            
+            average = data['total_score'] / total_games if total_games > 0 else 0
             
             # Create weekly performance objects
             weekly_performances = []
@@ -368,7 +371,8 @@ class DataAdapterPandas(DataAdapter):
                         team_name=data['team_name'],
                         week=week_num,
                         score=week_data['score'],
-                        points=week_data['points']
+                        points=week_data['points'],
+                        players_per_team=week_data['players_per_team']
                     )
                 )
             

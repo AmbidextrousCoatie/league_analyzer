@@ -387,64 +387,50 @@ function updatePositionChart() {
 function updateTableTeamDetails() {
     const selectedSeason = document.querySelector('input[name="season"]:checked')?.value;
     const selectedLeague = document.querySelector('input[name="league"]:checked')?.value;
-    const currentWeek = document.querySelector('input[name="week"]:checked')?.value;
-    const team = document.querySelector('input[name="team"]:checked')?.value;
-
-    console.log("Updating team week details... League: ", selectedLeague, " Season: ", selectedSeason, " Week: ", currentWeek, " Team: ", team);
-
-    if (!selectedSeason || !selectedLeague || !currentWeek) {
-        console.log("Missing required selection");
-        document.getElementById('teamTableWeekDetails').innerHTML = 
-            '<div class="alert alert-warning">Please select season, league, and match day</div>';
+    const selectedWeek = document.querySelector('input[name="week"]:checked')?.value;
+    const selectedTeam = document.querySelector('input[name="team"]:checked')?.value;
+    
+    if (!selectedSeason || !selectedLeague || !selectedWeek || !selectedTeam) {
         return;
     }
-
-
-    document.querySelector('#teamTableWeekDetails').closest('.card')
-        .querySelector('.card-header h5').textContent = `Spielzettel für ${team} in Woche ${currentWeek}`;    
-
-    document.getElementById('teamTableWeekDetails').innerHTML = 
-        '<div class="text-center"><div class="spinner-border" role="status"></div></div>';
     
-    fetch(`/league/get_team_week_details?season=${selectedSeason}&league=${selectedLeague}&team=${team}&week=${currentWeek}`)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            return response.json();
-        })
-        .then(response => {
-            //console.log("Received data:", response);
+    // Update header
+    document.getElementById('teamDetailsHeader').innerHTML = `<h5>${selectedTeam} - Spieltag ${selectedWeek}</h5>`;
+    
+    // Show loading state
+    document.getElementById('teamDetailsContent').innerHTML = '<div class="text-center p-3"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>';
+    
+    // Fetch team details
+    fetch(`/league/get_team_week_details?season=${selectedSeason}&league=${selectedLeague}&week=${selectedWeek}&team=${selectedTeam}`)
+        .then(response => response.json())
+        .then(data => {
+            // Process and display the data
+            const content = document.getElementById('teamDetailsContent');
             
-            if (!response.config) {
-                throw new Error('Invalid response structure: missing config');
+            if (data.config && data.config.length > 0) {
+                let html = '<div class="list-group">';
+                
+                data.config.forEach(match => {
+                    html += `
+                        <div class="list-group-item">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <strong>${match.player}</strong>
+                                <span class="badge bg-primary rounded-pill">${match.score}</span>
+                            </div>
+                            <div class="small text-muted mt-1">vs. ${match.opponent}</div>
+                        </div>
+                    `;
+                });
+                
+                html += '</div>';
+                content.innerHTML = html;
+            } else {
+                content.innerHTML = '<div class="alert alert-info">No details available for this team and week.</div>';
             }
-
-            // Transform the data into array format
-            const transformedData = response.config.data.map(row => {
-                // Create an array matching the column order
-                return response.config.columns.map(col => row[col.key]);
-            });
-
-            const tableConfig = {
-                id: 'teamTableWeekDetails',
-                headerGroups: response.config.headerGroups,
-                columns: response.config.columns,
-                data: transformedData,  // Use transformed data
-                rowNumbering: response.config.rowNumbering || false,
-                positionChange: response.config.positionChange || false
-            };
-
-            //console.log("Transformed data:", transformedData);
-
-            // Create the table
-            const tableHtml = createTable(tableConfig);
-            document.getElementById('teamTableWeekDetails').innerHTML = tableHtml;
         })
         .catch(error => {
             console.error('Error:', error);
-            document.getElementById('teamTableWeekDetails').innerHTML = 
-                `<div class="alert alert-danger">Error loading team details: ${error.message}</div>`;
+            document.getElementById('teamDetailsContent').innerHTML = '<div class="alert alert-danger">Error loading team details.</div>';
         });
 }
 
@@ -511,32 +497,42 @@ function updateSectionLeagueStandings() {
 function updateTableLeagueWeek() {
     const selectedSeason = document.querySelector('input[name="season"]:checked')?.value;
     const selectedLeague = document.querySelector('input[name="league"]:checked')?.value;
-    const currentWeek = document.querySelector('input[name="week"]:checked')?.value;
+    const selectedWeek = document.querySelector('input[name="week"]:checked')?.value;
     
-
-    
-    console.log('Attempting to update TableLeagueWeek with:', {
-        season: selectedSeason,
-        league: selectedLeague,
-        week: currentWeek
-    });
-    
-    if (!selectedSeason || !selectedLeague || !currentWeek) {
-        console.log("Missing required selection");
+    if (!selectedSeason || !selectedLeague || !selectedWeek) {
         return;
     }
     
-    fetch(`/league/get_league_week_table?season=${selectedSeason}&league=${selectedLeague}&week=${currentWeek}&depth=${1}`)
-        .then(response => response.json())
-        .then(data => {
-            createTableBootstrap3('tableLeagueWeek', data);
-            //createTableTabulator('tableLeagueWeek', data);
-            
-            //createTableBootstrap2('leagueTableHistory', data);
-        })
-        .catch(error => console.error('Error:', error));
+    // Update header
+    document.getElementById('weekHeader').innerHTML = `<h5>Ergebnisse für ${selectedLeague} - ${selectedSeason} - Spieltag ${selectedWeek}</h5>`;
+    
+    // Fetch and display table
+    fetchAndRenderTable('tableLeagueWeek', '/league/get_league_week_table', {
+        season: selectedSeason,
+        league: selectedLeague,
+        week: selectedWeek
+    });
 }
 
+function updateTableLeagueHistory() {
+    const selectedSeason = document.querySelector('input[name="season"]:checked')?.value;
+    const selectedLeague = document.querySelector('input[name="league"]:checked')?.value;
+    
+    if (!selectedSeason || !selectedLeague) {
+        document.getElementById('selectionMessage').style.display = 'block';
+        document.getElementById('leagueTableHistory').style.display = 'none';
+        return;
+    }
+    
+    document.getElementById('selectionMessage').style.display = 'none';
+    document.getElementById('leagueTableHistory').style.display = 'block';
+    
+    // Fetch and display table
+    fetchAndRenderTable('leagueTableHistory', '/league/get_league_history', {
+        season: selectedSeason,
+        league: selectedLeague
+    });
+}
 
 function updateButtonsTeams() {
     const selectedSeason = document.querySelector('input[name="season"]:checked')?.value;
@@ -584,7 +580,7 @@ function initializePage() {
     const urlParams = new URLSearchParams(window.location.search);
     const selectedSeason = urlParams.get('season');
     const selectedLeague = urlParams.get('league');
-    const selectedWeek = null; //urlParams.get('week');
+    const selectedWeek = urlParams.get('week');
     
     console.log("URL parameters:", { season: selectedSeason, league: selectedLeague, week: selectedWeek });
 
@@ -917,8 +913,8 @@ function updateChartsLeague() {
             updateSharedLegend(data.order);
         });
 
-        // Fetch and create points charts
-        fetch(`/league/get_team_points?season=${selectedSeason}&league=${selectedLeague}`)
+    // Fetch and create points charts
+    fetch(`/league/get_team_points?season=${selectedSeason}&league=${selectedLeague}`)
         .then(response => response.json())
         .then(data => {
             // Create labels based on number of weeks

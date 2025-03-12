@@ -12,12 +12,12 @@ league_service = LeagueService()
 @bp.route('/league/stats')
 def stats():
     try:
-        #weeks = league_service.get_weeks()
-        #print(f"Available weeks: {weeks}")  # Debug output
+        weeks = league_service.get_weeks()
+        print(f"Available weeks: {weeks}")  # Debug output
         return render_template('league/stats.html', 
-                            seasons=league_service.get_seasons(),
-                            leagues=league_service.get_leagues())
-                            #weeks=weeks)
+                            season=league_service.get_seasons(),
+                            league=league_service.get_leagues(),
+                            week=weeks)
     except Exception as e:
         print(f"Error in stats route: {str(e)}")
         return jsonify({"error": str(e)}), 500
@@ -64,39 +64,26 @@ def get_available_teams():
 def get_league_history():
     try:
         # Get query parameters
-        # print("GOTCHA!")
         season = request.args.get('season')
         league = request.args.get('league')
-        #week = request.args.get('week')
         
-        #print(f"League History - Received request with: season={season}, league={league}, week={week}")
         print(f"League History - Received request with: season={season}, league={league}")
         
-
-
         if not all([season, league]):
             return jsonify({'error': 'Missing required parameters'}), 400
-            
-        #week = int(week) if week is not None else 0
         
-        # Use LeagueService
-        table_data = league_service.get_league_history_table(
+        # Use the new method that returns TableData
+        table_data = league_service.get_league_history_table_data(
             league_name=league,
-            season=season,
-            week=None,
-            depth=None,
-            debug_output=False
+            season=season
         )
-
-        
         
         print("::::::::::::::::::::::::::::")
         print(table_data)
         print("::::::::::::::::::::::::::::")
-        #transformed_data = DataDict().transform_dict(table_data)
-
-        # print(transformed_data.to_dict())
-        return jsonify(table_data)  # Make sure to jsonify the response
+        
+        # Convert to dictionary and return as JSON
+        return jsonify(table_data.to_dict())
         
     except Exception as e:
         print(f"Error: {str(e)}")
@@ -120,7 +107,10 @@ def get_league_week_table():
         table_data = league_service.get_league_week_table(season=season, league=league, week=week)
         
         print("############################")
+        print("league_routes.get_league_week_table: ", end="")
         print(table_data)
+        
+        print("############################")
         
         if not table_data:
             return jsonify({"message": "No data found for these filters"}), 404
