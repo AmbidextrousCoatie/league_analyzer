@@ -1,0 +1,366 @@
+<div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">
+            <button class="btn btn-link text-decoration-none p-0" type="button" data-bs-toggle="collapse" data-bs-target="#leagueRoutesCollapse" aria-expanded="true" aria-controls="leagueRoutesCollapse">
+                <i class="bi bi-chevron-down me-1"></i> League Routes
+            </button>
+        </h5>
+        <button class="btn btn-primary btn-sm" onclick="testAllLeagueRoutes()">Test All League Routes</button>
+    </div>
+    <div class="collapse show" id="leagueRoutesCollapse">
+        <div class="card-body">
+            <!-- get_league_week_table -->
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h5>get_league_week_table</h5>
+                    <small class="text-muted">/league/get_league_week_table</small>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <button class="btn btn-primary" onclick="testLeagueWeekTable()">Test Route</button>
+                    </div>
+                    <div id="leagueWeekTableResult" class="result-container">
+                        <!-- Results will be shown here -->
+                    </div>
+                </div>
+            </div>
+            
+            <!-- get_league_history -->
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h5>get_league_history</h5>
+                    <small class="text-muted">/league/get_league_history</small>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <button class="btn btn-primary" onclick="testLeagueHistory()">Test Route</button>
+                    </div>
+                    <div id="leagueHistoryResult" class="result-container">
+                        <!-- Results will be shown here -->
+                    </div>
+                </div>
+            </div>
+            
+            <!-- get_team_positions -->
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h5>get_team_positions</h5>
+                    <small class="text-muted">/league/get_team_positions</small>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <button class="btn btn-primary" onclick="testTeamPositions()">Test Route</button>
+                    </div>
+                    <div id="teamPositionsResult" class="result-container">
+                        <!-- Results will be shown here -->
+                    </div>
+                </div>
+            </div>
+            
+            <!-- get_team_points -->
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h5>get_team_points</h5>
+                    <small class="text-muted">/league/get_team_points</small>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <button class="btn btn-primary" onclick="testTeamPoints()">Test Route</button>
+                    </div>
+                    <div id="teamPointsResult" class="result-container">
+                        <!-- Results will be shown here -->
+                    </div>
+                </div>
+            </div>
+            
+            <!-- get_team_averages -->
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h5>get_team_averages</h5>
+                    <small class="text-muted">/league/get_team_averages</small>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <button class="btn btn-primary" onclick="testTeamAverages()">Test Route</button>
+                    </div>
+                    <div id="teamAveragesResult" class="result-container">
+                        <!-- Results will be shown here -->
+                    </div>
+                </div>
+            </div>
+            
+            <!-- get_team_points_vs_average -->
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h5>get_team_points_vs_average</h5>
+                    <small class="text-muted">/league/get_team_points_vs_average</small>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <button class="btn btn-primary" onclick="testTeamPointsVsAverage()">Test Route</button>
+                    </div>
+                    <div id="teamPointsVsAverageResult" class="result-container">
+                        <!-- Results will be shown here -->
+                    </div>
+                </div>
+            </div>
+            
+            <!-- get_team_week_details -->
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h5>get_team_week_details</h5>
+                    <small class="text-muted">/league/get_team_week_details</small>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <button class="btn btn-primary" onclick="testTeamWeekDetails()">Test Route</button>
+                    </div>
+                    <div id="teamWeekDetailsResult" class="result-container">
+                        <!-- Results will be shown here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Test all league routes
+function testAllLeagueRoutes() {
+    testLeagueWeekTable();
+    testLeagueHistory();
+    testTeamPositions();
+    testTeamPoints();
+    testTeamAverages();
+    testTeamPointsVsAverage();
+    testTeamWeekDetails();
+}
+
+// Test functions for each route
+function testLeagueWeekTable() {
+    const selectedSeason = document.querySelector('input[name="season"]:checked')?.value;
+    const selectedLeague = document.querySelector('input[name="league"]:checked')?.value;
+    const selectedWeek = document.querySelector('input[name="week"]:checked')?.value;
+    
+    if (!selectedSeason || !selectedLeague || !selectedWeek) {
+        displayResult('leagueWeekTableResult', 'Missing required parameters', true);
+        return;
+    }
+    
+    // Show loading
+    document.getElementById('leagueWeekTableResult').innerHTML = `
+        <div class="text-center">
+            <div class="spinner-border text-primary" role="status"></div>
+            <p>Loading data...</p>
+        </div>
+    `;
+    
+    fetch(`/league/get_league_week_table?season=${selectedSeason}&league=${selectedLeague}&week=${selectedWeek}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            displayResult('leagueWeekTableResult', data);
+        })
+        .catch(error => {
+            displayResult('leagueWeekTableResult', error.message, true);
+        });
+}
+
+function testLeagueHistory() {
+    const selectedSeason = document.querySelector('input[name="season"]:checked')?.value;
+    const selectedLeague = document.querySelector('input[name="league"]:checked')?.value;
+    
+    if (!selectedSeason || !selectedLeague) {
+        displayResult('leagueHistoryResult', 'Missing required parameters', true);
+        return;
+    }
+    
+    // Show loading
+    document.getElementById('leagueHistoryResult').innerHTML = `
+        <div class="text-center">
+            <div class="spinner-border text-primary" role="status"></div>
+            <p>Loading data...</p>
+        </div>
+    `;
+    
+    fetch(`/league/get_league_history?season=${selectedSeason}&league=${selectedLeague}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            displayResult('leagueHistoryResult', data);
+        })
+        .catch(error => {
+            displayResult('leagueHistoryResult', error.message, true);
+        });
+}
+
+function testTeamPositions() {
+    const selectedSeason = document.querySelector('input[name="season"]:checked')?.value;
+    const selectedLeague = document.querySelector('input[name="league"]:checked')?.value;
+    
+    if (!selectedSeason || !selectedLeague) {
+        displayResult('teamPositionsResult', 'Missing required parameters', true);
+        return;
+    }
+    
+    // Show loading
+    document.getElementById('teamPositionsResult').innerHTML = `
+        <div class="text-center">
+            <div class="spinner-border text-primary" role="status"></div>
+            <p>Loading data...</p>
+        </div>
+    `;
+    
+    fetch(`/league/get_team_positions?season=${selectedSeason}&league=${selectedLeague}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            displayResult('teamPositionsResult', data);
+        })
+        .catch(error => {
+            displayResult('teamPositionsResult', error.message, true);
+        });
+}
+
+function testTeamPoints() {
+    const selectedSeason = document.querySelector('input[name="season"]:checked')?.value;
+    const selectedLeague = document.querySelector('input[name="league"]:checked')?.value;
+    
+    if (!selectedSeason || !selectedLeague) {
+        displayResult('teamPointsResult', 'Missing required parameters', true);
+        return;
+    }
+    
+    // Show loading
+    document.getElementById('teamPointsResult').innerHTML = `
+        <div class="text-center">
+            <div class="spinner-border text-primary" role="status"></div>
+            <p>Loading data...</p>
+        </div>
+    `;
+    
+    fetch(`/league/get_team_points?season=${selectedSeason}&league=${selectedLeague}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            displayResult('teamPointsResult', data);
+        })
+        .catch(error => {
+            displayResult('teamPointsResult', error.message, true);
+        });
+}
+
+function testTeamAverages() {
+    const selectedSeason = document.querySelector('input[name="season"]:checked')?.value;
+    const selectedLeague = document.querySelector('input[name="league"]:checked')?.value;
+    
+    if (!selectedSeason || !selectedLeague) {
+        displayResult('teamAveragesResult', 'Missing required parameters', true);
+        return;
+    }
+    
+    // Show loading
+    document.getElementById('teamAveragesResult').innerHTML = `
+        <div class="text-center">
+            <div class="spinner-border text-primary" role="status"></div>
+            <p>Loading data...</p>
+        </div>
+    `;
+    
+    fetch(`/league/get_team_averages?season=${selectedSeason}&league=${selectedLeague}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            displayResult('teamAveragesResult', data);
+        })
+        .catch(error => {
+            displayResult('teamAveragesResult', error.message, true);
+        });
+}
+
+function testTeamPointsVsAverage() {
+    const selectedSeason = document.querySelector('input[name="season"]:checked')?.value;
+    const selectedLeague = document.querySelector('input[name="league"]:checked')?.value;
+    
+    if (!selectedSeason || !selectedLeague) {
+        displayResult('teamPointsVsAverageResult', 'Missing required parameters', true);
+        return;
+    }
+    
+    // Show loading
+    document.getElementById('teamPointsVsAverageResult').innerHTML = `
+        <div class="text-center">
+            <div class="spinner-border text-primary" role="status"></div>
+            <p>Loading data...</p>
+        </div>
+    `;
+    
+    fetch(`/league/get_team_points_vs_average?season=${selectedSeason}&league=${selectedLeague}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            displayResult('teamPointsVsAverageResult', data);
+        })
+        .catch(error => {
+            displayResult('teamPointsVsAverageResult', error.message, true);
+        });
+}
+
+function testTeamWeekDetails() {
+    const selectedSeason = document.querySelector('input[name="season"]:checked')?.value;
+    const selectedLeague = document.querySelector('input[name="league"]:checked')?.value;
+    const selectedWeek = document.querySelector('input[name="week"]:checked')?.value;
+    const selectedTeam = document.querySelector('input[name="team"]:checked')?.value;
+    
+    if (!selectedSeason || !selectedLeague || !selectedWeek || !selectedTeam) {
+        displayResult('teamWeekDetailsResult', 'Missing required parameters', true);
+        return;
+    }
+    
+    // Show loading
+    document.getElementById('teamWeekDetailsResult').innerHTML = `
+        <div class="text-center">
+            <div class="spinner-border text-primary" role="status"></div>
+            <p>Loading data...</p>
+        </div>
+    `;
+    
+    fetch(`/league/get_team_week_details?season=${selectedSeason}&league=${selectedLeague}&week=${selectedWeek}&team=${selectedTeam}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            displayResult('teamWeekDetailsResult', data);
+        })
+        .catch(error => {
+            displayResult('teamWeekDetailsResult', error.message, true);
+        });
+}
+</script> 

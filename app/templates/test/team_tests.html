@@ -1,0 +1,170 @@
+<div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">
+            <button class="btn btn-link text-decoration-none p-0" type="button" data-bs-toggle="collapse" data-bs-target="#teamRoutesCollapse" aria-expanded="true" aria-controls="teamRoutesCollapse">
+                <i class="bi bi-chevron-down me-1"></i> Team Routes
+            </button>
+        </h5>
+        <button class="btn btn-primary btn-sm" onclick="testAllTeamRoutes()">Test All Team Routes</button>
+    </div>
+    <div class="collapse show" id="teamRoutesCollapse">
+        <div class="card-body">
+            <!-- get_team_details -->
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h5>get_team_details</h5>
+                    <small class="text-muted">/team/get_team_details</small>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <button class="btn btn-primary" onclick="testTeamDetails()">Test Route</button>
+                    </div>
+                    <div id="teamDetailsResult" class="result-container">
+                        <!-- Results will be shown here -->
+                    </div>
+                </div>
+            </div>
+            
+            <!-- get_team_season_performance -->
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h5>get_team_season_performance</h5>
+                    <small class="text-muted">/team/get_team_season_performance</small>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <button class="btn btn-primary" onclick="testTeamSeasonPerformance()">Test Route</button>
+                    </div>
+                    <div id="teamSeasonPerformanceResult" class="result-container">
+                        <!-- Results will be shown here -->
+                    </div>
+                </div>
+            </div>
+            
+            <!-- get_team_players -->
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h5>get_team_players</h5>
+                    <small class="text-muted">/team/get_team_players</small>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <button class="btn btn-primary" onclick="testTeamPlayers()">Test Route</button>
+                    </div>
+                    <div id="teamPlayersResult" class="result-container">
+                        <!-- Results will be shown here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Test all team routes
+function testAllTeamRoutes() {
+    testTeamDetails();
+    testTeamSeasonPerformance();
+    testTeamPlayers();
+}
+
+// Test functions for each route
+function testTeamDetails() {
+    const selectedSeason = document.querySelector('input[name="season"]:checked')?.value;
+    const selectedLeague = document.querySelector('input[name="league"]:checked')?.value;
+    const selectedTeam = document.querySelector('input[name="team"]:checked')?.value;
+    
+    if (!selectedSeason || !selectedLeague || !selectedTeam) {
+        displayResult('teamDetailsResult', 'Missing required parameters', true);
+        return;
+    }
+    
+    // Show loading
+    document.getElementById('teamDetailsResult').innerHTML = `
+        <div class="text-center">
+            <div class="spinner-border text-primary" role="status"></div>
+            <p>Loading data...</p>
+        </div>
+    `;
+    
+    fetch(`/team/get_team_details?season=${selectedSeason}&league=${selectedLeague}&team=${selectedTeam}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            displayResult('teamDetailsResult', data);
+        })
+        .catch(error => {
+            displayResult('teamDetailsResult', error.message, true);
+        });
+}
+
+function testTeamSeasonPerformance() {
+    const selectedSeason = document.querySelector('input[name="season"]:checked')?.value;
+    const selectedLeague = document.querySelector('input[name="league"]:checked')?.value;
+    const selectedTeam = document.querySelector('input[name="team"]:checked')?.value;
+    
+    if (!selectedSeason || !selectedLeague || !selectedTeam) {
+        displayResult('teamSeasonPerformanceResult', 'Missing required parameters', true);
+        return;
+    }
+    
+    // Show loading
+    document.getElementById('teamSeasonPerformanceResult').innerHTML = `
+        <div class="text-center">
+            <div class="spinner-border text-primary" role="status"></div>
+            <p>Loading data...</p>
+        </div>
+    `;
+    
+    fetch(`/team/get_team_season_performance?season=${selectedSeason}&league=${selectedLeague}&team=${selectedTeam}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            displayResult('teamSeasonPerformanceResult', data);
+        })
+        .catch(error => {
+            displayResult('teamSeasonPerformanceResult', error.message, true);
+        });
+}
+
+function testTeamPlayers() {
+    const selectedSeason = document.querySelector('input[name="season"]:checked')?.value;
+    const selectedLeague = document.querySelector('input[name="league"]:checked')?.value;
+    const selectedTeam = document.querySelector('input[name="team"]:checked')?.value;
+    
+    if (!selectedSeason || !selectedLeague || !selectedTeam) {
+        displayResult('teamPlayersResult', 'Missing required parameters', true);
+        return;
+    }
+    
+    // Show loading
+    document.getElementById('teamPlayersResult').innerHTML = `
+        <div class="text-center">
+            <div class="spinner-border text-primary" role="status"></div>
+            <p>Loading data...</p>
+        </div>
+    `;
+    
+    fetch(`/team/get_team_players?season=${selectedSeason}&league=${selectedLeague}&team=${selectedTeam}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            displayResult('teamPlayersResult', data);
+        })
+        .catch(error => {
+            displayResult('teamPlayersResult', error.message, true);
+        });
+}
+</script> 

@@ -1,0 +1,233 @@
+<div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">
+            <button class="btn btn-link text-decoration-none p-0" type="button" data-bs-toggle="collapse" data-bs-target="#playerRoutesCollapse" aria-expanded="true" aria-controls="playerRoutesCollapse">
+                <i class="bi bi-chevron-down me-1"></i> Player Routes
+            </button>
+        </h5>
+        <button class="btn btn-primary btn-sm" onclick="testAllPlayerRoutes()">Test All Player Routes</button>
+    </div>
+    <div class="collapse show" id="playerRoutesCollapse">
+        <div class="card-body">
+            <!-- get_player_details -->
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h5>get_player_details</h5>
+                    <small class="text-muted">/player/get_player_details</small>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="playerNameInput" placeholder="Enter player name">
+                            <button class="btn btn-primary" onclick="testPlayerDetails()">Test Route</button>
+                        </div>
+                    </div>
+                    <div id="playerDetailsResult" class="result-container">
+                        <!-- Results will be shown here -->
+                    </div>
+                </div>
+            </div>
+            
+            <!-- get_player_season_performance -->
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h5>get_player_season_performance</h5>
+                    <small class="text-muted">/player/get_player_season_performance</small>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="playerNamePerformanceInput" placeholder="Enter player name">
+                            <button class="btn btn-primary" onclick="testPlayerSeasonPerformance()">Test Route</button>
+                        </div>
+                    </div>
+                    <div id="playerSeasonPerformanceResult" class="result-container">
+                        <!-- Results will be shown here -->
+                    </div>
+                </div>
+            </div>
+            
+            <!-- get_player_history -->
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h5>get_player_history</h5>
+                    <small class="text-muted">/player/get_player_history</small>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="playerNameHistoryInput" placeholder="Enter player name">
+                            <button class="btn btn-primary" onclick="testPlayerHistory()">Test Route</button>
+                        </div>
+                    </div>
+                    <div id="playerHistoryResult" class="result-container">
+                        <!-- Results will be shown here -->
+                    </div>
+                </div>
+            </div>
+            
+            <!-- get_top_players -->
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h5>get_top_players</h5>
+                    <small class="text-muted">/player/get_top_players</small>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <div class="input-group">
+                            <select class="form-select" id="topPlayersMetricSelect">
+                                <option value="average">Average</option>
+                                <option value="total_score">Total Score</option>
+                                <option value="high_game">High Game</option>
+                            </select>
+                            <input type="number" class="form-control" id="topPlayersLimitInput" placeholder="Limit" value="10">
+                            <button class="btn btn-primary" onclick="testTopPlayers()">Test Route</button>
+                        </div>
+                    </div>
+                    <div id="topPlayersResult" class="result-container">
+                        <!-- Results will be shown here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Test all player routes
+function testAllPlayerRoutes() {
+    testPlayerDetails();
+    testPlayerSeasonPerformance();
+    testPlayerHistory();
+    testTopPlayers();
+}
+
+// Test functions for each route
+function testPlayerDetails() {
+    const playerName = document.getElementById('playerNameInput').value;
+    
+    if (!playerName) {
+        displayResult('playerDetailsResult', 'Please enter a player name', true);
+        return;
+    }
+    
+    // Show loading
+    document.getElementById('playerDetailsResult').innerHTML = `
+        <div class="text-center">
+            <div class="spinner-border text-primary" role="status"></div>
+            <p>Loading data...</p>
+        </div>
+    `;
+    
+    fetch(`/player/get_player_details?player=${encodeURIComponent(playerName)}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            displayResult('playerDetailsResult', data);
+        })
+        .catch(error => {
+            displayResult('playerDetailsResult', error.message, true);
+        });
+}
+
+function testPlayerSeasonPerformance() {
+    const playerName = document.getElementById('playerNamePerformanceInput').value;
+    const selectedSeason = document.querySelector('input[name="season"]:checked')?.value;
+    
+    if (!playerName || !selectedSeason) {
+        displayResult('playerSeasonPerformanceResult', 'Missing required parameters', true);
+        return;
+    }
+    
+    // Show loading
+    document.getElementById('playerSeasonPerformanceResult').innerHTML = `
+        <div class="text-center">
+            <div class="spinner-border text-primary" role="status"></div>
+            <p>Loading data...</p>
+        </div>
+    `;
+    
+    fetch(`/player/get_player_season_performance?player=${encodeURIComponent(playerName)}&season=${selectedSeason}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            displayResult('playerSeasonPerformanceResult', data);
+        })
+        .catch(error => {
+            displayResult('playerSeasonPerformanceResult', error.message, true);
+        });
+}
+
+function testPlayerHistory() {
+    const playerName = document.getElementById('playerNameHistoryInput').value;
+    
+    if (!playerName) {
+        displayResult('playerHistoryResult', 'Please enter a player name', true);
+        return;
+    }
+    
+    // Show loading
+    document.getElementById('playerHistoryResult').innerHTML = `
+        <div class="text-center">
+            <div class="spinner-border text-primary" role="status"></div>
+            <p>Loading data...</p>
+        </div>
+    `;
+    
+    fetch(`/player/get_player_history?player=${encodeURIComponent(playerName)}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            displayResult('playerHistoryResult', data);
+        })
+        .catch(error => {
+            displayResult('playerHistoryResult', error.message, true);
+        });
+}
+
+function testTopPlayers() {
+    const selectedSeason = document.querySelector('input[name="season"]:checked')?.value;
+    const selectedLeague = document.querySelector('input[name="league"]:checked')?.value;
+    const metric = document.getElementById('topPlayersMetricSelect').value;
+    const limit = document.getElementById('topPlayersLimitInput').value;
+    
+    if (!selectedSeason || !selectedLeague || !metric) {
+        displayResult('topPlayersResult', 'Missing required parameters', true);
+        return;
+    }
+    
+    // Show loading
+    document.getElementById('topPlayersResult').innerHTML = `
+        <div class="text-center">
+            <div class="spinner-border text-primary" role="status"></div>
+            <p>Loading data...</p>
+        </div>
+    `;
+    
+    fetch(`/player/get_top_players?season=${selectedSeason}&league=${selectedLeague}&metric=${metric}&limit=${limit}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            displayResult('topPlayersResult', data);
+        })
+        .catch(error => {
+            displayResult('topPlayersResult', error.message, true);
+        });
+}
+</script> 

@@ -1,0 +1,516 @@
+{% extends "base.html" %}
+
+{% block title %}API Test Page{% endblock %}
+
+{% block content %}
+{% include "components/tables.html" %}
+{% include "components/charts.html" %}
+
+<div class="container-fluid">
+    <h1 class="mb-4">API Test Page</h1>
+    
+    <!-- Selection Area -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h4>Selection Controls</h4>
+        </div>
+        <div class="card-body">
+            <div class="row mb-3">
+                <div class="col-md-4">
+                    <h5>Season</h5>
+                    <div id="buttonsSeason" class="btn-group-horizontal w-100">
+                        <!-- Seasons will be inserted here -->
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <h5>League</h5>
+                    <div id="buttonsLeague" class="btn-group-horizontal w-100">
+                        <!-- Leagues will be inserted here -->
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <h5>Week</h5>
+                    <div id="buttonsWeek" class="btn-group-horizontal w-100">
+                        <!-- Weeks will be inserted here -->
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <h5>Team</h5>
+                    <div id="buttonsTeam" class="btn-group-horizontal w-100">
+                        <!-- Teams will be inserted here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- League Routes Card -->
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">
+                <button class="btn btn-link text-decoration-none p-0" type="button" data-bs-toggle="collapse" data-bs-target="#leagueRoutesCollapse" aria-expanded="true" aria-controls="leagueRoutesCollapse">
+                    <i class="bi bi-chevron-down me-1"></i> League Routes
+                </button>
+            </h5>
+            <button class="btn btn-primary btn-sm" onclick="testAllLeagueRoutes()">Test All League Routes</button>
+        </div>
+        <div class="collapse show" id="leagueRoutesCollapse">
+            <div class="card-body">
+                {% include "test/league_tests.html" %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Team Routes Card -->
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">
+                <button class="btn btn-link text-decoration-none p-0" type="button" data-bs-toggle="collapse" data-bs-target="#teamRoutesCollapse" aria-expanded="true" aria-controls="teamRoutesCollapse">
+                    <i class="bi bi-chevron-down me-1"></i> Team Routes
+                </button>
+            </h5>
+            <button class="btn btn-primary btn-sm" onclick="testAllTeamRoutes()">Test All Team Routes</button>
+        </div>
+        <div class="collapse show" id="teamRoutesCollapse">
+            <div class="card-body">
+                {% include "test/team_tests.html" %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Player Routes Card -->
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">
+                <button class="btn btn-link text-decoration-none p-0" type="button" data-bs-toggle="collapse" data-bs-target="#playerRoutesCollapse" aria-expanded="true" aria-controls="playerRoutesCollapse">
+                    <i class="bi bi-chevron-down me-1"></i> Player Routes
+                </button>
+            </h5>
+            <button class="btn btn-primary btn-sm" onclick="testAllPlayerRoutes()">Test All Player Routes</button>
+        </div>
+        <div class="collapse show" id="playerRoutesCollapse">
+            <div class="card-body">
+                {% include "test/player_tests.html" %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Common Test Functions -->
+<script>
+// Initialize the page
+function initializePage() {
+    // Get any URL parameters or set defaults
+    const urlParams = new URLSearchParams(window.location.search);
+    const selectedSeason = urlParams.get('season') || null;
+    const selectedLeague = urlParams.get('league') || null;
+    const selectedWeek = urlParams.get('week') || null;
+    
+    // Load available seasons
+    fetch('/league/get_available_seasons')
+        .then(response => response.json())
+        .then(seasons => {
+            const buttonsSeason = seasons.map(season => `
+                <input type="radio" class="btn-check" name="season" id="season_${season}" 
+                       value="${season}" ${season === selectedSeason ? 'checked' : ''}>
+                <label class="btn btn-outline-primary" for="season_${season}">${season}</label>
+            `).join('');
+            document.getElementById('buttonsSeason').innerHTML = buttonsSeason;
+            
+            // Always load leagues, regardless of whether a season is selected
+            loadLeagues();
+            
+            // If we have a selected season, select it
+            if (selectedSeason && seasons.includes(selectedSeason)) {
+                const seasonInput = document.querySelector(`input[name="season"][value="${selectedSeason}"]`);
+                if (seasonInput) {
+                    seasonInput.checked = true;
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Error loading seasons:', error);
+            document.getElementById('buttonsSeason').innerHTML = `
+                <div class="alert alert-danger">
+                    <strong>Error loading seasons:</strong> ${error.message || 'Unknown error'}
+                </div>
+            `;
+        });
+    
+    // Add event listeners for future changes
+    document.addEventListener('change', event => {
+        if (event.target.name === 'season' || event.target.name === 'league') {
+            handleSelectionChange();
+        }
+        if (event.target.name === 'week' || event.target.name === 'team') {
+            handleWeekTeamSelection();
+        }
+    });
+}
+
+// Function to load leagues
+function loadLeagues() {
+    const selectedSeason = document.querySelector('input[name="season"]:checked')?.value;
+    const selectedLeague = document.querySelector('input[name="league"]:checked')?.value;
+    
+    fetch('/league/get_available_leagues')
+        .then(response => response.json())
+        .then(leagues => {
+            const buttonsLeague = leagues.map(league => `
+                <input type="radio" class="btn-check" name="league" id="league_${league}" 
+                       value="${league}" ${league === selectedLeague ? 'checked' : ''}>
+                <label class="btn btn-outline-primary" for="league_${league}">${league}</label>
+            `).join('');
+            document.getElementById('buttonsLeague').innerHTML = buttonsLeague;
+            
+            if (selectedLeague && leagues.includes(selectedLeague)) {
+                // First update available options
+                updateAvailableOptions();
+                
+                // Then fetch weeks specifically for selected season and league
+                fetch(`/league/get_available_weeks?season=${selectedSeason}&league=${selectedLeague}`)
+                    .then(response => response.json())
+                    .then(weeks => {
+                        const weekButtons = weeks.map(week => `
+                            <input type="radio" class="btn-check" name="week" id="week_${week}" 
+                                   value="${week}" ${week.toString() === selectedWeek ? 'checked' : ''}>
+                            <label class="btn btn-outline-primary" for="week_${week}">${week}</label>
+                        `).join('');
+                        document.getElementById('buttonsWeek').innerHTML = weekButtons;
+                    })
+                    .catch(error => {
+                        console.error('Error loading weeks:', error);
+                        document.getElementById('buttonsWeek').innerHTML = `
+                            <div class="alert alert-danger">
+                                <strong>Error loading weeks:</strong> ${error.message || 'Unknown error'}
+                            </div>
+                        `;
+                    });
+            }
+        })
+        .catch(error => {
+            console.error('Error loading leagues:', error);
+            document.getElementById('buttonsLeague').innerHTML = `
+                <div class="alert alert-danger">
+                    <strong>Error loading leagues:</strong> ${error.message || 'Unknown error'}
+                </div>
+            `;
+        });
+}
+
+// Handle selection change for season or league
+function handleSelectionChange() {
+    const selectedSeason = document.querySelector('input[name="season"]:checked')?.value;
+    const selectedLeague = document.querySelector('input[name="league"]:checked')?.value;
+    
+    // Update URL parameters
+    const url = new URL(window.location);
+    if (selectedSeason) url.searchParams.set('season', selectedSeason);
+    if (selectedLeague) url.searchParams.set('league', selectedLeague);
+    window.history.pushState({}, '', url);
+    
+    // Reload leagues if season changed
+    if (event.target.name === 'season') {
+        loadLeagues();
+    } else {
+        // Just update available options if league changed
+        updateAvailableOptions();
+    }
+}
+
+// Handle selection change for week or team
+function handleWeekTeamSelection() {
+    const selectedSeason = document.querySelector('input[name="season"]:checked')?.value;
+    const selectedLeague = document.querySelector('input[name="league"]:checked')?.value;
+    const selectedWeek = document.querySelector('input[name="week"]:checked')?.value;
+    const selectedTeam = document.querySelector('input[name="team"]:checked')?.value;
+    
+    // Update URL parameters
+    const url = new URL(window.location);
+    if (selectedWeek) url.searchParams.set('week', selectedWeek);
+    if (selectedTeam) url.searchParams.set('team', selectedTeam);
+    window.history.pushState({}, '', url);
+}
+
+// Update available options (teams) based on selected season and league
+function updateAvailableOptions() {
+    const selectedSeason = document.querySelector('input[name="season"]:checked')?.value;
+    const selectedLeague = document.querySelector('input[name="league"]:checked')?.value;
+    
+    if (selectedSeason && selectedLeague) {
+        // Fetch weeks
+        fetch(`/league/get_available_weeks?season=${selectedSeason}&league=${selectedLeague}`)
+            .then(response => response.json())
+            .then(weeks => {
+                const weekButtons = weeks.map(week => `
+                    <input type="radio" class="btn-check" name="week" id="week_${week}" 
+                           value="${week}">
+                    <label class="btn btn-outline-primary" for="week_${week}">${week}</label>
+                `).join('');
+                document.getElementById('buttonsWeek').innerHTML = weekButtons;
+                
+                // Select first week by default
+                if (weeks.length > 0) {
+                    const firstWeekInput = document.querySelector(`input[name="week"][value="${weeks[0]}"]`);
+                    if (firstWeekInput) {
+                        firstWeekInput.checked = true;
+                    }
+                }
+            });
+        
+        // Fetch teams
+        fetch(`/league/get_team_positions?season=${selectedSeason}&league=${selectedLeague}`)
+            .then(response => response.json())
+            .then(data => {
+                // Extract team names from the response
+                const teams = Object.keys(data.weekly || {});
+                
+                const teamButtons = teams.map(team => `
+                    <input type="radio" class="btn-check" name="team" id="team_${team.replace(/\s+/g, '_')}" 
+                           value="${team}">
+                    <label class="btn btn-outline-primary" for="team_${team.replace(/\s+/g, '_')}">${team}</label>
+                `).join('');
+                document.getElementById('buttonsTeam').innerHTML = teamButtons;
+                
+                // Select first team by default
+                if (teams.length > 0) {
+                    const firstTeamInput = document.querySelector(`input[name="team"][value="${teams[0]}"]`);
+                    if (firstTeamInput) {
+                        firstTeamInput.checked = true;
+                    }
+                }
+            });
+    }
+}
+
+// Display result in a container
+function displayResult(containerId, data, isError = false) {
+    const container = document.getElementById(containerId);
+    
+    if (isError) {
+        container.innerHTML = `
+            <div class="alert alert-danger">
+                <strong>Error:</strong> ${data}
+            </div>
+        `;
+        return;
+    }
+    
+    // Create tabs for different views
+    container.innerHTML = `
+        <style>
+            /* Custom styling for tabs with higher specificity */
+            #${containerId} .nav-tabs .nav-link {
+                color: #0a9dc7 !important; /* Blue text for all tabs */
+                border: 1px solid #0a9dc7 !important; /* Blue border */
+                border-bottom: none !important;
+                background-color: #f8f9fa !important; /* Light gray background */
+            }
+            #${containerId} .nav-tabs .nav-link.active {
+                color: white !important; /* White text for active tab */
+                font-weight: bold !important;
+                background-color: #0a9dc7 !important; /* Blue background for active tab */
+                border-color: #0a9dc7 !important;
+                border-top-width: 2px !important;
+            }
+            #${containerId} .tab-content {
+                border: 1px solid #0a9dc7 !important;
+                border-top: none !important;
+            }
+            #${containerId} .nav-tabs {
+                border-bottom: 1px solid #0a9dc7 !important;
+            }
+        </style>
+        <ul class="nav nav-tabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="${containerId}-json-tab" data-bs-toggle="tab" data-bs-target="#${containerId}-json" type="button" role="tab" aria-controls="${containerId}-json" aria-selected="true">JSON</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="${containerId}-table-tab" data-bs-toggle="tab" data-bs-target="#${containerId}-table" type="button" role="tab" aria-controls="${containerId}-table" aria-selected="false">Table</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="${containerId}-chart-tab" data-bs-toggle="tab" data-bs-target="#${containerId}-chart" type="button" role="tab" aria-controls="${containerId}-chart" aria-selected="false">Chart</button>
+            </li>
+        </ul>
+        <div class="tab-content p-3 border border-top-0 rounded-bottom">
+            <div class="tab-pane fade show active" id="${containerId}-json" role="tabpanel" aria-labelledby="${containerId}-json-tab">
+                <pre class="bg-light p-3 rounded" style="max-height: 400px; overflow: auto;"><code>${JSON.stringify(data, null, 2)}</code></pre>
+            </div>
+            <div class="tab-pane fade" id="${containerId}-table" role="tabpanel" aria-labelledby="${containerId}-table-tab">
+                <div id="${containerId}-table-content"></div>
+            </div>
+            <div class="tab-pane fade" id="${containerId}-chart" role="tabpanel" aria-labelledby="${containerId}-chart-tab">
+                <div id="${containerId}-chart-content" style="height: 400px;"></div>
+            </div>
+        </div>
+    `;
+    
+    // Add event listener for table tab
+    document.getElementById(`${containerId}-table-tab`).addEventListener('click', () => {
+        try {
+            if (data.columns && data.data) {
+                // This is a TableData object
+                createTableBootstrap3(`${containerId}-table-content`, data);
+            } else {
+                // Try to create a generic table
+                createGenericTable(`${containerId}-table-content`, data);
+            }
+        } catch (error) {
+            document.getElementById(`${containerId}-table-content`).innerHTML = `
+                <div class="alert alert-warning">
+                    <strong>Note:</strong> Data is not in a format that can be displayed as a table.
+                </div>
+            `;
+        }
+    });
+    
+    // Add event listener for chart tab
+    document.getElementById(`${containerId}-chart-tab`).addEventListener('click', () => {
+        try {
+            createChart(`${containerId}-chart-content`, data);
+        } catch (error) {
+            document.getElementById(`${containerId}-chart-content`).innerHTML = `
+                <div class="alert alert-warning">
+                    <strong>Note:</strong> Data is not in a format that can be displayed as a chart.
+                </div>
+            `;
+        }
+    });
+}
+
+// Create a generic table from JSON data
+function createGenericTable(containerId, data) {
+    const container = document.getElementById(containerId);
+    
+    if (Array.isArray(data)) {
+        // Array of objects
+        if (data.length > 0 && typeof data[0] === 'object') {
+            const columns = Object.keys(data[0]);
+            const tableData = {
+                columns: columns,
+                data: data.map(item => columns.map(col => item[col]))
+            };
+            createTableBootstrap3(containerId, tableData);
+        } else {
+            // Simple array
+            const tableData = {
+                columns: ['Index', 'Value'],
+                data: data.map((item, index) => [index, item])
+            };
+            createTableBootstrap3(containerId, tableData);
+        }
+    } else if (typeof data === 'object') {
+        // Object
+        const tableData = {
+            columns: ['Key', 'Value'],
+            data: Object.entries(data).map(([key, value]) => [
+                key, 
+                typeof value === 'object' ? JSON.stringify(value) : value
+            ])
+        };
+        createTableBootstrap3(containerId, tableData);
+    } else {
+        container.innerHTML = `
+            <div class="alert alert-warning">
+                <strong>Note:</strong> Data is not in a format that can be displayed as a table.
+            </div>
+        `;
+    }
+}
+
+// Create a chart from JSON data
+function createChart(containerId, data) {
+    const container = document.getElementById(containerId);
+    
+    if (Array.isArray(data)) {
+        // Array of objects with numeric values
+        if (data.length > 0 && typeof data[0] === 'object') {
+            const labels = data.map((item, index) => item.label || `Item ${index + 1}`);
+            const values = data.map(item => {
+                const numericValues = Object.entries(item)
+                    .filter(([key, value]) => typeof value === 'number' && key !== 'id')
+                    .map(([key, value]) => ({ key, value }));
+                return numericValues.length > 0 ? numericValues[0].value : 0;
+            });
+            
+            const chartData = {
+                labels: labels,
+                datasets: [{
+                    label: 'Value',
+                    data: values,
+                    backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }]
+            };
+            
+            const ctx = document.createElement('canvas');
+            container.appendChild(ctx);
+            
+            new Chart(ctx, {
+                type: 'bar',
+                data: chartData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        } else {
+            // Simple array
+            const chartData = {
+                labels: data.map((_, index) => `Item ${index + 1}`),
+                datasets: [{
+                    label: 'Value',
+                    data: data,
+                    backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }]
+            };
+            
+            const ctx = document.createElement('canvas');
+            container.appendChild(ctx);
+            
+            new Chart(ctx, {
+                type: 'bar',
+                data: chartData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+    } else {
+        container.innerHTML = `
+            <div class="alert alert-warning">
+                <strong>Note:</strong> Data is not in a format that can be displayed as a chart.
+            </div>
+        `;
+    }
+}
+
+// Get random color for charts
+function getRandomColor(alpha = 1) {
+    const r = Math.floor(Math.random() * 256);
+    const g = Math.floor(Math.random() * 256);
+    const b = Math.floor(Math.random() * 256);
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
+// Initialize the page when DOM is loaded
+document.addEventListener('DOMContentLoaded', initializePage);
+</script>
+
+{% endblock %}

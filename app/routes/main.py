@@ -38,3 +38,8 @@ def reload_data():
     data_manager = DataManager()
     data_manager.reload_data()
     return redirect(request.referrer or url_for('main.index'))
+
+@bp.route('/test')
+def test():
+    """Test page for API routes"""
+    return render_template('test.html')
