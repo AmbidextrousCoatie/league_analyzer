@@ -7,6 +7,7 @@ from typing import List, Dict, Any, Optional, Tuple, Callable, Union
 
 from data_access.models.league_models import LeagueQuery
 from data_access.models.league_models import TeamSeasonPerformance, TeamWeeklyPerformance
+from data_access.models.raw_data_models import RawPlayerData, RawTeamData, RawLeagueData
 
 
 
@@ -49,7 +50,7 @@ class DataAdapterPandas(DataAdapter):
         self.df = df
 
     def get_filtered_data(self, 
-                          filters: Optional[Dict[str, Any]] = None, 
+                          filters: Optional[Dict[str, Dict[str, Any]]] = None, 
                           columns: Optional[List[str]] = None,
                           sort_by: Optional[Union[str, List[str]]] = None,
                           ascending: bool = True,
@@ -58,9 +59,10 @@ class DataAdapterPandas(DataAdapter):
         Get filtered data from the dataframe with enhanced filtering capabilities.
         
         Args:
-            filters: Dictionary of filters. Can be simple equality filters or complex filters.
-                    For complex filters, use a tuple: (operator, value)
-                    Example: {"Age": ("gt", 30), "Name": "John"}
+            filters: Dictionary of column names to filter dictionaries
+                   Each filter dictionary should have:
+                   - 'value': The value to filter by
+                   - 'operator': The operator to use (must be one of OPERATORS keys)
             columns: List of columns to include in the result
             sort_by: Column(s) to sort by
             ascending: Sort direction (True for ascending, False for descending)
@@ -77,34 +79,32 @@ class DataAdapterPandas(DataAdapter):
         
         # Apply filters
         if filters:
-            for key, value in filters.items():
-                if key in result.columns:
-                    if isinstance(value, tuple) and len(value) == 2 and value[0] in OPERATORS:
-                        # Complex filter with operator
-                        op_name, op_value = value
-                        op_func = OPERATORS[op_name]
+            for column, filter_dict in filters.items():
+                if column in result.columns:
+                    value = filter_dict.get('value')
+                    operator_name = filter_dict.get('operator')
+                    
+                    if value is not None and operator_name in OPERATORS:
+                        op_func = OPERATORS[operator_name]
                         
                         # Apply the filter using a vectorized operation if possible
-                        if op_name in ["in", "not_in"]:
-                            if op_name == "in":
-                                result = result[result[key].isin(op_value)]
+                        if operator_name in ["in", "not_in"]:
+                            if operator_name == "in":
+                                result = result[result[column].isin(value)]
                             else:
-                                result = result[~result[key].isin(op_value)]
-                        elif op_name in ["contains", "startswith", "endswith"]:
+                                result = result[~result[column].isin(value)]
+                        elif operator_name in ["contains", "startswith", "endswith"]:
                             # String operations
-                            if op_name == "contains":
-                                result = result[result[key].str.contains(op_value, na=False)]
-                            elif op_name == "startswith":
-                                result = result[result[key].str.startswith(op_value, na=False)]
-                            elif op_name == "endswith":
-                                result = result[result[key].str.endswith(op_value, na=False)]
+                            if operator_name == "contains":
+                                result = result[result[column].str.contains(value, na=False)]
+                            elif operator_name == "startswith":
+                                result = result[result[column].str.startswith(value, na=False)]
+                            elif operator_name == "endswith":
+                                result = result[result[column].str.endswith(value, na=False)]
                         else:
                             # Comparison operators
-                            mask = result[key].apply(lambda x: op_func(x, op_value))
+                            mask = result[column].apply(lambda x: op_func(x, value))
                             result = result[mask]
-                    else:
-                        # Simple equality filter
-                        result = result[result[key] == value]
         
         # Select columns
         if columns:
@@ -306,6 +306,7 @@ class DataAdapterPandas(DataAdapter):
             max_week=week
         )
         
+        print(query)
         # Get filtered data
         filters = query.to_filter_dict()
         league_data = self.get_filtered_data(filters=filters)
@@ -360,7 +361,8 @@ class DataAdapterPandas(DataAdapter):
                 # Each player plays one game per week
                 total_games += week_data['players_per_team']
             
-            average = data['total_score'] / total_games if total_games > 0 else 0
+            # @todo: this is a hack to normalize the score, the factor 2.5 is arbitrary, fix it in the structure
+            average = data['total_score'] / (total_games) if total_games > 0 else 0
             
             # Create weekly performance objects
             weekly_performances = []
@@ -392,4 +394,60 @@ class DataAdapterPandas(DataAdapter):
             )
         
         return result
+    
+    def _convert_to_raw_player_data(self, row: pd.Series) -> RawPlayerData:
+        """Convert a pandas Series to RawPlayerData"""
+        return RawPlayerData(
+            player_name=str(row[Columns.player_name]),
+            team_name=str(row[Columns.team_name]),
+            week=int(row[Columns.week]),
+            round_number=int(row[Columns.round_number]),
+            score=int(row[Columns.score]),
+            points=float(row[Columns.points]),
+            calculated_score=bool(not pd.isna(row[Columns.input_data]))
+        )
+
+    def _convert_to_raw_team_data(self, team_df: pd.DataFrame) -> RawTeamData:
+        """Convert team DataFrame to RawTeamData"""
+        players = [
+            self._convert_to_raw_player_data(row)
+            for _, row in team_df.iterrows()
+        ]
+        return RawTeamData(
+            team_name=str(team_df[Columns.team_name].iloc[0]),
+            season=str(team_df[Columns.season].iloc[0]),
+            players=players
+        )
+
+    def get_raw_team_data(self, team: str, season: str) -> RawTeamData:
+        """Get raw team data as DTO"""
+        filters = {
+            Columns.team_name: {'value': team, 'operator': 'eq'},
+            Columns.season: {'value': season, 'operator': 'eq'}
+        }
+        team_df = self.get_filtered_data(filters=filters)
+        if team_df.empty:
+            return None
+        return self._convert_to_raw_team_data(team_df)
+
+    def get_raw_league_data(self, league: str, season: str) -> RawLeagueData:
+        """Get raw league data as DTO"""
+        filters = {
+            Columns.league_name: {'value': league, 'operator': 'eq'},
+            Columns.season: {'value': season, 'operator': 'eq'}
+        }
+        league_df = self.get_filtered_data(filters=filters)
+        if league_df.empty:
+            return None
+            
+        teams = []
+        for team in league_df[Columns.team_name].unique():
+            team_df = league_df[league_df[Columns.team_name] == team]
+            teams.append(self._convert_to_raw_team_data(team_df))
+            
+        return RawLeagueData(
+            league_name=league,
+            season=season,
+            teams=teams
+        )
     

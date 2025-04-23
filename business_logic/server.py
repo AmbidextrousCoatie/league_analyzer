@@ -92,12 +92,16 @@ class Server:
         return individual_scores_df, team_scores_df, individual_averages_df, team_averages_df
 
     def get_teams_in_league_season(self, league_name:str, season:str, debug_output:bool=False) -> List[str]:
-        filters = {Columns.league_name: league_name, Columns.season: season}
-        
+        filters_depr = {Columns.league_name: league_name, Columns.season: season}
+        filters = {
+            Columns.league_name: {'value': league_name, 'operator': 'eq'},
+            Columns.season: {'value': season, 'operator': 'eq'}
+        }
+
         columns = [Columns.team_name]
         if debug_output:
             print ("get_teams_in_league_season: filter:" + str(filters) + " | columns:" + str(columns))
-        return sorted(self.data_adapter.get_filtered_data(columns=columns, filters_eq=filters)[Columns.team_name].unique().tolist())
+        return sorted(self.data_adapter.get_filtered_data(columns=columns, filters=filters)[Columns.team_name].unique().tolist())
 
     def aggregate_league_table(self, data_individual: pd.DataFrame, data_team: pd.DataFrame, week:int, debug: bool=False) -> pd.DataFrame:
         """
@@ -182,14 +186,31 @@ class Server:
         return data_league_history
 
 
-    def get_team_week(self, league_name: str, season: str, team_name: str,week: int) -> pd.DataFrame:
-        filters_eq = {Columns.league_name: league_name, Columns.team_name: team_name, Columns.season: season, Columns.week: week}
-        
-        
+    def get_team_week(self, league_name: str, season: str, team_name: str, week: int) -> pd.DataFrame:
+        """
+        High level database query.
+        Composes a table that represents a team's results in a given week.
+
+        Args:
+            league_name (str): The name of the league.
+            season (str): The season.
+            team_name (str): The name of the team.
+            week (int): The week number.
+
+        Returns:
+            pd.DataFrame: The team's results for the given week.
+        """
         columns = [Columns.score, Columns.points, Columns.week]
-
-
-        return self.data_adapter.get_filtered_data(columns=columns, filters_eq=filters_eq)
+        
+        # Use the new filter format
+        filters = {
+            Columns.league_name: {'value': league_name, 'operator': 'eq'},
+            Columns.team_name: {'value': team_name, 'operator': 'eq'},
+            Columns.season: {'value': season, 'operator': 'eq'},
+            Columns.week: {'value': week, 'operator': 'eq'}
+        }
+        
+        return self.data_adapter.get_filtered_data(columns=columns, filters=filters)
 
     def get_league_week(self, league_name: str, season: str, week: int) -> pd.DataFrame:
         """
@@ -212,14 +233,25 @@ class Server:
         Returns:
             pd.DataFrame: The league standings for the given week. Columns: team_name, points, score, week, score_average
         """
-        filters_eq_individual = {Columns.league_name: league_name, Columns.season: season, Columns.week: week, Columns.computed_data: False}
-        filters_eq_team = {Columns.league_name: league_name, Columns.season: season, Columns.week: week, Columns.computed_data: True}
+        # Use the new filter format
+        filters_individual = {
+            Columns.league_name: {'value': league_name, 'operator': 'eq'},
+            Columns.season: {'value': season, 'operator': 'eq'},
+            Columns.week: {'value': week, 'operator': 'eq'},
+            Columns.computed_data: {'value': False, 'operator': 'eq'}
+        }
+        
+        filters_team = {
+            Columns.league_name: {'value': league_name, 'operator': 'eq'},
+            Columns.season: {'value': season, 'operator': 'eq'},
+            Columns.week: {'value': week, 'operator': 'eq'},
+            Columns.computed_data: {'value': True, 'operator': 'eq'}
+        }
         
         columns = [Columns.team_name, Columns.points, Columns.score, Columns.week]
-        data_week_individual = self.data_adapter.get_filtered_data(columns=columns, filters_eq=filters_eq_individual)
-        data_week_team = self.data_adapter.get_filtered_data(columns=columns, filters_eq=filters_eq_team)
-        #print("data individual: " + str(data_week_individual))
-        #print("data team: " + str(data_week_team))
+        data_week_individual = self.data_adapter.get_filtered_data(columns=columns, filters=filters_individual)
+        data_week_team = self.data_adapter.get_filtered_data(columns=columns, filters=filters_team)
+        
         return self.aggregate_league_table(data_week_individual, data_week_team, week)
 
     def get_league_standings(self, league_name: str, season: str, week: int) -> pd.DataFrame:
@@ -662,3 +694,145 @@ class Server:
         data =  self.data_adapter.get_latest_events(limit)
         print(data)
         return data
+
+    def get_league_season(self, league_name: str, season: str) -> pd.DataFrame:
+        """
+        High level database query.
+        Composes a table that represents a league's results in a given season.
+
+        Args:
+            league_name (str): The name of the league.
+            season (str): The season.
+
+        Returns:
+            pd.DataFrame: The league standings for the given season.
+        """
+        columns_to_fetch = [Columns.team_name, Columns.points, Columns.score, Columns.week]
+        
+        # Use the new filter format
+        filters = {
+            Columns.season: {'value': season, 'operator': 'eq'},
+            Columns.league_name: {'value': league_name, 'operator': 'eq'}
+        }
+        
+        league_season_data = self.data_adapter.get_filtered_data(columns=columns_to_fetch, filters=filters)
+        
+        return league_season_data
+    
+    def get_team_season(self, team_name: str) -> pd.DataFrame:
+        """
+        High level database query.
+        Composes a table that represents a team's results in a given season.
+
+        Args:
+            team_name (str): The name of the team.
+
+        Returns:
+            pd.DataFrame: The team's results for the given season.
+        """
+        columns_to_fetch = [Columns.team_name, Columns.points, Columns.score, Columns.week]
+        
+        # Use the new filter format
+        filters = {
+            Columns.team_name: {'value': team_name, 'operator': 'eq'},
+            Columns.computed_data: {'value': False, 'operator': 'eq'}
+        }
+        
+        league_season_data = self.data_adapter.get_filtered_data(columns=columns_to_fetch, filters=filters)
+        
+        return league_season_data
+    
+    def get_player_week(self, league_name: str, season: str, team_name: str, player_name: str, week: int) -> pd.DataFrame:
+        """
+        High level database query.
+        Composes a table that represents a player's results in a given week.
+
+        Args:
+            league_name (str): The name of the league.
+            season (str): The season.
+            team_name (str): The name of the team.
+            player_name (str): The name of the player.
+            week (int): The week number.
+
+        Returns:
+            pd.DataFrame: The player's results for the given week.
+        """
+        columns = [Columns.team_name, Columns.player_name, Columns.points, Columns.score, Columns.week]
+        
+        # Use the new filter format
+        filters = {
+            Columns.league_name: {'value': league_name, 'operator': 'eq'},
+            Columns.season: {'value': season, 'operator': 'eq'},
+            Columns.week: {'value': week, 'operator': 'eq'},
+            Columns.team_name: {'value': team_name, 'operator': 'eq'},
+            Columns.player_name: {'value': player_name, 'operator': 'eq'}
+        }
+        
+        data = self.data_adapter.get_filtered_data(columns=columns, filters=filters)
+        
+        return data
+
+    def get_league_season_cumulated(self, league_name: str, season: str, week: int) -> pd.DataFrame:
+        """
+        High level database query.
+        Composes a table that represents a league's results in a given season, cumulated up to a specific week.
+
+        Args:
+            league_name (str): The name of the league.
+            season (str): The season.
+            week (int): The week number up to which to cumulate.
+
+        Returns:
+            pd.DataFrame: The cumulated league standings for the given season up to the specified week.
+        """
+        columns_to_fetch = [Columns.team_name, Columns.points, Columns.score, Columns.week]
+        
+        # Use the new filter format
+        filters_individual = {
+            Columns.league_name: {'value': league_name, 'operator': 'eq'},
+            Columns.season: {'value': season, 'operator': 'eq'},
+            Columns.week: {'value': week, 'operator': 'le'},
+            Columns.computed_data: {'value': False, 'operator': 'eq'}
+        }
+        
+        filters_team = {
+            Columns.league_name: {'value': league_name, 'operator': 'eq'},
+            Columns.season: {'value': season, 'operator': 'eq'},
+            Columns.week: {'value': week, 'operator': 'le'},
+            Columns.computed_data: {'value': True, 'operator': 'eq'}
+        }
+        
+        data_week_individual = self.data_adapter.get_filtered_data(columns=columns_to_fetch, filters=filters_individual)
+        data_week_team = self.data_adapter.get_filtered_data(columns=columns_to_fetch, filters=filters_team)
+        
+        return self.aggregate_league_table(data_week_individual, data_week_team, week)
+    
+    def get_player_season(self, player_name: str, season: str) -> pd.DataFrame:
+        """
+        High level database query.
+        Composes a table that represents a player's results in a given season.
+
+        Args:
+            player_name (str): The name of the player.
+            season (str): The season.
+
+        Returns:
+            pd.DataFrame: The player's results for the given season.
+        """
+        columns = [Columns.team_name, Columns.player_name, Columns.points, Columns.score, Columns.week]
+        
+        # Use the new filter format
+        filters_player = {
+            Columns.player_name: {'value': player_name, 'operator': 'eq'},
+            Columns.season: {'value': season, 'operator': 'eq'}
+        }
+        
+        filters_team = {
+            Columns.team_name: {'value': player_name, 'operator': 'eq'},
+            Columns.season: {'value': season, 'operator': 'eq'}
+        }
+        
+        data_player = self.data_adapter.get_filtered_data(columns=columns, filters=filters_player)
+        data_team = self.data_adapter.get_filtered_data(columns=columns, filters=filters_team)
+        
+        return pd.concat([data_player, data_team])

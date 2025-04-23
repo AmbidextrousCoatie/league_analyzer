@@ -4,65 +4,16 @@ from data_access.schema import Columns
 from app.services.data_manager import DataManager
 from business_logic.statistics import calculate_score_average_player, calculate_games_count_player
 from business_logic.server import Server
+from app.services.statistics_service import StatisticsService
+from app.models.statistics_models import PlayerStatistics
+from typing import Dict, List, Any, Optional
 
 class PlayerService:
     def __init__(self):
         self.data_manager = DataManager()
         self.server = Server()
+        self.stats_service = StatisticsService()
 
-    def get_all_players(self):
-        players = fetch_column(
-            database_df=self.data_manager.df,
-            column_name=Columns.player_name,
-            unique=True,
-            as_list=True
-        )
-        return [{'id': name, 'name': name} for name in sorted(players)]
-
-    def get_personal_stats(self, player_name: str, season: str = 'all'):
-        df = self.data_manager.df
-        print(player_name)
-        # Filter for the specific player
-        player_df = fetch_data(df, values_to_filter_for={Columns.player_name: player_name})
-
-        player_id = player_df.iloc[0][Columns.player_id]
-        print(player_id)
-        # Calculate all-time average
-        # Calculate all-time average
-        all_time_average = calculate_score_average_player(player_df, player_name)
-        all_time_game_count = len(player_df)
-
-        # Calculate per-season average
-        per_season_average = calculate_score_average_player(player_df, player_name, group_by=Columns.season)
-        per_season_game_count = calculate_games_count_player(player_df, player_name, group_by=Columns.season)
-        print(per_season_average)
-        seasons = per_season_average.index.to_list() 
-        averages = per_season_average.values.tolist()
-        gamecount = [30] # per_season_game_count.values.tolist()
-
-        # TODO: Add team comparison
-        stats = {
-            'name': player_name,
-            'id': int(player_id),
-            'team': player_df.iloc[0][Columns.team_name],
-            'average': [all_time_average] + averages,
-            'game_count': [all_time_game_count] + gamecount,
-            'season': ["all time"] + seasons,
-
-        }
-
-        #print(stats)
-    
-        return stats
-    
-    def get_team_comparison(self, player_id: str, season: str = 'all'):
-        """Compare player stats with team averages"""
-        pass
-    
-    def get_historical_data(self, player_id: str):
-        """Get historical performance data"""
-        pass
-    
     def get_all_players(self):
         """Get list of all players for selection"""
         players = fetch_column(
@@ -73,7 +24,94 @@ class PlayerService:
         )
         return [{'id': name, 'name': name} for name in sorted(players)]
 
-    def search_players(self, search_term):
+    def get_player_statistics(self, player_name: str, season: str) -> PlayerStatistics:
+        """Get comprehensive player statistics"""
+        return self.stats_service.get_player_statistics(player_name, season)
+
+    def get_personal_stats(self, player_name: str, season: str = 'all') -> Dict[str, Any]:
+        """Get personal statistics for a player"""
+        if season == 'all':
+            # Get all seasons the player participated in
+            player_data = self.data_manager.df[self.data_manager.df[Columns.player_name] == player_name]
+            seasons = sorted(player_data[Columns.season].unique())
+            
+            # Get statistics for each season
+            season_stats = []
+            for season in seasons:
+                stats = self.get_player_statistics(player_name, season)
+                if stats:
+                    season_stats.append({
+                        'season': season,
+                        'statistics': {
+                            'total_score': stats.season_summary.total_score,
+                            'total_points': stats.season_summary.total_points,
+                            'average_score': stats.season_summary.average_score,
+                            'games_played': stats.season_summary.games_played,
+                            'best_score': stats.season_summary.best_score,
+                            'worst_score': stats.season_summary.worst_score,
+                            'team_contribution': stats.team_contribution
+                        }
+                    })
+            
+            return {
+                'name': player_name,
+                'seasons': season_stats
+            }
+        else:
+            # Get statistics for specific season
+            stats = self.get_player_statistics(player_name, season)
+            if not stats:
+                return None
+                
+            return {
+                'name': player_name,
+                'season': season,
+                'statistics': {
+                    'total_score': stats.season_summary.total_score,
+                    'total_points': stats.season_summary.total_points,
+                    'average_score': stats.season_summary.average_score,
+                    'games_played': stats.season_summary.games_played,
+                    'best_score': stats.season_summary.best_score,
+                    'worst_score': stats.season_summary.worst_score,
+                    'team_contribution': stats.team_contribution
+                }
+            }
+
+    def get_team_comparison(self, player_name: str, season: str) -> Dict[str, Any]:
+        """Compare player stats with team averages"""
+        player_stats = self.get_player_statistics(player_name, season)
+        if not player_stats:
+            return None
+            
+        # Get team data
+        team_data = self.data_manager.df[
+            (self.data_manager.df[Columns.team_name] == player_stats.team_name) &
+            (self.data_manager.df[Columns.season] == season)
+        ]
+        
+        # Calculate team averages
+        team_avg = team_data[Columns.score].mean()
+        team_total = team_data[Columns.score].sum()
+        
+        return {
+            'player': {
+                'name': player_name,
+                'average': player_stats.season_summary.average_score,
+                'total_score': player_stats.season_summary.total_score,
+                'contribution': player_stats.team_contribution
+            },
+            'team': {
+                'name': player_stats.team_name,
+                'average': team_avg,
+                'total_score': team_total
+            },
+            'comparison': {
+                'vs_team_avg': player_stats.season_summary.average_score - team_avg,
+                'contribution_percentage': player_stats.team_contribution
+            }
+        }
+
+    def search_players(self, search_term: str) -> List[Dict[str, str]]:
         """Search players by name"""
         # Get all players first
         all_players = self.get_all_players()
@@ -89,6 +127,9 @@ class PlayerService:
         
         return all_players
 
+    def get_historical_data(self, player_id: str):
+        """Get historical performance data"""
+        pass
 
     def get_lifetime_stats(self, player_name):
         """Get lifetime statistics for a player."""

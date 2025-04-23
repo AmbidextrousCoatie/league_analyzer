@@ -1,6 +1,7 @@
 # data_access/models/league_models.py
 from dataclasses import dataclass, field
 from typing import Optional, Dict, Any, List, Union
+from data_access.schema import Columns
 
 @dataclass
 class LeagueQuery:
@@ -12,34 +13,38 @@ class LeagueQuery:
     min_week: Optional[int] = None
     max_week: Optional[int] = None
     
-    def to_filter_dict(self) -> Dict[str, Any]:
+    def to_filter_dict(self) -> Dict[str, Dict[str, Any]]:
         """Convert to a filter dictionary for the adapter"""
         filters = {}
         
         if self.season:
-            filters["Season"] = self.season
+            filters[Columns.season] = {'value': self.season, 'operator': 'eq'}
         
         if self.league:
-            filters["League"] = self.league
+            filters[Columns.league_name] = {'value': self.league, 'operator': 'eq'}
         
         if self.week is not None:
-            filters["Week"] = self.week
+            filters[Columns.week] = {'value': self.week, 'operator': 'eq'}
         elif self.min_week is not None or self.max_week is not None:
             # Handle week range
             if self.min_week is not None and self.max_week is not None:
                 # Between min and max
-                filters["Week"] = ("in", list(range(self.min_week, self.max_week + 1)))
+                filters[Columns.week] = {'value': list(range(self.min_week, self.max_week + 1)), 'operator': 'in'}
             elif self.min_week is not None:
                 # Greater than or equal to min
-                filters["Week"] = ("ge", self.min_week)
+                filters[Columns.week] = {'value': self.min_week, 'operator': 'ge'}
             elif self.max_week is not None:
                 # Less than or equal to max
-                filters["Week"] = ("le", self.max_week)
+                filters[Columns.week] = {'value': self.max_week, 'operator': 'le'}
         
         if self.team:
-            filters["Team"] = self.team
+            filters[Columns.team_name] = {'value': self.team, 'operator': 'eq'}
         
         return filters
+    
+    def __str__(self) -> str:
+        """Convert to a string representation"""
+        return f"LeagueQuery(season={self.season}, league={self.league}, week={self.week}, team={self.team}, min_week={self.min_week}, max_week={self.max_week})"
 
 @dataclass
 class TeamWeeklyPerformance:

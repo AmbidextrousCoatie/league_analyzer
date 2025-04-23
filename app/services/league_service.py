@@ -3,11 +3,14 @@ import datetime
 from data_access.adapters.data_adapter_factory import DataAdapterFactory, DataAdapterSelector
 from data_access.models.league_models import LeagueQuery, TeamSeasonPerformance, LeagueStandings, TeamWeeklyPerformance
 from app.models.table_data import TableData, ColumnGroup, Column, PlotData, TileData
+from app.services.statistics_service import StatisticsService
+from app.models.statistics_models import LeagueStatistics, LeagueResults
 
 class LeagueService:
     def __init__(self, adapter_type=DataAdapterSelector.PANDAS):
         self.adapter = DataAdapterFactory.create_adapter(adapter_type)
-    
+        self.stats_service = StatisticsService()
+
     def get_available_weeks(self, season: str, league: str) -> List[int]:
         """Get available weeks for a season and league"""
         return self.adapter.get_weeks(season, league)
@@ -41,17 +44,53 @@ class LeagueService:
         if week is None:
             week = self.get_latest_week(season, league)
         
-        # Create query for all weeks up to the specified week
-        query = LeagueQuery(
-            season=season,
-            league=league,
-            max_week=week
-        )
+        print("week: ", week)
+
+        # Get league statistics
+        stats = self.stats_service.get_league_statistics(league, season)
+        if not stats:
+            return LeagueStandings(
+                season=season,
+                league_name=league,
+                week=week,
+                teams=[],
+                last_updated=datetime.datetime.now().isoformat()
+            )
         
-        # Get team performances from the adapter
-        # This assumes your adapter has a method to get team season performances
-        # If not, you'll need to process the raw data here
-        team_performances = self._get_team_season_performances(query)
+        # Convert statistics to team performances
+        team_performances = []
+        for team_name, team_stats in stats.team_stats.items():
+            # Get the latest weekly performance
+            latest_week = max(team_stats.weekly_performances.keys())
+            week_perf = team_stats.weekly_performances[latest_week]
+            
+            # Create weekly performances list
+            weekly_performances = []
+            for week_num, perf in team_stats.weekly_performances.items():
+                weekly_performances.append(
+                    TeamWeeklyPerformance(
+                        team_id=perf.team_id,
+                        team_name=perf.team_name,
+                        week=week_num,
+                        score=perf.total_score,
+                        points=perf.points
+                    )
+                )
+            
+            # Sort weekly performances by week
+            weekly_performances.sort(key=lambda x: x.week)
+            
+            # Create team performance
+            team_performances.append(
+                TeamSeasonPerformance(
+                    team_id=week_perf.team_id,
+                    team_name=team_name,
+                    total_score=team_stats.season_summary.total_score,
+                    total_points=team_stats.season_summary.total_points,
+                    average=team_stats.season_summary.average_score,
+                    weekly_performances=weekly_performances
+                )
+            )
         
         # Sort by total points (descending) and assign positions
         team_performances.sort(key=lambda x: (x.total_points, x.total_score), reverse=True)
@@ -66,98 +105,34 @@ class LeagueService:
             teams=team_performances,
             last_updated=datetime.datetime.now().isoformat()
         )
-    
-    def _get_team_season_performances(self, query: LeagueQuery) -> List[TeamSeasonPerformance]:
-        """
-        Get team performances for a season.
-        This method processes raw data from the adapter into TeamSeasonPerformance objects.
-        """
-        # Get raw data from adapter
-        league_data = self.adapter.get_filtered_data(query.to_filter_dict())
+
+    def get_league_results(self, league: str, season: str) -> LeagueResults:
+        """Get league results using the new data structure"""
+        stats = self.stats_service.get_league_statistics(league, season)
+        if not stats:
+            return None
+            
+        # Calculate ranking based on total points
+        ranking = sorted(
+            stats.team_stats.keys(),
+            key=lambda x: stats.team_stats[x].season_summary.total_points,
+            reverse=True
+        )
         
-        if league_data.empty:
-            return []
-        
-        # Process data to get team performances
-        # This implementation will depend on your specific data structure
-        # Here's a simplified example assuming your DataFrame has certain columns
-        
-        # Group by team
-        team_performances = {}
-        
-        # Process each row in the DataFrame
-        for _, row in league_data.iterrows():
-            team_id = row.get('TeamID', str(row.get('Team', '')))
-            team_name = row.get('TeamName', row.get('Team', ''))
-            week = row.get('Week', 0)
-            score = row.get('Score', 0)
-            points = row.get('Points', 0)
-            
-            # Initialize team data if not exists
-            if team_id not in team_performances:
-                team_performances[team_id] = {
-                    'team_id': team_id,
-                    'team_name': team_name,
-                    'total_score': 0,
-                    'total_points': 0,
-                    'weekly_performances': {}
-                }
-            
-            # Update team totals
-            team_data = team_performances[team_id]
-            team_data['total_score'] += score / 2.0
-            team_data['total_points'] += points
-            
-            # Store weekly performance
-            if week not in team_data['weekly_performances']:
-                team_data['weekly_performances'][week] = {
-                    'score': 0,
-                    'points': 0
-                }
-            
-            week_data = team_data['weekly_performances'][week]
-            week_data['score'] += score / 2.0
-            week_data['points'] += points
-        
-        # Convert to TeamSeasonPerformance objects
-        result = []
-        for team_id, data in team_performances.items():
-            # Calculate average (assuming 4 games per week)
-            weekly_count = len(data['weekly_performances'])
-           
-            games_played = weekly_count * 4  # Adjust based on your league structure
-            average = data['total_score'] / games_played / 5.0 if games_played > 0 else 0
-            
-            # Create weekly performance objects
-            weekly_performances = []
-            for week, week_data in data['weekly_performances'].items():
-                weekly_performances.append(
-                    TeamWeeklyPerformance(
-                        team_id=data['team_id'],
-                        team_name=data['team_name'],
-                        week=week,
-                        score=week_data['score'],
-                        points=week_data['points']
-                    )
-                )
-            
-            # Sort weekly performances by week
-            weekly_performances.sort(key=lambda x: x.week)
-            
-            # Create the TeamSeasonPerformance
-            result.append(
-                TeamSeasonPerformance(
-                    team_id=data['team_id'],
-                    team_name=data['team_name'],
-                    total_score=data['total_score'],
-                    total_points=data['total_points'],
-                    average=round(average, 2),
-                    weekly_performances=weekly_performances
-                )
-            )
-        
-        return result
-    
+        return LeagueResults(
+            name=league,
+            level=self._get_league_level(league),
+            weeks=stats.weekly_summaries,
+            ranking=ranking,
+            data=stats.season_summary
+        )
+
+    def _get_league_level(self, league: str) -> int:
+        """Get the level of a league"""
+        # This is a placeholder implementation
+        # You should implement the actual logic based on your requirements
+        return 1
+
     def get_league_week_table(self, season: str, league: str, week: Optional[int] = None, depth: int = 1) -> TableData:
         """
         Get a formatted table for league standings with weekly breakdowns.
@@ -262,15 +237,16 @@ class LeagueService:
                 if perf:
                     # Calculate average using players_per_team
                     weekly_avg = perf.score / perf.players_per_team
-                    row.extend([perf.score, perf.points, round(weekly_avg, 1)])
+                    row.extend([perf.score / 2.0, perf.points, round(weekly_avg / 10.0, 1)])
                 else:
                     row.extend([0, 0, 0])  # No data for this week
             
+            # @todo: this is a hack to normalize the score, the factor 2.0 amd 10.0 is arbitrary, fix it in the structure
             # Add season totals
             row.extend([
-                team.total_score,
+                team.total_score / 2.0,
                 team.total_points,
-                team.average
+                team.average / 10.0
             ])
             
             data.append(row)
@@ -732,7 +708,7 @@ class LeagueService:
             "title": f"{league_name} - {season} History",
             "teams": []
         }
-        
+        # @todo: this is a hack to normalize the score, the factor 2.5 is arbitrary, fix it in the structure
         for team in standings.teams:
             team_data = {
                 "name": team.team_name,
@@ -824,8 +800,7 @@ class LeagueService:
                     Column(
                         title="Pins", 
                         field="total_score", 
-                        format="{:,}",
-                        style={"fontWeight": "bold"}
+                        format="{:,}"
                     ),
                     Column(
                         title="Pts.", 
@@ -836,8 +811,7 @@ class LeagueService:
                     Column(
                         title="Avg.", 
                         field="average", 
-                        format="{:.1f}",
-                        style={"fontWeight": "bold", "color": "#007bff"}
+                        format="{:.1f}"
                     )
                 ]
             )
@@ -859,7 +833,7 @@ class LeagueService:
                     # Get players_per_team from the performance or use default
                     players_per_team = perf.get("players_per_team", 4)
                     # Calculate average using players_per_team
-                    weekly_avg = perf["score"] / players_per_team / 2.0
+                    weekly_avg = perf["score"] / players_per_team / 5.0 # @todo: this is a hack to normalize the score, the factor 5.0 is arbitrary, fix it in the structure
                     row.extend([perf["score"], perf["points"], round(weekly_avg, 1)])
                 else:
                     row.extend([0, 0, 0])  # No data for this week
