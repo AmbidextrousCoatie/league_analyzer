@@ -22,7 +22,7 @@ from data_access.schema import Columns
 def get_random_city():
     cities_bavaria = ['München', 'Nürnberg', 'Augsburg', 'Regensburg', 'Ingolstadt', 'Würzburg', 'Fürth', 'Erlangen',
                       'Bayreuth', 'Bamberg', 'Aschaffenburg', 'Landshut', 'Kempten', 'Rosenheim', 'Schweinfurt',
-                      'Neu-Ulm', 'Passau', 'Straubing', 'Hof', 'Weiden in der Oberpfalz']
+                      'Neu-Ulm', 'Passau', 'Straubing', 'Hof', 'Weiden']
 
     return random.choice(cities_bavaria)
 
@@ -336,7 +336,7 @@ def generate_league_dates(season, league_size):
         raise ValueError("Unsupported league size")
     
     # Number of match days needed (each team plays against every other team)
-    num_match_days = league_size - 1
+    num_match_days = league_size # - 1
     
     # Generate all dates
     dates = []
