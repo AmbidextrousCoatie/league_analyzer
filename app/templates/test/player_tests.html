@@ -21,6 +21,9 @@
                             <input type="text" class="form-control" id="playerNameInput" placeholder="Enter player name">
                             <button class="btn btn-primary" onclick="testPlayerDetails()">Test Route</button>
                         </div>
+                        <div class="mt-2">
+                            <span id="playerDetailsTime" class="text-muted"></span>
+                        </div>
                     </div>
                     <div id="playerDetailsResult" class="result-container">
                         <!-- Results will be shown here -->
@@ -40,6 +43,9 @@
                             <input type="text" class="form-control" id="playerNamePerformanceInput" placeholder="Enter player name">
                             <button class="btn btn-primary" onclick="testPlayerSeasonPerformance()">Test Route</button>
                         </div>
+                        <div class="mt-2">
+                            <span id="playerSeasonPerformanceTime" class="text-muted"></span>
+                        </div>
                     </div>
                     <div id="playerSeasonPerformanceResult" class="result-container">
                         <!-- Results will be shown here -->
@@ -58,6 +64,9 @@
                         <div class="input-group">
                             <input type="text" class="form-control" id="playerNameHistoryInput" placeholder="Enter player name">
                             <button class="btn btn-primary" onclick="testPlayerHistory()">Test Route</button>
+                        </div>
+                        <div class="mt-2">
+                            <span id="playerHistoryTime" class="text-muted"></span>
                         </div>
                     </div>
                     <div id="playerHistoryResult" class="result-container">
@@ -83,6 +92,9 @@
                             <input type="number" class="form-control" id="topPlayersLimitInput" placeholder="Limit" value="10">
                             <button class="btn btn-primary" onclick="testTopPlayers()">Test Route</button>
                         </div>
+                        <div class="mt-2">
+                            <span id="topPlayersTime" class="text-muted"></span>
+                        </div>
                     </div>
                     <div id="topPlayersResult" class="result-container">
                         <!-- Results will be shown here -->
@@ -104,7 +116,7 @@ function testAllPlayerRoutes() {
 
 // Test functions for each route
 function testPlayerDetails() {
-    const playerName = document.getElementById('playerNameInput').value;
+    const playerName = document.querySelector('#playerNameInput').value;
     
     if (!playerName) {
         displayResult('playerDetailsResult', 'Please enter a player name', true);
@@ -119,7 +131,9 @@ function testPlayerDetails() {
         </div>
     `;
     
-    fetch(`/player/get_player_details?player=${encodeURIComponent(playerName)}`)
+    const startTime = performance.now();
+    
+    fetch(`/player/get_player_details?player_name=${encodeURIComponent(playerName)}`)
         .then(response => {
             if (!response.ok) {
                 throw new Error(`HTTP error! Status: ${response.status}`);
@@ -127,15 +141,21 @@ function testPlayerDetails() {
             return response.json();
         })
         .then(data => {
-            displayResult('playerDetailsResult', data);
+            const endTime = performance.now();
+            const elapsedTime = ((endTime - startTime) / 1000).toFixed(2);
+            document.getElementById('playerDetailsTime').textContent = `Elapsed time: ${elapsedTime}s`;
+            displayResult('playerDetailsResult', data, false, elapsedTime);
         })
         .catch(error => {
-            displayResult('playerDetailsResult', error.message, true);
+            const endTime = performance.now();
+            const elapsedTime = ((endTime - startTime) / 1000).toFixed(2);
+            document.getElementById('playerDetailsTime').textContent = `Elapsed time: ${elapsedTime}s`;
+            displayResult('playerDetailsResult', error.message, true, elapsedTime);
         });
 }
 
 function testPlayerSeasonPerformance() {
-    const playerName = document.getElementById('playerNamePerformanceInput').value;
+    const playerName = document.querySelector('#playerNamePerformanceInput').value;
     const selectedSeason = document.querySelector('input[name="season"]:checked')?.value;
     
     if (!playerName || !selectedSeason) {
@@ -151,6 +171,8 @@ function testPlayerSeasonPerformance() {
         </div>
     `;
     
+    const startTime = performance.now();
+    
     fetch(`/player/get_player_season_performance?player=${encodeURIComponent(playerName)}&season=${selectedSeason}`)
         .then(response => {
             if (!response.ok) {
@@ -159,15 +181,21 @@ function testPlayerSeasonPerformance() {
             return response.json();
         })
         .then(data => {
-            displayResult('playerSeasonPerformanceResult', data);
+            const endTime = performance.now();
+            const elapsedTime = ((endTime - startTime) / 1000).toFixed(2);
+            document.getElementById('playerSeasonPerformanceTime').textContent = `Elapsed time: ${elapsedTime}s`;
+            displayResult('playerSeasonPerformanceResult', data, false, elapsedTime);
         })
         .catch(error => {
-            displayResult('playerSeasonPerformanceResult', error.message, true);
+            const endTime = performance.now();
+            const elapsedTime = ((endTime - startTime) / 1000).toFixed(2);
+            document.getElementById('playerSeasonPerformanceTime').textContent = `Elapsed time: ${elapsedTime}s`;
+            displayResult('playerSeasonPerformanceResult', error.message, true, elapsedTime);
         });
 }
 
 function testPlayerHistory() {
-    const playerName = document.getElementById('playerNameHistoryInput').value;
+    const playerName = document.querySelector('#playerNameHistoryInput').value;
     
     if (!playerName) {
         displayResult('playerHistoryResult', 'Please enter a player name', true);
@@ -182,6 +210,8 @@ function testPlayerHistory() {
         </div>
     `;
     
+    const startTime = performance.now();
+    
     fetch(`/player/get_player_history?player=${encodeURIComponent(playerName)}`)
         .then(response => {
             if (!response.ok) {
@@ -190,18 +220,24 @@ function testPlayerHistory() {
             return response.json();
         })
         .then(data => {
-            displayResult('playerHistoryResult', data);
+            const endTime = performance.now();
+            const elapsedTime = ((endTime - startTime) / 1000).toFixed(2);
+            document.getElementById('playerHistoryTime').textContent = `Elapsed time: ${elapsedTime}s`;
+            displayResult('playerHistoryResult', data, false, elapsedTime);
         })
         .catch(error => {
-            displayResult('playerHistoryResult', error.message, true);
+            const endTime = performance.now();
+            const elapsedTime = ((endTime - startTime) / 1000).toFixed(2);
+            document.getElementById('playerHistoryTime').textContent = `Elapsed time: ${elapsedTime}s`;
+            displayResult('playerHistoryResult', error.message, true, elapsedTime);
         });
 }
 
 function testTopPlayers() {
     const selectedSeason = document.querySelector('input[name="season"]:checked')?.value;
     const selectedLeague = document.querySelector('input[name="league"]:checked')?.value;
-    const metric = document.getElementById('topPlayersMetricSelect').value;
-    const limit = document.getElementById('topPlayersLimitInput').value;
+    const metric = document.querySelector('#topPlayersMetricSelect').value;
+    const limit = document.querySelector('#topPlayersLimitInput').value;
     
     if (!selectedSeason || !selectedLeague || !metric) {
         displayResult('topPlayersResult', 'Missing required parameters', true);
@@ -216,6 +252,8 @@ function testTopPlayers() {
         </div>
     `;
     
+    const startTime = performance.now();
+    
     fetch(`/player/get_top_players?season=${selectedSeason}&league=${selectedLeague}&metric=${metric}&limit=${limit}`)
         .then(response => {
             if (!response.ok) {
@@ -224,10 +262,16 @@ function testTopPlayers() {
             return response.json();
         })
         .then(data => {
-            displayResult('topPlayersResult', data);
+            const endTime = performance.now();
+            const elapsedTime = ((endTime - startTime) / 1000).toFixed(2);
+            document.getElementById('topPlayersTime').textContent = `Elapsed time: ${elapsedTime}s`;
+            displayResult('topPlayersResult', data, false, elapsedTime);
         })
         .catch(error => {
-            displayResult('topPlayersResult', error.message, true);
+            const endTime = performance.now();
+            const elapsedTime = ((endTime - startTime) / 1000).toFixed(2);
+            document.getElementById('topPlayersTime').textContent = `Elapsed time: ${elapsedTime}s`;
+            displayResult('topPlayersResult', error.message, true, elapsedTime);
         });
 }
 </script> 

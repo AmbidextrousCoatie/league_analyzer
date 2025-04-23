@@ -16,8 +16,9 @@
                     <small class="text-muted">/league/get_league_week_table</small>
                 </div>
                 <div class="card-body">
-                    <div class="mb-3">
-                        <button class="btn btn-primary" onclick="testLeagueWeekTable()">Test Route</button>
+                    <div class="mb-3 d-flex align-items-center">
+                        <button class="btn btn-primary me-2" onclick="testLeagueWeekTable()">Test Route</button>
+                        <span id="leagueWeekTableTime" class="text-muted"></span>
                     </div>
                     <div id="leagueWeekTableResult" class="result-container">
                         <!-- Results will be shown here -->
@@ -32,8 +33,9 @@
                     <small class="text-muted">/league/get_league_history</small>
                 </div>
                 <div class="card-body">
-                    <div class="mb-3">
-                        <button class="btn btn-primary" onclick="testLeagueHistory()">Test Route</button>
+                    <div class="mb-3 d-flex align-items-center">
+                        <button class="btn btn-primary me-2" onclick="testLeagueHistory()">Test Route</button>
+                        <span id="leagueHistoryTime" class="text-muted"></span>
                     </div>
                     <div id="leagueHistoryResult" class="result-container">
                         <!-- Results will be shown here -->
@@ -48,8 +50,9 @@
                     <small class="text-muted">/league/get_team_positions</small>
                 </div>
                 <div class="card-body">
-                    <div class="mb-3">
-                        <button class="btn btn-primary" onclick="testTeamPositions()">Test Route</button>
+                    <div class="mb-3 d-flex align-items-center">
+                        <button class="btn btn-primary me-2" onclick="testTeamPositions()">Test Route</button>
+                        <span id="teamPositionsTime" class="text-muted"></span>
                     </div>
                     <div id="teamPositionsResult" class="result-container">
                         <!-- Results will be shown here -->
@@ -64,8 +67,9 @@
                     <small class="text-muted">/league/get_team_points</small>
                 </div>
                 <div class="card-body">
-                    <div class="mb-3">
-                        <button class="btn btn-primary" onclick="testTeamPoints()">Test Route</button>
+                    <div class="mb-3 d-flex align-items-center">
+                        <button class="btn btn-primary me-2" onclick="testTeamPoints()">Test Route</button>
+                        <span id="teamPointsTime" class="text-muted"></span>
                     </div>
                     <div id="teamPointsResult" class="result-container">
                         <!-- Results will be shown here -->
@@ -80,8 +84,9 @@
                     <small class="text-muted">/league/get_team_averages</small>
                 </div>
                 <div class="card-body">
-                    <div class="mb-3">
-                        <button class="btn btn-primary" onclick="testTeamAverages()">Test Route</button>
+                    <div class="mb-3 d-flex align-items-center">
+                        <button class="btn btn-primary me-2" onclick="testTeamAverages()">Test Route</button>
+                        <span id="teamAveragesTime" class="text-muted"></span>
                     </div>
                     <div id="teamAveragesResult" class="result-container">
                         <!-- Results will be shown here -->
@@ -96,8 +101,9 @@
                     <small class="text-muted">/league/get_team_points_vs_average</small>
                 </div>
                 <div class="card-body">
-                    <div class="mb-3">
-                        <button class="btn btn-primary" onclick="testTeamPointsVsAverage()">Test Route</button>
+                    <div class="mb-3 d-flex align-items-center">
+                        <button class="btn btn-primary me-2" onclick="testTeamPointsVsAverage()">Test Route</button>
+                        <span id="teamPointsVsAverageTime" class="text-muted"></span>
                     </div>
                     <div id="teamPointsVsAverageResult" class="result-container">
                         <!-- Results will be shown here -->
@@ -112,8 +118,9 @@
                     <small class="text-muted">/league/get_team_week_details</small>
                 </div>
                 <div class="card-body">
-                    <div class="mb-3">
-                        <button class="btn btn-primary" onclick="testTeamWeekDetails()">Test Route</button>
+                    <div class="mb-3 d-flex align-items-center">
+                        <button class="btn btn-primary me-2" onclick="testTeamWeekDetails()">Test Route</button>
+                        <span id="teamWeekDetailsTime" class="text-muted"></span>
                     </div>
                     <div id="teamWeekDetailsResult" class="result-container">
                         <!-- Results will be shown here -->
@@ -155,6 +162,8 @@ function testLeagueWeekTable() {
         </div>
     `;
     
+    const startTime = performance.now();
+    
     fetch(`/league/get_league_week_table?season=${selectedSeason}&league=${selectedLeague}&week=${selectedWeek}`)
         .then(response => {
             if (!response.ok) {
@@ -163,10 +172,16 @@ function testLeagueWeekTable() {
             return response.json();
         })
         .then(data => {
-            displayResult('leagueWeekTableResult', data);
+            const endTime = performance.now();
+            const elapsedTime = ((endTime - startTime) / 1000).toFixed(2);
+            document.getElementById('leagueWeekTableTime').textContent = `Elapsed time: ${elapsedTime}s`;
+            displayResult('leagueWeekTableResult', data, false, elapsedTime);
         })
         .catch(error => {
-            displayResult('leagueWeekTableResult', error.message, true);
+            const endTime = performance.now();
+            const elapsedTime = ((endTime - startTime) / 1000).toFixed(2);
+            document.getElementById('leagueWeekTableTime').textContent = `Elapsed time: ${elapsedTime}s`;
+            displayResult('leagueWeekTableResult', error.message, true, elapsedTime);
         });
 }
 
@@ -187,6 +202,8 @@ function testLeagueHistory() {
         </div>
     `;
     
+    const startTime = performance.now();
+    
     fetch(`/league/get_league_history?season=${selectedSeason}&league=${selectedLeague}`)
         .then(response => {
             if (!response.ok) {
@@ -195,10 +212,16 @@ function testLeagueHistory() {
             return response.json();
         })
         .then(data => {
-            displayResult('leagueHistoryResult', data);
+            const endTime = performance.now();
+            const elapsedTime = ((endTime - startTime) / 1000).toFixed(2);
+            document.getElementById('leagueHistoryTime').textContent = `Elapsed time: ${elapsedTime}s`;
+            displayResult('leagueHistoryResult', data, false, elapsedTime);
         })
         .catch(error => {
-            displayResult('leagueHistoryResult', error.message, true);
+            const endTime = performance.now();
+            const elapsedTime = ((endTime - startTime) / 1000).toFixed(2);
+            document.getElementById('leagueHistoryTime').textContent = `Elapsed time: ${elapsedTime}s`;
+            displayResult('leagueHistoryResult', error.message, true, elapsedTime);
         });
 }
 
@@ -219,6 +242,8 @@ function testTeamPositions() {
         </div>
     `;
     
+    const startTime = performance.now();
+    
     fetch(`/league/get_team_positions?season=${selectedSeason}&league=${selectedLeague}`)
         .then(response => {
             if (!response.ok) {
@@ -227,10 +252,16 @@ function testTeamPositions() {
             return response.json();
         })
         .then(data => {
-            displayResult('teamPositionsResult', data);
+            const endTime = performance.now();
+            const elapsedTime = ((endTime - startTime) / 1000).toFixed(2);
+            document.getElementById('teamPositionsTime').textContent = `Elapsed time: ${elapsedTime}s`;
+            displayResult('teamPositionsResult', data, false, elapsedTime);
         })
         .catch(error => {
-            displayResult('teamPositionsResult', error.message, true);
+            const endTime = performance.now();
+            const elapsedTime = ((endTime - startTime) / 1000).toFixed(2);
+            document.getElementById('teamPositionsTime').textContent = `Elapsed time: ${elapsedTime}s`;
+            displayResult('teamPositionsResult', error.message, true, elapsedTime);
         });
 }
 
@@ -251,6 +282,8 @@ function testTeamPoints() {
         </div>
     `;
     
+    const startTime = performance.now();
+    
     fetch(`/league/get_team_points?season=${selectedSeason}&league=${selectedLeague}`)
         .then(response => {
             if (!response.ok) {
@@ -259,10 +292,16 @@ function testTeamPoints() {
             return response.json();
         })
         .then(data => {
-            displayResult('teamPointsResult', data);
+            const endTime = performance.now();
+            const elapsedTime = ((endTime - startTime) / 1000).toFixed(2);
+            document.getElementById('teamPointsTime').textContent = `Elapsed time: ${elapsedTime}s`;
+            displayResult('teamPointsResult', data, false, elapsedTime);
         })
         .catch(error => {
-            displayResult('teamPointsResult', error.message, true);
+            const endTime = performance.now();
+            const elapsedTime = ((endTime - startTime) / 1000).toFixed(2);
+            document.getElementById('teamPointsTime').textContent = `Elapsed time: ${elapsedTime}s`;
+            displayResult('teamPointsResult', error.message, true, elapsedTime);
         });
 }
 
@@ -283,6 +322,8 @@ function testTeamAverages() {
         </div>
     `;
     
+    const startTime = performance.now();
+    
     fetch(`/league/get_team_averages?season=${selectedSeason}&league=${selectedLeague}`)
         .then(response => {
             if (!response.ok) {
@@ -291,10 +332,16 @@ function testTeamAverages() {
             return response.json();
         })
         .then(data => {
-            displayResult('teamAveragesResult', data);
+            const endTime = performance.now();
+            const elapsedTime = ((endTime - startTime) / 1000).toFixed(2);
+            document.getElementById('teamAveragesTime').textContent = `Elapsed time: ${elapsedTime}s`;
+            displayResult('teamAveragesResult', data, false, elapsedTime);
         })
         .catch(error => {
-            displayResult('teamAveragesResult', error.message, true);
+            const endTime = performance.now();
+            const elapsedTime = ((endTime - startTime) / 1000).toFixed(2);
+            document.getElementById('teamAveragesTime').textContent = `Elapsed time: ${elapsedTime}s`;
+            displayResult('teamAveragesResult', error.message, true, elapsedTime);
         });
 }
 
@@ -315,6 +362,8 @@ function testTeamPointsVsAverage() {
         </div>
     `;
     
+    const startTime = performance.now();
+    
     fetch(`/league/get_team_points_vs_average?season=${selectedSeason}&league=${selectedLeague}`)
         .then(response => {
             if (!response.ok) {
@@ -323,10 +372,16 @@ function testTeamPointsVsAverage() {
             return response.json();
         })
         .then(data => {
-            displayResult('teamPointsVsAverageResult', data);
+            const endTime = performance.now();
+            const elapsedTime = ((endTime - startTime) / 1000).toFixed(2);
+            document.getElementById('teamPointsVsAverageTime').textContent = `Elapsed time: ${elapsedTime}s`;
+            displayResult('teamPointsVsAverageResult', data, false, elapsedTime);
         })
         .catch(error => {
-            displayResult('teamPointsVsAverageResult', error.message, true);
+            const endTime = performance.now();
+            const elapsedTime = ((endTime - startTime) / 1000).toFixed(2);
+            document.getElementById('teamPointsVsAverageTime').textContent = `Elapsed time: ${elapsedTime}s`;
+            displayResult('teamPointsVsAverageResult', error.message, true, elapsedTime);
         });
 }
 
@@ -349,6 +404,8 @@ function testTeamWeekDetails() {
         </div>
     `;
     
+    const startTime = performance.now();
+    
     fetch(`/league/get_team_week_details?season=${selectedSeason}&league=${selectedLeague}&week=${selectedWeek}&team=${selectedTeam}`)
         .then(response => {
             if (!response.ok) {
@@ -357,10 +414,16 @@ function testTeamWeekDetails() {
             return response.json();
         })
         .then(data => {
-            displayResult('teamWeekDetailsResult', data);
+            const endTime = performance.now();
+            const elapsedTime = ((endTime - startTime) / 1000).toFixed(2);
+            document.getElementById('teamWeekDetailsTime').textContent = `Elapsed time: ${elapsedTime}s`;
+            displayResult('teamWeekDetailsResult', data, false, elapsedTime);
         })
         .catch(error => {
-            displayResult('teamWeekDetailsResult', error.message, true);
+            const endTime = performance.now();
+            const elapsedTime = ((endTime - startTime) / 1000).toFixed(2);
+            document.getElementById('teamWeekDetailsTime').textContent = `Elapsed time: ${elapsedTime}s`;
+            displayResult('teamWeekDetailsResult', error.message, true, elapsedTime);
         });
 }
 </script> 

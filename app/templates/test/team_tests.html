@@ -16,8 +16,9 @@
                     <small class="text-muted">/team/get_team_details</small>
                 </div>
                 <div class="card-body">
-                    <div class="mb-3">
-                        <button class="btn btn-primary" onclick="testTeamDetails()">Test Route</button>
+                    <div class="mb-3 d-flex align-items-center">
+                        <button class="btn btn-primary me-2" onclick="testTeamDetails()">Test Route</button>
+                        <span id="teamDetailsTime" class="text-muted"></span>
                     </div>
                     <div id="teamDetailsResult" class="result-container">
                         <!-- Results will be shown here -->
@@ -32,8 +33,9 @@
                     <small class="text-muted">/team/get_team_season_performance</small>
                 </div>
                 <div class="card-body">
-                    <div class="mb-3">
-                        <button class="btn btn-primary" onclick="testTeamSeasonPerformance()">Test Route</button>
+                    <div class="mb-3 d-flex align-items-center">
+                        <button class="btn btn-primary me-2" onclick="testTeamSeasonPerformance()">Test Route</button>
+                        <span id="teamSeasonPerformanceTime" class="text-muted"></span>
                     </div>
                     <div id="teamSeasonPerformanceResult" class="result-container">
                         <!-- Results will be shown here -->
@@ -48,8 +50,9 @@
                     <small class="text-muted">/team/get_team_players</small>
                 </div>
                 <div class="card-body">
-                    <div class="mb-3">
-                        <button class="btn btn-primary" onclick="testTeamPlayers()">Test Route</button>
+                    <div class="mb-3 d-flex align-items-center">
+                        <button class="btn btn-primary me-2" onclick="testTeamPlayers()">Test Route</button>
+                        <span id="teamPlayersTime" class="text-muted"></span>
                     </div>
                     <div id="teamPlayersResult" class="result-container">
                         <!-- Results will be shown here -->
@@ -70,12 +73,10 @@ function testAllTeamRoutes() {
 
 // Test functions for each route
 function testTeamDetails() {
-    const selectedSeason = document.querySelector('input[name="season"]:checked')?.value;
-    const selectedLeague = document.querySelector('input[name="league"]:checked')?.value;
-    const selectedTeam = document.querySelector('input[name="team"]:checked')?.value;
+    const teamName = document.querySelector('#teamNameInput').value;
     
-    if (!selectedSeason || !selectedLeague || !selectedTeam) {
-        displayResult('teamDetailsResult', 'Missing required parameters', true);
+    if (!teamName) {
+        displayResult('teamDetailsResult', 'Please enter a team name', true);
         return;
     }
     
@@ -87,7 +88,9 @@ function testTeamDetails() {
         </div>
     `;
     
-    fetch(`/team/get_team_details?season=${selectedSeason}&league=${selectedLeague}&team=${selectedTeam}`)
+    const startTime = performance.now();
+    
+    fetch(`/team/get_team_details?team=${encodeURIComponent(teamName)}`)
         .then(response => {
             if (!response.ok) {
                 throw new Error(`HTTP error! Status: ${response.status}`);
@@ -95,19 +98,24 @@ function testTeamDetails() {
             return response.json();
         })
         .then(data => {
-            displayResult('teamDetailsResult', data);
+            const endTime = performance.now();
+            const elapsedTime = ((endTime - startTime) / 1000).toFixed(2);
+            document.getElementById('teamDetailsTime').textContent = `Elapsed time: ${elapsedTime}s`;
+            displayResult('teamDetailsResult', data, false, elapsedTime);
         })
         .catch(error => {
-            displayResult('teamDetailsResult', error.message, true);
+            const endTime = performance.now();
+            const elapsedTime = ((endTime - startTime) / 1000).toFixed(2);
+            document.getElementById('teamDetailsTime').textContent = `Elapsed time: ${elapsedTime}s`;
+            displayResult('teamDetailsResult', error.message, true, elapsedTime);
         });
 }
 
 function testTeamSeasonPerformance() {
+    const teamName = document.querySelector('#teamNamePerformanceInput').value;
     const selectedSeason = document.querySelector('input[name="season"]:checked')?.value;
-    const selectedLeague = document.querySelector('input[name="league"]:checked')?.value;
-    const selectedTeam = document.querySelector('input[name="team"]:checked')?.value;
     
-    if (!selectedSeason || !selectedLeague || !selectedTeam) {
+    if (!teamName || !selectedSeason) {
         displayResult('teamSeasonPerformanceResult', 'Missing required parameters', true);
         return;
     }
@@ -120,7 +128,9 @@ function testTeamSeasonPerformance() {
         </div>
     `;
     
-    fetch(`/team/get_team_season_performance?season=${selectedSeason}&league=${selectedLeague}&team=${selectedTeam}`)
+    const startTime = performance.now();
+    
+    fetch(`/team/get_team_season_performance?team=${encodeURIComponent(teamName)}&season=${selectedSeason}`)
         .then(response => {
             if (!response.ok) {
                 throw new Error(`HTTP error! Status: ${response.status}`);
@@ -128,19 +138,24 @@ function testTeamSeasonPerformance() {
             return response.json();
         })
         .then(data => {
-            displayResult('teamSeasonPerformanceResult', data);
+            const endTime = performance.now();
+            const elapsedTime = ((endTime - startTime) / 1000).toFixed(2);
+            document.getElementById('teamSeasonPerformanceTime').textContent = `Elapsed time: ${elapsedTime}s`;
+            displayResult('teamSeasonPerformanceResult', data, false, elapsedTime);
         })
         .catch(error => {
-            displayResult('teamSeasonPerformanceResult', error.message, true);
+            const endTime = performance.now();
+            const elapsedTime = ((endTime - startTime) / 1000).toFixed(2);
+            document.getElementById('teamSeasonPerformanceTime').textContent = `Elapsed time: ${elapsedTime}s`;
+            displayResult('teamSeasonPerformanceResult', error.message, true, elapsedTime);
         });
 }
 
 function testTeamPlayers() {
+    const teamName = document.querySelector('#teamNamePlayersInput').value;
     const selectedSeason = document.querySelector('input[name="season"]:checked')?.value;
-    const selectedLeague = document.querySelector('input[name="league"]:checked')?.value;
-    const selectedTeam = document.querySelector('input[name="team"]:checked')?.value;
     
-    if (!selectedSeason || !selectedLeague || !selectedTeam) {
+    if (!teamName || !selectedSeason) {
         displayResult('teamPlayersResult', 'Missing required parameters', true);
         return;
     }
@@ -153,7 +168,9 @@ function testTeamPlayers() {
         </div>
     `;
     
-    fetch(`/team/get_team_players?season=${selectedSeason}&league=${selectedLeague}&team=${selectedTeam}`)
+    const startTime = performance.now();
+    
+    fetch(`/team/get_team_players?team=${encodeURIComponent(teamName)}&season=${selectedSeason}`)
         .then(response => {
             if (!response.ok) {
                 throw new Error(`HTTP error! Status: ${response.status}`);
@@ -161,10 +178,16 @@ function testTeamPlayers() {
             return response.json();
         })
         .then(data => {
-            displayResult('teamPlayersResult', data);
+            const endTime = performance.now();
+            const elapsedTime = ((endTime - startTime) / 1000).toFixed(2);
+            document.getElementById('teamPlayersTime').textContent = `Elapsed time: ${elapsedTime}s`;
+            displayResult('teamPlayersResult', data, false, elapsedTime);
         })
         .catch(error => {
-            displayResult('teamPlayersResult', error.message, true);
+            const endTime = performance.now();
+            const elapsedTime = ((endTime - startTime) / 1000).toFixed(2);
+            document.getElementById('teamPlayersTime').textContent = `Elapsed time: ${elapsedTime}s`;
+            displayResult('teamPlayersResult', error.message, true, elapsedTime);
         });
 }
 </script> 
