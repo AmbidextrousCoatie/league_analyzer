@@ -369,8 +369,24 @@ function displayResult(containerId, data, isError = false) {
     // Add event listener for chart tab
     document.getElementById(`${containerId}-chart-tab`).addEventListener('click', () => {
         try {
-            createChart(`${containerId}-chart-content`, data);
+            
+            const seriesLength = data.length;
+            // add debug print for seriesLength
+            console.log('seriesLength', seriesLength);
+            const labels = Array.from({length: seriesLength}, (_, i) => `${data.label_x_axis} ${i + 1}`);
+
+            createLineChart(
+                data.data,
+                data.sorted_by_total,
+                `${containerId}-chart-content`,
+                data.name,
+                labels,
+                false,
+                'auto'
+            );
+
         } catch (error) {
+            console.error('Error creating chart:', error);
             document.getElementById(`${containerId}-chart-content`).innerHTML = `
                 <div class="alert alert-warning">
                     <strong>Note:</strong> Data is not in a format that can be displayed as a chart.

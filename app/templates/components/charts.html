@@ -83,7 +83,7 @@ function createLineChart(data, order, containerId, title, labels, invertYAxis = 
     let yMin, yMax;
     if (yAxisRange === 'auto') {
         const allValues = order.map(team => data[team]).flat();
-        yMin = Math.min(...allValues) - 10;
+        yMin = Math.max(Math.min(...allValues) - 10, 0);
         yMax = Math.max(...allValues) + 10;
     }
 

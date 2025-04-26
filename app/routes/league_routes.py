@@ -280,7 +280,7 @@ def get_team_positions():
             season=season
         )
         
-        print(positions)
+        #print(positions)
         return jsonify(positions)
         
     except Exception as e:

@@ -5,6 +5,10 @@ from data_access.models.league_models import LeagueQuery, TeamSeasonPerformance,
 from app.models.table_data import TableData, ColumnGroup, Column, PlotData, TileData
 from app.services.statistics_service import StatisticsService
 from app.models.statistics_models import LeagueStatistics, LeagueResults
+from app.models.series_data import SeriesData
+from itertools import accumulate
+# from data_access.series_data import calculate_series_data, get_player_series_data, get_team_series_data
+
 
 class LeagueService:
     def __init__(self, adapter_type=DataAdapterSelector.PANDAS):
@@ -506,8 +510,18 @@ class LeagueService:
         standings = self.get_league_standings(season, league_name)
         
         if not standings.teams:
-            return {"weekly": {}, "total": {}}
+            return SeriesData().to_dict()
         
+        
+        series_data = SeriesData(label_x_axis="Spieltag", label_y_axis="Punkte", name="Punkte im Saisonverlauf", 
+                                 query_params={"season": season, "league": league_name})
+        
+        for team in standings.teams:
+            week_performances = [p.points for p in team.weekly_performances]
+            series_data.add_data(team.team_name, week_performances)
+
+        return series_data.to_dict()
+
         # Get all weeks in the season
         all_weeks = sorted(set(
             perf.week for team in standings.teams 
@@ -550,6 +564,7 @@ class LeagueService:
         # Prepare result structure
         weekly_averages = {}
         total_averages = {}
+
         
         for team in standings.teams:
             # Create a map of week to score for this team
@@ -589,7 +604,57 @@ class LeagueService:
             perf.week for team in standings.teams 
             for perf in team.weekly_performances
         ))
+
+        series_data = SeriesData(label_x_axis="Spieltag", label_y_axis="Position", name="Position im Saisonverlauf", 
+                                 query_params={"season": season, "league": league_name})
+        points_per_team = {}
+        points_per_team_accumulated = {}
+        for team in standings.teams:
+            points_per_team[team.team_name] = [p.points for p in team.weekly_performances]
+            points_per_team_accumulated[team.team_name] = list(accumulate(points_per_team[team.team_name]))
         
+
+        position_per_week = {team_name: [] for team_name in points_per_team.keys()}
+        position_per_week_accumulated = {team_name: [] for team_name in points_per_team.keys()}
+        # create a tuple of team name and points per week and sort it by points
+
+        for week in all_weeks:
+            week = week - 1
+
+            # create a tuple of team name and points per week
+            team_points_week = [(team_name, points_per_team[team_name][week]) for team_name in points_per_team.keys()]
+            # sort it by points
+            team_points_week.sort(key=lambda x: x[1], reverse=True)
+
+            # create a tuple of team name and points accumulated per week
+            team_points_week_accumulated = [(team_name, points_per_team_accumulated[team_name][week]) for team_name in points_per_team.keys()]
+            # sort it by points
+            team_points_week_accumulated.sort(key=lambda x: x[1], reverse=True)
+
+            # position per week
+            for idx, team_n_points in enumerate(team_points_week):
+                # find position of team_name in points_per_team[team_name]
+
+                position_per_week[team_n_points[0]].append(idx+1)
+
+            for idx, team_n_points in enumerate(team_points_week_accumulated):
+                # position per week accumulated
+                # find position of team_name in points_per_team_accumulated[team_name]
+                #position_accumulated = team_points_week_accumulated.index(team_name) + 1
+                position_per_week_accumulated[team_n_points[0]].append(idx+1)
+
+            # position per week accumulated
+
+        # add the data to the series data
+        for team in standings.teams:
+            series_data.add_data(team.team_name, position_per_week[team.team_name])
+            # replace auto generated accumulated data             
+            series_data.data_accumulated[team.team_name] = position_per_week_accumulated[team.team_name]
+
+        return series_data.to_dict()
+
+
+    
         # Calculate positions for each week
         positions = {}
         

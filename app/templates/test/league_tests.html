@@ -255,6 +255,7 @@ function testTeamPositions() {
             const endTime = performance.now();
             const elapsedTime = ((endTime - startTime) / 1000).toFixed(2);
             document.getElementById('teamPositionsTime').textContent = `Elapsed time: ${elapsedTime}s`;
+            data.data = data.data_accumulated
             displayResult('teamPositionsResult', data, false, elapsedTime);
         })
         .catch(error => {
@@ -295,6 +296,7 @@ function testTeamPoints() {
             const endTime = performance.now();
             const elapsedTime = ((endTime - startTime) / 1000).toFixed(2);
             document.getElementById('teamPointsTime').textContent = `Elapsed time: ${elapsedTime}s`;
+            data.data = data.data_accumulated
             displayResult('teamPointsResult', data, false, elapsedTime);
         })
         .catch(error => {
