@@ -277,7 +277,7 @@ def get_team_positions():
         if not all([season, league]):
             return jsonify({'error': 'Missing required parameters'}), 400
             
-        positions = league_service.get_team_positions_during_season(
+        positions = league_service.get_team_positions_simple(
             league_name=league,
             season=season
         )
