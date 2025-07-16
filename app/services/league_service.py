@@ -947,3 +947,157 @@ class LeagueService:
                 name="Durchschnitt im Saisonverlauf", 
                 query_params={"season": season, "league": league_name}
             ).to_dict()
+
+    def get_league_week_table_simple(self, season: str, league: str, week: Optional[int] = None) -> TableData:
+        """
+        Get a simplified league week table with direct data query.
+        
+        Args:
+            season: The season identifier
+            league: The league name
+            week: The current week (if None, gets the latest)
+            
+        Returns:
+            TableData object with the league standings
+        """
+        try:
+            # If week is not specified, get the latest week
+            if week is None:
+                week = self.get_latest_week(season, league)
+            
+            # Direct query to get all data for this league and season
+            filters = {
+                Columns.league_name: {'value': league, 'operator': 'eq'},
+                Columns.season: {'value': season, 'operator': 'eq'},
+                Columns.computed_data: {'value': False, 'operator': 'eq'}
+            }
+            
+            league_data = self.adapter.get_filtered_data(filters=filters)
+            
+            if league_data.empty:
+                return TableData(
+                    columns=[],
+                    data=[],
+                    title=f"No data available for {league} - {season}"
+                )
+            
+            # Get all teams
+            teams = league_data[Columns.team_name].unique()
+            
+            # Calculate week-specific data and season totals for each team
+            team_data = {}
+            
+            for team in teams:
+                team_data[team] = {
+                    'week_score': 0,
+                    'week_points': 0,
+                    'season_score': 0,
+                    'season_points': 0
+                }
+                
+                # Get team data
+                team_week_data = league_data[
+                    (league_data[Columns.team_name] == team) & 
+                    (league_data[Columns.week] == week)
+                ]
+                team_season_data = league_data[league_data[Columns.team_name] == team]
+                
+                # Calculate week-specific data
+                if not team_week_data.empty:
+                    team_data[team]['week_score'] = int(team_week_data[Columns.score].sum())
+                    team_data[team]['week_points'] = float(team_week_data[Columns.points].sum())
+                
+                # Calculate season totals
+                if not team_season_data.empty:
+                    team_data[team]['season_score'] = int(team_season_data[Columns.score].sum())
+                    team_data[team]['season_points'] = float(team_season_data[Columns.points].sum())
+            
+            # Sort teams by week points (descending), then by week score (descending)
+            sorted_teams = sorted(
+                teams,
+                key=lambda t: (team_data[t]['week_points'], team_data[t]['week_score']),
+                reverse=True
+            )
+            
+            # Create column groups
+            columns = [
+                ColumnGroup(
+                    title="Ranking",
+                    frozen="left",
+                    style={"backgroundColor": "#f8f9fa"},
+                    columns=[
+                        Column(title="#", field="pos", width="50px", align="center"),
+                        Column(title="Team", field="team", width="200px", align="left")
+                    ]
+                ),
+                ColumnGroup(
+                    title=f"Week {week}",
+                    columns=[
+                        Column(title="Pins", field="week_score", format="{:,}"),
+                        Column(title="Pts.", field="week_points", format="{:.1f}"),
+                        Column(title="Avg.", field="week_avg", format="{:.1f}")
+                    ]
+                ),
+                ColumnGroup(
+                    title="Season Total",
+                    style={"backgroundColor": "#e9ecef"},
+                    header_style={"fontWeight": "bold"},
+                    columns=[
+                        Column(title="Pins", field="season_score", format="{:,}"),
+                        Column(title="Pts.", field="season_points", format="{:.1f}"),
+                        Column(title="Avg.", field="season_avg", format="{:.1f}")
+                    ]
+                )
+            ]
+            
+            # Prepare the data rows
+            data = []
+            for i, team in enumerate(sorted_teams, 1):
+                team_info = team_data[team]
+                
+                # Get team data for average calculation
+                team_week_data = league_data[
+                    (league_data[Columns.team_name] == team) & 
+                    (league_data[Columns.week] == week)
+                ]
+                team_season_data = league_data[league_data[Columns.team_name] == team]
+                
+                # Calculate averages
+                week_avg = team_info['week_score'] / len(team_week_data) if len(team_week_data) > 0 else 0
+                season_avg = team_info['season_score'] / len(team_season_data) if len(team_season_data) > 0 else 0
+                
+                row = [
+                    i,  # Position
+                    team,  # Team name
+                    team_info['week_score'],  # Week pins
+                    team_info['week_points'],  # Week points
+                    round(week_avg, 1),  # Week average
+                    team_info['season_score'],  # Season pins
+                    team_info['season_points'],  # Season points
+                    round(season_avg, 1)  # Season average
+                ]
+                
+                data.append(row)
+            
+            # Create and return the TableData
+            return TableData(
+                columns=columns,
+                data=data,
+                title=f"{league} Standings - {season}",
+                description=f"Week {week} Results & Season Totals",
+                config={
+                    "stickyHeader": True,
+                    "striped": True,
+                    "hover": True,
+                    "responsive": True,
+                    "compact": False
+                }
+            )
+            
+        except Exception as e:
+            print(f"Error in get_league_week_table_simple: {e}")
+            return TableData(
+                columns=[],
+                data=[],
+                title=f"Error loading data for {league} - {season}"
+            )

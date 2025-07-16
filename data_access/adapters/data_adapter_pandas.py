@@ -369,7 +369,7 @@ class DataAdapterPandas(DataAdapter):
             # Create weekly performance objects
             weekly_performances = []
             for week_num, week_data in data['weekly_performances'].items():
-                print(week_data)
+                
                 weekly_performances.append( 
                     TeamWeeklyPerformance(
                         team_id=data['team_id'],

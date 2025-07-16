@@ -104,7 +104,7 @@ def get_league_week_table():
 
         # Get the table data from the service
         # This now returns a TableData object
-        table_data = league_service.get_league_week_table(season=season, league=league, week=week)
+        table_data = league_service.get_league_week_table_simple(season=season, league=league, week=week)
         
         print("############################")
         print("league_routes.get_league_week_table: ", end="")
