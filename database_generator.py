@@ -22,11 +22,12 @@ if __name__ == "__main__":
     league_bzl = DataGeneratorLeague(league_name="BZL 2 Nord", league_level=6, number_of_teams=6, number_of_players_per_team=4)
     league_kl = DataGeneratorLeague(league_name="KL 1 Nord", league_level=7, number_of_teams=6, number_of_players_per_team=4)
 
+        
     league_bayl = create_league_roster(league_bayl)
-    league_ll = create_league_roster(league_ll)
+    league_ll = create_league_roster(league_ll)  
     league_bzol = create_league_roster(league_bzol)
     league_bzl = create_league_roster(league_bzl)
-    league_kl = create_league_roster(league_kl)
+    league_kl = create_league_roster(league_kl,)
 
     print(league_bayl)
     print(league_ll)

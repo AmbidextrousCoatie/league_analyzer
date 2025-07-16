@@ -14,7 +14,7 @@ levels = {
 
 class League:
 
-    def __init__(self, league_name, number_of_teams, number_of_players_per_team, weeks=None, skill_level: int = 7):
+    def __init__(self, league_name, number_of_teams, number_of_players_per_team, names_of_all_exiting_teams=[], weeks=None, skill_level: int = 7):
         self.name = league_name
         self.number_of_teams = number_of_teams
         self.number_of_players_per_team = number_of_players_per_team

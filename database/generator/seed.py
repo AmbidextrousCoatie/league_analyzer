@@ -19,6 +19,9 @@ from database.generator.league import DataGeneratorLeague
 from data_access.schema import Columns
 
 
+global_names_of_all_existing_teams = []
+
+
 def get_random_city():
     cities_bavaria = ['München', 'Nürnberg', 'Augsburg', 'Regensburg', 'Ingolstadt', 'Würzburg', 'Fürth', 'Erlangen',
                       'Bayreuth', 'Bamberg', 'Aschaffenburg', 'Landshut', 'Kempten', 'Rosenheim', 'Schweinfurt',
@@ -33,15 +36,17 @@ def create_random_player(league_skill):
 
 
 def create_league_roster(league: DataGeneratorLeague):
+
     league.teams = [create_team(league.skill, league.number_of_players_per_team) for i in range(league.number_of_teams)]
     return league
 
 
 def create_team(league_skill, players_per_team=4):
     home_alley = get_random_city()
+    
     team_name = get_random_team_name(team_city=home_alley)
     players = [create_random_player(league_skill) for i in range(players_per_team)]
-    return DataGeneratorTeam(team_name, players, home_alley)
+    return DataGeneratorTeam(team_name["name"], team_name["number"], players, home_alley)
 
 
 def get_random_last_name():
@@ -111,10 +116,16 @@ def get_random_team_name(team_city=None, team_number=None):
     if team_city is None:
         team_city = get_random_city()
 
-    if team_number is None:
-        team_number = random.randint(1, 99)
 
-    return team_city + " " + str(team_number)
+    if team_number is None:
+        # count how many times the team_city is in names_of_all_exiting_teams
+        print(global_names_of_all_existing_teams)
+        team_city_counter = global_names_of_all_existing_teams.count(team_city)
+        team_number = team_city_counter + 1
+        global_names_of_all_existing_teams.append(team_city)
+
+    team_name = {"name": team_city, "number": team_number}
+    return team_name
 
 
 def get_random_alley(teams, week):
@@ -333,7 +344,7 @@ def generate_league_dates(season, league_size):
     elif league_size == 10:
         weeks_between = 3
     else:
-        raise ValueError("Unsupported league size")
+        raise ValueError("Unsupported league size: " + str(league_size))
     
     # Number of match days needed (each team plays against every other team)
     num_match_days = league_size # - 1

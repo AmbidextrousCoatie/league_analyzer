@@ -90,3 +90,11 @@ app/routes/__pycache__/team_routes.cpython-312.pyc
 app/services/__pycache__/data_dict.cpython-312.pyc
 app/services/__pycache__/team_service.cpython-310.pyc
 app/services/__pycache__/team_service.cpython-312.pyc
+app/models/__pycache__/series_data.cpython-310.pyc
+app/models/__pycache__/series_data.cpython-312.pyc
+app/models/__pycache__/statistics_models.cpython-310.pyc
+app/models/__pycache__/statistics_models.cpython-312.pyc
+app/models/__pycache__/table_data.cpython-310.pyc
+app/models/__pycache__/table_data.cpython-312.pyc
+*.pyc
+*__pycache__*
