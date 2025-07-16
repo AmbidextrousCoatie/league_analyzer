@@ -512,7 +512,12 @@ class LeagueService:
         standings = self.get_league_standings(season, league_name)
         
         if not standings.teams:
-            return SeriesData().to_dict()
+            return SeriesData(
+                label_x_axis="Spieltag", 
+                label_y_axis="Punkte", 
+                name="Punkte im Saisonverlauf", 
+                query_params={"season": season, "league": league_name}
+            ).to_dict()
         
         series_data = SeriesData(label_x_axis="Spieltag", label_y_axis="Punkte", name="Punkte im Saisonverlauf", 
                                  query_params={"season": season, "league": league_name})
@@ -864,7 +869,7 @@ class LeagueService:
             if week is None:
                 week = self.get_latest_week(season, league)
             
-            # Direct query to get all data for this league and season
+            # Direct query to get all data for this league and season (both individual and team points)
             filters = {
                 Columns.league_name: {'value': league, 'operator': 'eq'},
                 Columns.season: {'value': season, 'operator': 'eq'},
@@ -1042,95 +1047,118 @@ class LeagueService:
             )
 
     def get_team_positions_simple(self, league_name: str, season: str) -> Dict[str, Any]:
-        """Get team positions throughout a season - simple direct query approach"""
-        try:
-            # Direct query to get team data for the league and season
-            filters = {
-                Columns.league_name: {'value': league_name, 'operator': 'eq'},
-                Columns.season: {'value': season, 'operator': 'eq'},
-                Columns.computed_data: {'value': False, 'operator': 'eq'}
-            }
-            
-            league_data = self.adapter.get_filtered_data(filters=filters)
-            
-            if league_data.empty:
-                return SeriesData(
-                    label_x_axis="Spieltag", 
-                    label_y_axis="Position", 
-                    name="Position im Saisonverlauf", 
-                    query_params={"season": season, "league": league_name}
-                ).to_dict()
-            
-            # Get all teams and weeks
-            teams = league_data[Columns.team_name].unique()
-            weeks = sorted(league_data[Columns.week].unique())
-            
-            # Calculate points for each team per week
-            team_points = {}
-            team_points_accumulated = {}
-            
-            for team in teams:
-                team_points[team] = []
-                team_points_accumulated[team] = []
-                
-                for week in weeks:
-                    week_data = league_data[
-                        (league_data[Columns.team_name] == team) & 
-                        (league_data[Columns.week] == week)
-                    ]
-                    
-                    if not week_data.empty:
-                        points = float(week_data[Columns.points].sum())
-                    else:
-                        points = 0.0
-                    
-                    team_points[team].append(points)
-                
-                # Calculate accumulated points
-                team_points_accumulated[team] = list(accumulate(team_points[team]))
-            
-            # Calculate positions for each week
-            positions_per_week = {team: [] for team in teams}
-            positions_accumulated = {team: [] for team in teams}
-            
-            for week_idx, week in enumerate(weeks):
-                # Weekly positions
-                week_team_points = [(team, team_points[team][week_idx]) for team in teams]
-                week_team_points.sort(key=lambda x: x[1], reverse=True)
-                
-                for pos, (team, _) in enumerate(week_team_points, 1):
-                    positions_per_week[team].append(pos)
-                
-                # Accumulated positions
-                accumulated_team_points = [(team, team_points_accumulated[team][week_idx]) for team in teams]
-                accumulated_team_points.sort(key=lambda x: x[1], reverse=True)
-                
-                for pos, (team, _) in enumerate(accumulated_team_points, 1):
-                    positions_accumulated[team].append(pos)
-            
-            # Create SeriesData
-            series_data = SeriesData(
-                label_x_axis="Spieltag", 
-                label_y_axis="Position", 
-                name="Position im Saisonverlauf", 
-                query_params={"season": season, "league": league_name}
-            )
-            
-            # Add weekly positions
-            for team in teams:
-                series_data.add_data(team, positions_per_week[team])
-            
-            # Add accumulated positions
-            for team in teams:
-                series_data.data_accumulated[team] = positions_accumulated[team]
-            
-            return series_data.to_dict()
-            
-        except Exception as e:
-            print(f"Error in get_team_positions_simple: {e}")
+        """Get team positions throughout a season using direct data adapter queries"""
+        # Get all data for this league and season (both individual and team points)
+        filters = {
+            'League': {'value': league_name, 'operator': 'eq'},
+            'Season': {'value': season, 'operator': 'eq'}
+        }
+        all_data = self.adapter.get_filtered_data(filters=filters)
+        
+        if all_data.empty:
             return SeriesData(
                 label_x_axis="Spieltag", 
                 label_y_axis="Position", 
                 name="Position im Saisonverlauf", 
                 query_params={"season": season, "league": league_name}
             ).to_dict()
+        
+        # Get all weeks and teams
+        all_weeks = sorted(all_data['Week'].unique())
+        all_teams = sorted(all_data['Team'].unique())
+        
+        # Calculate weekly points for each team (individual + team points)
+        weekly_points = {}
+        for team in all_teams:
+            weekly_points[team] = []
+            for week in all_weeks:
+                week_data = all_data[(all_data['Team'] == team) & (all_data['Week'] == week)]
+                if not week_data.empty:
+                    # Sum up all points (individual + team) for this team in this week
+                    total_week_points = week_data['Points'].sum()
+                    weekly_points[team].append(total_week_points)
+                else:
+                    weekly_points[team].append(0)
+        
+        # Create SeriesData
+        series_data = SeriesData(
+            label_x_axis="Spieltag", 
+            label_y_axis="Position", 
+            name="Position im Saisonverlauf", 
+            query_params={"season": season, "league": league_name}
+        )
+        
+        # Calculate positions for each week
+        positions_per_team = {team: [] for team in all_teams}
+        
+        for week_idx, week in enumerate(all_weeks):
+            # Get accumulated points up to this week for each team
+            accumulated_points = {}
+            for team in all_teams:
+                accumulated_points[team] = sum(weekly_points[team][:week_idx + 1])
+            
+            # Sort teams by accumulated points (descending) for this week
+            sorted_teams = sorted(accumulated_points.items(), key=lambda x: x[1], reverse=True)
+            
+            # Create a mapping of team to position for this week
+            week_positions = {}
+            for pos, (team, _) in enumerate(sorted_teams, 1):
+                week_positions[team] = pos
+            
+            # Add the position for this week to each team's list
+            for team in all_teams:
+                positions_per_team[team].append(week_positions[team])
+        
+        # Add data for each team using the proper add_data method
+        for team in all_teams:
+            series_data.add_data(team, positions_per_team[team])
+        
+        return series_data.to_dict()
+
+    def get_team_points_simple(self, league_name: str, season: str) -> Dict[str, Any]:
+        """Get team points throughout a season using direct data adapter queries"""
+        # Get all data for this league and season (both individual and team points)
+        filters = {
+            'League': {'value': league_name, 'operator': 'eq'},
+            'Season': {'value': season, 'operator': 'eq'}
+        }
+        all_data = self.adapter.get_filtered_data(filters=filters)
+        
+        if all_data.empty:
+            return SeriesData(
+                label_x_axis="Spieltag", 
+                label_y_axis="Punkte", 
+                name="Punkte im Saisonverlauf", 
+                query_params={"season": season, "league": league_name}
+            ).to_dict()
+        
+        # Get all weeks and teams
+        all_weeks = sorted(all_data['Week'].unique())
+        all_teams = sorted(all_data['Team'].unique())
+        
+        # Calculate weekly points for each team (individual + team points)
+        weekly_points = {}
+        for team in all_teams:
+            weekly_points[team] = []
+            for week in all_weeks:
+                week_data = all_data[(all_data['Team'] == team) & (all_data['Week'] == week)]
+                if not week_data.empty:
+                    # Sum up all points (individual + team) for this team in this week
+                    total_week_points = week_data['Points'].sum()
+                    weekly_points[team].append(total_week_points)
+                else:
+                    weekly_points[team].append(0)
+        
+        # Create SeriesData
+        series_data = SeriesData(
+            label_x_axis="Spieltag", 
+            label_y_axis="Punkte", 
+            name="Punkte im Saisonverlauf", 
+            query_params={"season": season, "league": league_name}
+        )
+        
+        # Add data for each team
+        for team in all_teams:
+            series_data.add_data(team, weekly_points[team])
+        
+        return series_data.to_dict()

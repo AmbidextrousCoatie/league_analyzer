@@ -100,13 +100,14 @@
 
 <!-- Common Test Functions -->
 <script>
-// Initialize the page
+    // Initialize the page
 function initializePage() {
     // Get any URL parameters or set defaults
     const urlParams = new URLSearchParams(window.location.search);
     const selectedSeason = urlParams.get('season') || null;
     const selectedLeague = urlParams.get('league') || null;
     const selectedWeek = urlParams.get('week') || null;
+    const selectedTeam = urlParams.get('team') || null;
     
     // Load available seasons
     fetch('/league/get_available_seasons')
@@ -166,7 +167,7 @@ function loadLeagues() {
             document.getElementById('buttonsLeague').innerHTML = buttonsLeague;
             
             if (selectedLeague && leagues.includes(selectedLeague)) {
-                // First update available options
+                // First update available options (weeks and teams)
                 updateAvailableOptions();
                 
                 // Then fetch weeks specifically for selected season and league
@@ -179,12 +180,48 @@ function loadLeagues() {
                             <label class="btn btn-outline-primary" for="week_${week}">${week}</label>
                         `).join('');
                         document.getElementById('buttonsWeek').innerHTML = weekButtons;
+                        
+                        // Select the week if it was in URL
+                        if (selectedWeek && weeks.includes(parseInt(selectedWeek))) {
+                            const weekInput = document.querySelector(`input[name="week"][value="${selectedWeek}"]`);
+                            if (weekInput) {
+                                weekInput.checked = true;
+                            }
+                        }
                     })
                     .catch(error => {
                         console.error('Error loading weeks:', error);
                         document.getElementById('buttonsWeek').innerHTML = `
                             <div class="alert alert-danger">
                                 <strong>Error loading weeks:</strong> ${error.message || 'Unknown error'}
+                            </div>
+                        `;
+                    });
+                
+                // Fetch teams specifically for selected season and league
+                fetch(`/league/get_available_teams?season=${selectedSeason}&league=${selectedLeague}`)
+                    .then(response => response.json())
+                    .then(teams => {
+                        const teamButtons = teams.map(team => `
+                            <input type="radio" class="btn-check" name="team" id="team_${team.replace(/\s+/g, '_')}" 
+                                   value="${team}" ${team === selectedTeam ? 'checked' : ''}>
+                            <label class="btn btn-outline-primary" for="team_${team.replace(/\s+/g, '_')}">${team}</label>
+                        `).join('');
+                        document.getElementById('buttonsTeam').innerHTML = teamButtons;
+                        
+                        // Select the team if it was in URL
+                        if (selectedTeam && teams.includes(selectedTeam)) {
+                            const teamInput = document.querySelector(`input[name="team"][value="${selectedTeam}"]`);
+                            if (teamInput) {
+                                teamInput.checked = true;
+                            }
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error loading teams:', error);
+                        document.getElementById('buttonsTeam').innerHTML = `
+                            <div class="alert alert-danger">
+                                <strong>Error loading teams:</strong> ${error.message || 'Unknown error'}
                             </div>
                         `;
                     });
@@ -234,10 +271,12 @@ function handleWeekTeamSelection() {
     window.history.pushState({}, '', url);
 }
 
-// Update available options (teams) based on selected season and league
+// Update available options (weeks and teams) based on selected season and league
 function updateAvailableOptions() {
     const selectedSeason = document.querySelector('input[name="season"]:checked')?.value;
     const selectedLeague = document.querySelector('input[name="league"]:checked')?.value;
+    const selectedWeek = document.querySelector('input[name="week"]:checked')?.value;
+    const selectedTeam = document.querySelector('input[name="team"]:checked')?.value;
     
     if (selectedSeason && selectedLeague) {
         // Fetch weeks
@@ -246,13 +285,13 @@ function updateAvailableOptions() {
             .then(weeks => {
                 const weekButtons = weeks.map(week => `
                     <input type="radio" class="btn-check" name="week" id="week_${week}" 
-                           value="${week}">
+                           value="${week}" ${week.toString() === selectedWeek ? 'checked' : ''}>
                     <label class="btn btn-outline-primary" for="week_${week}">${week}</label>
                 `).join('');
                 document.getElementById('buttonsWeek').innerHTML = weekButtons;
                 
-                // Select first week by default
-                if (weeks.length > 0) {
+                // Select first week by default if none selected
+                if (!selectedWeek && weeks.length > 0) {
                     const firstWeekInput = document.querySelector(`input[name="week"][value="${weeks[0]}"]`);
                     if (firstWeekInput) {
                         firstWeekInput.checked = true;
@@ -261,26 +300,31 @@ function updateAvailableOptions() {
             });
         
         // Fetch teams
-        fetch(`/league/get_team_positions?season=${selectedSeason}&league=${selectedLeague}`)
+        fetch(`/league/get_available_teams?season=${selectedSeason}&league=${selectedLeague}`)
             .then(response => response.json())
-            .then(data => {
-                // Extract team names from the response
-                const teams = Object.keys(data.weekly || {});
-                
+            .then(teams => {
                 const teamButtons = teams.map(team => `
                     <input type="radio" class="btn-check" name="team" id="team_${team.replace(/\s+/g, '_')}" 
-                           value="${team}">
+                           value="${team}" ${team === selectedTeam ? 'checked' : ''}>
                     <label class="btn btn-outline-primary" for="team_${team.replace(/\s+/g, '_')}">${team}</label>
                 `).join('');
                 document.getElementById('buttonsTeam').innerHTML = teamButtons;
                 
-                // Select first team by default
-                if (teams.length > 0) {
+                // Select first team by default if none selected
+                if (!selectedTeam && teams.length > 0) {
                     const firstTeamInput = document.querySelector(`input[name="team"][value="${teams[0]}"]`);
                     if (firstTeamInput) {
                         firstTeamInput.checked = true;
                     }
                 }
+            })
+            .catch(error => {
+                console.error('Error loading teams:', error);
+                document.getElementById('buttonsTeam').innerHTML = `
+                    <div class="alert alert-danger">
+                        <strong>Error loading teams:</strong> ${error.message || 'Unknown error'}
+                    </div>
+                `;
             });
     }
 }
@@ -333,6 +377,9 @@ function displayResult(containerId, data, isError = false) {
             <li class="nav-item" role="presentation">
                 <button class="nav-link" id="${containerId}-chart-tab" data-bs-toggle="tab" data-bs-target="#${containerId}-chart" type="button" role="tab" aria-controls="${containerId}-chart" aria-selected="false">Chart</button>
             </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="${containerId}-chart-cumulated-tab" data-bs-toggle="tab" data-bs-target="#${containerId}-chart-cumulated" type="button" role="tab" aria-controls="${containerId}-chart-cumulated" aria-selected="false">Chart cumulated</button>
+            </li>
         </ul>
         <div class="tab-content p-3 border border-top-0 rounded-bottom">
             <div class="tab-pane fade show active" id="${containerId}-json" role="tabpanel" aria-labelledby="${containerId}-json-tab">
@@ -343,6 +390,9 @@ function displayResult(containerId, data, isError = false) {
             </div>
             <div class="tab-pane fade" id="${containerId}-chart" role="tabpanel" aria-labelledby="${containerId}-chart-tab">
                 <div id="${containerId}-chart-content" style="height: 400px;"></div>
+            </div>
+            <div class="tab-pane fade" id="${containerId}-chart-cumulated" role="tabpanel" aria-labelledby="${containerId}-chart-cumulated-tab">
+                <div id="${containerId}-chart-cumulated-content" style="height: 400px;"></div>
             </div>
         </div>
     `;
@@ -366,12 +416,10 @@ function displayResult(containerId, data, isError = false) {
         }
     });
     
-    // Add event listener for chart tab
+    // Add event listener for chart tab (normal data)
     document.getElementById(`${containerId}-chart-tab`).addEventListener('click', () => {
         try {
-            
             const seriesLength = data.length;
-            // add debug print for seriesLength
             console.log('seriesLength', seriesLength);
             const labels = Array.from({length: seriesLength}, (_, i) => `${data.label_x_axis} ${i + 1}`);
 
@@ -388,6 +436,33 @@ function displayResult(containerId, data, isError = false) {
         } catch (error) {
             console.error('Error creating chart:', error);
             document.getElementById(`${containerId}-chart-content`).innerHTML = `
+                <div class="alert alert-warning">
+                    <strong>Note:</strong> Data is not in a format that can be displayed as a chart.
+                </div>
+            `;
+        }
+    });
+
+    // Add event listener for chart cumulated tab
+    document.getElementById(`${containerId}-chart-cumulated-tab`).addEventListener('click', () => {
+        try {
+            const seriesLength = data.length;
+            console.log('seriesLength', seriesLength);
+            const labels = Array.from({length: seriesLength}, (_, i) => `${data.label_x_axis} ${i + 1}`);
+
+            createLineChart(
+                data.data_accumulated,
+                data.sorted_by_total,
+                `${containerId}-chart-cumulated-content`,
+                data.name + ' (Cumulated)',
+                labels,
+                false,
+                'auto'
+            );
+
+        } catch (error) {
+            console.error('Error creating cumulated chart:', error);
+            document.getElementById(`${containerId}-chart-cumulated-content`).innerHTML = `
                 <div class="alert alert-warning">
                     <strong>Note:</strong> Data is not in a format that can be displayed as a chart.
                 </div>

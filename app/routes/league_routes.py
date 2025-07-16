@@ -187,7 +187,7 @@ def get_team_points():
         if not all([season, league]):
             return jsonify({'error': 'Missing required parameters'}), 400
             
-        points = league_service.get_team_points_during_season(
+        points = league_service.get_team_points_simple(
             league_name=league,
             season=season
         )
@@ -282,7 +282,7 @@ def get_team_positions():
             season=season
         )
         
-        #print(positions)
+        print(positions)
         return jsonify(positions)
         
     except Exception as e:
