@@ -41,6 +41,7 @@ class TeamWeekPerformance:
     week: int
     total_score: float
     points: float
+    number_of_games: int
     player_scores: Dict[str, float]  # player_name -> score
     details: Optional[Dict[str, Any]] = None
 

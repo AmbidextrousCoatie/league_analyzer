@@ -213,18 +213,19 @@ def get_team_points_vs_average():
         if not all([season, league]):
             return jsonify({'error': 'Missing required parameters'}), 400
             
-        points_raw = league_service.get_team_points_during_season(
+        points_data = league_service.get_team_points_during_season(
             league_name=league,
             season=season
-        )["weekly"]
+        )
 
-        averages_raw = league_service.get_team_averages_during_season(
+        averages_data = league_service.get_team_averages_simple(
             league_name=league,
             season=season
-        )["averages"]
+        )
        
-        #print(points_raw)
-        #print(averages_raw)
+        # Extract data from the new SeriesData structure
+        points_raw = points_data["data"]
+        averages_raw = averages_data["data"]
 
         points_vs_average = dict()
 
@@ -238,8 +239,9 @@ def get_team_points_vs_average():
         return jsonify(points_vs_average)
         
     except Exception as e:
-        print(f"Error in get_team_positions: {str(e)}")
+        print(f"Error in get_team_points_vs_average: {str(e)}")
         print(traceback.format_exc())
+        return jsonify({'error': str(e)}), 500
 
 @bp.route('/get_latest_events')
 def get_latest_events():
@@ -299,7 +301,7 @@ def get_team_averages():
         if not all([season, league]):
             return jsonify({'error': 'Missing required parameters'}), 400
             
-        averages = league_service.get_team_averages_during_season(
+        averages = league_service.get_team_averages_simple(
             league_name=league,
             season=season
         )

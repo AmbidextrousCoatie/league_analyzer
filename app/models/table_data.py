@@ -65,6 +65,11 @@ class TableData:
             **({"config": self.config} if self.config else {})
         }
 
+#@dataclass
+#class TableDataLeague(TableData):
+#    """Table data for a league."""
+#    league: str
+
 @dataclass
 class PlotData:
     """Data structure for chart/plot visualization."""

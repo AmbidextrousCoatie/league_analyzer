@@ -33,13 +33,14 @@ class StatisticsService:
                 p.player_name: p.score
                 for p in week_players
             }
-            
+           
             weekly_performances[week] = TeamWeekPerformance(
                 team_id=team,
                 team_name=team,
                 week=week,
                 total_score=sum(p.score for p in week_players),
                 points=sum(p.points for p in week_players),
+                number_of_games=len([p.score for p in week_players]),
                 player_scores=player_scores
             )
         
@@ -100,7 +101,7 @@ class StatisticsService:
                     week_data[team.team_name] = [
                         sum(p.score for p in week_players),  # Total pins
                         sum(p.points for p in week_players),  # Points
-                        sum(p.score for p in week_players) / len(week_players)  # Average
+                        sum(p.score for p in week_players) / len(week_players) / len(week_players)  # Average
                     ]
             weekly_summaries[week] = LeagueWeekSummary(data=week_data)
         
@@ -110,7 +111,7 @@ class StatisticsService:
             season_data[team.team_name] = [
                 sum(p.score for p in team.players),  # Total pins
                 sum(p.points for p in team.players),  # Points
-                sum(p.score for p in team.players) / len(team.players)  # Average
+                sum(p.score for p in team.players) / len(team.players) / len(team.players) # Average
             ]
         season_summary = LeagueSeasonSummary(data=season_data)
         
@@ -183,4 +184,21 @@ class StatisticsService:
             weekly_performances=weekly_performances,
             season_summary=season_summary,
             team_contribution=team_contribution
-        ) 
+        )
+
+    def get_team_series_data(self, team_name: str, season: str, league: str, 
+                            x_field: str, y_field: str) -> Dict[str, Any]:
+        """Get team series data using the new SeriesData class"""
+        raw_data = self.server.data_adapter.get_team_series_data(team_name, season, league)
+        
+        series_data = calculate_series_data_from_dataframe(
+            df=pd.DataFrame(raw_data),
+            x_field=x_field,
+            y_field=y_field,
+            name=f"{team_name} {y_field}",
+            label_x=x_field,
+            label_y=y_field,
+            query_params={"team": team_name, "season": season, "league": league}
+        )
+        
+        return series_data.to_dict() 

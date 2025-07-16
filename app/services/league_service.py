@@ -6,6 +6,7 @@ from app.models.table_data import TableData, ColumnGroup, Column, PlotData, Tile
 from app.services.statistics_service import StatisticsService
 from app.models.statistics_models import LeagueStatistics, LeagueResults
 from app.models.series_data import SeriesData
+from data_access.schema import Columns
 from itertools import accumulate
 # from data_access.series_data import calculate_series_data, get_player_series_data, get_team_series_data
 
@@ -77,6 +78,7 @@ class LeagueService:
                         team_name=perf.team_name,
                         week=week_num,
                         score=perf.total_score,
+                        number_of_games=perf.number_of_games,
                         points=perf.points
                     )
                 )
@@ -512,7 +514,6 @@ class LeagueService:
         if not standings.teams:
             return SeriesData().to_dict()
         
-        
         series_data = SeriesData(label_x_axis="Spieltag", label_y_axis="Punkte", name="Punkte im Saisonverlauf", 
                                  query_params={"season": season, "league": league_name})
         
@@ -522,74 +523,33 @@ class LeagueService:
 
         return series_data.to_dict()
 
-        # Get all weeks in the season
-        all_weeks = sorted(set(
-            perf.week for team in standings.teams 
-            for perf in team.weekly_performances
-        ))
-        
-        # Prepare result structure
-        weekly_points = {}
-        total_points = {}
-        
-        for team in standings.teams:
-            # Create a map of week to points for this team
-            week_to_points = {p.week: p.points for p in team.weekly_performances}
-            
-            # Add points for each week (or 0 if no data)
-            weekly_points[team.team_name] = [week_to_points.get(week, 0) for week in all_weeks]
-            
-            # Add total points
-            total_points[team.team_name] = team.total_points
-        
-        return {
-            "weekly": weekly_points,
-            "total": total_points
-        }
-
     def get_team_averages_during_season(self, league_name: str, season: str) -> Dict[str, Any]:
         """Get team averages throughout a season"""
         # Get all teams and their performances
         standings = self.get_league_standings(season, league_name)
         
         if not standings.teams:
-            return {"averages": {}, "total": {}}
+            return SeriesData().to_dict()
         
-        # Get all weeks in the season
-        all_weeks = sorted(set(
-            perf.week for team in standings.teams 
-            for perf in team.weekly_performances
-        ))
-        
-        # Prepare result structure
-        weekly_averages = {}
-        total_averages = {}
-
+        series_data = SeriesData(label_x_axis="Spieltag", label_y_axis="Durchschnitt", name="Durchschnitt im Saisonverlauf", 
+                                 query_params={"season": season, "league": league_name})
         
         for team in standings.teams:
-            # Create a map of week to score for this team
-            week_to_perf = {p.week: p for p in team.weekly_performances}
-            
-            # Calculate average for each week (assuming 4 games per week)
+            # Calculate average for each week
             averages = []
-            for week in all_weeks:
-                perf = week_to_perf.get(week)
-                if perf:
-                    # Assuming 4 games per week
-                    avg = perf.score / 4 if perf.score > 0 else 0
+            for perf in team.weekly_performances:
+                if perf.score > 0 and perf.number_of_games > 0:
+                    # Calculate team average: total pins divided by number of games
+                    # perf.score is the total pins of all players on the team for this week
+                    # perf.number_of_games is the number of games played by all players on the team for this week
+                    avg = perf.score / perf.number_of_games
                     averages.append(round(avg, 2))
                 else:
                     averages.append(0)
             
-            weekly_averages[team.team_name] = averages
-            
-            # Add total average
-            total_averages[team.team_name] = team.average
-        
-        return {
-            "averages": weekly_averages,
-            "total": total_averages
-        }
+            series_data.add_data(team.team_name, averages)
+
+        return series_data.to_dict()
 
     def get_team_positions_during_season(self, league_name: str, season: str) -> Dict[str, List[int]]:
         """Get team positions throughout a season"""
@@ -896,10 +856,11 @@ class LeagueService:
                 perf = week_to_perf.get(week)
                 if perf:
                     # Get players_per_team from the performance or use default
+                    print(perf)
                     players_per_team = perf.get("players_per_team", 4)
                     # Calculate average using players_per_team
-                    weekly_avg = perf["score"] / players_per_team / 5.0 # @todo: this is a hack to normalize the score, the factor 5.0 is arbitrary, fix it in the structure
-                    row.extend([perf["score"], perf["points"], round(weekly_avg, 1)])
+                    weekly_avg = perf["score"] / players_per_team / 10.0 # @todo: this is a hack to normalize the score, the factor 5.0 is arbitrary, fix it in the structure
+                    row.extend([perf["score"]/2, perf["points"], round(weekly_avg, 1)])
                 else:
                     row.extend([0, 0, 0])  # No data for this week
             
@@ -928,3 +889,61 @@ class LeagueService:
                 "responsive": True
             }
         )
+
+    def get_team_averages_simple(self, league_name: str, season: str) -> Dict[str, Any]:
+        """Get team averages throughout a season - simple direct query approach"""
+        try:
+            # Direct query to get team data for the league and season
+            filters = {
+                Columns.league_name: {'value': league_name, 'operator': 'eq'},
+                Columns.computed_data: {'value': False, 'operator': 'eq'},
+
+            }
+            
+            # Get all team data for this league and season
+            team_data = self.adapter.get_filtered_data(filters=filters)
+            
+            if team_data.empty:
+                return SeriesData(
+                    label_x_axis="Spieltag", 
+                    label_y_axis="Durchschnitt", 
+                    name="Durchschnitt im Saisonverlauf", 
+                    query_params={"season": season, "league": league_name, "computed_data": False}
+                ).to_dict()
+            
+            # Group by team and week to calculate averages
+            series_data = SeriesData(
+                label_x_axis="Spieltag", 
+                label_y_axis="Durchschnitt", 
+                name="Durchschnitt im Saisonverlauf", 
+                query_params={"season": season, "league": league_name}
+            )
+            
+            # Get all teams and weeks
+            teams = team_data[Columns.team_name].unique()
+            weeks = sorted(team_data[Columns.week].unique())
+            
+            for team in teams:
+                team_week_data = team_data[team_data[Columns.team_name] == team]
+                averages = []
+                
+                for week in weeks:
+                    week_data = team_week_data[team_week_data[Columns.week] == week]
+                    
+                    if not week_data.empty:
+                        averages.append(round(week_data[Columns.score].mean(), 2))
+                    else:
+                        averages.append(0)
+                
+                series_data.add_data(team, averages)
+            
+            return series_data.to_dict()
+            
+        except Exception as e:
+            print(f"Error in get_team_averages_simple: {e}")
+            return SeriesData(
+                label_x_axis="Spieltag", 
+                label_y_axis="Durchschnitt", 
+                name="Durchschnitt im Saisonverlauf", 
+                query_params={"season": season, "league": league_name}
+            ).to_dict()

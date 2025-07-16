@@ -54,6 +54,7 @@ class TeamWeeklyPerformance:
     week: int
     score: int
     points: float
+    number_of_games: int
     players_per_team: int = 4  # Default to 4 if not specified
     
     def to_dict(self) -> Dict[str, Any]:
@@ -64,6 +65,7 @@ class TeamWeeklyPerformance:
             "week": self.week,
             "score": self.score,
             "points": self.points,
+            "number_of_games": self.number_of_games,
             "players_per_team": self.players_per_team
         }
 

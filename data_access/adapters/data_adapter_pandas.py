@@ -333,6 +333,7 @@ class DataAdapterPandas(DataAdapter):
                     'team_name': team_name,
                     'total_score': 0,
                     'total_points': 0,
+                    'total_number_of_games': 0,
                     'weekly_performances': {}
                 }
             
@@ -341,17 +342,18 @@ class DataAdapterPandas(DataAdapter):
                 team_performances[team_id]['weekly_performances'][week_num] = {
                     'score': 0,
                     'points': 0,
+                    'number_of_games': 0,
                     'players_per_team': players_per_team
                 }
             
             # Add score and points
             team_performances[team_id]['weekly_performances'][week_num]['score'] += score
             team_performances[team_id]['weekly_performances'][week_num]['points'] += points
-            
+            team_performances[team_id]['weekly_performances'][week_num]['number_of_games'] += 1
             # Update team totals
             team_performances[team_id]['total_score'] += score
             team_performances[team_id]['total_points'] += points
-        
+            team_performances[team_id]['total_number_of_games'] += 1
         # Convert to TeamSeasonPerformance objects
         result = []
         for team_id, data in team_performances.items():
@@ -367,13 +369,15 @@ class DataAdapterPandas(DataAdapter):
             # Create weekly performance objects
             weekly_performances = []
             for week_num, week_data in data['weekly_performances'].items():
-                weekly_performances.append(
+                print(week_data)
+                weekly_performances.append( 
                     TeamWeeklyPerformance(
                         team_id=data['team_id'],
                         team_name=data['team_name'],
                         week=week_num,
                         score=week_data['score'],
                         points=week_data['points'],
+                        number_of_games=week_data['number_of_games'],
                         players_per_team=week_data['players_per_team']
                     )
                 )
