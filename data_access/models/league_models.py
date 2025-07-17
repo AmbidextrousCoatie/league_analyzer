@@ -12,6 +12,7 @@ class LeagueQuery:
     team: Optional[str] = None
     min_week: Optional[int] = None
     max_week: Optional[int] = None
+    computed_data: Optional[bool] = None
     
     def to_filter_dict(self) -> Dict[str, Dict[str, Any]]:
         """Convert to a filter dictionary for the adapter"""
@@ -40,11 +41,14 @@ class LeagueQuery:
         if self.team:
             filters[Columns.team_name] = {'value': self.team, 'operator': 'eq'}
         
+        if self.computed_data is not None:
+            filters[Columns.computed_data] = {'value': self.computed_data, 'operator': 'eq'}
+        
         return filters
     
     def __str__(self) -> str:
         """Convert to a string representation"""
-        return f"LeagueQuery(season={self.season}, league={self.league}, week={self.week}, team={self.team}, min_week={self.min_week}, max_week={self.max_week})"
+        return f"LeagueQuery(season={self.season}, league={self.league}, week={self.week}, team={self.team}, computed_data={self.computed_data}, min_week={self.min_week}, max_week={self.max_week})"
 
 @dataclass
 class TeamWeeklyPerformance:

@@ -78,9 +78,9 @@ def get_league_history():
             season=season
         )
         
-        print("::::::::::::::::::::::::::::")
-        print(table_data)
-        print("::::::::::::::::::::::::::::")
+        #print("::::::::::::::::::::::::::::")
+        #print(table_data)
+        #print("::::::::::::::::::::::::::::")
         
         # Convert to dictionary and return as JSON
         return jsonify(table_data.to_dict())
@@ -106,11 +106,11 @@ def get_league_week_table():
         # This now returns a TableData object
         table_data = league_service.get_league_week_table_simple(season=season, league=league, week=week)
         
-        print("############################")
-        print("league_routes.get_league_week_table: ", end="")
-        print(table_data)
+        #print("############################")
+        #print("league_routes.get_league_week_table: ", end="")
+        #print(table_data)
         
-        print("############################")
+        #print("############################")
         
         if not table_data:
             return jsonify({"message": "No data found for these filters"}), 404
@@ -166,11 +166,14 @@ def get_honor_scores():
             league=league, 
             season=season, 
             week=week, 
-            individual_scores=3, 
-            team_scores=3, 
-            indivdual_averages=3, 
-            team_averages=3
+            number_of_individual_scores=3, 
+            number_of_team_scores=3, 
+            number_of_individual_averages=3, 
+            number_of_team_averages=3
         )
+        print("############################")   
+        print(honor_scores)
+        print("############################")
         return jsonify(honor_scores)
     except Exception as e:
         print(f"Error in get_honor_scores: {str(e)}")
@@ -256,8 +259,8 @@ def get_latest_events():
             return jsonify({'error': 'Limit must be greater than 0'}), 400
             
         events = league_service.get_latest_events(limit=limit)
-        print("league_routes.get_latest_events")
-        print(events)
+        #print("league_routes.get_latest_events")
+        #print(events)
         print(f"Found {len(events)} latest events")
         return jsonify(events)
         
@@ -282,7 +285,7 @@ def get_team_positions():
             season=season
         )
         
-        print(positions)
+        #print(positions)
         return jsonify(positions)
         
     except Exception as e:

@@ -4,151 +4,26 @@
     {% include "components/tables.html" %}
     {% include "components/charts.html" %}
 
-
-<div class="card">
-    <div class="card-header">
-        <h4>League Statistics</h4>
-    </div>
-    <div class="card-body">
-        <!-- Selection Area -->
-        <div class="row mb-3">
-            <div class="col-md-6">
-                <h5>Saison</h5>
-                <div id="buttonsSeason" class="btn-group-horizontalw-100">
-                    <!-- Seasons will be inserted here -->
-                </div>
-            </div>
-            <div class="col-md-6">
-                <h5>Liga</h5>
-                <div id="buttonsLeague" class="btn-group-horizontal w-100">
-                    <!-- Leagues will be inserted here -->
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- League History Table -->
-<div class="card">
-    <div class="card-header">
-        <h5>Saisonübersicht</h5>
-    </div>
-    <!-- Message Area -->
-    <div id="selectionMessage" class="alert alert-danger" style="font-size: 1.5rem; font-weight: bold;">
-        Bitte wählen Sie eine Kombintation aus Saison und Liga.
-    </div>
-
-    <!-- Table Area -->
-    <div id="leagueTableHistory" style="display: none">
-        <!-- Table will be inserted here -->
-    </div>
-
-    <div class="card-body">
-        <!-- Position Charts -->
-        <div class="row">
-            <!-- Positions over the course of the season -->
-            <div class="col-md-6">
-                <div class="card h-100">
-                    <div class="card-header">
-                        <h5>Platzierung im Saisonverlauf</h5>
-                    </div>
-                    <div class="card-body">
-                        <div id="chartTeamPositionCumulated" style="width: 100%; min-width: 100%; height: 300px;"></div>
-                    </div>
-                </div>
-            </div>            
-            <!-- Points over the course of the season -->
-            <div class="col-md-6">
-                <div class="card h-100">
-                    <div class="card-header">
-                        <h5>Punkte im Saisonverlauf</h5>
-                    </div>
-                    <div class="card-body">
-                        <div id="chartTeamPointsCumulated" style="width: 100%; min-width: 100%; height: 300px;"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!-- Shared Legend -->
-        <div class="row mt-3">
-            <div class="col-12">
-                <div id="sharedLegend" class="d-flex justify-content-center flex-wrap">
-                    <!-- Legend will be dynamically inserted here -->
-                </div>
-            </div>
-        </div>
-        <!-- Points Charts -->
-        <div class="row">
-            <!-- Points per Week Chart -->
-            <div class="col-md-6">
-                <div class="card h-100">
-                    <div class="card-header">
-                        <h5>Punkte pro Spieltag</h5>
-                    </div>
-                    <div class="card-body">
-                        <div id="chartTeamPointsWeekly" style="width: 100%; min-width: 100%; height: 300px;"></div>
-                    </div>
-                </div>
-            </div>
-            <!-- Position per Week Chart -->
-            <div class="col-md-6">
-                <div class="card h-100">
-                    <div class="card-header">
-                        <h5>Platzierung pro Spieltag</h5>
-                    </div>
-                    <div class="card-body">
-                        <div id="chartTeamPositionWeekly" style="width: 100%; min-width: 100%; height: 300px;"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!-- Shared Legend -->
-        <div class="row mt-3">
-            <div class="col-12">
-                <div id="sharedLegendMiddle" class="d-flex justify-content-center flex-wrap">
-                    <!-- Legend will be dynamically inserted here -->
-                </div>
-            </div>
-        </div>
-        <!-- misc Charts -->
-        <div class="row">
-            <!-- Average per Week Chart -->
-            <div class="col-md-6">
-                <div class="card h-100">
-                    <div class="card-header">
-                        <h5>Schnitt pro Spieltag</h5>
-                    </div>
-                    <div class="card-body">
-                        <div id="chartTeamAverageScoreWeekly" style="width: 100%; min-width: 100%; height: 300px;"></div>
-                    </div>
-                </div>
-            </div>
-            <!-- Points vs Average -->
-            <div class="col-md-6">
-                <div class="card h-100">
-                    <div class="card-header">
-                        <h5>Punkte vs. Schnitt</h5>
-                    </div>
-                    <div class="card-body">
-                        <canvas id="chartTeamPointsVsAverage"></canvas>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>  
-<!---/div-->
-
-<!--//////////////////////////////////////////////////////////////////////////-->
-<!--//////////////////////////////////////////////////////////////////////////-->   
-
-    <div class="card">
-       <div class="card-header">
-            <h5>Ligaergebnisse - Spieltag</h5>
+<div class="container-fluid">
+    <!-- Selection Area -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h4>League Statistics</h4>
         </div>
         <div class="card-body">
-            <!-- Selection Area -->
             <div class="row mb-3">
+                <div class="col-md-4">
+                    <h5>Season</h5>
+                    <div id="buttonsSeason" class="btn-group-horizontal w-100">
+                        <!-- Seasons will be inserted here -->
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <h5>League</h5>
+                    <div id="buttonsLeague" class="btn-group-horizontal w-100">
+                        <!-- Leagues will be inserted here -->
+                    </div>
+                </div>
                 <div class="col-md-4">
                     <h5>Week</h5>
                     <div id="buttonsWeek" class="btn-group-horizontal w-100">
@@ -156,16 +31,136 @@
                     </div>
                 </div>
             </div>
-        
-        <div id="weekHeader" class="card-header">
-            <h5>Ergebnisse für Spieltag Bitte wählen</h5>
+            <div class="row">
+                <div class="col-md-12">
+                    <h5>Team</h5>
+                    <div id="buttonsTeam" class="btn-group-horizontal w-100">
+                        <!-- Teams will be inserted here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- League History Table -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5>Season Overview</h5>
+        </div>
+        <!-- Message Area -->
+        <div id="selectionMessage" class="alert alert-danger" style="font-size: 1.5rem; font-weight: bold;">
+            Please select a combination of Season and League.
+        </div>
+
+        <!-- Table Area -->
+        <div id="leagueTableHistory" style="display: none">
+            <!-- Table will be inserted here -->
+        </div>
+
+        <div class="card-body">
+            <!-- Position Charts -->
+            <div class="row">
+                <!-- Positions over the course of the season -->
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-header">
+                            <h5>Position in Season Progress</h5>
+                        </div>
+                        <div class="card-body">
+                            <div id="chartTeamPositionCumulated" style="width: 100%; min-width: 100%; height: 300px;"></div>
+                        </div>
+                    </div>
+                </div>            
+                <!-- Points over the course of the season -->
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-header">
+                            <h5>Points in Season Progress</h5>
+                        </div>
+                        <div class="card-body">
+                            <div id="chartTeamPointsCumulated" style="width: 100%; min-width: 100%; height: 300px;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Shared Legend -->
+            <div class="row mt-3">
+                <div class="col-12">
+                    <div id="sharedLegend" class="d-flex justify-content-center flex-wrap">
+                        <!-- Legend will be dynamically inserted here -->
+                    </div>
+                </div>
+            </div>
+            <!-- Points Charts -->
+            <div class="row">
+                <!-- Points per Week Chart -->
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-header">
+                            <h5>Points per Match Day</h5>
+                        </div>
+                        <div class="card-body">
+                            <div id="chartTeamPointsWeekly" style="width: 100%; min-width: 100%; height: 300px;"></div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Position per Week Chart -->
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-header">
+                            <h5>Position per Match Day</h5>
+                        </div>
+                        <div class="card-body">
+                            <div id="chartTeamPositionWeekly" style="width: 100%; min-width: 100%; height: 300px;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Shared Legend -->
+            <div class="row mt-3">
+                <div class="col-12">
+                    <div id="sharedLegendMiddle" class="d-flex justify-content-center flex-wrap">
+                        <!-- Legend will be dynamically inserted here -->
+                    </div>
+                </div>
+            </div>
+            <!-- misc Charts -->
+            <div class="row">
+                <!-- Average per Week Chart -->
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-header">
+                            <h5>Average per Match Day</h5>
+                        </div>
+                        <div class="card-body">
+                            <div id="chartTeamAverageScoreWeekly" style="width: 100%; min-width: 100%; height: 300px;"></div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Points vs Average -->
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-header">
+                            <h5>Points vs. Average</h5>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="chartTeamPointsVsAverage"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>  
+
+    <!-- League Results - Match Day -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5>League Results - Match Day</h5>
         </div>
         <div class="card-body">
-            <!-- Selection Area -->
-        
             <!-- Message Area -->
             <div id="weekMessage" class="alert alert-info">
-                Bitte wählen Sie einen Spieltag aus.
+                Please select a match day.
             </div>
         
             <!-- Content Area -->
@@ -204,37 +199,31 @@
             </div>
         </div>
 
-        <div class="row mb-3">
-            <div class="col-md-12">
-                <h5>Team</h5>
-                <div id="buttonsTeam" class="btn-group-horizontal w-100">
-                    <!-- Teams will be inserted here -->
+        <!-- Team Details Section -->
+        <div class="card-body">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Score Sheet for Selected Team</h5>
+                    <div id="teamDetailsMetadata" class="text-muted small"></div>
                 </div>
-            </div>
+                <div class="card-body">
+                    <div id="teamTableWeekDetails">
+                        <!-- Team table will be dynamically inserted here -->
+                        <div class="alert alert-info">Please select a team to display the score sheet.</div>
+                    </div>
+                </div>
+            </div>  
         </div>
-        <div class="card">
-            <div class="card-header">
-                <h5>Spielzettel für Team wählen</h5>
-                <div id="teamDetailsMetadata" class="text-muted small"></div>
-            </div>
-            <div class="card-body">
-                <div id="teamTableWeekDetails">
-                    <!-- Team table will be dynamically inserted here -->
-                    <div class="alert alert-info">Bitte wählen Sie ein Team, aus um den Spielzettel anzuzeigen.</div>
-                </div>
-            </div>
-        </div>  
     </div>
+</div>
 
 {% endblock %}
 
 {% block scripts %}
 
-
 <script>
 
 let positionChart = null;
-
 
 function updateSharedLegend(teams) {
     const legendHtml = teams.map(team => `
@@ -382,8 +371,6 @@ function updatePositionChart() {
     }
 }
 
-
-
 function updateTableTeamDetails() {
     const selectedSeason = document.querySelector('input[name="season"]:checked')?.value;
     const selectedLeague = document.querySelector('input[name="league"]:checked')?.value;
@@ -395,17 +382,17 @@ function updateTableTeamDetails() {
     }
     
     // Update header
-    document.getElementById('teamDetailsHeader').innerHTML = `<h5>${selectedTeam} - Spieltag ${selectedWeek}</h5>`;
+    document.getElementById('teamDetailsMetadata').innerHTML = `${selectedTeam} - Match Day ${selectedWeek}`;
     
     // Show loading state
-    document.getElementById('teamDetailsContent').innerHTML = '<div class="text-center p-3"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>';
+    document.getElementById('teamTableWeekDetails').innerHTML = '<div class="text-center p-3"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>';
     
     // Fetch team details
     fetch(`/league/get_team_week_details?season=${selectedSeason}&league=${selectedLeague}&week=${selectedWeek}&team=${selectedTeam}`)
         .then(response => response.json())
         .then(data => {
             // Process and display the data
-            const content = document.getElementById('teamDetailsContent');
+            const content = document.getElementById('teamTableWeekDetails');
             
             if (data.config && data.config.length > 0) {
                 let html = '<div class="list-group">';
@@ -430,7 +417,7 @@ function updateTableTeamDetails() {
         })
         .catch(error => {
             console.error('Error:', error);
-            document.getElementById('teamDetailsContent').innerHTML = '<div class="alert alert-danger">Error loading team details.</div>';
+            document.getElementById('teamTableWeekDetails').innerHTML = '<div class="alert alert-danger">Error loading team details.</div>';
         });
 }
 
@@ -489,7 +476,6 @@ function updateSectionLeagueStandings() {
         .then(response => response.json())
         .then(data => {
             createTableBootstrap3('leagueTableHistory', data);
-            //createTableBootstrap2('leagueTableHistory', data);
         })
         .catch(error => console.error('Error:', error));
 }
@@ -499,12 +485,29 @@ function updateTableLeagueWeek() {
     const selectedLeague = document.querySelector('input[name="league"]:checked')?.value;
     const selectedWeek = document.querySelector('input[name="week"]:checked')?.value;
     
-    if (!selectedSeason || !selectedLeague || !selectedWeek) {
+    if (!selectedSeason || !selectedLeague) {
         return;
     }
     
-    // Update header
-    document.getElementById('weekHeader').innerHTML = `<h5>Ergebnisse für ${selectedLeague} - ${selectedSeason} - Spieltag ${selectedWeek}</h5>`;
+    if (!selectedWeek) {
+        // Show message when no week is selected
+        const messageArea = document.getElementById('weekMessage');
+        const standingsTable = document.getElementById('tableLeagueWeek');
+        
+        if (messageArea) {
+            messageArea.style.display = 'block';
+            messageArea.innerHTML = 'Please select a match day.';
+        }
+        if (standingsTable) standingsTable.style.display = 'none';
+        return;
+    }
+    
+    // Show the table and hide the message
+    const messageArea = document.getElementById('weekMessage');
+    const standingsTable = document.getElementById('tableLeagueWeek');
+    
+    if (messageArea) messageArea.style.display = 'none';
+    if (standingsTable) standingsTable.style.display = 'block';
     
     // Fetch and display table
     fetchAndRenderTable('tableLeagueWeek', '/league/get_league_week_table', {
@@ -534,44 +537,6 @@ function updateTableLeagueHistory() {
     });
 }
 
-function updateButtonsTeams() {
-    const selectedSeason = document.querySelector('input[name="season"]:checked')?.value;
-    const selectedLeague = document.querySelector('input[name="league"]:checked')?.value;
-    const currentTeam = document.querySelector('input[name="team"]:checked')?.value;
-    
-    if (selectedSeason && selectedLeague) {
-        fetch(`/league/get_available_teams?season=${selectedSeason}&league=${selectedLeague}`)
-            .then(response => response.json())
-            .then(teams => {
-                const buttonsTeam = document.getElementById('buttonsTeam');
-                
-                // Create team buttons
-                const buttonsHtml = teams.map(team => `
-                    <input type="radio" class="btn-check" name="team" id="team_${team}" value="${team}">
-                    <label class="btn btn-outline-primary" for="team_${team}">${team}</label>
-                `).join('');
-                
-                buttonsTeam.innerHTML = buttonsHtml;
-                
-                // Select team: keep current if available, otherwise take first
-                if (currentTeam && teams.includes(currentTeam)) {
-                    document.getElementById(`team_${currentTeam}`).checked = true;
-                } else if (teams.length > 0) {
-                    document.getElementById(`team_${teams[0]}`).checked = true;
-                }
-                
-                // Update relevant tables/charts
-                //updateTableLeagueWeek();
-                //updateSectionLeagueStandings();
-                //updateTableTeamDetails();
-
-                // Add listeners to new team buttons
-                document.querySelectorAll('input[name="team"]')
-                    .forEach(input => input.addEventListener('change', updateTableTeamDetails));
-            });
-    }
-}
-
 // Initialize the page
 function initializePage() {
     console.log("Initializing page...");
@@ -581,8 +546,9 @@ function initializePage() {
     const selectedSeason = urlParams.get('season');
     const selectedLeague = urlParams.get('league');
     const selectedWeek = urlParams.get('week');
+    const selectedTeam = urlParams.get('team');
     
-    console.log("URL parameters:", { season: selectedSeason, league: selectedLeague, week: selectedWeek });
+    console.log("URL parameters:", { season: selectedSeason, league: selectedLeague, week: selectedWeek, team: selectedTeam });
 
     // Function to update all content
     function updateAllContent() {
@@ -601,12 +567,6 @@ function initializePage() {
         
         if (messageArea) messageArea.style.display = 'none';
         if (standingsTable) standingsTable.style.display = 'block';
-        
-        // Update the week header text
-        const weekHeader = document.getElementById('weekHeader').querySelector('h5');
-        if (weekHeader) {
-            weekHeader.textContent = `Ergebnisse für Spieltag ${selectedWeek} in der Saison ${selectedSeason}`;
-        }
         
         // Update tables and scores
         updateTableLeagueWeek();
@@ -645,8 +605,52 @@ function initializePage() {
                                 updateAllContent();
                                 updateWeekContent();
                             }
+                        })
+                        .catch(error => {
+                            console.error('Error loading weeks:', error);
+                            document.getElementById('buttonsWeek').innerHTML = `
+                                <div class="alert alert-danger">
+                                    <strong>Error loading weeks:</strong> ${error.message || 'Unknown error'}
+                                </div>
+                            `;
+                        });
+                    
+                    // Fetch teams specifically for selected season and league
+                    fetch(`/league/get_available_teams?season=${selectedSeason}&league=${selectedLeague}`)
+                        .then(response => response.json())
+                        .then(teams => {
+                            const teamButtons = teams.map(team => `
+                                <input type="radio" class="btn-check" name="team" id="team_${team.replace(/\s+/g, '_')}" 
+                                       value="${team}" ${team === selectedTeam ? 'checked' : ''}>
+                                <label class="btn btn-outline-primary" for="team_${team.replace(/\s+/g, '_')}">${team}</label>
+                            `).join('');
+                            document.getElementById('buttonsTeam').innerHTML = teamButtons;
+                            
+                            // Select the team if it was in URL
+                            if (selectedTeam && teams.includes(selectedTeam)) {
+                                const teamInput = document.querySelector(`input[name="team"][value="${selectedTeam}"]`);
+                                if (teamInput) {
+                                    teamInput.checked = true;
+                                }
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error loading teams:', error);
+                            document.getElementById('buttonsTeam').innerHTML = `
+                                <div class="alert alert-danger">
+                                    <strong>Error loading teams:</strong> ${error.message || 'Unknown error'}
+                                </div>
+                            `;
                         });
                 }
+            })
+            .catch(error => {
+                console.error('Error loading leagues:', error);
+                document.getElementById('buttonsLeague').innerHTML = `
+                    <div class="alert alert-danger">
+                        <strong>Error loading leagues:</strong> ${error.message || 'Unknown error'}
+                    </div>
+                `;
             });
     }
 
@@ -671,16 +675,31 @@ function initializePage() {
                     seasonInput.checked = true;
                 }
             }
+        })
+        .catch(error => {
+            console.error('Error loading seasons:', error);
+            document.getElementById('buttonsSeason').innerHTML = `
+                <div class="alert alert-danger">
+                    <strong>Error loading seasons:</strong> ${error.message || 'Unknown error'}
+                </div>
+            `;
         });
 
     // Add event listeners for future changes
     document.addEventListener('change', event => {
+        console.log('🔍 Change event detected:', event.target.name, '=', event.target.value);
+        
         if (event.target.name === 'season' || event.target.name === 'league') {
+            console.log('🔍 Handling season/league change');
             handleSelectionChange();
             updateAvailableOptions();
             updateChartsLeague();
+            // Also update week-specific content when season/league changes
+            updateTableLeagueWeek();
+            updateHonorScores();
         }
         if (event.target.name === 'week' || event.target.name === 'team') {
+            console.log('🔍 Handling week/team change');
             updateTableTeamDetails();
             updateWeekContent();
             handleWeekTeamSelection();
@@ -693,6 +712,12 @@ function handleSelectionChange() {
     const selectedSeason = document.querySelector('input[name="season"]:checked')?.value;
     const selectedLeague = document.querySelector('input[name="league"]:checked')?.value;
     
+    // Update URL parameters
+    const url = new URL(window.location);
+    if (selectedSeason) url.searchParams.set('season', selectedSeason);
+    if (selectedLeague) url.searchParams.set('league', selectedLeague);
+    window.history.pushState({}, '', url);
+    
     const messageArea = document.getElementById('selectionMessage');
     const tableArea = document.getElementById('leagueTableHistory');
     
@@ -701,6 +726,9 @@ function handleSelectionChange() {
         tableArea.style.display = 'block';
         updateSectionLeagueStandings();
         updateChartsLeague();
+        // Also update week-specific content when season/league changes
+        updateTableLeagueWeek();
+        updateHonorScores();
         
     } else {
         messageArea.style.display = 'block';
@@ -712,6 +740,8 @@ function handleSelectionChange() {
 function updateAvailableOptions() {
     const selectedSeason = document.querySelector('input[name="season"]:checked')?.value;
     const selectedLeague = document.querySelector('input[name="league"]:checked')?.value;
+    const selectedWeek = document.querySelector('input[name="week"]:checked')?.value;
+    const selectedTeam = document.querySelector('input[name="team"]:checked')?.value;
 
     console.log("Updating available options for:", {
         season: selectedSeason,
@@ -724,10 +754,27 @@ function updateAvailableOptions() {
             .then(response => response.json())
             .then(weeks => {
                 const weekButtons = weeks.map(week => `
-                    <input type="radio" class="btn-check" name="week" id="week_${week}" value="${week}">
+                    <input type="radio" class="btn-check" name="week" id="week_${week}" 
+                           value="${week}" ${week.toString() === selectedWeek ? 'checked' : ''}>
                     <label class="btn btn-outline-primary" for="week_${week}">${week}</label>
                 `).join('');
                 document.getElementById('buttonsWeek').innerHTML = weekButtons;
+                
+                // Select first week by default if none selected
+                if (!selectedWeek && weeks.length > 0) {
+                    const firstWeekInput = document.querySelector(`input[name="week"][value="${weeks[0]}"]`);
+                    if (firstWeekInput) {
+                        firstWeekInput.checked = true;
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error loading weeks:', error);
+                document.getElementById('buttonsWeek').innerHTML = `
+                    <div class="alert alert-danger">
+                        <strong>Error loading weeks:</strong> ${error.message || 'Unknown error'}
+                    </div>
+                `;
             });
 
         // Update available teams
@@ -735,10 +782,27 @@ function updateAvailableOptions() {
             .then(response => response.json())
             .then(teams => {
                 const teamButtons = teams.map(team => `
-                    <input type="radio" class="btn-check" name="team" id="team_${team}" value="${team}">
-                    <label class="btn btn-outline-primary" for="team_${team}">${team}</label>
+                    <input type="radio" class="btn-check" name="team" id="team_${team.replace(/\s+/g, '_')}" 
+                           value="${team}" ${team === selectedTeam ? 'checked' : ''}>
+                    <label class="btn btn-outline-primary" for="team_${team.replace(/\s+/g, '_')}">${team}</label>
                 `).join('');
                 document.getElementById('buttonsTeam').innerHTML = teamButtons;
+                
+                // Select first team by default if none selected
+                if (!selectedTeam && teams.length > 0) {
+                    const firstTeamInput = document.querySelector(`input[name="team"][value="${teams[0]}"]`);
+                    if (firstTeamInput) {
+                        firstTeamInput.checked = true;
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error loading teams:', error);
+                document.getElementById('buttonsTeam').innerHTML = `
+                    <div class="alert alert-danger">
+                        <strong>Error loading teams:</strong> ${error.message || 'Unknown error'}
+                    </div>
+                `;
             });
     } else {
         // Clear buttons if no season/league selected
@@ -751,6 +815,12 @@ function updateAvailableOptions() {
 function handleWeekTeamSelection() {
     const selectedWeek = document.querySelector('input[name="week"]:checked')?.value;
     const selectedTeam = document.querySelector('input[name="team"]:checked')?.value;
+    
+    // Update URL parameters
+    const url = new URL(window.location);
+    if (selectedWeek) url.searchParams.set('week', selectedWeek);
+    if (selectedTeam) url.searchParams.set('team', selectedTeam);
+    window.history.pushState({}, '', url);
     
     const messageArea = document.getElementById('weekMessage');
     const standingsTable = document.getElementById('tableLeagueWeek');
@@ -776,7 +846,16 @@ function updateHonorScores() {
     const selectedLeague = document.querySelector('input[name="league"]:checked')?.value;
     const selectedWeek = document.querySelector('input[name="week"]:checked')?.value;
     
-    if (!selectedSeason || !selectedLeague || !selectedWeek) {
+    if (!selectedSeason || !selectedLeague) {
+        return;
+    }
+    
+    if (!selectedWeek) {
+        // Clear honor scores when no week is selected
+        document.getElementById('individualScores').innerHTML = '<div class="text-muted">Please select a match day.</div>';
+        document.getElementById('teamScores').innerHTML = '<div class="text-muted">Please select a match day.</div>';
+        document.getElementById('individualAverages').innerHTML = '<div class="text-muted">Please select a match day.</div>';
+        document.getElementById('teamAverages').innerHTML = '<div class="text-muted">Please select a match day.</div>';
         return;
     }
     
@@ -786,29 +865,29 @@ function updateHonorScores() {
             // Individual Scores
             document.getElementById('individualScores').innerHTML = data.individual_scores
                 .map(item => `<div class="d-flex justify-content-between">
-                    <span>${item.Player}</span>
-                    <span class="fw-bold">${item.Score}</span>
+                    <span>${item.player}</span>
+                    <span class="fw-bold">${item.score}</span>
                 </div>`).join('');
             
             // Team Scores
             document.getElementById('teamScores').innerHTML = data.team_scores
                 .map(item => `<div class="d-flex justify-content-between">
-                    <span>${item.Team}</span>
-                    <span class="fw-bold">${item.Score}</span>
+                    <span>${item.team}</span>
+                    <span class="fw-bold">${item.score}</span>
                 </div>`).join('');
             
             // Individual Averages
             document.getElementById('individualAverages').innerHTML = data.individual_averages
                 .map(item => `<div class="d-flex justify-content-between">
-                    <span>${item.Player}</span>
-                    <span class="fw-bold">${item.Score.toFixed(1)}</span>
+                    <span>${item.player}</span>
+                    <span class="fw-bold">${item.average.toFixed(1)}</span>
                 </div>`).join('');
             
             // Team Averages
             document.getElementById('teamAverages').innerHTML = data.team_averages
                 .map(item => `<div class="d-flex justify-content-between">
-                    <span>${item.Team}</span>
-                    <span class="fw-bold">${item.Score.toFixed(1)}</span>
+                    <span>${item.team}</span>
+                    <span class="fw-bold">${item.average.toFixed(1)}</span>
                 </div>`).join('');
         })
         .catch(error => console.error('Error:', error));
@@ -860,57 +939,53 @@ function updateTeamAveragesChart() {
         });
 }
 
-
 function updateChartsLeague() {
+    console.log('🔍 updateChartsLeague function called');
+    
     const selectedSeason = document.querySelector('input[name="season"]:checked')?.value;
     const selectedLeague = document.querySelector('input[name="league"]:checked')?.value;
     
-    if (!selectedSeason || !selectedLeague) return;
-
-    console.log("Updating charts for:", {
-        season: selectedSeason,
-        league: selectedLeague
-    });
+    console.log('🔍 Selected season/league:', selectedSeason, selectedLeague);
     
-    /*fetch(`/league/get_available_teams?season=${selectedSeason}&league=${selectedLeague}`)
-            .then(response => response.json())
-            .then(teams => {
-                updateSharedLegend(teams);
-            });
-    */
+    if (!selectedSeason || !selectedLeague) {
+        console.log('🔍 Missing season or league, returning early');
+        return;
+    }
+    
     // Fetch and create position charts
     fetch(`/league/get_team_positions?season=${selectedSeason}&league=${selectedLeague}`)
         .then(response => response.json())
         .then(data => {
             // Create labels based on number of weeks
-            const numWeeks = Object.values(data.weekly)[0].length;
-            const labels = Array.from({length: numWeeks}, (_, i) => `Spieltag ${i + 1}`);
+            const numWeeks = Object.values(data.data)[0].length;
+            const labels = Array.from({length: numWeeks}, (_, i) => `Match Day ${i + 1}`);
 
             // Create weekly positions chart
            createLineChart(
-                data.weekly,
-                data.order,
+                data.data,
+                data.sorted_by_total,
                 'chartTeamPositionWeekly',
-                'Platzierung pro Spieltag',
+                'Position per Match Day',
                 labels, 
-                true,
+                false,
                 'exact'
             );
 
             // Create cumulative positions chart
             createLineChart(
-                data.cumulative,
-                data.order,
+                data.data,
+                data.sorted_by_total,
                 'chartTeamPositionCumulated',
-                'Platzierung im Saisonverlauf',
+                'ERROR: Position in Season Progress',
                 labels,
-                true,
+                false,
                 'exact'
             );
 
-
-            console.log('Team order:', data.order);
-            updateSharedLegend(data.order);
+            updateSharedLegend(data.sorted_by_total);
+        })
+        .catch(error => {
+            console.error('Error loading team positions:', error);
         });
 
     // Fetch and create points charts
@@ -918,85 +993,92 @@ function updateChartsLeague() {
         .then(response => response.json())
         .then(data => {
             // Create labels based on number of weeks
-            const numWeeks = Object.values(data.weekly)[0].length;
-            const labels = Array.from({length: numWeeks}, (_, i) => `Spieltag ${i + 1}`);
-
-            // Create weekly positions chart
-            /*
-            createLineChart(
-                data.weekly,
-                data.order,
-                'chartTeamPointsWeekly',
-                'Punkte pro Spieltag',
-                labels,
-                false
-            ); */
-
+            const numWeeks = Object.values(data.data)[0].length;
+            const labels = Array.from({length: numWeeks}, (_, i) => `Match Day ${i + 1}`);
 
             createScatterChartMultiAxis(
-                data.weekly,
-                data.order,
+                data.data,
+                data.sorted_by_total,
                 'chartTeamPointsWeekly',
-                'Punkte pro Spieltag',
+                'Points per Match Day',
                 labels
             );
 
             // Create cumulative positions chart
             createLineChart(
-                data.cumulative,
-                data.order,
+                data.data_accumulated,
+                data.sorted_by_total,
                 'chartTeamPointsCumulated',
-                'Punkte im Saisonverlauf',
+                'Points in Season Progress',
                 labels,
                 false
             );
-
-
+        })
+        .catch(error => {
+            console.error('Error loading team points:', error);
         });
 
-        fetch(`/league/get_team_averages?season=${selectedSeason}&league=${selectedLeague}`)
+            fetch(`/league/get_team_averages?season=${selectedSeason}&league=${selectedLeague}`)
         .then(response => response.json())
         .then(data => {
+            console.log('=== TEAM AVERAGES DEBUG ===');
+            console.log('Data structure:', {
+                hasData: !!data.data,
+                dataKeys: data.data ? Object.keys(data.data) : 'no data',
+                hasOrder: !!data.sorted_by_total,
+                orderLength: data.sorted_by_total ? data.sorted_by_total.length : 'no order'
+            });
             
-            const numWeeks = Object.values(data.averages)[0].length;
-            const labels = Array.from({length: numWeeks}, (_, i) => `Spieltag ${i + 1}`);
+            const chartContainer = document.getElementById('chartTeamAverageScoreWeekly');
+            if (!chartContainer) {
+                console.error('❌ Chart container not found!');
+                return;
+            }
+            
+            const numWeeks = Object.values(data.data)[0].length;
+            const labels = Array.from({length: numWeeks}, (_, i) => `Match Day ${i + 1}`);
+            
+            console.log('Creating chart with weeks:', numWeeks, 'labels:', labels.length);
 
-            createLineChart(
-                data.averages,
-                null,
-                'chartTeamAverageScoreWeekly',
-                'Schnitt pro Spieltag',
-                labels,
-                false,
-                'auto'
-            );
+            try {
+                createLineChart(
+                    data.data,
+                    data.sorted_by_total,
+                    'chartTeamAverageScoreWeekly',
+                    'Average per Match Day',
+                    labels,
+                    false,
+                    'auto'
+                );
+                
+                console.log('✅ Team averages chart created successfully');
+            } catch (error) {
+                console.error('❌ Error creating team averages chart:', error);
+            }
+            console.log('=== END TEAM AVERAGES DEBUG ===');
+        })
+        .catch(error => {
+            console.error('❌ Error loading team averages:', error);
         });
 
-
-        fetch(`/league/get_team_points_vs_average?season=${selectedSeason}&league=${selectedLeague}`)
+    fetch(`/league/get_team_points_vs_average?season=${selectedSeason}&league=${selectedLeague}`)
         .then(response => response.json())
         .then(data => {
-            axis_labels = ['Punkte', 'Schnitt']
+            axis_labels = ['Points', 'Average']
             createScatterChart_vanilla(
                 data,
                 'chartTeamPointsVsAverage',
-                'Punkte vs. Schnitt',
+                'Points vs. Average',
                 axis_labels
             );
+        })
+        .catch(error => {
+            console.error('Error loading team points vs average:', error);
         });
 }
-
-
-// Add to your existing event listeners
-document.querySelectorAll('input[name="team"], input[name="season"], input[name="league"]')
-    .forEach(input => {
-        input.addEventListener('change', () => {
-
-            updateChartsLeague();
-        });
-    });
 
 // Initial load
 document.addEventListener('DOMContentLoaded', initializePage);
 </script>
+
 {% endblock %}

@@ -1,5 +1,7 @@
 from typing import List, Dict, Any, Optional
 import datetime
+
+
 from data_access.adapters.data_adapter_factory import DataAdapterFactory, DataAdapterSelector
 from data_access.models.league_models import LeagueQuery, TeamSeasonPerformance, LeagueStandings, TeamWeeklyPerformance
 from app.models.table_data import TableData, ColumnGroup, Column, PlotData, TileData
@@ -651,16 +653,20 @@ class LeagueService:
         return positions
 
     def get_honor_scores(self, league: str, season: str, week: int, 
-                        individual_scores: int = 3, team_scores: int = 3,
-                        indivdual_averages: int = 3, team_averages: int = 3) -> Dict[str, Any]:
+                        number_of_individual_scores: int = 3, number_of_team_scores: int = 3,
+                        number_of_individual_averages: int = 3, number_of_team_averages: int = 3) -> Dict[str, Any]:
         """Get honor scores for a specific week"""
         # Create a query for this league, season, and week
-        query = LeagueQuery(season=season, league=league, week=week)
+        query_individual = LeagueQuery(season=season, league=league, week=week, computed_data=False)
+        query_team = LeagueQuery(season=season, league=league, week=week, computed_data=True)
         
+
         # Get the data
-        league_data = self.adapter.get_filtered_data(query.to_filter_dict())
+        league_data_individual = self.adapter.get_filtered_data(query_individual.to_filter_dict())
+        league_data_team = self.adapter.get_filtered_data(query_team.to_filter_dict())
         
-        if league_data.empty:
+        
+        if league_data_individual.empty:
             return {
                 "individual_scores": [],
                 "team_scores": [],
@@ -670,52 +676,50 @@ class LeagueService:
         
         # Process individual scores
         individual_scores_list = []
-        if "Player" in league_data.columns and "Score" in league_data.columns:
-            player_scores = league_data.groupby("Player")["Score"].max().reset_index()
-            player_scores = player_scores.sort_values("Score", ascending=False).head(individual_scores)
-            
+        if Columns.player_name in league_data_individual.columns and Columns.score in league_data_individual.columns:
+            player_scores = league_data_individual.sort_values(Columns.score, ascending=False).head(number_of_individual_scores)
+
             for _, row in player_scores.iterrows():
                 individual_scores_list.append({
-                    "player": row["Player"],
-                    "score": row["Score"]
+                    "player": row[Columns.player_name] + " (" + row[Columns.team_name] + ")",
+                    "score": row[Columns.score]
                 })
-        
+
         # Process team scores
         team_scores_list = []
-        if "Team" in league_data.columns and "Score" in league_data.columns:
-            team_scores = league_data.groupby("Team")["Score"].sum().reset_index()
-            team_scores = team_scores.sort_values("Score", ascending=False).head(team_scores)
+        if Columns.team_name in league_data_team.columns and Columns.score in league_data_team.columns:
+            team_scores = league_data_team.sort_values(Columns.score, ascending=False).head(number_of_team_scores)
             
             for _, row in team_scores.iterrows():
                 team_scores_list.append({
-                    "team": row["Team"],
-                    "score": row["Score"]
+                    "team": row[Columns.team_name],
+                    "score": row[Columns.score]
                 })
         
         # Process individual averages
         individual_averages_list = []
-        if "Player" in league_data.columns and "Score" in league_data.columns:
-            player_averages = league_data.groupby("Player")["Score"].mean().reset_index()
-            player_averages = player_averages.sort_values("Score", ascending=False).head(indivdual_averages)
+        if Columns.player_name in league_data_individual.columns and Columns.score in league_data_individual.columns:
+            player_averages = league_data_individual.groupby([Columns.player_name, Columns.team_name])[Columns.score].mean().reset_index()
+            player_averages = player_averages.sort_values(Columns.score, ascending=False).head(number_of_individual_averages)
             
             for _, row in player_averages.iterrows():
                 individual_averages_list.append({
-                    "player": row["Player"],
-                    "average": round(row["Score"], 2)
+                    "player": row[Columns.player_name] + " (" + row[Columns.team_name] + ")",
+                    "average": round(row[Columns.score], 2)
                 })
-        
+
         # Process team averages
         team_averages_list = []
-        if "Team" in league_data.columns and "Score" in league_data.columns:
-            team_averages = league_data.groupby("Team")["Score"].mean().reset_index()
-            team_averages = team_averages.sort_values("Score", ascending=False).head(team_averages)
+        if Columns.team_name in league_data_team.columns and Columns.score in league_data_team.columns:
+            team_averages = league_data_team.groupby([Columns.team_name, Columns.players_per_team])[Columns.score].mean().reset_index()
+            team_averages = team_averages.sort_values(Columns.score, ascending=False).head(number_of_team_averages)
             
             for _, row in team_averages.iterrows():
                 team_averages_list.append({
-                    "team": row["Team"],
-                    "average": round(row["Score"], 2)
+                    "team": row[Columns.team_name],
+                    "average": round(row[Columns.score]/row[Columns.players_per_team], 2)
                 })
-        
+
         return {
             "individual_scores": individual_scores_list,
             "team_scores": team_scores_list,
@@ -784,6 +788,7 @@ class LeagueService:
             # Direct query to get team data for the league and season
             filters = {
                 Columns.league_name: {'value': league_name, 'operator': 'eq'},
+                Columns.season: {'value': season, 'operator': 'eq'},
                 Columns.computed_data: {'value': False, 'operator': 'eq'},
 
             }
@@ -819,7 +824,7 @@ class LeagueService:
                     week_data = team_week_data[team_week_data[Columns.week] == week]
                     
                     if not week_data.empty:
-                        averages.append(round(week_data[Columns.score].mean(), 2))
+                        averages.append(round(float(week_data[Columns.score].mean()), 2))
                     else:
                         averages.append(0)
                 
