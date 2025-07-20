@@ -32,6 +32,7 @@ class TableData:
     title: Optional[str] = None
     description: Optional[str] = None
     config: Optional[Dict[str, Any]] = field(default_factory=dict)  # Table-wide configuration
+    metadata: Optional[Dict[str, Any]] = field(default_factory=dict)  # Additional metadata for i18n and UI
     
     def to_dict(self) -> Dict[str, Any]:
         """Convert to a dictionary suitable for JSON serialization"""
@@ -62,7 +63,8 @@ class TableData:
             "data": self.data,
             **({"title": self.title} if self.title else {}),
             **({"description": self.description} if self.description else {}),
-            **({"config": self.config} if self.config else {})
+            **({"config": self.config} if self.config else {}),
+            **({"metadata": self.metadata} if self.metadata else {})
         }
 
 #@dataclass

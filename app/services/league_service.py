@@ -4,6 +4,7 @@ import datetime
 
 from data_access.adapters.data_adapter_factory import DataAdapterFactory, DataAdapterSelector
 from data_access.models.league_models import LeagueQuery, TeamSeasonPerformance, LeagueStandings, TeamWeeklyPerformance
+from app.services.i18n_service import i18n_service
 from app.models.table_data import TableData, ColumnGroup, Column, PlotData, TileData
 from app.services.statistics_service import StatisticsService
 from app.models.statistics_models import LeagueStatistics, LeagueResults
@@ -1169,12 +1170,12 @@ class LeagueService:
             # Create column groups
             columns = [
                 ColumnGroup(
-                    title="Ranking",
+                    title=i18n_service.get_text("ranking"),
                     frozen="left",
                     style={"backgroundColor": "#f8f9fa"},
                     columns=[
                         Column(title="#", field="pos", width="50px", align="center"),
-                        Column(title="Team", field="team", width="200px", align="left")
+                        Column(title=i18n_service.get_text("team"), field="team", width="200px", align="left")
                     ]
                 )
             ]
@@ -1183,11 +1184,11 @@ class LeagueService:
             for w in weeks_to_show:
                 columns.append(
                     ColumnGroup(
-                        title=f"Week {w}",
+                        title=f"{i18n_service.get_text('week')} {w}",
                         columns=[
-                            Column(title="Pins", field=f"week{w}_score", format="{:,}"),
-                            Column(title="Pts.", field=f"week{w}_points", format="{:.1f}"),
-                            Column(title="Avg.", field=f"week{w}_avg", format="{:.1f}")
+                            Column(title=i18n_service.get_text("score"), field=f"week{w}_score", format="{:,}"),
+                            Column(title=i18n_service.get_text("points"), field=f"week{w}_points", format="{:.1f}"),
+                            Column(title=i18n_service.get_text("average"), field=f"week{w}_avg", format="{:.1f}")
                         ]
                     )
                 )
@@ -1195,13 +1196,13 @@ class LeagueService:
             # Add season total column (accumulated up to selected week)
             columns.append(
                 ColumnGroup(
-                    title=f"Total until Week {week}",
+                    title=f"{i18n_service.get_text('total_until_week')} {week}",
                     style={"backgroundColor": "#e9ecef"},
                     header_style={"fontWeight": "bold"},
                     columns=[
-                        Column(title="Pins", field="season_score", format="{:,}"),
-                        Column(title="Pts.", field="season_points", format="{:.1f}"),
-                        Column(title="Avg.", field="season_avg", format="{:.1f}")
+                        Column(title=i18n_service.get_text("score"), field="season_score", format="{:,}"),
+                        Column(title=i18n_service.get_text("points"), field="season_points", format="{:.1f}"),
+                        Column(title=i18n_service.get_text("average"), field="season_avg", format="{:.1f}")
                     ]
                 )
             )
@@ -1238,8 +1239,12 @@ class LeagueService:
                 data.append(row)
             
             # Create and return the TableData
-            title = f"{league} History - {season}" if include_history else f"{league} Standings - {season}"
-            description = f"Through Week {week}" if include_history else f"Week {week} Results & Season Totals"
+            if include_history:
+                title = f"{league} {i18n_service.get_text('league_history')} - {season}"
+                description = f"{i18n_service.get_text('through_week')} {week}"
+            else:
+                title = f"{league} {i18n_service.get_text('league_standings')} - {season}"
+                description = f"{i18n_service.get_text('week_results')}"
             
             return TableData(
                 columns=columns,
@@ -1252,6 +1257,41 @@ class LeagueService:
                     "hover": True,
                     "responsive": True,
                     "compact": False
+                },
+                metadata={
+                    "card_headers": {
+                        "league_statistics": i18n_service.get_text("league_statistics"),
+                        "season": i18n_service.get_text("season"),
+                        "league": i18n_service.get_text("league"),
+                        "week": i18n_service.get_text("week"),
+                        "team": i18n_service.get_text("team"),
+                        "season_overview": i18n_service.get_text("season_overview"),
+                        "position_in_season_progress": i18n_service.get_text("position_in_season_progress"),
+                        "points_in_season_progress": i18n_service.get_text("points_in_season_progress"),
+                        "points_per_match_day": i18n_service.get_text("points_per_match_day"),
+                        "position_per_match_day": i18n_service.get_text("position_per_match_day"),
+                        "average_per_match_day": i18n_service.get_text("average_per_match_day"),
+                        "points_vs_average": i18n_service.get_text("points_vs_average"),
+                        "league_results_match_day": i18n_service.get_text("league_results_match_day"),
+                        "honor_scores": i18n_service.get_text("honor_scores"),
+                        "top_individual_scores": i18n_service.get_text("top_individual_scores"),
+                        "top_team_scores": i18n_service.get_text("top_team_scores"),
+                        "best_individual_averages": i18n_service.get_text("best_individual_averages"),
+                        "best_team_averages": i18n_service.get_text("best_team_averages"),
+                        "score_sheet_selected_team": i18n_service.get_text("score_sheet_selected_team"),
+                        "details": i18n_service.get_text("details"),
+                        "head_to_head": i18n_service.get_text("head_to_head"),
+                        "refresh_data": i18n_service.get_text("refresh_data")
+                    },
+                    "messages": {
+                        "please_select_combination": i18n_service.get_text("please_select_combination"),
+                        "please_select_match_day": i18n_service.get_text("please_select_match_day"),
+                        "please_select_team": i18n_service.get_text("please_select_team")
+                    },
+                    "chart_labels": {
+                        "match_day_label": i18n_service.get_text("match_day_label"),
+                        "match_day_format": i18n_service.get_text("match_day_format")
+                    }
                 }
             )
             
@@ -1458,12 +1498,12 @@ class LeagueService:
             # Create column groups
             columns = [
                 ColumnGroup(
-                    title="Match Info",
+                    title=i18n_service.get_text("match_day"),
                     style={"backgroundColor": "#f8f9fa"},
                     columns=[
-                        Column(title="#", field="round_number", width="60px", align="center"),
-                        Column(title="Opponent", field="opponent_name", width="120px", align="left"),
-                        Column(title="Points", field="total_points", width="80px", align="center")
+                        Column(title=i18n_service.get_text("round"), field="round_number", width="60px", align="center"),
+                        Column(title=i18n_service.get_text("opponent"), field="opponent_name", width="120px", align="left"),
+                        Column(title=i18n_service.get_text("points"), field="total_points", width="80px", align="center")
                     ]
                 )
             ]
@@ -1474,9 +1514,9 @@ class LeagueService:
                     ColumnGroup(
                         title=f"Position {int(position+1)}",
                         columns=[
-                            Column(title="Name", field=f"pos{position}_name", width="150px", align="left"),
-                            Column(title="Score", field=f"pos{position}_score", width="80px", align="center"),
-                            Column(title="Points", field=f"pos{position}_points", width="80px", align="center")
+                            Column(title=i18n_service.get_text("name"), field=f"pos{position}_name", width="150px", align="left"),
+                            Column(title=i18n_service.get_text("score"), field=f"pos{position}_score", width="80px", align="center"),
+                            Column(title=i18n_service.get_text("points"), field=f"pos{position}_points", width="80px", align="center")
                         ]
                     )
                 )
@@ -1484,12 +1524,12 @@ class LeagueService:
             # Add team column group
             columns.append(
                 ColumnGroup(
-                    title="Team",
+                    title=i18n_service.get_text("team"),
                     style={"backgroundColor": "#e9ecef"},
                     header_style={"fontWeight": "bold"},
                     columns=[
-                        Column(title="Score", field="team_score", width="80px", align="center"),
-                        Column(title="Points", field="team_points", width="80px", align="center")
+                        Column(title=i18n_service.get_text("score"), field="team_score", width="80px", align="center"),
+                        Column(title=i18n_service.get_text("points"), field="team_points", width="80px", align="center")
                     ]
                 )
             )
@@ -1594,7 +1634,7 @@ class LeagueService:
             return TableData(
                 columns=columns,
                 data=data,
-                title=f"{team} - Match Day {week} Head-to-Head",
+                title=f"{team} - {i18n_service.get_text('match_day')} {week} {i18n_service.get_text('head_to_head')}",
                 description=f"All matches in {league} - {season}",
                 config={
                     "stickyHeader": True,
@@ -1602,6 +1642,41 @@ class LeagueService:
                     "hover": True,
                     "responsive": True,
                     "compact": False
+                },
+                metadata={
+                    "card_headers": {
+                        "league_statistics": i18n_service.get_text("league_statistics"),
+                        "season": i18n_service.get_text("season"),
+                        "league": i18n_service.get_text("league"),
+                        "week": i18n_service.get_text("week"),
+                        "team": i18n_service.get_text("team"),
+                        "season_overview": i18n_service.get_text("season_overview"),
+                        "position_in_season_progress": i18n_service.get_text("position_in_season_progress"),
+                        "points_in_season_progress": i18n_service.get_text("points_in_season_progress"),
+                        "points_per_match_day": i18n_service.get_text("points_per_match_day"),
+                        "position_per_match_day": i18n_service.get_text("position_per_match_day"),
+                        "average_per_match_day": i18n_service.get_text("average_per_match_day"),
+                        "points_vs_average": i18n_service.get_text("points_vs_average"),
+                        "league_results_match_day": i18n_service.get_text("league_results_match_day"),
+                        "honor_scores": i18n_service.get_text("honor_scores"),
+                        "top_individual_scores": i18n_service.get_text("top_individual_scores"),
+                        "top_team_scores": i18n_service.get_text("top_team_scores"),
+                        "best_individual_averages": i18n_service.get_text("best_individual_averages"),
+                        "best_team_averages": i18n_service.get_text("best_team_averages"),
+                        "score_sheet_selected_team": i18n_service.get_text("score_sheet_selected_team"),
+                        "details": i18n_service.get_text("details"),
+                        "head_to_head": i18n_service.get_text("head_to_head"),
+                        "refresh_data": i18n_service.get_text("refresh_data")
+                    },
+                    "messages": {
+                        "please_select_combination": i18n_service.get_text("please_select_combination"),
+                        "please_select_match_day": i18n_service.get_text("please_select_match_day"),
+                        "please_select_team": i18n_service.get_text("please_select_team")
+                    },
+                    "chart_labels": {
+                        "match_day_label": i18n_service.get_text("match_day_label"),
+                        "match_day_format": i18n_service.get_text("match_day_format")
+                    }
                 }
             )
             
@@ -1610,5 +1685,5 @@ class LeagueService:
             return TableData(
                 columns=[],
                 data=[],
-                title=f"Error loading head-to-head data for {team} - Week {week}"
+                title=f"Error loading {i18n_service.get_text('head_to_head')} data for {team} - {i18n_service.get_text('week')} {week}"
             )

@@ -8,24 +8,24 @@
     <!-- Selection Area -->
     <div class="card mb-4">
         <div class="card-header">
-            <h4>League Statistics</h4>
+            <h4 data-i18n="league_statistics">League Statistics</h4>
         </div>
         <div class="card-body">
             <div class="row mb-3">
                 <div class="col-md-4">
-                    <h5>Season</h5>
+                    <h5 data-i18n="season">Season</h5>
                     <div id="buttonsSeason" class="btn-group-horizontal w-100">
                         <!-- Seasons will be inserted here -->
                     </div>
                 </div>
                 <div class="col-md-4">
-                    <h5>League</h5>
+                    <h5 data-i18n="league">League</h5>
                     <div id="buttonsLeague" class="btn-group-horizontal w-100">
                         <!-- Leagues will be inserted here -->
                     </div>
                 </div>
                 <div class="col-md-4">
-                    <h5>Week</h5>
+                    <h5 data-i18n="week">Week</h5>
                     <div id="buttonsWeek" class="btn-group-horizontal w-100">
                         <!-- Weeks will be inserted here -->
                     </div>
@@ -33,7 +33,7 @@
             </div>
             <div class="row">
                 <div class="col-md-12">
-                    <h5>Team</h5>
+                    <h5 data-i18n="team">Team</h5>
                     <div id="buttonsTeam" class="btn-group-horizontal w-100">
                         <!-- Teams will be inserted here -->
                     </div>
@@ -45,10 +45,10 @@
     <!-- League History Table -->
     <div class="card mb-4">
         <div class="card-header">
-            <h5>Season Overview</h5>
+            <h5 data-i18n="season_overview">Season Overview</h5>
         </div>
         <!-- Message Area -->
-        <div id="selectionMessage" class="alert alert-danger" style="font-size: 1.5rem; font-weight: bold;">
+        <div id="selectionMessage" class="alert alert-danger" style="font-size: 1.5rem; font-weight: bold;" data-i18n="please_select_combination">
             Please select a combination of Season and League.
         </div>
 
@@ -64,7 +64,7 @@
                 <div class="col-md-6">
                     <div class="card h-100">
                         <div class="card-header">
-                            <h5>Position in Season Progress</h5>
+                            <h5 data-i18n="position_in_season_progress">Position in Season Progress</h5>
                         </div>
                         <div class="card-body">
                             <div id="chartTeamPositionCumulated" style="width: 100%; min-width: 100%; height: 300px;"></div>
@@ -75,7 +75,7 @@
                 <div class="col-md-6">
                     <div class="card h-100">
                         <div class="card-header">
-                            <h5>Points in Season Progress</h5>
+                            <h5 data-i18n="points_in_season_progress">Points in Season Progress</h5>
                         </div>
                         <div class="card-body">
                             <div id="chartTeamPointsCumulated" style="width: 100%; min-width: 100%; height: 300px;"></div>
@@ -97,7 +97,7 @@
                 <div class="col-md-6">
                     <div class="card h-100">
                         <div class="card-header">
-                            <h5>Points per Match Day</h5>
+                            <h5 data-i18n="points_per_match_day">Points per Match Day</h5>
                         </div>
                         <div class="card-body">
                             <div id="chartTeamPointsWeekly" style="width: 100%; min-width: 100%; height: 300px;"></div>
@@ -108,7 +108,7 @@
                 <div class="col-md-6">
                     <div class="card h-100">
                         <div class="card-header">
-                            <h5>Position per Match Day</h5>
+                            <h5 data-i18n="position_per_match_day">Position per Match Day</h5>
                         </div>
                         <div class="card-body">
                             <div id="chartTeamPositionWeekly" style="width: 100%; min-width: 100%; height: 300px;"></div>
@@ -130,7 +130,7 @@
                 <div class="col-md-6">
                     <div class="card h-100">
                         <div class="card-header">
-                            <h5>Average per Match Day</h5>
+                            <h5 data-i18n="average_per_match_day">Average per Match Day</h5>
                         </div>
                         <div class="card-body">
                             <div id="chartTeamAverageScoreWeekly" style="width: 100%; min-width: 100%; height: 300px;"></div>
@@ -141,7 +141,7 @@
                 <div class="col-md-6">
                     <div class="card h-100">
                         <div class="card-header">
-                            <h5>Points vs. Average</h5>
+                            <h5 data-i18n="points_vs_average">Points vs. Average</h5>
                         </div>
                         <div class="card-body">
                             <canvas id="chartTeamPointsVsAverage"></canvas>
@@ -155,11 +155,11 @@
     <!-- League Results - Match Day -->
     <div class="card mb-4">
         <div class="card-header">
-            <h5>League Results - Match Day</h5>
+            <h5 data-i18n="league_results_match_day">League Results - Match Day</h5>
         </div>
         <div class="card-body">
             <!-- Message Area -->
-            <div id="weekMessage" class="alert alert-info">
+            <div id="weekMessage" class="alert alert-info" data-i18n="please_select_match_day">
                 Please select a match day.
             </div>
         
@@ -173,24 +173,24 @@
                 <div class="col-md-4">
                     <div id="honorScores" class="card">
                         <div class="card-header">
-                            <h5>Honor Scores</h5>
+                            <h5 data-i18n="honor_scores">Honor Scores</h5>
                         </div>
                         <div class="card-body">
                             <!-- Make sure these IDs exist -->
                             <div class="mb-3">
-                                <h6>Top Individual Scores</h6>
+                                <h6 data-i18n="top_individual_scores">Top Individual Scores</h6>
                                 <div id="individualScores"></div>
                             </div>
                             <div class="mb-3">
-                                <h6>Top Team Scores</h6>
+                                <h6 data-i18n="top_team_scores">Top Team Scores</h6>
                                 <div id="teamScores"></div>
                             </div>
                             <div class="mb-3">
-                                <h6>Best Individual Averages</h6>
+                                <h6 data-i18n="best_individual_averages">Best Individual Averages</h6>
                                 <div id="individualAverages"></div>
                             </div>
                             <div class="mb-3">
-                                <h6>Best Team Averages</h6>
+                                <h6 data-i18n="best_team_averages">Best Team Averages</h6>
                                 <div id="teamAverages"></div>
                             </div>
                         </div>
@@ -204,21 +204,21 @@
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <div>
-                        <h5>Score Sheet for Selected Team</h5>
+                        <h5 data-i18n="score_sheet_selected_team">Score Sheet for Selected Team</h5>
                         <div id="teamDetailsMetadata" class="text-muted small"></div>
                     </div>
                     <div class="btn-group" role="group" aria-label="View options">
                         <input type="radio" class="btn-check" name="teamView" id="teamViewDetails" value="details" checked>
-                        <label class="btn btn-outline-primary btn-sm" for="teamViewDetails">Details</label>
+                        <label class="btn btn-outline-primary btn-sm" for="teamViewDetails" data-i18n="details">Details</label>
                         
                         <input type="radio" class="btn-check" name="teamView" id="teamViewHeadToHead" value="headToHead">
-                        <label class="btn btn-outline-primary btn-sm" for="teamViewHeadToHead">Head-to-Head</label>
+                        <label class="btn btn-outline-primary btn-sm" for="teamViewHeadToHead" data-i18n="head_to_head">Head-to-Head</label>
                     </div>
                 </div>
                 <div class="card-body">
                     <div id="teamTableWeekDetails">
                         <!-- Team table will be dynamically inserted here -->
-                        <div class="alert alert-info">Please select a team to display the score sheet.</div>
+                        <div class="alert alert-info" data-i18n="please_select_team">Please select a team to display the score sheet.</div>
                     </div>
                 </div>
             </div>  
@@ -338,7 +338,7 @@ function updatePositionChart() {
                                 },
                                 title: {
                                     display: true,
-                                    text: 'Match Day',
+                                    text: window.translations ? (window.translations['match_day_label'] || 'Match Day') : 'Match Day',
                                     font: { weight: 'bold' },
                                     padding: { top: 10, bottom: 10 }
                                 }
@@ -392,7 +392,8 @@ function updateTableTeamDetails() {
     }
     
     // Update header
-    document.getElementById('teamDetailsMetadata').innerHTML = `${selectedTeam} - Match Day ${selectedWeek}`;
+    const matchDayText = window.translations ? (window.translations['match_day_label'] || 'Match Day') : 'Match Day';
+    document.getElementById('teamDetailsMetadata').innerHTML = `${selectedTeam} - ${matchDayText} ${selectedWeek}`;
     
     // Determine endpoint based on selected view
     const endpoint = selectedView === 'headToHead' 
@@ -472,7 +473,7 @@ function updateTableLeagueWeek() {
         
         if (messageArea) {
             messageArea.style.display = 'block';
-            messageArea.innerHTML = 'Please select a match day.';
+            messageArea.innerHTML = window.translations ? (window.translations['please_select_match_day'] || 'Please select a match day.') : 'Please select a match day.';
         }
         if (standingsTable) standingsTable.style.display = 'none';
         return;
@@ -832,10 +833,11 @@ function updateHonorScores() {
     
     if (!selectedWeek) {
         // Clear honor scores when no week is selected
-        document.getElementById('individualScores').innerHTML = '<div class="text-muted">Please select a match day.</div>';
-        document.getElementById('teamScores').innerHTML = '<div class="text-muted">Please select a match day.</div>';
-        document.getElementById('individualAverages').innerHTML = '<div class="text-muted">Please select a match day.</div>';
-        document.getElementById('teamAverages').innerHTML = '<div class="text-muted">Please select a match day.</div>';
+        const pleaseSelectText = window.translations ? (window.translations['please_select_match_day'] || 'Please select a match day.') : 'Please select a match day.';
+        document.getElementById('individualScores').innerHTML = `<div class="text-muted">${pleaseSelectText}</div>`;
+        document.getElementById('teamScores').innerHTML = `<div class="text-muted">${pleaseSelectText}</div>`;
+        document.getElementById('individualAverages').innerHTML = `<div class="text-muted">${pleaseSelectText}</div>`;
+        document.getElementById('teamAverages').innerHTML = `<div class="text-muted">${pleaseSelectText}</div>`;
         return;
     }
     
@@ -938,7 +940,8 @@ function updateChartsLeague() {
         .then(data => {
             // Create labels based on number of weeks
             const numWeeks = Object.values(data.data)[0].length;
-            const labels = Array.from({length: numWeeks}, (_, i) => `Match Day ${i + 1}`);
+            const matchDayFormat = window.translations ? (window.translations['match_day_format'] || 'Match Day #{week}') : 'Match Day #{week}';
+            const labels = Array.from({length: numWeeks}, (_, i) => matchDayFormat.replace('{week}', i + 1));
 
             // Create weekly positions chart
            createLineChart(
@@ -974,7 +977,8 @@ function updateChartsLeague() {
         .then(data => {
             // Create labels based on number of weeks
             const numWeeks = Object.values(data.data)[0].length;
-            const labels = Array.from({length: numWeeks}, (_, i) => `Match Day ${i + 1}`);
+            const matchDayFormat = window.translations ? (window.translations['match_day_format'] || 'Match Day #{week}') : 'Match Day #{week}';
+            const labels = Array.from({length: numWeeks}, (_, i) => matchDayFormat.replace('{week}', i + 1));
 
             createScatterChartMultiAxis(
                 data.data,
@@ -1016,7 +1020,8 @@ function updateChartsLeague() {
             }
             
             const numWeeks = Object.values(data.data)[0].length;
-            const labels = Array.from({length: numWeeks}, (_, i) => `Match Day ${i + 1}`);
+            const matchDayFormat = window.translations ? (window.translations['match_day_format'] || 'Match Day #{week}') : 'Match Day #{week}';
+            const labels = Array.from({length: numWeeks}, (_, i) => matchDayFormat.replace('{week}', i + 1));
             
             console.log('Creating chart with weeks:', numWeeks, 'labels:', labels.length);
 

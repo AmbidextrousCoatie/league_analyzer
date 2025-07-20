@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, jsonify, request
 from app.services.league_service import LeagueService
 from data_access.schema import Columns, ColumnsExtra
+from app.services.i18n_service import i18n_service, Language
 from business_logic.statistics import query_database
 from data_access.adapters.data_adapter_factory import DataAdapterSelector
 import traceback
@@ -100,7 +101,7 @@ def get_league_week_table():
         print(f"League Standings - Received request with: season={season}, league={league}, week={week}")
         
         if not season or not league:
-            return jsonify({"error": "Season and league are required"}), 400
+            return jsonify({"error": i18n_service.get_text("season_league_required")}), 400
 
         # Get the table data from the service
         # This now returns a TableData object
@@ -151,7 +152,7 @@ def get_team_week_details_table():
         print(f"Team Week Details Table - Received request with: season={season}, league={league}, week={week}, team={team}")
         
         if not all([season, league, week, team]):
-            return jsonify({'error': 'Missing required parameters'}), 400
+            return jsonify({'error': i18n_service.get_text('missing_parameters')}), 400
         
         # Get the table data from the service
         table_data = league_service.get_team_week_details_table_data(
@@ -257,7 +258,7 @@ def get_team_points():
 
         print(f"Team Points - Received request with: season={season}, league={league}")
         if not all([season, league]):
-            return jsonify({'error': 'Missing required parameters'}), 400
+            return jsonify({'error': i18n_service.get_text('missing_parameters')}), 400
             
         points = league_service.get_team_points_simple(
             league_name=league,
@@ -283,7 +284,7 @@ def get_team_points_vs_average():
 
         print(f"Team Points vs Average - Received request with: season={season}, league={league}")
         if not all([season, league]):
-            return jsonify({'error': 'Missing required parameters'}), 400
+            return jsonify({'error': i18n_service.get_text('missing_parameters')}), 400
             
         points_data = league_service.get_team_points_during_season(
             league_name=league,
@@ -347,7 +348,7 @@ def get_team_positions():
 
         print(f"Team Positions - Received request with: season={season}, league={league}")
         if not all([season, league]):
-            return jsonify({'error': 'Missing required parameters'}), 400
+            return jsonify({'error': i18n_service.get_text('missing_parameters')}), 400
             
         positions = league_service.get_team_positions_simple(
             league_name=league,
@@ -371,7 +372,7 @@ def get_team_averages():
         print(f"Team Averages - Received request with: season={season}, league={league}")
 
         if not all([season, league]):
-            return jsonify({'error': 'Missing required parameters'}), 400
+            return jsonify({'error': i18n_service.get_text('missing_parameters')}), 400
             
         averages = league_service.get_team_averages_simple(
             league_name=league,
@@ -384,3 +385,57 @@ def get_team_averages():
         print(f"Error in get_team_averages: {str(e)}")
         print(traceback.format_exc())
         return jsonify({'error': str(e)}), 500
+
+@bp.route('/league/set_language', methods=['POST'])
+def set_language():
+    """Set the current language"""
+    try:
+        data = request.get_json()
+        language_code = data.get('language')
+        
+        if language_code == 'en':
+            i18n_service.set_language(Language.ENGLISH)
+        elif language_code == 'de':
+            i18n_service.set_language(Language.GERMAN)
+        else:
+            return jsonify({"error": "Invalid language code"}), 400
+        
+        return jsonify({
+            "success": True,
+            "language": language_code,
+            "available_languages": i18n_service.get_available_languages()
+        })
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@bp.route('/league/get_translations')
+def get_translations():
+    """Get all translations for the current language"""
+    try:
+        return jsonify({
+            "language": i18n_service.get_current_language().value,
+            "available_languages": i18n_service.get_available_languages(),
+            "translations": {
+                key: i18n_service.get_text(key) 
+                for key in [
+                    "points", "score", "average", "position", "team", "name", "week", "total",
+                    "ranking", "opponent", "round", "league_standings", "league_history",
+                    "team_week_details", "head_to_head", "match_day", "through_week",
+                    "week_results", "total_until_week", "select_match_day", "loading_data",
+                    "no_data_found", "error_loading_data", "missing_parameters",
+                    "match_day_label", "position_label", "points_label", "average_label",
+                    "position_progression", "points_progression", "average_progression",
+                    "season_league_required", "no_data_available",
+                    "league_statistics", "season", "league", "season_overview",
+                    "position_in_season_progress", "points_in_season_progress",
+                    "points_per_match_day", "position_per_match_day", "average_per_match_day",
+                    "points_vs_average", "league_results_match_day", "honor_scores",
+                    "top_individual_scores", "top_team_scores", "best_individual_averages",
+                    "best_team_averages", "score_sheet_selected_team", "details",
+                    "refresh_data", "please_select_combination", "please_select_match_day",
+                    "please_select_team", "match_day_label", "match_day_format"
+                ]
+            }
+        })
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
