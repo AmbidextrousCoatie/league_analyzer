@@ -1052,13 +1052,26 @@ class LeagueService:
                 week = self.get_latest_week(season, league)
             
             # Direct query to get all data for this league and season (both individual and team points)
-            filters = {
+            # Get individual player data (for scores and averages)
+            individual_filters = {
                 Columns.league_name: {'value': league, 'operator': 'eq'},
                 Columns.season: {'value': season, 'operator': 'eq'},
                 Columns.computed_data: {'value': False, 'operator': 'eq'}
             }
             
-            league_data = self.adapter.get_filtered_data(filters=filters)
+            individual_data = self.adapter.get_filtered_data(filters=individual_filters)
+            
+            # Get team bonus data (for team points)
+            team_filters = {
+                Columns.league_name: {'value': league, 'operator': 'eq'},
+                Columns.season: {'value': season, 'operator': 'eq'},
+                Columns.computed_data: {'value': True, 'operator': 'eq'}
+            }
+            
+            team_bonus_data = self.adapter.get_filtered_data(filters=team_filters)
+            
+            # Use individual data for the main league data (scores and averages)
+            league_data = individual_data
             
             if league_data.empty:
                 return TableData(
@@ -1067,7 +1080,7 @@ class LeagueService:
                     title=f"No data available for {league} - {season}"
                 )
             
-            # Get all teams and weeks
+            # Get als and weeks
             teams = league_data[Columns.team_name].unique()
             all_weeks = sorted(league_data[Columns.week].unique())
             
@@ -1087,22 +1100,37 @@ class LeagueService:
                     'season_points': 0
                 }
                 
-                # Get team data
-                team_season_data = league_data[league_data[Columns.team_name] == team]
+                # Get individual player data for this team (for scores and averages)
+                team_individual_data = individual_data[individual_data[Columns.team_name] == team]
                 
-                # Calculate season totals
-                if not team_season_data.empty:
-                    team_data[team]['season_score'] = int(team_season_data[Columns.score].sum())
-                    team_data[team]['season_points'] = float(team_season_data[Columns.points].sum())
+                # Get team bonus data for this team (for team points only)
+                team_bonus_team_data = team_bonus_data[team_bonus_data[Columns.team_name] == team]
+                
+                # Calculate season totals (accumulated up to selected week)
+                if not team_individual_data.empty:
+                    # Filter individual data up to selected week
+                    team_individual_until_week = team_individual_data[team_individual_data[Columns.week] <= week]
+                    team_data[team]['season_score'] = int(team_individual_until_week[Columns.score].sum())
+                    team_data[team]['season_points'] = float(team_individual_until_week[Columns.points].sum())
+                
+                # Add team bonus points to season total (up to selected week)
+                if not team_bonus_team_data.empty:
+                    team_bonus_until_week = team_bonus_team_data[team_bonus_team_data[Columns.week] <= week]
+                    team_data[team]['season_points'] += float(team_bonus_until_week[Columns.points].sum())
                 
                 # Calculate weekly data
                 for w in weeks_to_show:
-                    team_week_data = team_season_data[team_season_data[Columns.week] == w]
+                    team_week_individual = team_individual_data[team_individual_data[Columns.week] == w]
+                    team_week_bonus = team_bonus_team_data[team_bonus_team_data[Columns.week] == w]
                     
-                    if not team_week_data.empty:
-                        week_score = int(team_week_data[Columns.score].sum())
-                        week_points = float(team_week_data[Columns.points].sum())
-                        week_avg = week_score / len(team_week_data) if len(team_week_data) > 0 else 0
+                    if not team_week_individual.empty:
+                        week_score = int(team_week_individual[Columns.score].sum())
+                        week_points = float(team_week_individual[Columns.points].sum())
+                        week_avg = week_score / len(team_week_individual) if len(team_week_individual) > 0 else 0
+                        
+                        # Add team bonus points for this week
+                        if not team_week_bonus.empty:
+                            week_points += float(team_week_bonus[Columns.points].sum())
                         
                         team_data[team]['weekly_data'][w] = {
                             'score': week_score,
@@ -1116,21 +1144,27 @@ class LeagueService:
                             'avg': 0
                         }
             
-            # Sort teams by week points (descending), then by week score (descending)
-            # For history mode, sort by the selected week's performance
+            # Sort teams based on context
             if include_history:
-                sort_week = week
+                # For history mode: sort by total accumulated points (descending), then by total accumulated score (descending)
+                sorted_teams = sorted(
+                    teams,
+                    key=lambda t: (
+                        team_data[t]['season_points'],
+                        team_data[t]['season_score']
+                    ),
+                    reverse=True
+                )
             else:
-                sort_week = week
-            
-            sorted_teams = sorted(
-                teams,
-                key=lambda t: (
-                    team_data[t]['weekly_data'].get(sort_week, {}).get('points', 0),
-                    team_data[t]['weekly_data'].get(sort_week, {}).get('score', 0)
-                ),
-                reverse=True
-            )
+                # For single week: sort by points earned in the selected week (descending), then by score in the selected week (descending)
+                sorted_teams = sorted(
+                    teams,
+                    key=lambda t: (
+                        team_data[t]['weekly_data'].get(week, {}).get('points', 0),
+                        team_data[t]['weekly_data'].get(week, {}).get('score', 0)
+                    ),
+                    reverse=True
+                )
             
             # Create column groups
             columns = [
@@ -1158,10 +1192,10 @@ class LeagueService:
                     )
                 )
             
-            # Add season total column
+            # Add season total column (accumulated up to selected week)
             columns.append(
                 ColumnGroup(
-                    title="Season Total",
+                    title=f"Total until Week {week}",
                     style={"backgroundColor": "#e9ecef"},
                     header_style={"fontWeight": "bold"},
                     columns=[
@@ -1177,9 +1211,10 @@ class LeagueService:
             for i, team in enumerate(sorted_teams, 1):
                 team_info = team_data[team]
                 
-                # Calculate season average
-                team_season_data = league_data[league_data[Columns.team_name] == team]
-                season_avg = team_info['season_score'] / len(team_season_data) if len(team_season_data) > 0 else 0
+                # Calculate season average (only from individual player data up to selected week)
+                team_season_individual = individual_data[individual_data[Columns.team_name] == team]
+                team_individual_until_week = team_season_individual[team_season_individual[Columns.week] <= week]
+                season_avg = team_info['season_score'] / len(team_individual_until_week) if len(team_individual_until_week) > 0 else 0
                 
                 # Start with position and team name
                 row = [i, team]
@@ -1230,14 +1265,10 @@ class LeagueService:
 
     def get_team_positions_simple(self, league_name: str, season: str) -> Dict[str, Any]:
         """Get team positions throughout a season using direct data adapter queries"""
-        # Get all data for this league and season (both individual and team points)
-        filters = {
-            'League': {'value': league_name, 'operator': 'eq'},
-            'Season': {'value': season, 'operator': 'eq'}
-        }
-        all_data = self.adapter.get_filtered_data(filters=filters)
+        # Get weekly points from get_team_points_simple
+        points_data = self.get_team_points_simple(league_name, season)
         
-        if all_data.empty:
+        if not points_data or 'data' not in points_data:
             return SeriesData(
                 label_x_axis="Spieltag", 
                 label_y_axis="Position", 
@@ -1245,24 +1276,20 @@ class LeagueService:
                 query_params={"season": season, "league": league_name}
             ).to_dict()
         
-        # Get all weeks and teams
-        all_weeks = sorted(all_data['Week'].unique())
-        all_teams = sorted(all_data['Team'].unique())
+        # Extract weekly points from the SeriesData
+        weekly_points = points_data.get('data', {})
+        all_teams = list(weekly_points.keys())
+        all_weeks = list(range(1, len(next(iter(weekly_points.values()), [])) + 1)) if weekly_points else []
         
-        # Calculate weekly points for each team (individual + team points)
-        weekly_points = {}
-        for team in all_teams:
-            weekly_points[team] = []
-            for week in all_weeks:
-                week_data = all_data[(all_data['Team'] == team) & (all_data['Week'] == week)]
-                if not week_data.empty:
-                    # Sum up all points (individual + team) for this team in this week
-                    total_week_points = week_data['Points'].sum()
-                    weekly_points[team].append(total_week_points)
-                else:
-                    weekly_points[team].append(0)
+        if not all_teams:
+            return SeriesData(
+                label_x_axis="Spieltag", 
+                label_y_axis="Position", 
+                name="Position im Saisonverlauf", 
+                query_params={"season": season, "league": league_name}
+            ).to_dict()
         
-        # Create SeriesData
+        # Create SeriesData for positions
         series_data = SeriesData(
             label_x_axis="Spieltag", 
             label_y_axis="Position", 
@@ -1299,14 +1326,23 @@ class LeagueService:
 
     def get_team_points_simple(self, league_name: str, season: str) -> Dict[str, Any]:
         """Get team points throughout a season using direct data adapter queries"""
-        # Get all data for this league and season (both individual and team points)
-        filters = {
-            'League': {'value': league_name, 'operator': 'eq'},
-            'Season': {'value': season, 'operator': 'eq'}
+        # Get individual player data
+        individual_filters = {
+            Columns.league_name: {'value': league_name, 'operator': 'eq'},
+            Columns.season: {'value': season, 'operator': 'eq'},
+            Columns.computed_data: {'value': False, 'operator': 'eq'}
         }
-        all_data = self.adapter.get_filtered_data(filters=filters)
+        individual_data = self.adapter.get_filtered_data(filters=individual_filters)
         
-        if all_data.empty:
+        # Get team bonus data
+        team_filters = {
+            Columns.league_name: {'value': league_name, 'operator': 'eq'},
+            Columns.season: {'value': season, 'operator': 'eq'},
+            Columns.computed_data: {'value': True, 'operator': 'eq'}
+        }
+        team_data = self.adapter.get_filtered_data(filters=team_filters)
+        
+        if individual_data.empty and team_data.empty:
             return SeriesData(
                 label_x_axis="Spieltag", 
                 label_y_axis="Punkte", 
@@ -1314,22 +1350,28 @@ class LeagueService:
                 query_params={"season": season, "league": league_name}
             ).to_dict()
         
-        # Get all weeks and teams
-        all_weeks = sorted(all_data['Week'].unique())
-        all_teams = sorted(all_data['Team'].unique())
+        # Get all weeks and teams (from individual data for weeks, from both for teams)
+        all_weeks = sorted(individual_data[Columns.week].unique()) if not individual_data.empty else []
+        all_teams_individual = set(individual_data[Columns.team_name].unique()) if not individual_data.empty else set()
+        all_teams_team = set(team_data[Columns.team_name].unique()) if not team_data.empty else set()
+        all_teams = sorted(all_teams_individual | all_teams_team)
         
         # Calculate weekly points for each team (individual + team points)
         weekly_points = {}
         for team in all_teams:
             weekly_points[team] = []
             for week in all_weeks:
-                week_data = all_data[(all_data['Team'] == team) & (all_data['Week'] == week)]
-                if not week_data.empty:
-                    # Sum up all points (individual + team) for this team in this week
-                    total_week_points = week_data['Points'].sum()
-                    weekly_points[team].append(total_week_points)
-                else:
-                    weekly_points[team].append(0)
+                # Get individual player points for this team and week
+                individual_week_data = individual_data[(individual_data[Columns.team_name] == team) & (individual_data[Columns.week] == week)]
+                individual_points = individual_week_data[Columns.points].sum() if not individual_week_data.empty else 0
+                
+                # Get team bonus points for this team and week
+                team_week_data = team_data[(team_data[Columns.team_name] == team) & (team_data[Columns.week] == week)]
+                team_points = team_week_data[Columns.points].sum() if not team_week_data.empty else 0
+                
+                # Total points = individual + team bonus
+                total_week_points = individual_points + team_points
+                weekly_points[team].append(total_week_points)
         
         # Create SeriesData
         series_data = SeriesData(
