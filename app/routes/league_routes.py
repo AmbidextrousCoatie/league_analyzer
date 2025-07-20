@@ -136,8 +136,79 @@ def get_team_week_details():
     week = int(request.args.get('week'))
     
     details = league_service.get_team_week_details(league, season, team, week)
+    print(details)
     
     return jsonify({'config': details})
+
+@bp.route('/league/get_team_week_details_table')
+def get_team_week_details_table():
+    try:
+        season = request.args.get('season')
+        league = request.args.get('league')
+        week = int(request.args.get('week'))
+        team = request.args.get('team')
+        
+        print(f"Team Week Details Table - Received request with: season={season}, league={league}, week={week}, team={team}")
+        
+        if not all([season, league, week, team]):
+            return jsonify({'error': 'Missing required parameters'}), 400
+        
+        # Get the table data from the service
+        table_data = league_service.get_team_week_details_table_data(
+            league=league, 
+            season=season, 
+            team=team, 
+            week=week
+        )
+        
+        if not table_data:
+            return jsonify({"message": "No data found for these filters"}), 404
+        
+        # Convert TableData to dictionary and return as JSON
+        print(table_data)
+        return jsonify(table_data.to_dict())
+        
+    except Exception as e:
+        import traceback
+        print(f"Error in get_team_week_details_table: {str(e)}")
+        print(f"Traceback: {traceback.format_exc()}")
+        return jsonify({"error": str(e)}), 500
+
+@bp.route('/league/get_team_week_head_to_head_table')
+def get_team_week_head_to_head_table():
+    try:
+        season = request.args.get('season')
+        league = request.args.get('league')
+        week_str = request.args.get('week')
+        team = request.args.get('team')
+        
+        print(f"Team Week Head-to-Head Table - Received request with: season={season}, league={league}, week={week_str}, team={team}")
+        
+        if not all([season, league, week_str, team]):
+            return jsonify({'error': 'Missing required parameters'}), 400
+        
+        week = int(week_str)
+        
+        # Get the table data from the service
+        table_data = league_service.get_team_week_head_to_head_table_data(
+            league=league, 
+            season=season, 
+            team=team, 
+            week=week
+        )
+        
+        if not table_data:
+            return jsonify({"message": "No data found for these filters"}), 404
+        
+        # Convert TableData to dictionary and return as JSON
+        print(table_data)
+        return jsonify(table_data.to_dict())
+        
+    except Exception as e:
+        import traceback
+        print(f"Error in get_team_week_head_to_head_table: {str(e)}")
+        print(f"Traceback: {traceback.format_exc()}")
+        return jsonify({"error": str(e)}), 500
 
 @bp.route('/league/get_available_seasons')
 def get_available_seasons():
@@ -171,9 +242,7 @@ def get_honor_scores():
             number_of_individual_averages=3, 
             number_of_team_averages=3
         )
-        print("############################")   
-        print(honor_scores)
-        print("############################")
+        
         return jsonify(honor_scores)
     except Exception as e:
         print(f"Error in get_honor_scores: {str(e)}")

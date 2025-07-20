@@ -4,8 +4,8 @@ from business_logic.team import Team
 
 class DataGeneratorLeague(League):
 
-    def __init__(self, league_name, league_level, number_of_teams, number_of_players_per_team, weeks=None):
-        super().__init__(league_name, number_of_teams, number_of_players_per_team, weeks)
+    def __init__(self, league_name, league_level, number_of_teams, number_of_players_per_team, names_of_all_exiting_teams=[], weeks=None):
+        super().__init__(league_name, number_of_teams, number_of_players_per_team, names_of_all_exiting_teams, weeks)
         self.skill = 11-league_level
         self.last_seasons_order_names = []
         self.last_seasons_order_ids = []

@@ -202,9 +202,18 @@
         <!-- Team Details Section -->
         <div class="card-body">
             <div class="card">
-                <div class="card-header">
-                    <h5>Score Sheet for Selected Team</h5>
-                    <div id="teamDetailsMetadata" class="text-muted small"></div>
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5>Score Sheet for Selected Team</h5>
+                        <div id="teamDetailsMetadata" class="text-muted small"></div>
+                    </div>
+                    <div class="btn-group" role="group" aria-label="View options">
+                        <input type="radio" class="btn-check" name="teamView" id="teamViewDetails" value="details" checked>
+                        <label class="btn btn-outline-primary btn-sm" for="teamViewDetails">Details</label>
+                        
+                        <input type="radio" class="btn-check" name="teamView" id="teamViewHeadToHead" value="headToHead">
+                        <label class="btn btn-outline-primary btn-sm" for="teamViewHeadToHead">Head-to-Head</label>
+                    </div>
                 </div>
                 <div class="card-body">
                     <div id="teamTableWeekDetails">
@@ -376,6 +385,7 @@ function updateTableTeamDetails() {
     const selectedLeague = document.querySelector('input[name="league"]:checked')?.value;
     const selectedWeek = document.querySelector('input[name="week"]:checked')?.value;
     const selectedTeam = document.querySelector('input[name="team"]:checked')?.value;
+    const selectedView = document.querySelector('input[name="teamView"]:checked')?.value;
     
     if (!selectedSeason || !selectedLeague || !selectedWeek || !selectedTeam) {
         return;
@@ -384,41 +394,22 @@ function updateTableTeamDetails() {
     // Update header
     document.getElementById('teamDetailsMetadata').innerHTML = `${selectedTeam} - Match Day ${selectedWeek}`;
     
-    // Show loading state
-    document.getElementById('teamTableWeekDetails').innerHTML = '<div class="text-center p-3"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>';
+    // Determine endpoint based on selected view
+    const endpoint = selectedView === 'headToHead' 
+        ? '/league/get_team_week_head_to_head_table'
+        : '/league/get_team_week_details_table';
     
-    // Fetch team details
-    fetch(`/league/get_team_week_details?season=${selectedSeason}&league=${selectedLeague}&week=${selectedWeek}&team=${selectedTeam}`)
-        .then(response => response.json())
-        .then(data => {
-            // Process and display the data
-            const content = document.getElementById('teamTableWeekDetails');
-            
-            if (data.config && data.config.length > 0) {
-                let html = '<div class="list-group">';
-                
-                data.config.forEach(match => {
-                    html += `
-                        <div class="list-group-item">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <strong>${match.player}</strong>
-                                <span class="badge bg-primary rounded-pill">${match.score}</span>
-                            </div>
-                            <div class="small text-muted mt-1">vs. ${match.opponent}</div>
-                        </div>
-                    `;
-                });
-                
-                html += '</div>';
-                content.innerHTML = html;
-            } else {
-                content.innerHTML = '<div class="alert alert-info">No details available for this team and week.</div>';
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            document.getElementById('teamTableWeekDetails').innerHTML = '<div class="alert alert-danger">Error loading team details.</div>';
-        });
+    // Use fetchAndRenderTable for consistent table rendering
+    fetchAndRenderTable('teamTableWeekDetails', endpoint, {
+        season: selectedSeason,
+        league: selectedLeague,
+        week: selectedWeek,
+        team: selectedTeam,
+        options: {
+            disablePositionCircle: true,
+            mergeCells: selectedView === 'headToHead'
+        }
+    });
 }
 
 function updateTablePosition(data) {
@@ -463,22 +454,7 @@ function updateTablePosition(data) {
     });
 }
 
-function updateSectionLeagueStandings() {
-    const selectedSeason = document.querySelector('input[name="season"]:checked')?.value;
-    const selectedLeague = document.querySelector('input[name="league"]:checked')?.value;
-    
-    if (!selectedSeason || !selectedLeague) {
-        console.log("Missing required selection");
-        return;
-    }
 
-    fetch(`/league/get_league_history?season=${selectedSeason}&league=${selectedLeague}`)
-        .then(response => response.json())
-        .then(data => {
-            createTableBootstrap3('leagueTableHistory', data);
-        })
-        .catch(error => console.error('Error:', error));
-}
 
 function updateTableLeagueWeek() {
     const selectedSeason = document.querySelector('input[name="season"]:checked')?.value;
@@ -704,6 +680,10 @@ function initializePage() {
             updateWeekContent();
             handleWeekTeamSelection();
         }
+        if (event.target.name === 'teamView') {
+            console.log('🔍 Handling team view change');
+            updateTableTeamDetails();
+        }
     });
 }
 
@@ -724,7 +704,7 @@ function handleSelectionChange() {
     if (selectedSeason && selectedLeague) {
         messageArea.style.display = 'none';
         tableArea.style.display = 'block';
-        updateSectionLeagueStandings();
+        updateTableLeagueHistory();
         updateChartsLeague();
         // Also update week-specific content when season/league changes
         updateTableLeagueWeek();
