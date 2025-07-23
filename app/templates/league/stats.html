@@ -408,7 +408,8 @@ function updateTableTeamDetails() {
         team: selectedTeam,
         options: {
             disablePositionCircle: true,
-            mergeCells: selectedView === 'headToHead'
+            mergeCells: selectedView === 'headToHead',
+            enableSpecialRowStyling: true
         }
     });
 }
@@ -950,7 +951,7 @@ function updateChartsLeague() {
                 'chartTeamPositionWeekly',
                 'Position per Match Day',
                 labels, 
-                false,
+                true,
                 'exact'
             );
 

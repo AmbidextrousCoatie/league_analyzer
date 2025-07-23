@@ -94,19 +94,31 @@ function createLineChart(data, order, containerId, title, labels, invertYAxis = 
     }
     
     // Create series from the data using the specified order
-    const series = order.map(team => ({
-        name: team,
-        type: 'line',
-        data: data[team],
-        lineStyle: {
-            color: getTeamColor(team),
-            width: 2
-        },
-        itemStyle: {
-            color: getTeamColor(team)
-        },
-        smooth: false
-    }));
+    const series = order.map(team => {
+        let seriesData = data[team];
+        
+        // If inverting y-axis, transform the data values
+        if (invertYAxis && yAxisRange === 'exact') {
+            // For position charts: invert the values so position 1 appears at the top
+            // If max position is 8, then position 1 becomes 8, position 8 becomes 1, etc.
+            const maxPosition = yMax;
+            seriesData = data[team].map(value => maxPosition - value + 1);
+        }
+        
+        return {
+            name: team,
+            type: 'line',
+            data: seriesData,
+            lineStyle: {
+                color: getTeamColor(team),
+                width: 2
+            },
+            itemStyle: {
+                color: getTeamColor(team)
+            },
+            smooth: false
+        };
+    });
     
     // Chart options
     const chartOptions = {
@@ -130,14 +142,32 @@ function createLineChart(data, order, containerId, title, labels, invertYAxis = 
                 show: false
             },
             splitLine: {
-                show: !invertYAxis
+                show: true
             }
         },
         yAxis: {
             type: 'value',
-            inverse: invertYAxis,
             min: yMin,
             max: yMax,
+            axisLine: {
+                show: true
+            },
+            axisTick: {
+                show: true
+            },
+            splitLine: {
+                show: true
+            },
+            axisLabel: {
+                formatter: function(value) {
+                    if (invertYAxis && yAxisRange === 'exact') {
+                        // Show original position values on axis
+                        const maxPosition = yMax;
+                        return maxPosition - value + 1;
+                    }
+                    return value;
+                }
+            }
         },
         series: series,
         animation: false

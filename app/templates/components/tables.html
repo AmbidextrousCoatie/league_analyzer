@@ -471,7 +471,7 @@ function createTableBootstrap3(tableId, data, options = {}) {
     const config = data.config || {};
     
     // Get options with defaults
-    const { disablePositionCircle = false, mergeCells = false } = options;
+    const { disablePositionCircle = false, mergeCells = false, enableSpecialRowStyling = false } = options;
     
     // Create table wrapper for horizontal scroll
     const tableWrapper = document.createElement('div');
@@ -671,7 +671,7 @@ function createTableBootstrap3(tableId, data, options = {}) {
                         }
                         
                         // Update the table body
-                        updateTableBody(data.data);
+                        updateTableBody(data.data, enableSpecialRowStyling);
                     });
                 } else {
                     th.textContent = col.title || '';
@@ -726,7 +726,7 @@ function createTableBootstrap3(tableId, data, options = {}) {
     }
 
     // Function to update table body with current data
-    function updateTableBody(tableData) {
+    function updateTableBody(tableData, enableSpecialRowStyling) {
         tbody.innerHTML = '';  // Clear existing rows
         
         if (mergeCells) {
@@ -734,7 +734,7 @@ function createTableBootstrap3(tableId, data, options = {}) {
             updateTableBodyWithMergedCells(tableData);
         } else {
             // Original logic for regular tables
-            updateTableBodyRegular(tableData);
+            updateTableBodyRegular(tableData, enableSpecialRowStyling);
         }
     }
     
@@ -984,11 +984,22 @@ function createTableBootstrap3(tableId, data, options = {}) {
     }
     
     // Function to update table body with regular logic (original implementation)
-    function updateTableBodyRegular(tableData) {
+    function updateTableBodyRegular(tableData, enableSpecialRowStyling) {
         tableData.forEach((rowData, rowIndex) => {
             const tr = document.createElement('tr');
             
             let colIndex = 0;  // Track the flat column index
+            
+            // Apply styling based on metadata if available and special styling is enabled
+            if (enableSpecialRowStyling && data.row_metadata && data.row_metadata[rowIndex]) {
+                const rowMetadata = data.row_metadata[rowIndex];
+                const styling = rowMetadata.styling || {};
+                
+                // Apply row-level styles
+                Object.entries(styling).forEach(([key, value]) => {
+                    tr.style[key] = value;
+                });
+            }
             
             data.columns.forEach((colGroup, groupIndex) => {
                 if (colGroup.columns) {
@@ -1007,6 +1018,17 @@ function createTableBootstrap3(tableId, data, options = {}) {
                             td.innerHTML = `<div style="width: 24px; height: 24px; border-radius: 50%; background-color: ${color}; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; margin: 0 auto;">${value}</div>`;
                         } else {
                             td.textContent = value;
+                        }
+                        
+                        // Apply cell-level styling based on metadata if available and special styling is enabled
+                        if (enableSpecialRowStyling && data.row_metadata && data.row_metadata[rowIndex]) {
+                            const rowMetadata = data.row_metadata[rowIndex];
+                            const styling = rowMetadata.styling || {};
+                            
+                            // Apply cell-level styles (like fontWeight)
+                            if (styling.fontWeight) {
+                                td.style.fontWeight = styling.fontWeight;
+                            }
                         }
                         
                         // Apply column styles
@@ -1078,7 +1100,7 @@ function createTableBootstrap3(tableId, data, options = {}) {
     }
     
     // Initial population of table body
-    updateTableBody(data.data);
+    updateTableBody(data.data, enableSpecialRowStyling);
     
     tableWrapper.appendChild(table);
     document.getElementById(tableId).innerHTML = '';  // Clear existing content

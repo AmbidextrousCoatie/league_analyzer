@@ -202,31 +202,16 @@ class LeagueService:
                 )
             )
         
-        # Add season total column with special styling
+        # Add totals column group
         columns.append(
             ColumnGroup(
-                title="Season Total",
-                style={"backgroundColor": "#e9ecef"},  # Slightly darker background
-                header_style={"fontWeight": "bold"},  # Bold header
+                title="Total",
+                style={"backgroundColor": "#e9ecef"},
+                header_style={"fontWeight": "bold"},
                 columns=[
-                    Column(
-                        title="Pins", 
-                        field="season_total_score", 
-                        format="{:,}",
-                        style={"fontWeight": "bold"}
-                    ),
-                    Column(
-                        title="Pts.", 
-                        field="season_total_points", 
-                        format="{:.1f}",
-                        style={"fontWeight": "bold"}
-                    ),
-                    Column(
-                        title="Avg.", 
-                        field="season_total_average", 
-                        format="{:.1f}",
-                        style={"fontWeight": "bold"}
-                    )
+                    Column(title="Points", field="total_points", width="80px", align="center"),
+                    Column(title="Score", field="total_score", width="80px", align="center"),
+                    Column(title="Avg", field="average", width="80px", align="center")
                 ]
             )
         )
@@ -546,8 +531,27 @@ class LeagueService:
             
             opponent_data = self.adapter.get_filtered_data(filters=opponent_filters)
             
-            # Get unique games (round_number) for this team
+            # Get individual opponent data to calculate average based on individual results
+            opponent_individual_filters = {
+                Columns.league_name: {'value': league, 'operator': 'eq'},
+                Columns.season: {'value': season, 'operator': 'eq'},
+                Columns.team_name_opponent: {'value': team, 'operator': 'eq'},
+                Columns.week: {'value': week, 'operator': 'eq'},
+                Columns.computed_data: {'value': False, 'operator': 'eq'}  # Individual data, not computed
+            }
+            
+            opponent_individual_data = self.adapter.get_filtered_data(filters=opponent_individual_filters)
+            
+            # Get unique games (round_number) for this team and map to opponent names
             games = sorted(player_data[Columns.round_number].unique())
+            
+            # Create a mapping of round_number to opponent team name
+            game_to_opponent = {}
+            for game in games:
+                game_data = player_data[player_data[Columns.round_number] == game]
+                if not game_data.empty:
+                    opponent_name = game_data[Columns.team_name_opponent].iloc[0]
+                    game_to_opponent[game] = opponent_name
             
             # Create column groups
             columns = [
@@ -562,11 +566,12 @@ class LeagueService:
                 )
             ]
             
-            # Add game column groups
+            # Add game column groups with opponent team names
             for game in games:
+                opponent_name = game_to_opponent.get(game, f"Game {game}")
                 columns.append(
                     ColumnGroup(
-                        title=f"Game {game}",
+                        title=opponent_name,
                         columns=[
                             Column(title="Score", field=f"game{game}_score", width="80px", align="center"),
                             Column(title="Pts", field=f"game{game}_points", width="60px", align="center")
@@ -590,6 +595,7 @@ class LeagueService:
             
             # Prepare data rows
             data = []
+            row_metadata = []
             
             # Get unique players for this team
             unique_players = player_data[Columns.player_name].unique()
@@ -600,7 +606,7 @@ class LeagueService:
                 first_player_row = player_data_subset.iloc[0]
                 
                 # Start with position and name
-                row = [int(first_player_row[Columns.position]), player_name]
+                row = [int(first_player_row[Columns.position] + 1), player_name]
                 
                 # Add game data
                 for game in games:
@@ -617,6 +623,12 @@ class LeagueService:
                 row.append(int(player_data_subset[Columns.points].sum()))
                 row.append(int(player_data_subset[Columns.score].sum()))
                 row.append(round(float(player_data_subset[Columns.score].mean()), 1) if len(player_data_subset) > 0 else 0)
+                
+                # Add metadata for styling
+                row_metadata.append({
+                    'rowType': 'player',
+                    'styling': {}
+                })
                 
                 data.append(row)
             
@@ -640,9 +652,18 @@ class LeagueService:
                 team_row.append(int(team_data[Columns.score].sum()))
                 team_row.append(round(float(player_data[Columns.score].mean()), 1) if len(player_data) > 0 else 0)
                 
+                # Add metadata for styling
+                row_metadata.append({
+                    'rowType': 'team',
+                    'styling': {
+                        'fontWeight': 'bold',
+                        'borderTop': '2px solid #000000'
+                    }
+                })
+                
                 data.append(team_row)
             
-            # Add opponent total row
+            # Add opponent total row right after team row
             if not opponent_data.empty:
                 # Start with position and name
                 opponent_row = ["Team", "Opponents"]
@@ -652,21 +673,72 @@ class LeagueService:
                     game_data = opponent_data[opponent_data[Columns.round_number] == game]
                     if not game_data.empty:
                         opponent_row.append(int(game_data[Columns.score].iloc[0]))
-                        opponent_row.append(round(float(game_data[Columns.points].iloc[0]), 1))
+                        opponent_row.append("")  # Replace opponent points with empty string
                     else:
                         opponent_row.append(0)
-                        opponent_row.append(0)
+                        opponent_row.append("")
                 
                 # Calculate opponent totals
-                opponent_row.append(int(opponent_data[Columns.points].sum()))
+                opponent_row.append("")  # Replace opponent total points with empty string
                 opponent_row.append(int(opponent_data[Columns.score].sum()))
-                opponent_row.append(round(float(opponent_data[Columns.score].mean()), 1) if len(opponent_data) > 0 else 0)
+                
+                # Calculate opponent average based on individual results
+                if not opponent_individual_data.empty:
+                    opponent_average = round(float(opponent_individual_data[Columns.score].mean()), 1)
+                else:
+                    opponent_average = 0
+                
+                opponent_row.append(opponent_average)
+                
+                # Add metadata for styling
+                row_metadata.append({
+                    'rowType': 'opponents',
+                    'styling': {}
+                })
                 
                 data.append(opponent_row)
+            
+            # Add Total row that sums all points (individual + team)
+            total_row = ["Total", "Points"]
+            
+            # Calculate total points for each game (individual + team)
+            for game in games:
+                game_player_data = player_data[player_data[Columns.round_number] == game]
+                game_team_data = team_data[team_data[Columns.round_number] == game] if not team_data.empty else None
+                
+                # Individual points for this game
+                game_points_total = round(float(game_player_data[Columns.points].sum()), 1) if not game_player_data.empty else 0
+                
+                # Add team points for this game if available
+                if game_team_data is not None and not game_team_data.empty:
+                    game_points_total += round(float(game_team_data[Columns.points].iloc[0]), 1)
+                
+                # Add empty string for score and points for this game
+                total_row.extend(["", game_points_total])
+            
+            # Calculate overall totals (individual + team)
+            total_points = int(player_data[Columns.points].sum())
+            if not team_data.empty:
+                total_points += int(team_data[Columns.points].sum())
+            
+            total_row.extend([total_points, "", ""])  # Replace score and average with empty strings
+            
+            # Add metadata for styling
+            row_metadata.append({
+                'rowType': 'total',
+                'styling': {
+                    'fontWeight': 'bold',
+                    'borderTop': '2px solid #000000',
+                    'borderBottom': '2px solid #000000'
+                }
+            })
+            
+            data.append(total_row)
             
             return TableData(
                 columns=columns,
                 data=data,
+                row_metadata=row_metadata,
                 title=f"{team} - Match Day {week}",
                 description=f"Score sheet for {team} in {league} - {season}",
                 config={
@@ -1098,7 +1170,8 @@ class LeagueService:
                 team_data[team] = {
                     'weekly_data': {},
                     'season_score': 0,
-                    'season_points': 0
+                    'season_points': 0,
+                    'season_avg': 0
                 }
                 
                 # Get individual player data for this team (for scores and averages)
@@ -1113,6 +1186,10 @@ class LeagueService:
                     team_individual_until_week = team_individual_data[team_individual_data[Columns.week] <= week]
                     team_data[team]['season_score'] = int(team_individual_until_week[Columns.score].sum())
                     team_data[team]['season_points'] = float(team_individual_until_week[Columns.points].sum())
+                    
+                    # Calculate season average based on individual scores
+                    if len(team_individual_until_week) > 0:
+                        team_data[team]['season_avg'] = round(float(team_individual_until_week[Columns.score].mean()), 1)
                 
                 # Add team bonus points to season total (up to selected week)
                 if not team_bonus_team_data.empty:
@@ -1193,16 +1270,16 @@ class LeagueService:
                     )
                 )
             
-            # Add season total column (accumulated up to selected week)
+            # Add totals column group
             columns.append(
                 ColumnGroup(
-                    title=f"{i18n_service.get_text('total_until_week')} {week}",
+                    title="Total",
                     style={"backgroundColor": "#e9ecef"},
                     header_style={"fontWeight": "bold"},
                     columns=[
-                        Column(title=i18n_service.get_text("score"), field="season_score", format="{:,}"),
-                        Column(title=i18n_service.get_text("points"), field="season_points", format="{:.1f}"),
-                        Column(title=i18n_service.get_text("average"), field="season_avg", format="{:.1f}")
+                        Column(title="Points", field="season_points", format="{:,}"),
+                        Column(title="Score", field="season_score", format="{:,}"),
+                        Column(title="Avg", field="season_avg", format="{:.1f}")
                     ]
                 )
             )
@@ -1211,11 +1288,6 @@ class LeagueService:
             data = []
             for i, team in enumerate(sorted_teams, 1):
                 team_info = team_data[team]
-                
-                # Calculate season average (only from individual player data up to selected week)
-                team_season_individual = individual_data[individual_data[Columns.team_name] == team]
-                team_individual_until_week = team_season_individual[team_season_individual[Columns.week] <= week]
-                season_avg = team_info['season_score'] / len(team_individual_until_week) if len(team_individual_until_week) > 0 else 0
                 
                 # Start with position and team name
                 row = [i, team]
@@ -1233,7 +1305,7 @@ class LeagueService:
                 row.extend([
                     team_info['season_score'],
                     team_info['season_points'],
-                    round(season_avg, 1)
+                    team_info['season_avg']
                 ])
                 
                 data.append(row)
@@ -1257,41 +1329,6 @@ class LeagueService:
                     "hover": True,
                     "responsive": True,
                     "compact": False
-                },
-                metadata={
-                    "card_headers": {
-                        "league_statistics": i18n_service.get_text("league_statistics"),
-                        "season": i18n_service.get_text("season"),
-                        "league": i18n_service.get_text("league"),
-                        "week": i18n_service.get_text("week"),
-                        "team": i18n_service.get_text("team"),
-                        "season_overview": i18n_service.get_text("season_overview"),
-                        "position_in_season_progress": i18n_service.get_text("position_in_season_progress"),
-                        "points_in_season_progress": i18n_service.get_text("points_in_season_progress"),
-                        "points_per_match_day": i18n_service.get_text("points_per_match_day"),
-                        "position_per_match_day": i18n_service.get_text("position_per_match_day"),
-                        "average_per_match_day": i18n_service.get_text("average_per_match_day"),
-                        "points_vs_average": i18n_service.get_text("points_vs_average"),
-                        "league_results_match_day": i18n_service.get_text("league_results_match_day"),
-                        "honor_scores": i18n_service.get_text("honor_scores"),
-                        "top_individual_scores": i18n_service.get_text("top_individual_scores"),
-                        "top_team_scores": i18n_service.get_text("top_team_scores"),
-                        "best_individual_averages": i18n_service.get_text("best_individual_averages"),
-                        "best_team_averages": i18n_service.get_text("best_team_averages"),
-                        "score_sheet_selected_team": i18n_service.get_text("score_sheet_selected_team"),
-                        "details": i18n_service.get_text("details"),
-                        "head_to_head": i18n_service.get_text("head_to_head"),
-                        "refresh_data": i18n_service.get_text("refresh_data")
-                    },
-                    "messages": {
-                        "please_select_combination": i18n_service.get_text("please_select_combination"),
-                        "please_select_match_day": i18n_service.get_text("please_select_match_day"),
-                        "please_select_team": i18n_service.get_text("please_select_team")
-                    },
-                    "chart_labels": {
-                        "match_day_label": i18n_service.get_text("match_day_label"),
-                        "match_day_format": i18n_service.get_text("match_day_format")
-                    }
                 }
             )
             
@@ -1458,6 +1495,17 @@ class LeagueService:
             }
             
             opponent_data = self.adapter.get_filtered_data(filters=opponent_filters)
+            
+            # Get individual opponent data to calculate average based on individual results
+            opponent_individual_filters = {
+                Columns.league_name: {'value': league, 'operator': 'eq'},
+                Columns.season: {'value': season, 'operator': 'eq'},
+                Columns.team_name_opponent: {'value': team, 'operator': 'eq'},
+                Columns.week: {'value': week, 'operator': 'eq'},
+                Columns.computed_data: {'value': False, 'operator': 'eq'}  # Individual data, not computed
+            }
+            
+            opponent_individual_data = self.adapter.get_filtered_data(filters=opponent_individual_filters)
             
             # Get team totals (computed data) for both teams
             team_totals_filters = {
@@ -1642,41 +1690,6 @@ class LeagueService:
                     "hover": True,
                     "responsive": True,
                     "compact": False
-                },
-                metadata={
-                    "card_headers": {
-                        "league_statistics": i18n_service.get_text("league_statistics"),
-                        "season": i18n_service.get_text("season"),
-                        "league": i18n_service.get_text("league"),
-                        "week": i18n_service.get_text("week"),
-                        "team": i18n_service.get_text("team"),
-                        "season_overview": i18n_service.get_text("season_overview"),
-                        "position_in_season_progress": i18n_service.get_text("position_in_season_progress"),
-                        "points_in_season_progress": i18n_service.get_text("points_in_season_progress"),
-                        "points_per_match_day": i18n_service.get_text("points_per_match_day"),
-                        "position_per_match_day": i18n_service.get_text("position_per_match_day"),
-                        "average_per_match_day": i18n_service.get_text("average_per_match_day"),
-                        "points_vs_average": i18n_service.get_text("points_vs_average"),
-                        "league_results_match_day": i18n_service.get_text("league_results_match_day"),
-                        "honor_scores": i18n_service.get_text("honor_scores"),
-                        "top_individual_scores": i18n_service.get_text("top_individual_scores"),
-                        "top_team_scores": i18n_service.get_text("top_team_scores"),
-                        "best_individual_averages": i18n_service.get_text("best_individual_averages"),
-                        "best_team_averages": i18n_service.get_text("best_team_averages"),
-                        "score_sheet_selected_team": i18n_service.get_text("score_sheet_selected_team"),
-                        "details": i18n_service.get_text("details"),
-                        "head_to_head": i18n_service.get_text("head_to_head"),
-                        "refresh_data": i18n_service.get_text("refresh_data")
-                    },
-                    "messages": {
-                        "please_select_combination": i18n_service.get_text("please_select_combination"),
-                        "please_select_match_day": i18n_service.get_text("please_select_match_day"),
-                        "please_select_team": i18n_service.get_text("please_select_team")
-                    },
-                    "chart_labels": {
-                        "match_day_label": i18n_service.get_text("match_day_label"),
-                        "match_day_format": i18n_service.get_text("match_day_format")
-                    }
                 }
             )
             

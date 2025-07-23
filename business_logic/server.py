@@ -37,9 +37,18 @@ class Server:
     
 
     def get_final_position_in_league(self, team_name: str, season: str, league_name: str) -> int:
-        filters_eq = {Columns.season: season, Columns.league_name: league_name}
+        filters = {
+            Columns.season: {
+                'value': season,
+                'operator': 'eq'
+            },
+            Columns.league_name: {
+                'value': league_name,
+                'operator': 'eq'
+            }
+        }
         columns_to_fetch = [Columns.team_name, Columns.points]
-        league_season_data = self.data_adapter.get_filtered_data(columns=columns_to_fetch, filters_eq=filters_eq)   
+        league_season_data = self.data_adapter.get_filtered_data(columns=columns_to_fetch, filters=filters)   
 
         team_rank = league_season_data.groupby(Columns.team_name)[Columns.points].sum().rank(ascending=False)
 
@@ -47,19 +56,39 @@ class Server:
 
 
     def get_average_per_season(self, team_name: str=None) -> pd.DataFrame:
-        filters_eq = {Columns.team_name: team_name, Columns.computed_data: False}
+        filters = {
+            Columns.team_name: {
+                'value': team_name,
+                'operator': 'eq'
+            },
+            Columns.computed_data: {
+                'value': False,
+                'operator': 'eq'
+            }
+        }
         columns_to_fetch = [Columns.team_name, Columns.score, Columns.season]
-        league_season_data = self.data_adapter.get_filtered_data(columns=columns_to_fetch, filters_eq=filters_eq)   
+        league_season_data = self.data_adapter.get_filtered_data(columns=columns_to_fetch, filters=filters)   
 
         team_average = league_season_data.groupby(Columns.season)[Columns.score].mean()
         return team_average.to_dict()    
 
 
     def get_honor_scores(self, league_name:str=None, season:str=None, week:int=None, team_name:str=None, player_name:str=None, individual_scores:int=1, team_scores:int=1, indivdual_averages:int=1, team_averages:int=1) -> pd.DataFrame:
-        filters_eq = {Columns.league_name: league_name, Columns.season: season, Columns.week: week, Columns.team_name: team_name, Columns.player_name: player_name}
+        filters = {}
+        if league_name:
+            filters[Columns.league_name] = {'value': league_name, 'operator': 'eq'}
+        if season:
+            filters[Columns.season] = {'value': season, 'operator': 'eq'}
+        if week:
+            filters[Columns.week] = {'value': week, 'operator': 'eq'}
+        if team_name:
+            filters[Columns.team_name] = {'value': team_name, 'operator': 'eq'}
+        if player_name:
+            filters[Columns.player_name] = {'value': player_name, 'operator': 'eq'}
+            
         columns = [Columns.team_name, Columns.player_name, Columns.score, Columns.input_data, Columns.players_per_team]
 
-        data = self.data_adapter.get_filtered_data(columns=columns, filters_eq=filters_eq)
+        data = self.data_adapter.get_filtered_data(columns=columns, filters=filters)
 
 
         # individual scores
@@ -275,14 +304,22 @@ class Server:
         Returns:
             pd.DataFrame: The league standings for the given week. Columns: team_name, points, score, week, score_average
         """
-        filters_eq_individual = {Columns.league_name: league_name, Columns.season: season, Columns.computed_data: False}
-        filters_lt_individual = {Columns.week: week+1}
-        filters_eq_team = {Columns.league_name: league_name, Columns.season: season, Columns.computed_data: True}
-        filters_lt_team = {Columns.week: week+1}
+        filters_individual = {
+            Columns.league_name: {'value': league_name, 'operator': 'eq'},
+            Columns.season: {'value': season, 'operator': 'eq'},
+            Columns.computed_data: {'value': False, 'operator': 'eq'},
+            Columns.week: {'value': week+1, 'operator': 'lt'}
+        }
+        filters_team = {
+            Columns.league_name: {'value': league_name, 'operator': 'eq'},
+            Columns.season: {'value': season, 'operator': 'eq'},
+            Columns.computed_data: {'value': True, 'operator': 'eq'},
+            Columns.week: {'value': week+1, 'operator': 'lt'}
+        }
         
         columns = [Columns.team_name, Columns.points, Columns.score]
-        data_week_individual = self.data_adapter.get_filtered_data(columns=columns, filters_eq=filters_eq_individual, filters_lt=filters_lt_individual)
-        data_week_team = self.data_adapter.get_filtered_data(columns=columns, filters_eq=filters_eq_team, filters_lt=filters_lt_team)
+        data_week_individual = self.data_adapter.get_filtered_data(columns=columns, filters=filters_individual)
+        data_week_team = self.data_adapter.get_filtered_data(columns=columns, filters=filters_team)
 
         return self.aggregate_league_table(data_week_individual, data_week_team, week)        
 
@@ -290,10 +327,18 @@ class Server:
     def __depr__get_league_standings_history(self, league_name: str, season: str, week: int) -> pd.DataFrame:
         
         columns = [Columns.team_name, Columns.points, Columns.score, Columns.week]
-        filters_player = {Columns.league_name: league_name, Columns.season: season, Columns.computed_data: False}
-        filters_team = {Columns.league_name: league_name, Columns.season: season, Columns.computed_data: True}
-        data_player = self.data_adapter.get_filtered_data(columns=columns, filters_eq=filters_player)
-        data_team = self.data_adapter.get_filtered_data(columns=columns, filters_eq=filters_team)
+        filters_player = {
+            Columns.league_name: {'value': league_name, 'operator': 'eq'},
+            Columns.season: {'value': season, 'operator': 'eq'},
+            Columns.computed_data: {'value': False, 'operator': 'eq'}
+        }
+        filters_team = {
+            Columns.league_name: {'value': league_name, 'operator': 'eq'},
+            Columns.season: {'value': season, 'operator': 'eq'},
+            Columns.computed_data: {'value': True, 'operator': 'eq'}
+        }
+        data_player = self.data_adapter.get_filtered_data(columns=columns, filters=filters_player)
+        data_team = self.data_adapter.get_filtered_data(columns=columns, filters=filters_team)
        
         data_player = data_player.groupby([Columns.week,Columns.team_name])
 
@@ -609,28 +654,42 @@ class Server:
     def get_games_for_player(self, player_name: str) -> pd.DataFrame:
         """Get all games for a player"""
         player_filters = {
-            Columns.player_name: player_name
+            Columns.player_name: {
+                'value': player_name,
+                'operator': 'eq'
+            }
         }
 
         columns = [Columns.player_id, Columns.player_name, Columns.date, Columns.week, Columns.season, Columns.league_name, Columns.team_name, Columns.score, Columns.points]
-        return self.data_adapter.get_filtered_data(columns=columns, filters_eq=player_filters)
+        return self.data_adapter.get_filtered_data(columns=columns, filters=player_filters)
 
     def get_special_matches(self, team_name: str=None, amount: int=3):
 
         columns = [Columns.week, Columns.season, Columns.league_name, Columns.round_number, Columns.team_name, Columns.score, Columns.points, Columns.team_name_opponent]
         filters_team = {
-            Columns.team_name: team_name,
-            Columns.computed_data: True
+            Columns.team_name: {
+                'value': team_name,
+                'operator': 'eq'
+            },
+            Columns.computed_data: {
+                'value': True,
+                'operator': 'eq'
+            }
         }
-
 
         filters_opponent = {
-            Columns.team_name_opponent: team_name,
-            Columns.computed_data: True
+            Columns.team_name_opponent: {
+                'value': team_name,
+                'operator': 'eq'
+            },
+            Columns.computed_data: {
+                'value': True,
+                'operator': 'eq'
+            }
         }
 
-        data_team = self.data_adapter.get_filtered_data(columns=columns, filters_eq=filters_team)
-        data_opponent = self.data_adapter.get_filtered_data(columns=columns, filters_eq=filters_opponent)
+        data_team = self.data_adapter.get_filtered_data(columns=columns, filters=filters_team)
+        data_opponent = self.data_adapter.get_filtered_data(columns=columns, filters=filters_opponent)
 
         # merge data_team and data_opponent
         data_combined = pd.concat([data_team, data_opponent])
