@@ -98,6 +98,18 @@
     </div>
 </div>
 
+<!-- Scatter Plot Section -->
+<div class="card mb-4">
+  <div class="card-header">
+    <h5>Points vs. Average (Scatter Plot)</h5>
+  </div>
+  <div class="card-body">
+    <canvas id="chartTeamPointsVsAverage" style="width: 100%; min-width: 100%; height: 300px;"></canvas>
+    <button id="loadScatterPlotBtn" class="btn btn-primary btn-sm mt-2">Load Scatter Plot</button>
+    <div id="scatterPlotLegend" class="d-flex flex-wrap mt-3"></div>
+  </div>
+</div>
+
 <!-- Common Test Functions -->
 <script>
     // Initialize the page
@@ -143,6 +155,7 @@ function initializePage() {
     // Add event listeners for future changes
     document.addEventListener('change', event => {
         if (event.target.name === 'season' || event.target.name === 'league') {
+            updateAvailableOptions();
             handleSelectionChange();
         }
         if (event.target.name === 'week' || event.target.name === 'team') {
@@ -600,8 +613,67 @@ function getRandomColor(alpha = 1) {
     return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
 
+function renderScatterPlot() {
+    // Get current selection
+    const season = document.querySelector('input[name="season"]:checked')?.value;
+    const league = document.querySelector('input[name="league"]:checked')?.value;
+    if (!season || !league) {
+        alert('Please select a season and league.');
+        return;
+    }
+    fetch(`/league/get_team_points_vs_average?season=${encodeURIComponent(season)}&league=${encodeURIComponent(league)}`)
+        .then(res => res.json())
+        .then(data => {
+            if (!data || typeof data !== 'object' || Array.isArray(data)) {
+                console.error('No valid data for scatter plot:', data);
+                return;
+            }
+            const axis_labels = {x: 'Points', y: 'Average'};
+            // Use color palette for each team
+            if (typeof createScatterChart_vanilla === 'function') {
+                // Patch: inject color into data for each team
+                const teams = Object.keys(data);
+                const coloredData = {};
+                teams.forEach((team, idx) => {
+                    coloredData[team] = data[team]; // Data is array of [x, y]
+                    // The color will be set in the chart function using getTeamColor(team, idx)
+                });
+                createScatterChart_vanilla(coloredData, 'chartTeamPointsVsAverage', 'Points vs. Average', axis_labels);
+                // Render legend after every second chart (here, always after this chart)
+                renderScatterLegend(teams);
+            } else {
+                console.error('createScatterChart_vanilla is not defined');
+            }
+        })
+        .catch(err => console.error('Error fetching scatter plot data:', err));
+}
+
+function renderScatterLegend(teams) {
+    const legendDiv = document.getElementById('scatterPlotLegend');
+    if (!legendDiv) return;
+    legendDiv.innerHTML = teams.map((team, idx) => `
+        <div class="d-flex align-items-center me-4 mb-2">
+            <span style="display:inline-block;width:18px;height:18px;border-radius:50%;background:${getTeamColor(team, idx)};margin-right:8px;"></span>
+            <span>${team}</span>
+        </div>
+    `).join('');
+}
+
 // Initialize the page when DOM is loaded
 document.addEventListener('DOMContentLoaded', initializePage);
+document.addEventListener('DOMContentLoaded', function() {
+    const btn = document.getElementById('loadScatterPlotBtn');
+    if (btn) {
+        btn.addEventListener('click', renderScatterPlot);
+    }
+});
+// Optionally, auto-load on season/league change
+// Uncomment below if you want auto-update:
+document.addEventListener('change', event => {
+    if (event.target.name === 'season' || event.target.name === 'league') {
+        renderScatterPlot();
+    }
+});
 </script>
 
 {% endblock %}

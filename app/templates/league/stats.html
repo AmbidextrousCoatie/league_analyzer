@@ -104,14 +104,14 @@
                         </div>
                     </div>
                 </div>
-                <!-- Position per Week Chart -->
+                <!-- Average per Week Chart -->
                 <div class="col-md-6">
                     <div class="card h-100">
                         <div class="card-header">
-                            <h5 data-i18n="position_per_match_day">Position per Match Day</h5>
+                            <h5 data-i18n="average_per_match_day">Average per Match Day</h5>
                         </div>
                         <div class="card-body">
-                            <div id="chartTeamPositionWeekly" style="width: 100%; min-width: 100%; height: 300px;"></div>
+                            <div id="chartTeamAverageScoreWeekly" style="width: 100%; min-width: 100%; height: 300px;"></div>
                         </div>
                     </div>
                 </div>
@@ -125,19 +125,19 @@
                 </div>
             </div>
             <!-- misc Charts -->
-            <div class="row">
-                <!-- Average per Week Chart -->
+            <!--div class="row">
+                <!-!- Position per Week Chart -|->
                 <div class="col-md-6">
                     <div class="card h-100">
                         <div class="card-header">
-                            <h5 data-i18n="average_per_match_day">Average per Match Day</h5>
+                            <h5 data-i18n="position_per_match_day">Position per Match Day</h5>
                         </div>
                         <div class="card-body">
-                            <div id="chartTeamAverageScoreWeekly" style="width: 100%; min-width: 100%; height: 300px;"></div>
+                            <div id="chartTeamPositionWeekly" style="width: 100%; min-width: 100%; height: 300px;"></div>
                         </div>
                     </div>
                 </div>
-                <!-- Points vs Average -->
+                <!-!- Points vs Average -|->
                 <div class="col-md-6">
                     <div class="card h-100">
                         <div class="card-header">
@@ -148,7 +148,7 @@
                         </div>
                     </div>
                 </div>
-            </div>
+            </div>-->
         </div>
     </div>  
 
@@ -567,6 +567,13 @@ function initializePage() {
                     // First update available options
                     updateAvailableOptions();
                     
+                    // After rendering league buttons
+                    const leagueInputs = document.querySelectorAll('input[name="league"]');
+                    if (![...leagueInputs].some(input => input.checked) && leagueInputs.length > 0) {
+                        leagueInputs[0].checked = true;
+                        leagueInputs[0].dispatchEvent(new Event('change', { bubbles: true }));
+                    }
+
                     // Then fetch weeks specifically for selected season and league
                     fetch(`/league/get_available_weeks?season=${selectedSeason}&league=${selectedLeague}`)
                         .then(response => response.json())
@@ -643,6 +650,13 @@ function initializePage() {
             `).join('');
             document.getElementById('buttonsSeason').innerHTML = buttonsSeason;
             
+            // After rendering season buttons
+            const seasonInputs = document.querySelectorAll('input[name="season"]');
+            if (![...seasonInputs].some(input => input.checked) && seasonInputs.length > 0) {
+                seasonInputs[0].checked = true;
+                seasonInputs[0].dispatchEvent(new Event('change', { bubbles: true }));
+            }
+
             // Always load leagues, regardless of whether a season is selected
             loadLeagues();
             
@@ -664,27 +678,43 @@ function initializePage() {
         });
 
     // Add event listeners for future changes
+    // --- Centralized Refresh Functions ---
+    function refreshAllLeagueContent() {
+        updateTableLeagueHistory();
+        updateTableLeagueWeek();
+        updateChartsLeague();
+        updateHonorScores();
+        // Add any other league-wide refreshes here
+    }
+
+    function refreshTeamContent() {
+        updateTableTeamDetails();
+        // Add any other team-specific refreshes here
+    }
+
+    // Palette switcher integration
+    window.refreshAllCharts = function() {
+        refreshAllLeagueContent();
+        refreshTeamContent();
+    };
+
+    // --- Clean Event Listeners ---
     document.addEventListener('change', event => {
-        console.log('🔍 Change event detected:', event.target.name, '=', event.target.value);
-        
-        if (event.target.name === 'season' || event.target.name === 'league') {
-            console.log('🔍 Handling season/league change');
-            handleSelectionChange();
+        const name = event.target.name;
+        if (name === 'season' || name === 'league') {
             updateAvailableOptions();
-            updateChartsLeague();
-            // Also update week-specific content when season/league changes
-            updateTableLeagueWeek();
-            updateHonorScores();
+            refreshAllLeagueContent();
+            refreshTeamContent();
         }
-        if (event.target.name === 'week' || event.target.name === 'team') {
-            console.log('🔍 Handling week/team change');
-            updateTableTeamDetails();
-            updateWeekContent();
-            handleWeekTeamSelection();
+        if (name === 'week') {
+            refreshAllLeagueContent();
+            refreshTeamContent();
         }
-        if (event.target.name === 'teamView') {
-            console.log('🔍 Handling team view change');
-            updateTableTeamDetails();
+        if (name === 'team') {
+            refreshTeamContent();
+        }
+        if (name === 'teamView') {
+            refreshTeamContent();
         }
     });
 }
@@ -741,12 +771,13 @@ function updateAvailableOptions() {
                     <label class="btn btn-outline-primary" for="week_${week}">${week}</label>
                 `).join('');
                 document.getElementById('buttonsWeek').innerHTML = weekButtons;
-                
                 // Select first week by default if none selected
-                if (!selectedWeek && weeks.length > 0) {
-                    const firstWeekInput = document.querySelector(`input[name="week"][value="${weeks[0]}"]`);
-                    if (firstWeekInput) {
-                        firstWeekInput.checked = true;
+                let weekInput = document.querySelector('input[name="week"]:checked');
+                if (!weekInput && weeks.length > 0) {
+                    weekInput = document.querySelector(`input[name="week"][value="${weeks[0]}"]`);
+                    if (weekInput) {
+                        weekInput.checked = true;
+                        weekInput.dispatchEvent(new Event('change', { bubbles: true }));
                     }
                 }
             })
@@ -769,12 +800,13 @@ function updateAvailableOptions() {
                     <label class="btn btn-outline-primary" for="team_${team.replace(/\s+/g, '_')}">${team}</label>
                 `).join('');
                 document.getElementById('buttonsTeam').innerHTML = teamButtons;
-                
                 // Select first team by default if none selected
-                if (!selectedTeam && teams.length > 0) {
-                    const firstTeamInput = document.querySelector(`input[name="team"][value="${teams[0]}"]`);
-                    if (firstTeamInput) {
-                        firstTeamInput.checked = true;
+                let teamInput = document.querySelector('input[name="team"]:checked');
+                if (!teamInput && teams.length > 0) {
+                    teamInput = document.querySelector(`input[name="team"][value="${teams[0]}"]`);
+                    if (teamInput) {
+                        teamInput.checked = true;
+                        teamInput.dispatchEvent(new Event('change', { bubbles: true }));
                     }
                 }
             })
@@ -944,17 +976,6 @@ function updateChartsLeague() {
             const matchDayFormat = window.translations ? (window.translations['match_day_format'] || 'Match Day #{week}') : 'Match Day #{week}';
             const labels = Array.from({length: numWeeks}, (_, i) => matchDayFormat.replace('{week}', i + 1));
 
-            // Create weekly positions chart
-           createLineChart(
-                data.data,
-                data.sorted_by_total,
-                'chartTeamPositionWeekly',
-                'Position per Match Day',
-                labels, 
-                true,
-                'exact'
-            );
-
             // Create cumulative positions chart
             createLineChart(
                 data.data,
@@ -962,7 +983,7 @@ function updateChartsLeague() {
                 'chartTeamPositionCumulated',
                 'ERROR: Position in Season Progress',
                 labels,
-                false,
+                true,
                 'exact'
             );
 
@@ -1047,20 +1068,6 @@ function updateChartsLeague() {
             console.error('❌ Error loading team averages:', error);
         });
 
-    fetch(`/league/get_team_points_vs_average?season=${selectedSeason}&league=${selectedLeague}`)
-        .then(response => response.json())
-        .then(data => {
-            axis_labels = ['Points', 'Average']
-            createScatterChart_vanilla(
-                data,
-                'chartTeamPointsVsAverage',
-                'Points vs. Average',
-                axis_labels
-            );
-        })
-        .catch(error => {
-            console.error('Error loading team points vs average:', error);
-        });
 }
 
 // Initial load

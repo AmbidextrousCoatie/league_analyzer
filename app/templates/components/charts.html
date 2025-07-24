@@ -4,31 +4,49 @@
 <script>
 // --- Team Color Palettes ---
 const TEAM_COLOR_PALETTES = {
-  "forestWine": [
-    "#463C54", "#555B6E", "#5A7D7C", "#789262", "#A3A76D",
-    "#C1B97F", "#B98B6D", "#B04A5A", "#A11A3C", "#8B1534"
-  ],
-  "sunsetPop": [
-    "#00475A", "#2B537A", "#5B4C8A", "#8B4C8A", "#C05A8A",
-    "#F95D6A", "#FF8A36", "#FFB35C", "#FFD782"
+  "harmonic10": [
+    "#1F77B4", "#FF7F0E", "#2CA02C", "#D62728", "#9467BD",
+    "#8C564B", "#E377C2", "#7F7F7F", "#BCBD22", "#17BECF"
   ],
   "rainbowPastel": [
     "#1B8CA6", "#2CA89A", "#8CBF8A", "#E6C86E", "#F7A86E",
     "#E86E56", "#D95A6A", "#C94C8A", "#A04CBF", "#D6A4E6"
-  ],
-  "distinct10": [
-    "#E41A1C", "#377EB8", "#4DAF4A", "#984EA3", "#FF7F00",
-    "#FFFF33", "#A65628", "#F781BF", "#999999", "#1B7837"
-  ],
-  "harmonic10": [
-    "#1F77B4", "#FF7F0E", "#2CA02C", "#D62728", "#9467BD",
-    "#8C564B", "#E377C2", "#7F7F7F", "#BCBD22", "#17BECF"
   ]
 };
 
 // Default palette
-let currentPaletteName = "forestWine";
+let currentPaletteName = "harmonic10";
 let currentPalette = TEAM_COLOR_PALETTES[currentPaletteName];
+
+let teamColorMap = {};
+
+function updateTeamColorMap(currentTeams) {
+  // Remove teams no longer present
+  Object.keys(teamColorMap).forEach(team => {
+    if (!currentTeams.includes(team)) {
+      delete teamColorMap[team];
+    }
+  });
+
+  // Assign colors to new teams
+  const usedColors = Object.values(teamColorMap);
+  let paletteIdx = 0;
+  currentTeams.forEach(team => {
+    if (!teamColorMap[team]) {
+      // Find the next unused color in the palette
+      while (paletteIdx < currentPalette.length && usedColors.includes(currentPalette[paletteIdx])) {
+        paletteIdx++;
+      }
+      // If we run out of unique colors, start reusing
+      teamColorMap[team] = currentPalette[paletteIdx % currentPalette.length];
+      paletteIdx++;
+    }
+  });
+}
+
+function getTeamColor(team) {
+  return teamColorMap[team] || "#888"; // fallback color
+}
 
 // --- Palette Switcher UI ---
 function renderPaletteSwitcher(containerId = "paletteSwitcher") {
@@ -51,20 +69,6 @@ function renderPaletteSwitcher(containerId = "paletteSwitcher") {
     btn.style.cursor = "pointer";
     container.appendChild(btn);
   });
-}
-
-// --- Team Color Function ---
-function getTeamColor(team, idx) {
-  if (typeof idx === "number") {
-    return currentPalette[idx % currentPalette.length];
-  }
-  // Fallback: hash team name to index
-  let hash = 0;
-  for (let i = 0; i < team.length; i++) {
-    hash = team.charCodeAt(i) + ((hash << 5) - hash);
-  }
-  const index = Math.abs(hash) % currentPalette.length;
-  return currentPalette[index];
 }
 
 // --- Global chart refresh stub (user should implement) ---
@@ -104,64 +108,55 @@ document.addEventListener("DOMContentLoaded", function() {
 // Example for createLineChart:
 function createLineChart(data, order, containerId, title, labels, invertYAxis = false, yAxisRange = null) {
     const container = document.getElementById(containerId);
-    
+    if (!container) {
+        console.error('createLineChart: Container not found:', containerId);
+        return;
+    }
+
+    // Coerce invertYAxis to boolean and log
+    const originalInvertYAxis = invertYAxis;
+    invertYAxis = (invertYAxis === true || invertYAxis === 'true');
+    console.log('createLineChart invertYAxis argument:', originalInvertYAxis, '-> coerced:', invertYAxis, 'type:', typeof invertYAxis);
+
     // Dispose of existing chart instance if it exists
     const existingChart = echarts.getInstanceByDom(container);
     if (existingChart) {
         existingChart.dispose();
     }
-    
+
     if (order == null) {
-        order = Object.keys(data)
+        order = Object.keys(data);
     }
-    
-    // Initialize new chart instance
-    const chart = echarts.init(container, null, {
-        devicePixelRatio: window.devicePixelRatio,
-        renderer: 'canvas'
-    });
-    
+    // Update teamColorMap for this set of teams
+    updateTeamColorMap(order);
+
     // Calculate y-axis range if requested
     let yMin, yMax;
     if (yAxisRange === 'auto') {
         const allValues = order.map(team => data[team]).flat();
         yMin = Math.max(Math.min(...allValues) - 10, 0);
         yMax = Math.max(...allValues) + 10;
-    }
-
-    if (yAxisRange === 'exact') {
+    } else if (yAxisRange === 'exact') {
         const allValues = order.map(team => data[team]).flat();
         yMin = Math.min(...allValues);
         yMax = Math.max(...allValues);
     }
-    
+
     // Create series from the data using the specified order
-    const series = order.map((team, idx) => {
-        let seriesData = data[team];
-        
-        // If inverting y-axis, transform the data values
-        if (invertYAxis && yAxisRange === 'exact') {
-            // For position charts: invert the values so position 1 appears at the top
-            // If max position is 8, then position 1 becomes 8, position 8 becomes 1, etc.
-            const maxPosition = yMax;
-            seriesData = data[team].map(value => maxPosition - value + 1);
-        }
-        
-        return {
-            name: team,
-            type: 'line',
-            data: seriesData,
-            lineStyle: {
-                color: getTeamColor(team, idx),
-                width: 2
-            },
-            itemStyle: {
-                color: getTeamColor(team, idx)
-            },
-            smooth: false
-        };
-    });
-    
+    const series = order.map(team => ({
+        name: team,
+        type: 'line',
+        data: data[team],
+        lineStyle: {
+            color: getTeamColor(team),
+            width: 2
+        },
+        itemStyle: {
+            color: getTeamColor(team)
+        },
+        smooth: false
+    }));
+
     // Chart options
     const chartOptions = {
         tooltip: {
@@ -180,56 +175,39 @@ function createLineChart(data, order, containerId, title, labels, invertYAxis = 
         xAxis: {
             type: 'category',
             data: labels,
-            axisLine: {
-                show: false
-            },
-            splitLine: {
-                show: true
-            }
+            axisLine: { show: false },
+            splitLine: { show: true }
         },
         yAxis: {
             type: 'value',
             min: yMin,
             max: yMax,
-            axisLine: {
-                show: true
-            },
-            axisTick: {
-                show: true
-            },
-            splitLine: {
-                show: true
-            },
-            axisLabel: {
-                formatter: function(value) {
-                    if (invertYAxis && yAxisRange === 'exact') {
-                        // Show original position values on axis
-                        const maxPosition = yMax;
-                        return maxPosition - value + 1;
-                    }
-                    return value;
-                }
-            }
+            inverse: invertYAxis, // Use ECharts built-in inversion
+            axisLine: { show: true },
+            axisTick: { show: true },
+            splitLine: { show: true }
         },
         series: series,
         animation: false
     };
-    
+    console.log('ECharts yAxis.inverse:', chartOptions.yAxis.inverse, 'type:', typeof chartOptions.yAxis.inverse);
+
     // Set the chart options with clear flag
+    const chart = echarts.init(container, null, {
+        devicePixelRatio: window.devicePixelRatio,
+        renderer: 'canvas'
+    });
     chart.setOption(chartOptions, true);
-    
+
     // Clean up old resize listener if it exists
     if (container._echartResizeHandler) {
         window.removeEventListener('resize', container._echartResizeHandler);
     }
-    
     // Add new resize listener
-    const resizeHandler = () => {
-        chart.resize();
-    };
+    const resizeHandler = () => { chart.resize(); };
     window.addEventListener('resize', resizeHandler);
     container._echartResizeHandler = resizeHandler;
-    
+
     return chart;
 }
 
@@ -245,8 +223,8 @@ function createLineChart_vanilla(data, chartId, title, labels, reverse_y) {
     const datasets = Object.entries(data).map(([team, values]) => ({
         label: team,
         data: values,
-        borderColor: getTeamColor(team, Object.keys(data).length),
-        backgroundColor: getTeamColor(team, Object.keys(data).length),
+        borderColor: getTeamColor(team),
+        backgroundColor: getTeamColor(team),
         tension: 0.1
     }));
     
@@ -281,28 +259,28 @@ function createLineChart_vanilla(data, chartId, title, labels, reverse_y) {
 }
 
 function createScatterChart_vanilla(data, chartId, title, axis_labels) {
-    const ctx = document.getElementById(chartId).getContext('2d');
-    
+    const canvas = document.getElementById(chartId);
+    if (!canvas) {
+        console.error('createScatterChart_vanilla: Canvas not found:', chartId);
+        return;
+    }
+    const ctx = canvas.getContext('2d');
     // Destroy existing chart if it exists
     if (window[chartId + 'Instance'] instanceof Chart) {
         window[chartId + 'Instance'].destroy();
     }
-    
     // Collect all points for regression
     const allPoints = Object.values(data).flat();
     const xs = allPoints.map(point => point[0]);
     const ys = allPoints.map(point => point[1]);
-    
     // Calculate regression line
     const n = xs.length;
     const sumX = xs.reduce((a, b) => a + b, 0);
     const sumY = ys.reduce((a, b) => a + b, 0);
     const sumXY = xs.reduce((sum, x, i) => sum + x * ys[i], 0);
     const sumXX = xs.reduce((sum, x) => sum + x * x, 0);
-    
     const slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
     const intercept = (sumY - slope * sumX) / n;
-    
     // Create regression line points
     const minX = Math.min(...xs);
     const maxX = Math.max(...xs);
@@ -319,19 +297,17 @@ function createScatterChart_vanilla(data, chartId, title, axis_labels) {
         pointRadius: 0,
         fill: false
     };
-    
-    // Create datasets for each team
-    const datasets = Object.entries(data).map(([team, points]) => ({
+    // Create datasets for each team using palette colors
+    const teams = Object.keys(data);
+    const datasets = teams.map((team, idx) => ({
         label: team,
-        data: points.map(point => ({x: point[0], y: point[1]})),
-        borderColor: getTeamColor(team, Object.keys(data).length),
-        backgroundColor: getTeamColor(team, Object.keys(data).length),
+        data: data[team].map(point => ({x: point[0], y: point[1]})),
+        borderColor: getTeamColor(team),
+        backgroundColor: getTeamColor(team),
         pointRadius: 5
     }));
-    
     // Add regression line to datasets
     datasets.push(regressionLine);
-    
     window[chartId + 'Instance'] = new Chart(ctx, {
         type: 'scatter',
         data: {
@@ -445,7 +421,7 @@ function createScatterChartMultiAxis(data, order, containerId, title, labels) {
                 return Math.max(dataItem[1] / teams.length * 7, 10);
             },
             itemStyle: {
-                color: getTeamColor(team, idx)
+                color: getTeamColor(team)
             }
         });
     });

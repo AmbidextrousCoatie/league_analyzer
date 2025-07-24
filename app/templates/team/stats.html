@@ -172,6 +172,59 @@
                 });
         });
 
+        // Always update available options when team or season changes
+        document.addEventListener('change', event => {
+            if (event.target.name === 'season') {
+                updateAvailableOptions();
+            }
+            if (event.target.id === 'teamSelect') {
+                updateAvailableOptions();
+            }
+            // Add other handlers for week if needed
+        });
+
+        function updateAvailableOptions() {
+            const selectedTeam = document.getElementById('teamSelect').value;
+            const selectedSeason = document.querySelector('input[name="season"]:checked')?.value;
+            if (selectedTeam) {
+                updateSeasonButtons(selectedTeam);
+                if (selectedSeason) {
+                    updateWeekButtons(selectedTeam, selectedSeason);
+                }
+            }
+        }
+
+        function updateSeasonButtons(teamName) {
+            fetch(`/team/get_available_seasons?team_name=${teamName}`)
+                .then(response => response.json())
+                .then(seasons => {
+                    const container = document.getElementById('buttonsSeason');
+                    container.innerHTML = ['Alle', ...seasons].map(season => `
+                        <input type="radio" class="btn-check" name="season" id="season_${season}" value="${season}"
+                               ${season === 'Alle' ? 'checked' : ''}>
+                        <label class="btn btn-outline-primary" for="season_${season}">${season}</label>
+                    `).join('');
+
+                    // Add event listeners
+                    document.querySelectorAll('input[name="season"]').forEach(radio => {
+                        radio.addEventListener('change', function() {
+                            const selectedTeam = document.getElementById('teamSelect').value;
+                            updateWeekButtons(selectedTeam, this.value);
+                        });
+                    });
+
+                    // Select the first available season and update weeks immediately
+                    const firstSeason = seasons.length > 0 ? seasons[0] : null;
+                    if (firstSeason) {
+                        const selectedTeam = document.getElementById('teamSelect').value;
+                        // If 'Alle' is present, prefer it, else use firstSeason
+                        const selectedSeason = document.querySelector('input[name="season"]:checked')?.value || firstSeason;
+                        updateWeekButtons(selectedTeam, selectedSeason);
+                    }
+                });
+        }
+
+        // In updateTeamSelect, after calling updateSeasonButtons(selectedTeam), also update weeks
         function updateTeamSelect(teams) {
             const select = document.getElementById('teamSelect');
             select.innerHTML = `
@@ -197,27 +250,6 @@
                     loadSpecialMatches(selectedTeam);
                 }
             });
-        }
-
-        function updateSeasonButtons(teamName) {
-            fetch(`/team/get_available_seasons?team_name=${teamName}`)
-                .then(response => response.json())
-                .then(seasons => {
-                    const container = document.getElementById('buttonsSeason');
-                    container.innerHTML = ['Alle', ...seasons].map(season => `
-                        <input type="radio" class="btn-check" name="season" id="season_${season}" value="${season}"
-                               ${season === 'Alle' ? 'checked' : ''}>
-                        <label class="btn btn-outline-primary" for="season_${season}">${season}</label>
-                    `).join('');
-
-                    // Add event listeners
-                    document.querySelectorAll('input[name="season"]').forEach(radio => {
-                        radio.addEventListener('change', function() {
-                            const selectedTeam = document.getElementById('teamSelect').value;
-                            updateWeekButtons(selectedTeam, this.value);
-                        });
-                    });
-                });
         }
 
         function updateWeekButtons(teamName, season) {
