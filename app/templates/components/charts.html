@@ -2,64 +2,106 @@
 <script src="https://cdn.jsdelivr.net/npm/echarts@5.6.0/dist/echarts.min.js"></script>
 
 <script>
-// Global object to store team colors
-const teamColors = {};
+// --- Team Color Palettes ---
+const TEAM_COLOR_PALETTES = {
+  "forestWine": [
+    "#463C54", "#555B6E", "#5A7D7C", "#789262", "#A3A76D",
+    "#C1B97F", "#B98B6D", "#B04A5A", "#A11A3C", "#8B1534"
+  ],
+  "sunsetPop": [
+    "#00475A", "#2B537A", "#5B4C8A", "#8B4C8A", "#C05A8A",
+    "#F95D6A", "#FF8A36", "#FFB35C", "#FFD782"
+  ],
+  "rainbowPastel": [
+    "#1B8CA6", "#2CA89A", "#8CBF8A", "#E6C86E", "#F7A86E",
+    "#E86E56", "#D95A6A", "#C94C8A", "#A04CBF", "#D6A4E6"
+  ],
+  "distinct10": [
+    "#E41A1C", "#377EB8", "#4DAF4A", "#984EA3", "#FF7F00",
+    "#FFFF33", "#A65628", "#F781BF", "#999999", "#1B7837"
+  ],
+  "harmonic10": [
+    "#1F77B4", "#FF7F0E", "#2CA02C", "#D62728", "#9467BD",
+    "#8C564B", "#E377C2", "#7F7F7F", "#BCBD22", "#17BECF"
+  ]
+};
 
-function getTeamColor(team) {
-    if (!teamColors[team]) {
-        // Generate and store a color for this team
-        teamColors[team] = `hsl(${Object.keys(teamColors).length * 137.508}deg, 70%, 50%)`;
-    }
-    return teamColors[team];
+// Default palette
+let currentPaletteName = "forestWine";
+let currentPalette = TEAM_COLOR_PALETTES[currentPaletteName];
+
+// --- Palette Switcher UI ---
+function renderPaletteSwitcher(containerId = "paletteSwitcher") {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  container.innerHTML = "<b>Color Palette:</b> ";
+  Object.keys(TEAM_COLOR_PALETTES).forEach(name => {
+    const btn = document.createElement("button");
+    btn.textContent = name.replace(/([A-Z])/g, " $1").replace(/^./, s => s.toUpperCase());
+    btn.onclick = () => {
+      currentPaletteName = name;
+      currentPalette = TEAM_COLOR_PALETTES[name];
+      if (typeof window.refreshAllCharts === "function") window.refreshAllCharts();
+    };
+    btn.style.margin = "0 4px";
+    btn.style.padding = "4px 10px";
+    btn.style.borderRadius = "4px";
+    btn.style.border = name === currentPaletteName ? "2px solid #222" : "1px solid #aaa";
+    btn.style.background = name === currentPaletteName ? "#eee" : "#fff";
+    btn.style.cursor = "pointer";
+    container.appendChild(btn);
+  });
 }
 
-function createLineChart_vanilla(data, chartId, title, labels, reverse_y) {
-    const ctx = document.getElementById(chartId).getContext('2d');
-    
-    // Destroy existing chart if it exists
-    if (window[chartId + 'Instance'] instanceof Chart) {
-        window[chartId + 'Instance'].destroy();
-    }
-    
-    // Create datasets for each team
-    const datasets = Object.entries(data).map(([team, values]) => ({
-        label: team,
-        data: values,
-        borderColor: getTeamColor(team),
-        backgroundColor: getTeamColor(team),
-        tension: 0.1
-    }));
-    
-    window[chartId + 'Instance'] = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: labels,
-            datasets: datasets
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                title: {
-                    display: true,
-                    text: title
-                },
-                legend: {
-                    display: false
-                }
-            },
-            scales: {
-                y: {
-                    reverse: reverse_y,
-                    beginAtZero: false,
-                    ticks: {
-                        stepSize: 1
-                    }
-                }
-            }
-        }
+// --- Team Color Function ---
+function getTeamColor(team, idx) {
+  if (typeof idx === "number") {
+    return currentPalette[idx % currentPalette.length];
+  }
+  // Fallback: hash team name to index
+  let hash = 0;
+  for (let i = 0; i < team.length; i++) {
+    hash = team.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  const index = Math.abs(hash) % currentPalette.length;
+  return currentPalette[index];
+}
+
+// --- Global chart refresh stub (user should implement) ---
+if (!window.refreshAllCharts) {
+  window.refreshAllCharts = function() {
+    // User: call your chart rendering functions here to update colors
+    // Example: updateTableLeagueWeek(); updateTablePosition(data); etc.
+    // console.log('refreshAllCharts called');
+  };
+}
+
+// --- Palette Dropdown Handler for Navbar ---
+document.addEventListener("DOMContentLoaded", function() {
+  renderPaletteSwitcher();
+  // Palette dropdown in navbar
+  document.querySelectorAll('.palette-option').forEach(function(el) {
+    el.addEventListener('click', function(e) {
+      e.preventDefault();
+      const palette = el.getAttribute('data-palette');
+      if (palette && TEAM_COLOR_PALETTES[palette]) {
+        currentPaletteName = palette;
+        currentPalette = TEAM_COLOR_PALETTES[palette];
+        // Update navbar text
+        const text = el.textContent.trim();
+        const paletteText = document.getElementById('currentPaletteText');
+        if (paletteText) paletteText.textContent = text;
+        if (typeof window.refreshAllCharts === "function") window.refreshAllCharts();
+      }
     });
-}
+  });
+});
 
+// --- NOTE: Add <div id="paletteSwitcher"></div> to your HTML where you want the palette switcher to appear. ---
+
+// --- Update all chart color assignments below ---
+
+// Example for createLineChart:
 function createLineChart(data, order, containerId, title, labels, invertYAxis = false, yAxisRange = null) {
     const container = document.getElementById(containerId);
     
@@ -94,7 +136,7 @@ function createLineChart(data, order, containerId, title, labels, invertYAxis = 
     }
     
     // Create series from the data using the specified order
-    const series = order.map(team => {
+    const series = order.map((team, idx) => {
         let seriesData = data[team];
         
         // If inverting y-axis, transform the data values
@@ -110,11 +152,11 @@ function createLineChart(data, order, containerId, title, labels, invertYAxis = 
             type: 'line',
             data: seriesData,
             lineStyle: {
-                color: getTeamColor(team),
+                color: getTeamColor(team, idx),
                 width: 2
             },
             itemStyle: {
-                color: getTeamColor(team)
+                color: getTeamColor(team, idx)
             },
             smooth: false
         };
@@ -191,6 +233,53 @@ function createLineChart(data, order, containerId, title, labels, invertYAxis = 
     return chart;
 }
 
+function createLineChart_vanilla(data, chartId, title, labels, reverse_y) {
+    const ctx = document.getElementById(chartId).getContext('2d');
+    
+    // Destroy existing chart if it exists
+    if (window[chartId + 'Instance'] instanceof Chart) {
+        window[chartId + 'Instance'].destroy();
+    }
+    
+    // Create datasets for each team
+    const datasets = Object.entries(data).map(([team, values]) => ({
+        label: team,
+        data: values,
+        borderColor: getTeamColor(team, Object.keys(data).length),
+        backgroundColor: getTeamColor(team, Object.keys(data).length),
+        tension: 0.1
+    }));
+    
+    window[chartId + 'Instance'] = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: datasets
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                title: {
+                    display: true,
+                    text: title
+                },
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    reverse: reverse_y,
+                    beginAtZero: false,
+                    ticks: {
+                        stepSize: 1
+                    }
+                }
+            }
+        }
+    });
+}
+
 function createScatterChart_vanilla(data, chartId, title, axis_labels) {
     const ctx = document.getElementById(chartId).getContext('2d');
     
@@ -235,8 +324,8 @@ function createScatterChart_vanilla(data, chartId, title, axis_labels) {
     const datasets = Object.entries(data).map(([team, points]) => ({
         label: team,
         data: points.map(point => ({x: point[0], y: point[1]})),
-        borderColor: getTeamColor(team),
-        backgroundColor: getTeamColor(team),
+        borderColor: getTeamColor(team, Object.keys(data).length),
+        backgroundColor: getTeamColor(team, Object.keys(data).length),
         pointRadius: 5
     }));
     
@@ -356,7 +445,7 @@ function createScatterChartMultiAxis(data, order, containerId, title, labels) {
                 return Math.max(dataItem[1] / teams.length * 7, 10);
             },
             itemStyle: {
-                color: getTeamColor(team)
+                color: getTeamColor(team, idx)
             }
         });
     });
