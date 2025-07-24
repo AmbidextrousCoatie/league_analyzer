@@ -182,8 +182,9 @@ def get_team_week_head_to_head_table():
         league = request.args.get('league')
         week_str = request.args.get('week')
         team = request.args.get('team')
+        view_mode = request.args.get('view_mode', 'own_team')
         
-        print(f"Team Week Head-to-Head Table - Received request with: season={season}, league={league}, week={week_str}, team={team}")
+        print(f"Team Week Head-to-Head Table - Received request with: season={season}, league={league}, week={week_str}, team={team}, view_mode={view_mode}")
         
         if not all([season, league, week_str, team]):
             return jsonify({'error': 'Missing required parameters'}), 400
@@ -195,7 +196,8 @@ def get_team_week_head_to_head_table():
             league=league, 
             season=season, 
             team=team, 
-            week=week
+            week=week,
+            view_mode=view_mode
         )
         
         if not table_data:
@@ -439,3 +441,26 @@ def get_translations():
         })
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+@bp.route('/league/get_team_individual_scores_table')
+def get_team_individual_scores_table():
+    try:
+        season = request.args.get('season')
+        league = request.args.get('league')
+        week_str = request.args.get('week')
+        team = request.args.get('team')
+        if not all([season, league, week_str, team]):
+            return jsonify({'error': 'Missing required parameters'}), 400
+        week = int(week_str)
+        table_data = league_service.get_team_individual_scores_table(
+            league=league,
+            season=season,
+            team=team,
+            week=week
+        )
+        return jsonify(table_data.to_dict())
+    except Exception as e:
+        import traceback
+        print(f"Error in get_team_individual_scores_table: {str(e)}")
+        print(f"Traceback: {traceback.format_exc()}")
+        return jsonify({'error': str(e)}), 500

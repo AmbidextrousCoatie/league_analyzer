@@ -208,11 +208,12 @@
                         <div id="teamDetailsMetadata" class="text-muted small"></div>
                     </div>
                     <div class="btn-group" role="group" aria-label="View options">
-                        <input type="radio" class="btn-check" name="teamView" id="teamViewDetails" value="details" checked>
-                        <label class="btn btn-outline-primary btn-sm" for="teamViewDetails" data-i18n="details">Details</label>
-                        
-                        <input type="radio" class="btn-check" name="teamView" id="teamViewHeadToHead" value="headToHead">
-                        <label class="btn btn-outline-primary btn-sm" for="teamViewHeadToHead" data-i18n="head_to_head">Head-to-Head</label>
+                        <input type="radio" class="btn-check" name="teamView" id="teamViewClassic" value="classic" checked>
+                        <label class="btn btn-outline-primary btn-sm" for="teamViewClassic">Classic</label>
+                        <input type="radio" class="btn-check" name="teamView" id="teamViewNew" value="new">
+                        <label class="btn btn-outline-primary btn-sm" for="teamViewNew">New</label>
+                        <input type="radio" class="btn-check" name="teamView" id="teamViewNewFull" value="newFull">
+                        <label class="btn btn-outline-primary btn-sm" for="teamViewNewFull">New Full</label>
                     </div>
                 </div>
                 <div class="card-body">
@@ -386,32 +387,36 @@ function updateTableTeamDetails() {
     const selectedWeek = document.querySelector('input[name="week"]:checked')?.value;
     const selectedTeam = document.querySelector('input[name="team"]:checked')?.value;
     const selectedView = document.querySelector('input[name="teamView"]:checked')?.value;
-    
+    let endpoint = '/league/get_team_week_details_table';
+    let viewMode = undefined;
+    if (selectedView === 'new') {
+        endpoint = '/league/get_team_individual_scores_table';
+    } else if (selectedView === 'newFull') {
+        endpoint = '/league/get_team_week_head_to_head_table';
+        viewMode = 'full';
+    }
     if (!selectedSeason || !selectedLeague || !selectedWeek || !selectedTeam) {
         return;
     }
-    
     // Update header
     const matchDayText = window.translations ? (window.translations['match_day_label'] || 'Match Day') : 'Match Day';
     document.getElementById('teamDetailsMetadata').innerHTML = `${selectedTeam} - ${matchDayText} ${selectedWeek}`;
-    
-    // Determine endpoint based on selected view
-    const endpoint = selectedView === 'headToHead' 
-        ? '/league/get_team_week_head_to_head_table'
-        : '/league/get_team_week_details_table';
-    
     // Use fetchAndRenderTable for consistent table rendering
-    fetchAndRenderTable('teamTableWeekDetails', endpoint, {
+    const params = {
         season: selectedSeason,
         league: selectedLeague,
         week: selectedWeek,
         team: selectedTeam,
         options: {
             disablePositionCircle: true,
-            mergeCells: selectedView === 'headToHead',
+            mergeCells: false,
             enableSpecialRowStyling: true
         }
-    });
+    };
+    if (viewMode) {
+        params.view_mode = viewMode;
+    }
+    fetchAndRenderTable('teamTableWeekDetails', endpoint, params);
 }
 
 function updateTablePosition(data) {
@@ -1072,6 +1077,18 @@ function updateChartsLeague() {
 
 // Initial load
 document.addEventListener('DOMContentLoaded', initializePage);
+document.addEventListener('DOMContentLoaded', function() {
+    ['viewOwnTeam', 'viewOpponents', 'viewFull'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.addEventListener('change', function() {
+                if (document.querySelector('input[name="teamView"]:checked')?.value === 'headToHead') {
+                    updateTableTeamDetails();
+                }
+            });
+        }
+    });
+});
 </script>
 
 {% endblock %}

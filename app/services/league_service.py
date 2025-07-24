@@ -1,5 +1,6 @@
 from typing import List, Dict, Any, Optional
 import datetime
+import pandas as pd
 
 
 from data_access.adapters.data_adapter_factory import DataAdapterFactory, DataAdapterSelector
@@ -1464,8 +1465,11 @@ class LeagueService:
         
         return series_data.to_dict()
 
-    def get_team_week_head_to_head_table_data(self, league: str, season: str, team: str, week: int) -> TableData:
-        """Get head-to-head comparison table data for a team vs their opponents in a specific week"""
+    def get_team_week_head_to_head_table_data(self, league: str, season: str, team: str, week: int, view_mode: str = 'own_team') -> TableData:
+        """
+        Get head-to-head comparison table data for a team vs their opponents in a specific week.
+        view_mode: 'own_team' (default), 'opponents', 'full'
+        """
         try:
             # Get all matches for the team in this week
             team_filters = {
@@ -1475,16 +1479,14 @@ class LeagueService:
                 Columns.week: {'value': week, 'operator': 'eq'},
                 Columns.computed_data: {'value': False, 'operator': 'eq'}
             }
-            
             team_data = self.adapter.get_filtered_data(filters=team_filters)
-            
             if team_data.empty:
                 return TableData(
                     columns=[],
                     data=[],
                     title=f"No data available for {team} - Week {week}"
                 )
-            
+
             # Get all matches for the opponent teams in this week
             opponent_filters = {
                 Columns.league_name: {'value': league, 'operator': 'eq'},
@@ -1493,210 +1495,350 @@ class LeagueService:
                 Columns.week: {'value': week, 'operator': 'eq'},
                 Columns.computed_data: {'value': False, 'operator': 'eq'}
             }
-            
             opponent_data = self.adapter.get_filtered_data(filters=opponent_filters)
-            
-            # Get individual opponent data to calculate average based on individual results
-            opponent_individual_filters = {
-                Columns.league_name: {'value': league, 'operator': 'eq'},
-                Columns.season: {'value': season, 'operator': 'eq'},
-                Columns.team_name_opponent: {'value': team, 'operator': 'eq'},
-                Columns.week: {'value': week, 'operator': 'eq'},
-                Columns.computed_data: {'value': False, 'operator': 'eq'}  # Individual data, not computed
-            }
-            
-            opponent_individual_data = self.adapter.get_filtered_data(filters=opponent_individual_filters)
-            
-            # Get team totals (computed data) for both teams
-            team_totals_filters = {
-                Columns.league_name: {'value': league, 'operator': 'eq'},
-                Columns.season: {'value': season, 'operator': 'eq'},
-                Columns.team_name: {'value': team, 'operator': 'eq'},
-                Columns.week: {'value': week, 'operator': 'eq'},
-                Columns.computed_data: {'value': True, 'operator': 'eq'}
-            }
-            
-            team_totals_data = self.adapter.get_filtered_data(filters=team_totals_filters)
-            
-            opponent_totals_filters = {
-                Columns.league_name: {'value': league, 'operator': 'eq'},
-                Columns.season: {'value': season, 'operator': 'eq'},
-                Columns.team_name_opponent: {'value': team, 'operator': 'eq'},
-                Columns.week: {'value': week, 'operator': 'eq'},
-                Columns.computed_data: {'value': True, 'operator': 'eq'}
-            }
-            
-            opponent_totals_data = self.adapter.get_filtered_data(filters=opponent_totals_filters)
-            
-            # Debug: Print unique combinations
-            print(f"Team data unique combinations: {team_data[[Columns.round_number, Columns.match_number]].drop_duplicates().values.tolist()}")
-            print(f"Opponent data unique combinations: {opponent_data[[Columns.round_number, Columns.match_number]].drop_duplicates().values.tolist()}")
-            
-            # Get unique round numbers (matches) for the team
-            team_rounds = sorted(team_data[Columns.round_number].unique())
-            print(f"Team rounds: {team_rounds}")
-            
-            # Group by round_number for proper match identification
-            team_matches = team_data.groupby(Columns.round_number)
-            opponent_matches = opponent_data.groupby(Columns.round_number)
-            
-            # Get all unique positions across all matches
-            all_positions = sorted(set(team_data[Columns.position].unique()) | set(opponent_data[Columns.position].unique()))
-            
-            # Create column groups
+
+            # Get unique round numbers (matches)
+            all_rounds = sorted(set(team_data[Columns.round_number].unique()) | set(opponent_data[Columns.round_number].unique()))
+
+            # --- Determine which players to show ---
+            show_own = view_mode in ('own_team', 'full')
+            show_opp = view_mode in ('opponents', 'full')
+
+            # Get unique players for each side
+            own_players = team_data[Columns.player_name].unique() if show_own else []
+            opp_players = opponent_data[Columns.player_name].unique() if show_opp else []
+
+            # Build player participation map: {player: {round: row(s)}}
+            def build_participation_map(df):
+                part_map = {}
+                for player in df[Columns.player_name].unique():
+                    player_rows = df[df[Columns.player_name] == player]
+                    part_map[player] = {}
+                    for rnd in player_rows[Columns.round_number].unique():
+                        part_map[player][rnd] = player_rows[player_rows[Columns.round_number] == rnd].iloc[0]
+                return part_map
+            own_part_map = build_participation_map(team_data) if show_own else {}
+            opp_part_map = build_participation_map(opponent_data) if show_opp else {}
+
+            # --- Build columns ---
             columns = [
                 ColumnGroup(
-                    title=i18n_service.get_text("match_day"),
+                    title="Match Info",
                     style={"backgroundColor": "#f8f9fa"},
                     columns=[
-                        Column(title=i18n_service.get_text("round"), field="round_number", width="60px", align="center"),
-                        Column(title=i18n_service.get_text("opponent"), field="opponent_name", width="120px", align="left"),
-                        Column(title=i18n_service.get_text("points"), field="total_points", width="80px", align="center")
+                        Column(title="Round", field="round_number", width="60px", align="center"),
+                        Column(title="Opponent", field="opponent_name", width="120px", align="left"),
                     ]
                 )
             ]
-            
-            # Add position column groups for each position
-            for position in all_positions:
-                columns.append(
-                    ColumnGroup(
-                        title=f"Position {int(position+1)}",
-                        columns=[
-                            Column(title=i18n_service.get_text("name"), field=f"pos{position}_name", width="150px", align="left"),
-                            Column(title=i18n_service.get_text("score"), field=f"pos{position}_score", width="80px", align="center"),
-                            Column(title=i18n_service.get_text("points"), field=f"pos{position}_points", width="80px", align="center")
-                        ]
-                    )
+
+            # Helper to build player col group
+            def player_col_group(player, prefix):
+                return ColumnGroup(
+                    title=player,
+                    columns=[
+                        Column(title="Pos", field=f"{prefix}{player}_pos", width="50px", align="center"),
+                        Column(title="Score", field=f"{prefix}{player}_score", width="80px", align="center"),
+                        Column(title="Pts", field=f"{prefix}{player}_points", width="60px", align="center"),
+                    ]
                 )
-            
+
+            # Add own team player columns
+            for player in own_players:
+                columns.append(player_col_group(player, "own_"))
+            # Add opponent player columns
+            for player in opp_players:
+                columns.append(player_col_group(player, "opp_"))
+
             # Add team column group
             columns.append(
                 ColumnGroup(
-                    title=i18n_service.get_text("team"),
+                    title="Team",
                     style={"backgroundColor": "#e9ecef"},
                     header_style={"fontWeight": "bold"},
                     columns=[
-                        Column(title=i18n_service.get_text("score"), field="team_score", width="80px", align="center"),
-                        Column(title=i18n_service.get_text("points"), field="team_points", width="80px", align="center")
+                        Column(title="Score", field="team_score", width="80px", align="center"),
+                        Column(title="Points", field="team_points", width="80px", align="center")
                     ]
                 )
             )
-            
-            # Prepare data rows
-            data = []
-            
-            # Process each round (match)
-            for round_num in team_rounds:
-                print(f"Processing round: {round_num}")
-                # Get team match data for this round
-                try:
-                    team_match_data = team_matches.get_group(round_num)
-                except KeyError:
-                    print(f"No team data found for round {round_num}")
-                    continue
-                
-                # Get opponent match data for this round
-                try:
-                    opponent_match_data = opponent_matches.get_group(round_num)
-                except KeyError:
-                    print(f"No opponent data found for round {round_num}")
-                    continue
-                
-                # Get opponent team name from team data
-                opponent_team = team_match_data[Columns.team_name_opponent].iloc[0]
-                
-                # Create two rows for this match: own team and opponent team
-                for team_type in ['own', 'opponent']:
-                    current_team_name = team if team_type == 'own' else opponent_team
-                    current_match_data = team_match_data if team_type == 'own' else opponent_match_data
-                    
-                    # Start with match info (round number and opponent name)
-                    if team_type == 'own':
-                        row = [int(round_num), ""]  # Round number, empty opponent name
+
+            # --- Build data rows ---
+            if view_mode == 'own_team':
+                # Build main data rows (one per round)
+                data = []
+                for rnd in all_rounds:
+                    # Get opponent team name for this round (from own or opponent data)
+                    if rnd in team_data[Columns.round_number].values:
+                        opponent_team = team_data[team_data[Columns.round_number] == rnd][Columns.team_name_opponent].iloc[0]
+                    elif rnd in opponent_data[Columns.round_number].values:
+                        opponent_team = opponent_data[opponent_data[Columns.round_number] == rnd][Columns.team_name].iloc[0]
                     else:
-                        row = [int(round_num), opponent_team]  # Round number, opponent name
-                    
-                    # Calculate total points first (needed for Match Info group)
-                    if team_type == 'own':
-                        # Get team totals for this round
-                        team_total_data = team_totals_data[team_totals_data[Columns.round_number] == round_num]
-                        
-                        if not team_total_data.empty:
-                            team_score = int(team_total_data[Columns.score].iloc[0])
-                            team_points = int(team_total_data[Columns.points].iloc[0])
+                        opponent_team = ""
+                    row = [int(rnd), opponent_team]
+                    # For each player, always output pos, score, points (blank if not played)
+                    for player in own_players:
+                        if rnd in own_part_map[player]:
+                            row_data = own_part_map[player][rnd]
+                            row.append(int(row_data[Columns.position] + 1) if not pd.isnull(row_data[Columns.position]) else "")
+                            row.append(int(row_data[Columns.score]) if not pd.isnull(row_data[Columns.score]) else "")
+                            row.append(float(row_data[Columns.points]) if not pd.isnull(row_data[Columns.points]) else "")
                         else:
-                            team_score = int(current_match_data[Columns.score].sum())
-                            team_points = 0
-                        
-                        # Total points: individual points + team points
-                        individual_points = int(current_match_data[Columns.points].sum())
-                        total_points = individual_points + team_points
-                        
-                        # Add total points to Match Info group (third column)
-                        row.append(total_points)
+                            row.extend(["", "", ""])
+                    # Team totals for this round (if available)
+                    team_totals = team_data[(team_data[Columns.round_number] == rnd) & (team_data[Columns.computed_data] == True)]
+                    if not team_totals.empty:
+                        row.append(int(team_totals[Columns.score].iloc[0]))
+                        row.append(int(team_totals[Columns.points].iloc[0]))
                     else:
-                        # For opponent, calculate total points
-                        individual_points = int(current_match_data[Columns.points].sum())
-                        total_points = individual_points  # No team points for opponent
-                        
-                        # Add total points to Match Info group (third column)
-                        row.append(total_points)
-                    
-                    # Add position data
-                    for position in all_positions:
-                        # Get player data for this position
-                        pos_data = current_match_data[current_match_data[Columns.position] == position]
-                        
-                        if not pos_data.empty:
-                            player_name = pos_data[Columns.player_name].iloc[0]
-                            score = int(pos_data[Columns.score].iloc[0])
-                            points = round(float(pos_data[Columns.points].iloc[0]), 1)
-                        else:
-                            player_name = ""
-                            score = 0
-                            points = 0
-                        
-                        row.extend([player_name, score, points])
-                    
-                    # Add team data at the end
-                    if team_type == 'own':
-                        # Team score and points (separate columns)
-                        row.append(team_score)
-                        row.append(team_points)
-                    else:
-                        # Get opponent team totals
-                        opponent_total_data = opponent_totals_data[opponent_totals_data[Columns.round_number] == round_num]
-                        if not opponent_total_data.empty:
-                            opponent_team_score = int(opponent_total_data[Columns.score].iloc[0])
-                            opponent_team_points = int(opponent_total_data[Columns.points].iloc[0])
-                        else:
-                            opponent_team_score = int(current_match_data[Columns.score].sum())
-                            opponent_team_points = 0
-                        
-                        # Team score and points (separate columns)
-                        row.append(opponent_team_score)
-                        row.append(opponent_team_points)
-                    
+                        row.extend(["", ""])
                     data.append(row)
-            
-            return TableData(
-                columns=columns,
-                data=data,
-                title=f"{team} - {i18n_service.get_text('match_day')} {week} {i18n_service.get_text('head_to_head')}",
-                description=f"All matches in {league} - {season}",
-                config={
-                    "stickyHeader": True,
-                    "striped": True,
-                    "hover": True,
-                    "responsive": True,
-                    "compact": False
-                }
-            )
-            
+                # Add team totals row at the end
+                team_total_row = ["Team", ""]
+                for player in own_players:
+                    # Sum score and points for this player across all rounds
+                    player_rows = [own_part_map[player][rnd] for rnd in own_part_map[player] if not pd.isnull(own_part_map[player][rnd][Columns.score])]
+                    if player_rows:
+                        total_score = sum(int(row[Columns.score]) for row in player_rows if not pd.isnull(row[Columns.score]))
+                        total_points = sum(float(row[Columns.points]) for row in player_rows if not pd.isnull(row[Columns.points]))
+                        team_total_row.extend(["", total_score, total_points])
+                    else:
+                        team_total_row.extend(["", "", ""])
+                # Team total score/points for all rounds
+                team_score_total = team_data[team_data[Columns.computed_data] == True][Columns.score].sum() if not team_data.empty else ""
+                team_points_total = team_data[team_data[Columns.computed_data] == True][Columns.points].sum() if not team_data.empty else ""
+                team_total_row.append(int(team_score_total) if team_score_total != "" else "")
+                team_total_row.append(int(team_points_total) if team_points_total != "" else "")
+                data.append(team_total_row)
+                # Debug print for non-serializable values
+                for i, row in enumerate(data):
+                    for j, cell in enumerate(row):
+                        if hasattr(cell, 'dtype') or type(cell).__module__ == 'numpy':
+                            print(f"Non-serializable value at row {i}, col {j}: {cell} ({type(cell)})")
+                return TableData(
+                    columns=columns,
+                    data=data,
+                    title=f"{team} - Head-to-Head (Week {week}) [own_team]",
+                    description=f"Head-to-Head table for {team} in {league} - {season} (view: own_team)",
+                    config={
+                        "stickyHeader": True,
+                        "striped": True,
+                        "hover": True,
+                        "responsive": True,
+                        "compact": False
+                    }
+                )
+            else: # view_mode in ('opponents', 'full')
+                # --- Own team row ---
+                if show_own:
+                    row = [int(rnd), opponent_team]
+                    # Own players
+                    for player in own_players:
+                        if rnd in own_part_map[player]:
+                            row_data = own_part_map[player][rnd]
+                            row.append(int(row_data[Columns.position] + 1) if not pd.isnull(row_data[Columns.position]) else "")
+                            row.append(int(row_data[Columns.score]) if not pd.isnull(row_data[Columns.score]) else "")
+                            row.append(float(row_data[Columns.points]) if not pd.isnull(row_data[Columns.points]) else "")
+                        else:
+                            row.extend(["", "", ""])
+                    # Opponent players (blank)
+                    for player in opp_players:
+                        row.extend(["", "", ""])
+                    # Team totals (if available)
+                    team_totals = team_data[(team_data[Columns.round_number] == rnd) & (team_data[Columns.computed_data] == True)]
+                    if not team_totals.empty:
+                        row.append(int(team_totals[Columns.score].iloc[0]))
+                        row.append(int(team_totals[Columns.points].iloc[0]))
+                    else:
+                        row.extend(["", ""])
+                    data.append(row)
+
+                # --- Opponent team row (only in 'full' or 'opponents' mode) ---
+                if show_opp:
+                    row = [int(rnd), team]  # Opponent's view: their opponent is 'team'
+                    # Own players (blank)
+                    for player in own_players:
+                        row.extend(["", "", ""])
+                    # Opponent players
+                    for player in opp_players:
+                        if rnd in opp_part_map[player]:
+                            row_data = opp_part_map[player][rnd]
+                            row.append(int(row_data[Columns.position] + 1) if not pd.isnull(row_data[Columns.position]) else "")
+                            row.append(int(row_data[Columns.score]) if not pd.isnull(row_data[Columns.score]) else "")
+                            row.append(float(row_data[Columns.points]) if not pd.isnull(row_data[Columns.points]) else "")
+                        else:
+                            row.extend(["", "", ""])
+                    # Team totals (if available)
+                    opp_totals = opponent_data[(opponent_data[Columns.round_number] == rnd) & (opponent_data[Columns.computed_data] == True)]
+                    if not opp_totals.empty:
+                        row.append(int(opp_totals[Columns.score].iloc[0]))
+                        row.append(int(opp_totals[Columns.points].iloc[0]))
+                    else:
+                        row.extend(["", ""])
+                    data.append(row)
+
+                for i, row in enumerate(data):
+                    for j, cell in enumerate(row):
+                        if hasattr(cell, 'dtype') or type(cell).__module__ == 'numpy':
+                            print(f"Non-serializable value at row {i}, col {j}: {cell} ({type(cell)})")
+
+                return TableData(
+                    columns=columns,
+                    data=data,
+                    title=f"{team} - Head-to-Head (Week {week}) [{view_mode}]",
+                    description=f"Head-to-Head table for {team} in {league} - {season} (view: {view_mode})",
+                    config={
+                        "stickyHeader": True,
+                        "striped": True,
+                        "hover": True,
+                        "responsive": True,
+                        "compact": False
+                    }
+                )
         except Exception as e:
             print(f"Error in get_team_week_head_to_head_table_data: {e}")
             return TableData(
                 columns=[],
                 data=[],
-                title=f"Error loading {i18n_service.get_text('head_to_head')} data for {team} - {i18n_service.get_text('week')} {week}"
+                title=f"Error loading data for {team} - Week {week}"
             )
+
+    def get_team_individual_scores_table(self, league: str, season: str, team: str, week: int) -> TableData:
+        """
+        Returns a table with all individual scores of each player of the selected team at the given event (league, season, week).
+        - Col group 'Opponents': Name (opponent name)
+        - Col group with team name: Score, Points, Total Points (sum of all individual points + team points for the match)
+        - One col group per player who played: Pos, Score, Points
+        - Each row is a match (round) for the team in that week
+        - Summary row at the end: sum of all individual scores and points per player, sum of team totals
+        - hbar above the final row, final row bold
+        """
+        import pandas as pd
+        from app.models.table_data import TableData, ColumnGroup, Column
+        from data_access.schema import Columns
+
+        # Get all individual player results for the team in this event
+        player_filters = {
+            Columns.league_name: {'value': league, 'operator': 'eq'},
+            Columns.season: {'value': season, 'operator': 'eq'},
+            Columns.team_name: {'value': team, 'operator': 'eq'},
+            Columns.week: {'value': week, 'operator': 'eq'},
+            Columns.computed_data: {'value': False, 'operator': 'eq'}
+        }
+        player_data = self.adapter.get_filtered_data(filters=player_filters)
+        if player_data.empty:
+            return TableData(columns=[], data=[], title=f"No data available for {team} - Week {week}")
+
+        # Get team totals (computed data)
+        team_filters = {
+            Columns.league_name: {'value': league, 'operator': 'eq'},
+            Columns.season: {'value': season, 'operator': 'eq'},
+            Columns.team_name: {'value': team, 'operator': 'eq'},
+            Columns.week: {'value': week, 'operator': 'eq'},
+            Columns.computed_data: {'value': True, 'operator': 'eq'}
+        }
+        team_data = self.adapter.get_filtered_data(filters=team_filters)
+
+        # Get all rounds (matches) for this team in this event
+        rounds = sorted(player_data[Columns.round_number].unique())
+        # Get all players who played in this event
+        players = list(player_data[Columns.player_name].unique())
+
+        # Build columns
+        columns = [
+            ColumnGroup(
+                title="Match",
+                columns=[
+                    Column(title="Opponent", field="opponent", width="120px", align="left", sortable=False),
+                    Column(title="Total Points", field="team_total_points", width="100px", align="center", sortable=False,
+                           style={"fontWeight": "bold"}),
+                ]
+                #style={"borderRight": "2px solid #264653"}  # Vertical bar after Opponents group (same color as other borders)
+            ),
+            ColumnGroup(
+                title=team,
+                columns=[
+                    Column(title="Score", field="team_score", width="80px", align="center", sortable=False),
+                    Column(title="Pts.", field="team_points", width="80px", align="center", sortable=False),
+                      # Make Total Points column bold
+                ]
+            )
+        ]
+        for player in players:
+            columns.append(
+                ColumnGroup(
+                    title=player,
+                    columns=[
+                        Column(title="Score", field=f"{player}_score", width="80px", align="center", sortable=False),
+                        Column(title="Pts.", field=f"{player}_points", width="50px", align="center", sortable=False),
+                        Column(title="Pos", field=f"{player}_pos", width="50px", align="center", sortable=False),
+                        
+                    ]
+                )
+            )
+
+        # Build data rows (one per round)
+        data = []
+        row_metadata = []
+        for rnd in rounds:
+            row = []
+            # Opponent name for this round
+            round_data = player_data[player_data[Columns.round_number] == rnd]
+            opponent = round_data[Columns.team_name_opponent].iloc[0] if not round_data.empty else ""
+            row.append(str(opponent))
+            # Team totals for this round
+            team_row = team_data[team_data[Columns.round_number] == rnd] if not team_data.empty else pd.DataFrame()
+            team_score = int(team_row[Columns.score].iloc[0]) if not team_row.empty else 0
+            team_points = float(team_row[Columns.points].iloc[0]) if not team_row.empty else 0.0
+            # Total Points = sum of all individual points + team points
+            indiv_points = float(round_data[Columns.points].sum()) if not round_data.empty else 0.0
+            total_points = indiv_points + team_points
+            row.append(total_points)
+            row.append(team_score)
+            row.append(team_points)
+            
+            # For each player, get their data for this round
+            for player in players:
+                pdata = round_data[round_data[Columns.player_name] == player]
+                if not pdata.empty:
+                    pos = int(pdata[Columns.position].iloc[0] + 1) if not pd.isnull(pdata[Columns.position].iloc[0]) else ""
+                    score = int(pdata[Columns.score].iloc[0]) if not pd.isnull(pdata[Columns.score].iloc[0]) else 0
+                    points = float(pdata[Columns.points].iloc[0]) if not pd.isnull(pdata[Columns.points].iloc[0]) else 0.0
+                    row.extend([score, points, pos])
+                else:
+                    row.extend(["", 0, 0.0, ""])
+            data.append(row)
+            row_metadata.append({'rowType': 'match', 'styling': {}})
+
+        # Add summary row
+        summary_row = ["Total", 0, 0.0, 0.0]
+        for player in players:
+            player_rows = player_data[player_data[Columns.player_name] == player]
+            total_score = int(player_rows[Columns.score].sum()) if not player_rows.empty else 0
+            total_points = float(player_rows[Columns.points].sum()) if not player_rows.empty else 0.0
+            summary_row.extend([total_score, total_points, ""])
+        # Team total score/points for all rounds
+        team_score_total = int(team_data[Columns.score].sum()) if not team_data.empty else 0
+        team_points_total = float(team_data[Columns.points].sum()) if not team_data.empty else 0.0
+        indiv_points_total = float(player_data[Columns.points].sum()) if not player_data.empty else 0.0
+        team_total_points_total = indiv_points_total + team_points_total
+        summary_row[1] = team_total_points_total
+        summary_row[2] = team_score_total
+        summary_row[3] = team_points_total
+        data.append(summary_row)
+        row_metadata.append({'rowType': 'summary', 'styling': {'fontWeight': 'bold', 'borderTop': '2px solid #000000'}})
+
+        return TableData(
+            columns=columns,
+            data=data,
+            row_metadata=row_metadata,
+            title=f"{team} - Individual Scores (Week {week})",
+            description=f"All individual scores for {team} in {league} - {season}, week {week}",
+            config={
+                "stickyHeader": True,
+                "striped": True,
+                "hover": True,
+                "responsive": True,
+                "compact": False
+            }
+        )
