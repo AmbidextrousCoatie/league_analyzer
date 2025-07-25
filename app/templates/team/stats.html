@@ -46,7 +46,7 @@
 
     <div class="row mt-4">
         <!-- Chart -->
-        <div class="col-md-8">
+        <div class="col-md-12">
             <div class="card">
                 <div class="card-header">
                     <h5>Platzierungsverlauf</h5>
@@ -57,27 +57,31 @@
             </div>
         </div>
         
-        <!-- Table -->
-        <div class="col-md-4">
+
+    </div>
+
+
+
+    <!-- New League Comparison Section -->
+    <div class="row mt-4">
+        <div class="col-md-8">
             <div class="card">
                 <div class="card-header">
-                    <h5>Historische Platzierungen</h5>
+                    <h5>Leistung vs. Liga-Durchschnitt</h5>
                 </div>
                 <div class="card-body">
-                    <div id="tableTeamHistory"></div>
+                    <canvas id="chartLeagueComparison"></canvas>
                 </div>
             </div>
         </div>
-    </div>
-
-    <div class="row mt-4">
-        <div class="col-md-12">
+        
+        <div class="col-md-4">
             <div class="card">
                 <div class="card-header">
-                    <h5>Durchschnittliche Leistung pro Saison</h5>
+                    <h5>Liga-Vergleich Details</h5>
                 </div>
                 <div class="card-body">
-                    <canvas id="chartTeamPerformance"></canvas>
+                    <div id="tableLeagueComparison"></div>
                 </div>
             </div>
         </div>
@@ -215,9 +219,9 @@
                 .then(response => response.json())
                 .then(seasons => {
                     const container = document.getElementById('buttonsSeason');
-                    container.innerHTML = ['Alle', ...seasons].map(season => `
-                        <input type="radio" class="btn-check" name="season" id="season_${season}" value="${season}"
-                               ${season === 'Alle' ? 'checked' : ''}>
+                    container.innerHTML = ['All', ...seasons].map(season => `
+                        <input type="radio" class="btn-check" name="season" id="season_${season}" value="${season === 'All' ? '' : season}"
+                               ${season === 'All' ? 'checked' : ''}>
                         <label class="btn btn-outline-primary" for="season_${season}">${season}</label>
                     `).join('');
 
@@ -233,7 +237,7 @@
                     const firstSeason = seasons.length > 0 ? seasons[0] : null;
                     if (firstSeason) {
                         const selectedTeam = document.getElementById('teamSelect').value;
-                        // If 'Alle' is present, prefer it, else use firstSeason
+                        // If 'All' is present, prefer it, else use firstSeason
                         const selectedSeason = document.querySelector('input[name="season"]:checked')?.value || firstSeason;
                         updateWeekButtons(selectedTeam, selectedSeason);
                     }
@@ -262,7 +266,8 @@
                     updateSeasonButtons(selectedTeam);
                     updateMessageVisibility();
                     updateTeamHistory(selectedTeam);
-                    updateTeamAverages(selectedTeam);
+            
+                    updateLeagueComparison(selectedTeam); // Call new function
                     loadSpecialMatches(selectedTeam);
                 }
             });
@@ -273,10 +278,20 @@
                 .then(response => response.json())
                 .then(weeks => {
                     const container = document.getElementById('buttonsWeek');
-                    container.innerHTML = weeks.map(week => `
-                        <input type="radio" class="btn-check" name="week" id="week_${week}" value="${week}">
-                        <label class="btn btn-outline-primary" for="week_${week}">${week}</label>
-                    `).join('');
+                    // Handle case where weeks might be null, undefined, or not an array
+                    if (weeks && Array.isArray(weeks) && weeks.length > 0) {
+                        container.innerHTML = weeks.map(week => `
+                            <input type="radio" class="btn-check" name="week" id="week_${week}" value="${week}">
+                            <label class="btn btn-outline-primary" for="week_${week}">${week}</label>
+                        `).join('');
+                    } else {
+                        container.innerHTML = '<p class="text-muted">Keine Wochen verfügbar</p>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading weeks:', error);
+                    const container = document.getElementById('buttonsWeek');
+                    container.innerHTML = '<p class="text-muted">Fehler beim Laden der Wochen</p>';
                 });
         }
 
@@ -292,6 +307,9 @@
         }
 
         function updateTeamHistory(teamName) {
+            // Set current team name for use in other charts
+            window.currentTeamName = teamName;
+            
             fetch(`/team/get_team_history?team_name=${teamName}`)
                 .then(response => response.json())
                 .then(data => {
@@ -314,14 +332,14 @@
                             datasets: [{
                                 label: teamName,
                                 data: combinedPositions,
-                                borderColor: getTeamColor(teamName),
+                                borderColor: 'rgba(255, 99, 132, 1)',
                                 backgroundColor: 'transparent',
                                 tension: 0.1,
                                 pointRadius: 15,
                                 pointHoverRadius: 17,
                                 pointStyle: 'circle',
                                 pointBackgroundColor: 'white',
-                                pointBorderColor: getTeamColor(teamName),
+                                pointBorderColor: 'rgba(255, 99, 132, 1)',
                                 pointBorderWidth: 2
                             }]
                         },
@@ -390,7 +408,7 @@
                                             ctx.textAlign = 'center';
                                             ctx.textBaseline = 'middle';
                                             ctx.font = 'bold 12px Arial';
-                                            ctx.fillStyle = getTeamColor(teamName);
+                                            ctx.fillStyle = 'rgba(255, 99, 132, 1)';
                                             ctx.fillText(position.toString(), point.x, point.y);
                                             ctx.restore();
                                         });
@@ -420,39 +438,71 @@
                         }]
                     });
 
-                    // Transform data for table
-                    const tableConfig = {
-                        data: seasons.map(season => [
+
+                });
+        }
+
+
+
+        function updateLeagueComparison(teamName) {
+            fetch(`/team/get_league_comparison?team_name=${teamName}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (!data || Object.keys(data).length === 0) {
+                        console.log('No league comparison data available');
+                        return;
+                    }
+                    
+                    const seasons = Object.keys(data).sort();
+                    const teamScores = seasons.map(season => data[season].team_performance.team_average_score);
+                    const leagueScores = seasons.map(season => data[season].league_averages.average_score);
+                    
+                    // Create area chart using the new generic function
+                    createAreaChart_vanilla(
+                        leagueScores,  // Reference data (league averages)
+                        teamScores,    // Actual data (team averages)
+                        'chartLeagueComparison',
+                        'Team vs League Performance by Season',
+                        seasons        // Labels (seasons)
+                    );
+
+                    // Create comparison table
+                    const tableData = seasons.map(season => {
+                        const seasonData = data[season];
+                        return [
                             season,
-                            data[season].league_name,
-                            data[season].final_position
-                        ]),
+                            seasonData.league_name,
+                            seasonData.performance_rank,
+                            seasonData.team_performance.team_average_score,
+                            seasonData.league_averages.average_score,
+                            seasonData.team_performance.vs_league_score > 0 ? 
+                                `+${seasonData.team_performance.vs_league_score}` : 
+                                seasonData.team_performance.vs_league_score
+                        ];
+                    });
+
+                    const tableConfig = {
+                        data: tableData,
                         columns: [
                             { title: 'Saison' },
                             { title: 'Liga' },
-                            { title: 'Platzierung' }
+                            { title: 'Platz' },
+                            { title: 'Team Ø' },
+                            { title: 'Liga Ø' },
+                            { title: 'Differenz' }
                         ],
                         headerGroups: []
                     };
 
-                    document.getElementById('tableTeamHistory').innerHTML = createTable(tableConfig);
-                });
-        }
-
-        function updateTeamAverages(teamName) {
-            fetch(`/team/get_average_per_season?team_name=${teamName}`)
-                .then(response => response.json())
-                .then(data => {
-                    const seasons = Object.keys(data);
-                    const averages = seasons.map(season => data[season]);
-                    
-                    createLineChart_vanilla(
-                        {[teamName]: averages},
-                        'chartTeamPerformance',
-                        'Durchschnittliche Leistung',
-                        seasons,
-                        false  // Don't reverse Y-axis for averages
-                    );
+                    document.getElementById('tableLeagueComparison').innerHTML = createTable(tableConfig);
+                })
+                .catch(error => {
+                    console.error('Error loading league comparison data:', error);
                 });
         }
 

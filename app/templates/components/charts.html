@@ -258,6 +258,79 @@ function createLineChart_vanilla(data, chartId, title, labels, reverse_y) {
     });
 }
 
+function createAreaChart_vanilla(referenceData, actualData, chartId, title, labels) {
+    const ctx = document.getElementById(chartId);
+    if (!ctx) {
+        console.error('createAreaChart_vanilla: Canvas not found:', chartId);
+        return;
+    }
+    
+    // Destroy existing chart if it exists
+    if (window[chartId + 'Instance'] instanceof Chart) {
+        window[chartId + 'Instance'].destroy();
+    }
+    
+    // Create the area chart with seasons on x-axis and averages on y-axis
+    window[chartId + 'Instance'] = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels, // Seasons on x-axis
+            datasets: [
+                {
+                    label: 'Reference (League Average)',
+                    data: referenceData,
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    backgroundColor: 'rgba(75, 192, 192, 0.1)',
+                    borderWidth: 2,
+                    fill: false,
+                    tension: 0.1
+                },
+                {
+                    label: 'Average ' + (window.currentTeamName || 'Team'),
+                    data: actualData,
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    backgroundColor: 'rgba(255, 99, 132, 0.1)',
+                    borderWidth: 2,
+                    fill: '+1', // Fill area between this line and the reference line
+                    tension: 0.1
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                title: {
+                    display: true,
+                    text: title
+                },
+                legend: {
+                    display: true,
+                    position: 'top'
+                }
+            },
+            scales: {
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Season'
+                    }
+                },
+                y: {
+                    beginAtZero: false,
+                    title: {
+                        display: true,
+                        text: 'Average Score'
+                    }
+                }
+            }
+        }
+    });
+    
+    // Set the canvas height to make it taller
+    ctx.style.height = '400px'; // Doubled from typical 200px height
+}
+
 function createScatterChart_vanilla(data, chartId, title, axis_labels) {
     const canvas = document.getElementById(chartId);
     if (!canvas) {
