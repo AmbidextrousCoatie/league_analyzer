@@ -20,23 +20,27 @@ class Server:
     def get_leagues(self, season: str=None, team_name: str=None) -> List[str]:
         return self.data_adapter.get_leagues(season=season, team_name=team_name)
     
-    def get_weeks(self, league_name: str=None, season: str=None, team_name: str=None) -> List[int]:
+    def get_weeks(self, league: str=None, season: str=None) -> List[int]:
         """
-        Fetches the weeks all available weeks in the database, filtered by league_name and season if provided.
-        If league_name and season are provided, the weeks are fetched for the given league and season.
+        Fetches the weeks all available weeks in the database, filtered by league and season if provided.
+        If league and season are provided, the weeks are fetched for the given league and season.
         If only one of the two is provided, the weeks are fetched for all leagues or seasons respectively.
 
         Args:
-            league_name (str): The name of the league.
+            league (str): The name of the league.
             season (str): The season.
 
         Returns:
             List[int]: The weeks.
         """
-        return self.data_adapter.get_weeks(league_name=league_name, season=season)
+        return self.data_adapter.get_weeks(season=season, league=league)
     
 
     def get_final_position_in_league(self, team_name: str, season: str, league_name: str) -> int:
+        
+        # print all parameters
+        print(f"get_final_position_in_league: team_name: {team_name}, season: {season}, league_name: {league_name}")
+        
         filters = {
             Columns.season: {
                 'value': season,
@@ -49,28 +53,21 @@ class Server:
         }
         columns_to_fetch = [Columns.team_name, Columns.points]
         league_season_data = self.data_adapter.get_filtered_data(columns=columns_to_fetch, filters=filters)   
+        
+        # Debug: Check what columns we actually have
+        print(f"Available columns in league_season_data: {list(league_season_data.columns)}")
+        print(f"Looking for columns: {Columns.team_name} and {Columns.points}")
+        
+        if league_season_data.empty:
+            print(f"No data found for {team_name} in {league_name} {season}")
+            return 0
 
         team_rank = league_season_data.groupby(Columns.team_name)[Columns.points].sum().rank(ascending=False)
 
         return int(team_rank[team_name])    
 
 
-    def get_average_per_season(self, team_name: str=None) -> pd.DataFrame:
-        filters = {
-            Columns.team_name: {
-                'value': team_name,
-                'operator': 'eq'
-            },
-            Columns.computed_data: {
-                'value': False,
-                'operator': 'eq'
-            }
-        }
-        columns_to_fetch = [Columns.team_name, Columns.score, Columns.season]
-        league_season_data = self.data_adapter.get_filtered_data(columns=columns_to_fetch, filters=filters)   
-
-        team_average = league_season_data.groupby(Columns.season)[Columns.score].mean()
-        return team_average.to_dict()    
+    
 
 
     def get_honor_scores(self, league_name:str=None, season:str=None, week:int=None, team_name:str=None, player_name:str=None, individual_scores:int=1, team_scores:int=1, indivdual_averages:int=1, team_averages:int=1) -> pd.DataFrame:
@@ -707,7 +704,6 @@ class Server:
             
             # Get the score when the team was playing as opponent
             opponent_score = group[group[Columns.team_name_opponent] == team_name][Columns.score].iloc[0]
-            print(team_score, " : ", opponent_score, " (", team_score - opponent_score, ")")
 
             data_team.loc[(data_team[Columns.season] == season) & (data_team[Columns.week] == week) & (data_team[Columns.round_number] == round_number), ColumnsExtra.margin] = team_score - opponent_score
 
@@ -739,9 +735,6 @@ class Server:
             #'lowest_scoring_match': lowest_scoring_match.to_dict(orient='records'),
         }
 
-        print(special_matches)      
-
-        
         """Returns the special matches for a given team"""
         return special_matches
     
