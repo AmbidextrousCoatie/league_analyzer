@@ -594,42 +594,128 @@ class LeagueService:
                 )
             )
             
-            # Prepare data rows
+            # Prepare data rows with merged position cells
             data = []
             row_metadata = []
             
-            # Get unique players for this team
-            unique_players = player_data[Columns.player_name].unique()
+            # Get all unique players who played in this event (same logic as New view)
+            player_identifiers = []
+            for _, row in player_data.iterrows():
+                player_id = row[Columns.player_id] if not pd.isnull(row[Columns.player_id]) else row[Columns.player_name]
+                player_name = row[Columns.player_name]
+                # Create a unique identifier combining ID and name
+                identifier = f"{player_id}_{player_name}"
+                if identifier not in [p['identifier'] for p in player_identifiers]:
+                    player_identifiers.append({
+                        'identifier': identifier,
+                        'player_id': player_id,
+                        'player_name': player_name
+                    })
             
-            # Add player rows
-            for player_name in unique_players:
-                player_data_subset = player_data[player_data[Columns.player_name] == player_name]
-                first_player_row = player_data_subset.iloc[0]
+            # Create player-position combinations
+            player_position_combinations = []
+            for player_info in player_identifiers:
+                # Find all rows for this player
+                player_rows = player_data[
+                    (player_data[Columns.player_id] == player_info['player_id']) | 
+                    (player_data[Columns.player_name] == player_info['player_name'])
+                ]
+                
+                # Get all positions this player played
+                positions = sorted(player_rows[Columns.position].dropna().unique())
+                
+                for position in positions:
+                    player_position_combinations.append({
+                        'player_info': player_info,
+                        'position': position,
+                        'player_rows': player_rows[player_rows[Columns.position] == position]
+                    })
+            
+            # Sort by position first, then by player name
+            player_position_combinations.sort(key=lambda x: (x['position'], x['player_info']['player_name']))
+            
+            # Group by position for merging
+            position_groups = {}
+            for combo in player_position_combinations:
+                position = combo['position']
+                if position not in position_groups:
+                    position_groups[position] = []
+                position_groups[position].append(combo)
+            
+            # Create merged data structure
+            for position in sorted(position_groups.keys()):
+                position_combos = position_groups[position]
+                
+                # Add first row of this position group with position number
+                first_combo = position_combos[0]
+                player_info = first_combo['player_info']
+                player_rows = first_combo['player_rows']
                 
                 # Start with position and name
-                row = [int(first_player_row[Columns.position] + 1), player_name]
+                row = [int(position + 1), player_info['player_name']]
                 
-                # Add game data
+                # Add game data - only fill if player participated in this position
                 for game in games:
-                    game_data = player_data_subset[player_data_subset[Columns.round_number] == game]
+                    game_data = player_rows[player_rows[Columns.round_number] == game]
                     
                     if not game_data.empty:
                         row.append(int(game_data[Columns.score].iloc[0]))
                         row.append(round(float(game_data[Columns.points].iloc[0]), 1))
                     else:
-                        row.append(0)
-                        row.append(0)
+                        row.append("")
+                        row.append("")
                 
-                # Calculate totals
-                row.append(int(player_data_subset[Columns.points].sum()))
-                row.append(int(player_data_subset[Columns.score].sum()))
-                row.append(round(float(player_data_subset[Columns.score].mean()), 1) if len(player_data_subset) > 0 else 0)
+                # Calculate totals for this player-position combination
+                total_points = int(player_rows[Columns.points].sum()) if not player_rows.empty else 0
+                total_score = int(player_rows[Columns.score].sum()) if not player_rows.empty else 0
+                average = round(float(player_rows[Columns.score].mean()), 1) if not player_rows.empty and len(player_rows) > 0 else 0
+                
+                row.extend([total_points, total_score, average])
                 
                 # Add metadata for styling
                 row_metadata.append({
                     'rowType': 'player',
-                    'styling': {}
+                    'styling': {},
+                    'position': position,
+                    'isFirstInPosition': True,
+                    'positionRowspan': len(position_combos)
                 })
+                
+                data.append(row)
+                
+                # Add remaining rows for this position (without position number)
+                for combo in position_combos[1:]:
+                    player_info = combo['player_info']
+                    player_rows = combo['player_rows']
+                    
+                    # Start with empty position and name
+                    row = ["", player_info['player_name']]
+                    
+                    # Add game data - only fill if player participated in this position
+                    for game in games:
+                        game_data = player_rows[player_rows[Columns.round_number] == game]
+                        
+                        if not game_data.empty:
+                            row.append(int(game_data[Columns.score].iloc[0]))
+                            row.append(round(float(game_data[Columns.points].iloc[0]), 1))
+                        else:
+                            row.append("")
+                            row.append("")
+                    
+                    # Calculate totals for this player-position combination
+                    total_points = int(player_rows[Columns.points].sum()) if not player_rows.empty else 0
+                    total_score = int(player_rows[Columns.score].sum()) if not player_rows.empty else 0
+                    average = round(float(player_rows[Columns.score].mean()), 1) if not player_rows.empty and len(player_rows) > 0 else 0
+                    
+                    row.extend([total_points, total_score, average])
+                    
+                    # Add metadata for styling
+                    row_metadata.append({
+                        'rowType': 'player',
+                        'styling': {},
+                        'position': position,
+                        'isFirstInPosition': False
+                    })
                 
                 data.append(row)
             
@@ -1486,7 +1572,7 @@ class LeagueService:
                     data=[],
                     title=f"No data available for {team} - Week {week}"
                 )
-
+            
             # Get all matches for the opponent teams in this week
             opponent_filters = {
                 Columns.league_name: {'value': league, 'operator': 'eq'},
@@ -1496,7 +1582,7 @@ class LeagueService:
                 Columns.computed_data: {'value': False, 'operator': 'eq'}
             }
             opponent_data = self.adapter.get_filtered_data(filters=opponent_filters)
-
+            
             # Get unique round numbers (matches)
             all_rounds = sorted(set(team_data[Columns.round_number].unique()) | set(opponent_data[Columns.round_number].unique()))
 
@@ -1536,7 +1622,7 @@ class LeagueService:
             def player_col_group(player, prefix):
                 return ColumnGroup(
                     title=player,
-                    columns=[
+                        columns=[
                         Column(title="Pos", field=f"{prefix}{player}_pos", width="50px", align="center"),
                         Column(title="Score", field=f"{prefix}{player}_score", width="80px", align="center"),
                         Column(title="Pts", field=f"{prefix}{player}_points", width="60px", align="center"),
@@ -1562,7 +1648,7 @@ class LeagueService:
                     ]
                 )
             )
-
+            
             # --- Build data rows ---
             if view_mode == 'own_team':
                 # Build main data rows (one per round)
@@ -1741,8 +1827,23 @@ class LeagueService:
 
         # Get all rounds (matches) for this team in this event
         rounds = sorted(player_data[Columns.round_number].unique())
-        # Get all players who played in this event
-        players = list(player_data[Columns.player_name].unique())
+        
+        # Get all unique players who played in this event
+        # Use player_id as primary identifier, fallback to player_name
+        player_identifiers = []
+        for _, row in player_data.iterrows():
+            player_id = row[Columns.player_id] if not pd.isnull(row[Columns.player_id]) else row[Columns.player_name]
+            player_name = row[Columns.player_name]
+            # Create a unique identifier combining ID and name
+            identifier = f"{player_id}_{player_name}"
+            if identifier not in [p['identifier'] for p in player_identifiers]:
+                player_identifiers.append({
+                    'identifier': identifier,
+                    'player_id': player_id,
+                    'player_name': player_name
+                })
+        
+        players = [p['identifier'] for p in player_identifiers]
 
         # Build columns
         columns = [
@@ -1764,14 +1865,15 @@ class LeagueService:
                 ]
             )
         ]
-        for player in players:
+        for player_info in player_identifiers:
+            player_name = player_info['player_name']
             columns.append(
                 ColumnGroup(
-                    title=player,
+                    title=player_name,
                     columns=[
-                        Column(title="Score", field=f"{player}_score", width="80px", align="center", sortable=False),
-                        Column(title="Pts.", field=f"{player}_points", width="50px", align="center", sortable=False),
-                        Column(title="Pos", field=f"{player}_pos", width="50px", align="center", sortable=False),
+                        Column(title="Score", field=f"{player_info['identifier']}_score", width="80px", align="center", sortable=False),
+                        Column(title="Pts.", field=f"{player_info['identifier']}_points", width="50px", align="center", sortable=False),
+                        Column(title="Pos", field=f"{player_info['identifier']}_pos", width="50px", align="center", sortable=False),
                         
                     ]
                 )
@@ -1798,22 +1900,36 @@ class LeagueService:
             row.append(team_points)
             
             # For each player, get their data for this round
-            for player in players:
-                pdata = round_data[round_data[Columns.player_name] == player]
+            for player_info in player_identifiers:
+                # Find all rows for this player in this round
+                pdata = round_data[
+                    (round_data[Columns.player_id] == player_info['player_id']) | 
+                    (round_data[Columns.player_name] == player_info['player_name'])
+                ]
+                
                 if not pdata.empty:
-                    pos = int(pdata[Columns.position].iloc[0] + 1) if not pd.isnull(pdata[Columns.position].iloc[0]) else ""
-                    score = int(pdata[Columns.score].iloc[0]) if not pd.isnull(pdata[Columns.score].iloc[0]) else 0
-                    points = float(pdata[Columns.points].iloc[0]) if not pd.isnull(pdata[Columns.points].iloc[0]) else 0.0
-                    row.extend([score, points, pos])
+                    # If player played multiple positions, aggregate the data
+                    total_score = int(pdata[Columns.score].sum()) if not pdata.empty else ""
+                    total_points = float(pdata[Columns.points].sum()) if not pdata.empty else ""
+                    
+                    # For position, show all positions played (e.g., "0,1" if played both positions)
+                    positions = sorted(pdata[Columns.position].dropna().unique())
+                    pos_str = ",".join([str(int(pos + 1)) for pos in positions]) if len(positions) > 0 else ""
+                    
+                    row.extend([total_score, total_points, pos_str])
                 else:
-                    row.extend(["", 0, 0.0, ""])
-            data.append(row)
+                    row.extend(["", "", ""])
+                    data.append(row)
             row_metadata.append({'rowType': 'match', 'styling': {}})
 
         # Add summary row
         summary_row = ["Total", 0, 0.0, 0.0]
-        for player in players:
-            player_rows = player_data[player_data[Columns.player_name] == player]
+        for player_info in player_identifiers:
+            # Find all rows for this player in the entire event
+            player_rows = player_data[
+                (player_data[Columns.player_id] == player_info['player_id']) | 
+                (player_data[Columns.player_name] == player_info['player_name'])
+            ]
             total_score = int(player_rows[Columns.score].sum()) if not player_rows.empty else 0
             total_points = float(player_rows[Columns.points].sum()) if not player_rows.empty else 0.0
             summary_row.extend([total_score, total_points, ""])
@@ -1827,18 +1943,18 @@ class LeagueService:
         summary_row[3] = team_points_total
         data.append(summary_row)
         row_metadata.append({'rowType': 'summary', 'styling': {'fontWeight': 'bold', 'borderTop': '2px solid #000000'}})
-
+            
         return TableData(
-            columns=columns,
-            data=data,
+                columns=columns,
+                data=data,
             row_metadata=row_metadata,
             title=f"{team} - Individual Scores (Week {week})",
             description=f"All individual scores for {team} in {league} - {season}, week {week}",
-            config={
-                "stickyHeader": True,
-                "striped": True,
-                "hover": True,
-                "responsive": True,
-                "compact": False
+                config={
+                    "stickyHeader": True,
+                    "striped": True,
+                    "hover": True,
+                    "responsive": True,
+                    "compact": False
             }
         )
