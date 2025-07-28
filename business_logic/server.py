@@ -660,6 +660,21 @@ class Server:
         columns = [Columns.player_id, Columns.player_name, Columns.date, Columns.week, Columns.season, Columns.league_name, Columns.team_name, Columns.score, Columns.points]
         return self.data_adapter.get_filtered_data(columns=columns, filters=player_filters)
 
+    def get_matches(self, team: str = None, season: str = None, league: str = None, opponent_team_name: str = None) -> pd.DataFrame:
+        """Get matches data with team and opponent scores
+        
+        Args:
+            team: Team name to filter by
+            season: Season to filter by
+            league: League to filter by
+            opponent_team_name: Opponent team name to filter by
+            
+        Returns:
+            DataFrame with columns: league, season, week, team_name, round_number, 
+            score (team score), opponent_team_name, opponent_score (opponent team score)
+        """
+        return self.data_adapter.get_matches(team=team, season=season, league=league, opponent_team_name=opponent_team_name)
+
     def get_special_matches(self, team_name: str=None, amount: int=3):
 
         columns = [Columns.week, Columns.season, Columns.league_name, Columns.round_number, Columns.team_name, Columns.score, Columns.points, Columns.team_name_opponent]

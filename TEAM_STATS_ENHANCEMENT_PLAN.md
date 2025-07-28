@@ -3,16 +3,12 @@
 ## Overview
 This document outlines the complete implementation plan for enhancing the team statistics page with advanced analytics and insights.
 
-<<<<<<< HEAD
 ## Phase 0: Foundation & Documentation
 - [ ] Create comprehensive data glossary and definitions
 - [ ] Document database schema and column meanings  
 - [ ] Define key metrics and calculation methods
 - [ ] Establish common terminology across team/player/league contexts
 - [ ] Document data types (input_data vs computed_data, individual vs team totals)
-
-=======
->>>>>>> 714b4889ccbaa8c0fcf97f33e038f31829dd4e81
 ## Phase 1: League Comparison + History ✅ COMPLETED
 
 ### ✅ Backend Implementation
@@ -23,7 +19,6 @@ This document outlines the complete implementation plan for enhancing the team s
 
 ### ✅ Frontend Implementation
 - [x] Add "Leistung vs. Liga-Durchschnitt" section to team stats page
-<<<<<<< HEAD
 - [x] Create area chart showing team vs league average with conditional coloring
 - [x] Create league comparison table with detailed metrics (reordered columns)
 - [x] Add `updateLeagueComparison()` JavaScript function
@@ -38,42 +33,38 @@ This document outlines the complete implementation plan for enhancing the team s
 - Visual area chart with green/red coloring for performance gaps
 - Clean, focused layout with full-width team history chart
 - Proper column ordering in comparison table
-=======
-- [x] Create league comparison chart showing team vs league average
-- [x] Create league comparison table with detailed metrics
-- [x] Add `updateLeagueComparison()` JavaScript function
-- [x] Integrate with team selection handler
-
-### ✅ Features Delivered
-- League average scores and points per season
-- Team performance vs league average (difference, Z-scores)
-- Historical league strength context
-- Visual comparison charts and tables
->>>>>>> 714b4889ccbaa8c0fcf97f33e038f31829dd4e81
 
 ---
 
-## Phase 2: Clutch & Consistency
+## Phase 2: Clutch & Consistency ✅ COMPLETED
 
-### Backend Implementation
-- [ ] Add `get_clutch_performance()` method to TeamService
-- [ ] Add `get_consistency_metrics()` method to TeamService
-- [ ] Add `get_streak_analysis()` method to TeamService
-- [ ] Add `/team/get_clutch_analysis` API endpoint
+### ✅ Backend Implementation
+- [x] Add `get_clutch_performance()` method to TeamService
+- [x] Add `get_consistency_metrics()` method to TeamService
+- [x] Add `get_streak_analysis()` method to TeamService
+- [x] Add `/team/get_clutch_analysis` API endpoint
+- [x] Add `/team/get_consistency_metrics` API endpoint
+- [x] Add `/team/get_streak_analysis` API endpoint
 
-### Frontend Implementation
-- [ ] Add "Clutch Performance" section to team stats page
-- [ ] Create close game performance chart (games decided by <10 points)
-- [ ] Create consistency metrics visualization
-- [ ] Create streak analysis display
-- [ ] Add `updateClutchAnalysis()` JavaScript function
+### ✅ Frontend Implementation
+- [x] Add "Clutch Performance" section to team stats page
+- [x] Create close game performance chart (games decided by <10 points)
+- [x] Create consistency metrics visualization
+- [x] Create streak analysis display
+- [x] Add `updateClutchAnalysis()` JavaScript function
+- [x] Add `updateConsistencyMetrics()` JavaScript function
+- [x] Add `updateStreakAnalysis()` JavaScript function
+- [x] Create new `createHorizontalBarChart()` chart type with centered axis
+- [x] Integrate with team selection handler
 
-### Features to Deliver
+### ✅ Features Delivered
 - Win/loss margins analysis
 - Close game performance (games decided by <10 points)
 - Team consistency metrics (score variance, standard deviation)
 - Streak analysis (consecutive wins/losses)
 - Performance in high-pressure situations
+- Horizontal bar chart with centered axis (wins in green to the right, losses in red to the left)
+- Comprehensive consistency statistics (mean, std dev, coefficient of variation, consistency rating)
 
 ---
 
@@ -232,8 +223,8 @@ This document outlines the complete implementation plan for enhancing the team s
 
 ## Current Status
 - **Phase 1**: ✅ COMPLETED
-- **Phase 2**: 🔄 READY TO START
-- **Phase 3**: ⏳ WAITING
+- **Phase 2**: ✅ COMPLETED
+- **Phase 3**: 🔄 READY TO START
 - **Phase 4**: ⏳ WAITING  
 - **Phase 5**: ⏳ WAITING
 - **Phase 6**: ⏳ FUTURE

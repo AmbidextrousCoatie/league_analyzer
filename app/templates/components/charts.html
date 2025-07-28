@@ -2,6 +2,44 @@
 <script src="https://cdn.jsdelivr.net/npm/echarts@5.6.0/dist/echarts.min.js"></script>
 
 <script>
+// Semantic Color System - Palette-specific mappings
+const SEMANTIC_COLOR_MAPPINGS = {
+    harmonic10: {
+        positive: 2,   // Green shade in harmonic10
+        negative: 3,   // Red shade in harmonic10
+        highlight: 9   // turquoise highlight in harmonic10
+    },
+    rainbowPastel: {
+        positive: 2,   // Green shade in rainbowPastel
+        negative: 6,   // Red shade in rainbowPastel
+        highlight: 9   // violet highlight in rainbowPastel
+    }
+    // Add more palette mappings here as needed
+    // modern: { positive: 1, negative: 5, highlight: 3 },
+    // dark: { positive: 3, negative: 7, highlight: 1 }
+};
+
+function getSemanticColor(semanticName) {
+    const currentPalette = TEAM_COLOR_PALETTES[currentPaletteName];
+    const semanticMapping = SEMANTIC_COLOR_MAPPINGS[currentPaletteName];
+    
+    if (semanticMapping && semanticMapping[semanticName] !== undefined) {
+        const paletteIndex = semanticMapping[semanticName];
+        if (currentPalette[paletteIndex]) {
+            return currentPalette[paletteIndex];
+        }
+    }
+    
+    // Fallback colors if palette doesn't have mapping or enough colors
+    const fallbackColors = {
+        positive: '#2CA02C',  // Green
+        negative: '#D62728',  // Red
+        highlight: '#ffd700'  // Gold
+    };
+    
+    return fallbackColors[semanticName] || '#888';
+}
+
 // --- Team Color Palettes ---
 const TEAM_COLOR_PALETTES = {
   "harmonic10": [
@@ -531,6 +569,307 @@ function createScatterChartMultiAxis(data, order, containerId, title, labels) {
     window.addEventListener('resize', resizeHandler);
     container._echartResizeHandler = resizeHandler;
     
+    return chart;
+}
+
+function createHorizontalBarChart(data, containerId, title, labels, colors = null) {
+    const container = document.getElementById(containerId);
+    if (!container) {
+        console.error('createHorizontalBarChart: Container not found:', containerId);
+        return;
+    }
+
+    // Dispose of existing chart instance if it exists
+    const existingChart = echarts.getInstanceByDom(container);
+    if (existingChart) {
+        existingChart.dispose();
+    }
+
+    // Default colors from the palette
+    if (!colors) {
+        colors = {
+            positive: '#2CA02C',  // Green for wins
+            negative: '#D62728'   // Red for losses
+        };
+    }
+
+    // Create single series with net values
+    const seriesData = data.map((value, index) => ({
+        value: value,
+        itemStyle: {
+            color: value >= 0 ? colors.positive : colors.negative
+        }
+    }));
+
+    const series = [
+        {
+            name: 'Net Performance',
+            type: 'bar',
+            data: seriesData,
+            label: {
+                show: true,
+                position: function(params) {
+                    return params.value >= 0 ? 'right' : 'left';
+                },
+                formatter: function(params) {
+                    return Math.abs(params.value) > 0 ? Math.abs(params.value) : '';
+                }
+            }
+        }
+    ];
+
+    // Chart options
+    const chartOptions = {
+        title: {
+            text: title,
+            left: 'center',
+            top: 10
+        },
+        tooltip: {
+            trigger: 'axis',
+            axisPointer: {
+                type: 'shadow'
+            },
+            formatter: function(params) {
+                const dataIndex = params[0].dataIndex;
+                const label = labels[dataIndex];
+                const value = params[0].value;
+                
+                if (value > 0) {
+                    return `${label}<br/>Net Wins: +${value}`;
+                } else if (value < 0) {
+                    return `${label}<br/>Net Losses: ${value}`;
+                } else {
+                    return `${label}<br/>Even: 0`;
+                }
+            }
+        },
+        legend: {
+            show: false
+        },
+        grid: {
+            top: '15%',
+            right: '10%',
+            bottom: '10%',
+            left: '10%',
+            containLabel: true
+        },
+        xAxis: {
+            type: 'value',
+            position: 'center',
+            axisLine: {
+                show: true,
+                lineStyle: {
+                    color: '#333'
+                }
+            },
+            axisTick: {
+                show: false
+            },
+            axisLabel: {
+                show: true,
+                formatter: function(value) {
+                    return value >= 0 ? `+${value}` : `${value}`;
+                }
+            },
+            splitLine: {
+                show: true,
+                lineStyle: {
+                    type: 'dashed',
+                    color: '#ccc'
+                }
+            }
+        },
+        yAxis: {
+            type: 'category',
+            data: labels,
+            axisLine: {
+                show: false
+            },
+            axisTick: {
+                show: false
+            },
+            axisLabel: {
+                show: true,
+                color: '#333'
+            }
+        },
+        series: series,
+        animation: false
+    };
+
+    // Initialize chart
+    const chart = echarts.init(container, null, {
+        devicePixelRatio: window.devicePixelRatio,
+        renderer: 'canvas'
+    });
+    chart.setOption(chartOptions, true);
+
+    // Clean up old resize listener if it exists
+    if (container._echartResizeHandler) {
+        window.removeEventListener('resize', container._echartResizeHandler);
+    }
+    
+    // Add new resize listener
+    const resizeHandler = () => { chart.resize(); };
+    window.addEventListener('resize', resizeHandler);
+    container._echartResizeHandler = resizeHandler;
+
+    return chart;
+}
+
+function createClutchPerformanceChart(opponentData, containerId, title) {
+    console.log('createClutchPerformanceChart called with:', { opponentData, containerId, title });
+    const container = document.getElementById(containerId);
+    if (!container) {
+        console.error('createClutchPerformanceChart: Container not found:', containerId);
+        return;
+    }
+
+    // Dispose of existing chart instance if it exists
+    const existingChart = echarts.getInstanceByDom(container);
+    if (existingChart) {
+        existingChart.dispose();
+    }
+
+    // Extract opponent names and prepare data
+    const opponents = Object.keys(opponentData);
+    const winsData = opponents.map(opponent => opponentData[opponent].wins);
+    const lossesData = opponents.map(opponent => opponentData[opponent].losses);
+    
+    console.log('Chart data prepared:', { opponents, winsData, lossesData });
+
+    // Create stacked bar chart using ECharts approach
+    const series = [
+        {
+            name: 'Wins',
+            type: 'bar',
+            stack: 'total',
+            data: winsData,
+            itemStyle: {
+                color: getSemanticColor('positive')  // Green for wins
+            },
+            label: {
+                show: true,
+                position: 'inside',
+                formatter: function(params) {
+                    return params.value > 0 ? params.value : '';
+                }
+            }
+        },
+        {
+            name: 'Losses',
+            type: 'bar',
+            stack: 'total',
+            data: lossesData,
+            itemStyle: {
+                color: getSemanticColor('negative')  // Red for losses
+            },
+            label: {
+                show: true,
+                position: 'inside',
+                formatter: function(params) {
+                    return params.value > 0 ? params.value : '';
+                }
+            }
+        }
+    ];
+
+    // Chart options
+    const chartOptions = {
+        title: {
+            text: title,
+            left: 'center',
+            top: 10
+        },
+        tooltip: {
+            trigger: 'axis',
+            axisPointer: {
+                type: 'shadow'
+            },
+            formatter: function(params) {
+                const opponent = opponents[params[0].dataIndex];
+                const wins = params[0].value;
+                const losses = params[1].value;
+                const total = wins + losses;
+                const winRate = total > 0 ? ((wins / total) * 100).toFixed(1) : 0;
+                
+                return `${opponent}<br/>
+                        Wins: ${wins}<br/>
+                        Losses: ${losses}<br/>
+                        Total: ${total}<br/>
+                        Win Rate: ${winRate}%`;
+            }
+        },
+        legend: {
+            show: true,
+            top: 40,
+            data: ['Wins', 'Losses']
+        },
+        grid: {
+            top: '20%',
+            right: '10%',
+            bottom: '10%',
+            left: '10%',
+            containLabel: true
+        },
+        xAxis: {
+            type: 'value',
+            axisLine: {
+                show: true,
+                lineStyle: {
+                    color: '#333'
+                }
+            },
+            axisTick: {
+                show: false
+            },
+            axisLabel: {
+                show: true
+            },
+            splitLine: {
+                show: true,
+                lineStyle: {
+                    type: 'dashed',
+                    color: '#ccc'
+                }
+            }
+        },
+        yAxis: {
+            type: 'category',
+            data: opponents,
+            axisLine: {
+                show: false
+            },
+            axisTick: {
+                show: false
+            },
+            axisLabel: {
+                show: true,
+                color: '#333'
+            }
+        },
+        series: series,
+        animation: false
+    };
+
+    // Initialize chart
+    const chart = echarts.init(container, null, {
+        devicePixelRatio: window.devicePixelRatio,
+        renderer: 'canvas'
+    });
+    chart.setOption(chartOptions, true);
+
+    // Clean up old resize listener if it exists
+    if (container._echartResizeHandler) {
+        window.removeEventListener('resize', container._echartResizeHandler);
+    }
+    
+    // Add new resize listener
+    const resizeHandler = () => { chart.resize(); };
+    window.addEventListener('resize', resizeHandler);
+    container._echartResizeHandler = resizeHandler;
+
     return chart;
 }
 

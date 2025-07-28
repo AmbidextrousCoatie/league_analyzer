@@ -53,3 +53,19 @@ class DataAdapter(ABC):
         """Get league standings for a specific season"""
         pass
 
+    @abstractmethod
+    def get_matches(self, team: str = None, season: str = None, league: str = None, opponent_team_name: str = None) -> pd.DataFrame:
+        """Get matches data with team and opponent scores
+        
+        Args:
+            team: Team name to filter by
+            season: Season to filter by
+            league: League to filter by
+            opponent_team_name: Opponent team name to filter by
+            
+        Returns:
+            DataFrame with columns: league, season, week, team_name, round_number, 
+            score (team score), opponent_team_name, opponent_score (opponent team score)
+        """
+        pass
+
