@@ -1,0 +1,277 @@
+<!-- Clutch Performance Analysis -->
+<div class="card mb-3">
+    <div class="card-header">
+        <h5>Clutch Performance Analysis</h5>
+        <small class="text-muted">/team/get_clutch_analysis</small>
+    </div>
+    <div class="card-body">
+        <div class="mb-3 d-flex align-items-center">
+            <button class="btn btn-primary me-2" onclick="testClutchAnalysis()">Test Analysis</button>
+            <span id="clutchAnalysisTime" class="text-muted"></span>
+        </div>
+        <div id="clutchAnalysisResult" class="result-container">
+            <!-- Results will be shown here -->
+        </div>
+    </div>
+</div>
+
+<!-- Consistency Metrics Analysis -->
+<div class="card mb-3">
+    <div class="card-header">
+        <h5>Consistency Metrics Analysis</h5>
+        <small class="text-muted">/team/get_consistency_metrics</small>
+    </div>
+    <div class="card-body">
+        <div class="mb-3 d-flex align-items-center">
+            <button class="btn btn-primary me-2" onclick="testConsistencyMetrics()">Test Analysis</button>
+            <span id="consistencyMetricsTime" class="text-muted"></span>
+        </div>
+        <div id="consistencyMetricsResult" class="result-container">
+            <!-- Results will be shown here -->
+        </div>
+    </div>
+</div>
+
+<!-- Special Matches Analysis -->
+<div class="card mb-3">
+    <div class="card-header">
+        <h5>Special Matches Analysis</h5>
+        <small class="text-muted">/team/get_special_matches</small>
+    </div>
+    <div class="card-body">
+        <div class="mb-3 d-flex align-items-center">
+            <button class="btn btn-primary me-2" onclick="testSpecialMatches()">Test Analysis</button>
+            <span id="specialMatchesTime" class="text-muted"></span>
+        </div>
+        <div id="specialMatchesResult" class="result-container">
+            <!-- Results will be shown here -->
+        </div>
+    </div>
+</div>
+
+<!-- Margin Analysis -->
+<div class="card mb-3">
+    <div class="card-header">
+        <h5>Margin Analysis</h5>
+        <small class="text-muted">/team/get_margin_analysis</small>
+    </div>
+    <div class="card-body">
+        <div class="mb-3 d-flex align-items-center">
+            <button class="btn btn-primary me-2" onclick="testMarginAnalysis()">Test Analysis</button>
+            <span id="marginAnalysisTime" class="text-muted"></span>
+        </div>
+        <div id="marginAnalysisResult" class="result-container">
+            <!-- Results will be shown here -->
+        </div>
+    </div>
+</div>
+
+<script>
+// Test all team analysis modules
+function testAllTeamAnalysis() {
+    testClutchAnalysis();
+    testConsistencyMetrics();
+    testSpecialMatches();
+    testMarginAnalysis();
+}
+
+// Helper function to get current selection values
+function getCurrentSelection() {
+    const teamName = document.querySelector('input[name="team"]:checked')?.value;
+    const season = document.querySelector('input[name="season"]:checked')?.value;
+    const league = document.querySelector('input[name="league"]:checked')?.value;
+    
+    return { teamName, season, league };
+}
+
+// Helper function to build URL with parameters
+function buildURL(baseURL, params) {
+    const url = new URL(baseURL, window.location.origin);
+    Object.keys(params).forEach(key => {
+        if (params[key] && params[key] !== '') {
+            url.searchParams.append(key, params[key]);
+        }
+    });
+    return url.toString();
+}
+
+// Test Clutch Performance Analysis
+function testClutchAnalysis() {
+    const { teamName, season } = getCurrentSelection();
+    
+    if (!teamName) {
+        displayResult('clutchAnalysisResult', 'Please select a team', true);
+        return;
+    }
+    
+    // Show loading
+    document.getElementById('clutchAnalysisResult').innerHTML = `
+        <div class="text-center">
+            <div class="spinner-border text-primary" role="status"></div>
+            <p>Loading clutch analysis...</p>
+        </div>
+    `;
+    
+    const startTime = performance.now();
+    
+    const params = { team_name: teamName };
+    if (season && season !== '') {
+        params.season = season;
+    }
+    
+    const url = buildURL('/team/get_clutch_analysis', params);
+    
+    fetch(url)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            const elapsedTime = performance.now() - startTime;
+            document.getElementById('clutchAnalysisTime').textContent = `(${elapsedTime.toFixed(2)}ms)`;
+            displayResult('clutchAnalysisResult', data, false, elapsedTime);
+        })
+        .catch(error => {
+            const elapsedTime = performance.now() - startTime;
+            document.getElementById('clutchAnalysisTime').textContent = `(${elapsedTime.toFixed(2)}ms)`;
+            displayResult('clutchAnalysisResult', error.message, true, elapsedTime);
+        });
+}
+
+// Test Consistency Metrics Analysis
+function testConsistencyMetrics() {
+    const { teamName, season } = getCurrentSelection();
+    
+    if (!teamName) {
+        displayResult('consistencyMetricsResult', 'Please select a team', true);
+        return;
+    }
+    
+    // Show loading
+    document.getElementById('consistencyMetricsResult').innerHTML = `
+        <div class="text-center">
+            <div class="spinner-border text-primary" role="status"></div>
+            <p>Loading consistency metrics...</p>
+        </div>
+    `;
+    
+    const startTime = performance.now();
+    
+    const params = { team_name: teamName };
+    if (season && season !== '') {
+        params.season = season;
+    }
+    
+    const url = buildURL('/team/get_consistency_metrics', params);
+    
+    fetch(url)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            const elapsedTime = performance.now() - startTime;
+            document.getElementById('consistencyMetricsTime').textContent = `(${elapsedTime.toFixed(2)}ms)`;
+            displayResult('consistencyMetricsResult', data, false, elapsedTime);
+        })
+        .catch(error => {
+            const elapsedTime = performance.now() - startTime;
+            document.getElementById('consistencyMetricsTime').textContent = `(${elapsedTime.toFixed(2)}ms)`;
+            displayResult('consistencyMetricsResult', error.message, true, elapsedTime);
+        });
+}
+
+// Test Special Matches Analysis
+function testSpecialMatches() {
+    const { teamName, season } = getCurrentSelection();
+    
+    if (!teamName) {
+        displayResult('specialMatchesResult', 'Please select a team', true);
+        return;
+    }
+    
+    // Show loading
+    document.getElementById('specialMatchesResult').innerHTML = `
+        <div class="text-center">
+            <div class="spinner-border text-primary" role="status"></div>
+            <p>Loading special matches...</p>
+        </div>
+    `;
+    
+    const startTime = performance.now();
+    
+    const params = { team_name: teamName };
+    if (season && season !== '') {
+        params.season = season;
+    }
+    
+    const url = buildURL('/team/get_special_matches', params);
+    
+    fetch(url)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            const elapsedTime = performance.now() - startTime;
+            document.getElementById('specialMatchesTime').textContent = `(${elapsedTime.toFixed(2)}ms)`;
+            displayResult('specialMatchesResult', data, false, elapsedTime);
+        })
+        .catch(error => {
+            const elapsedTime = performance.now() - startTime;
+            document.getElementById('specialMatchesTime').textContent = `(${elapsedTime.toFixed(2)}ms)`;
+            displayResult('specialMatchesResult', error.message, true, elapsedTime);
+        });
+}
+
+// Test Margin Analysis
+function testMarginAnalysis() {
+    const { teamName, season } = getCurrentSelection();
+    
+    if (!teamName) {
+        displayResult('marginAnalysisResult', 'Please select a team', true);
+        return;
+    }
+    
+    // Show loading
+    document.getElementById('marginAnalysisResult').innerHTML = `
+        <div class="text-center">
+            <div class="spinner-border text-primary" role="status"></div>
+            <p>Loading margin analysis...</p>
+        </div>
+    `;
+    
+    const startTime = performance.now();
+    
+    const params = { team_name: teamName };
+    if (season && season !== '') {
+        params.season = season;
+    }
+    
+    const url = buildURL('/team/get_margin_analysis', params);
+    
+    fetch(url)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            const elapsedTime = performance.now() - startTime;
+            document.getElementById('marginAnalysisTime').textContent = `(${elapsedTime.toFixed(2)}ms)`;
+            displayResult('marginAnalysisResult', data, false, elapsedTime);
+        })
+        .catch(error => {
+            const elapsedTime = performance.now() - startTime;
+            document.getElementById('marginAnalysisTime').textContent = `(${elapsedTime.toFixed(2)}ms)`;
+            displayResult('marginAnalysisResult', error.message, true, elapsedTime);
+        });
+}
+</script> 

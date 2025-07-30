@@ -70,11 +70,7 @@
                 </div>
             </div>
         </div>
-        
-
     </div>
-
-
 
     <!-- New League Comparison Section -->
     <div class="row mt-4">
@@ -130,8 +126,6 @@
             </div>
         </div>
     </div>
-
-
 
     <div class="card mb-4">
         <div class="card-header">
@@ -498,8 +492,6 @@
                 });
         }
 
-
-
         function updateLeagueComparison(teamName) {
             fetch(`/team/get_league_comparison?team_name=${teamName}`)
                 .then(response => {
@@ -708,32 +700,6 @@
                 .catch(error => {
                     console.error('Error loading consistency metrics data:', error);
                 });
-        }
-
-        function displayConsistencyMetrics(data) {
-            const metricsHtml = `
-                <div class="row">
-                    <div class="col-md-6">
-                        <h6>Basic Statistics</h6>
-                        <table class="table table-sm">
-                            <tr><td>Average Score:</td><td><strong>${data.mean_score}</strong></td></tr>
-                            <tr><td>Standard Deviation:</td><td><strong>${data.std_deviation}</strong></td></tr>
-                            <tr><td>Coefficient of Variation:</td><td><strong>${data.coefficient_of_variation}%</strong></td></tr>
-                            <tr><td>Consistency Rating:</td><td><strong class="text-primary">${data.consistency_rating}</strong></td></tr>
-                        </table>
-                    </div>
-                    <div class="col-md-6">
-                        <h6>Score Range</h6>
-                        <table class="table table-sm">
-                            <tr><td>Highest Score:</td><td><strong class="text-success">${data.max_score}</strong></td></tr>
-                            <tr><td>Lowest Score:</td><td><strong class="text-danger">${data.min_score}</strong></td></tr>
-                            <tr><td>Score Range:</td><td><strong>${data.score_range}</strong></td></tr>
-                            <tr><td>Interquartile Range:</td><td><strong>${data.iqr}</strong></td></tr>
-                        </table>
-                    </div>
-                </div>
-            `;
-            document.getElementById('consistencyMetrics').innerHTML = metricsHtml;
         }
 
         function loadSpecialMatches(teamName) {

@@ -96,6 +96,23 @@
             </div>
         </div>
     </div>
+    
+    <!-- Team Analysis Modules Card -->
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">
+                <button class="btn btn-link text-decoration-none p-0" type="button" data-bs-toggle="collapse" data-bs-target="#teamAnalysisCollapse" aria-expanded="true" aria-controls="teamAnalysisCollapse">
+                    <i class="bi bi-chevron-down me-1"></i> Team Analysis Modules
+                </button>
+            </h5>
+            <button class="btn btn-primary btn-sm" onclick="testAllTeamAnalysis()">Test All Team Analysis</button>
+        </div>
+        <div class="collapse show" id="teamAnalysisCollapse">
+            <div class="card-body">
+                {% include "test/team_analysis_tests.html" %}
+            </div>
+        </div>
+    </div>
 </div>
 
 <!-- Scatter Plot Section -->
@@ -125,9 +142,11 @@ function initializePage() {
     fetch('/league/get_available_seasons')
         .then(response => response.json())
         .then(seasons => {
-            const buttonsSeason = seasons.map(season => `
+            // Add "All" option at the beginning
+            const allSeasons = ['All', ...seasons];
+            const buttonsSeason = allSeasons.map(season => `
                 <input type="radio" class="btn-check" name="season" id="season_${season}" 
-                       value="${season}" ${season === selectedSeason ? 'checked' : ''}>
+                       value="${season === 'All' ? '' : season}" ${season === 'All' ? 'checked' : ''}>
                 <label class="btn btn-outline-primary" for="season_${season}">${season}</label>
             `).join('');
             document.getElementById('buttonsSeason').innerHTML = buttonsSeason;
@@ -140,6 +159,12 @@ function initializePage() {
                 const seasonInput = document.querySelector(`input[name="season"][value="${selectedSeason}"]`);
                 if (seasonInput) {
                     seasonInput.checked = true;
+                }
+            } else if (!selectedSeason) {
+                // If no season is selected, select "All"
+                const allInput = document.querySelector(`input[name="season"][value=""]`);
+                if (allInput) {
+                    allInput.checked = true;
                 }
             }
         })
