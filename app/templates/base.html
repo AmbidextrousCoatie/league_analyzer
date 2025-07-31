@@ -341,6 +341,75 @@
         function t(key) {
             return translations[key] || key;
         }
+        
+        // Data source selector functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            setupDataSourceSelector();
+        });
+        
+        // Setup data source selector
+        function setupDataSourceSelector() {
+            const dataSourceItems = document.querySelectorAll('.data-source-option');
+            
+            dataSourceItems.forEach(item => {
+                item.addEventListener('click', async function(e) {
+                    e.preventDefault();
+                    const source = this.getAttribute('data-source');
+                    await switchDataSource(source);
+                });
+            });
+            
+            // Load current data source on page load
+            loadCurrentDataSource();
+        }
+        
+        // Switch data source
+        async function switchDataSource(source) {
+            try {
+                const response = await fetch(`/reload-data?source=${source}`);
+                
+                if (response.ok) {
+                    // Update the display
+                    updateDataSourceDisplay(source);
+                    
+                    // Refresh the page to reload data
+                    window.location.reload();
+                } else {
+                    console.error('Error switching data source');
+                }
+            } catch (error) {
+                console.error('Error switching data source:', error);
+            }
+        }
+        
+        // Load current data source
+        async function loadCurrentDataSource() {
+            try {
+                const response = await fetch('/get-data-source');
+                const data = await response.json();
+                
+                if (data.current_source) {
+                    updateDataSourceDisplay(data.current_source);
+                }
+            } catch (error) {
+                console.error('Error loading current data source:', error);
+            }
+        }
+        
+        // Update data source display
+        function updateDataSourceDisplay(source) {
+            const textElement = document.getElementById('currentDataSourceText');
+            
+            if (textElement) {
+                if (source === 'bowling_ergebnisse.csv') {
+                    textElement.textContent = 'Simulated Data';
+                } else if (source === 'bowling_ergebnisse_real.csv') {
+                    textElement.textContent = 'Real Data';
+                } else {
+                    textElement.textContent = 'Data Source';
+                }
+            }
+        }
     </script>
     
     {% block scripts %}{% endblock %}

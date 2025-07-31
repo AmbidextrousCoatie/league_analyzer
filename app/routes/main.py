@@ -35,9 +35,17 @@ def player_stats(analysis):
 
 @bp.route('/reload-data')
 def reload_data():
+    data_source = request.args.get('source', 'bowling_ergebnisse.csv')
+    print(f"DEBUG: Reloading data with source: {data_source}")
     data_manager = DataManager()
-    data_manager.reload_data()
+    data_manager.reload_data(data_source)
+    print(f"DEBUG: DataManager current source: {data_manager.current_source}")
     return redirect(request.referrer or url_for('main.index'))
+
+@bp.route('/get-data-source')
+def get_data_source():
+    data_manager = DataManager()
+    return {'current_source': data_manager.current_source}
 
 @bp.route('/test')
 def test():

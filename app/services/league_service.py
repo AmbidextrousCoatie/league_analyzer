@@ -19,6 +19,21 @@ class LeagueService:
     def __init__(self, adapter_type=DataAdapterSelector.PANDAS):
         self.adapter = DataAdapterFactory.create_adapter(adapter_type)
         self.stats_service = StatisticsService()
+        
+        # Register this adapter with DataManager for automatic refresh
+        try:
+            from app.services.data_manager import DataManager
+            data_manager = DataManager()
+            data_manager.register_server_instance(self)
+        except ImportError:
+            # DataManager not available, continue without registration
+            pass
+
+    def refresh_data_adapter(self):
+        """Refresh the data adapter with the current data source"""
+        print(f"DEBUG: LeagueService refreshing data adapter")
+        self.adapter = DataAdapterFactory.create_adapter(DataAdapterSelector.PANDAS)
+        print(f"DEBUG: LeagueService data adapter refreshed")
 
     def get_available_weeks(self, season: str, league: str) -> List[int]:
         """Get available weeks for a season and league"""
@@ -676,7 +691,7 @@ class LeagueService:
                 row_metadata.append({
                     'rowType': 'player',
                     'styling': {},
-                    'position': position,
+                    'position': int(position),
                     'isFirstInPosition': True,
                     'positionRowspan': len(position_combos)
                 })
@@ -713,7 +728,7 @@ class LeagueService:
                     row_metadata.append({
                         'rowType': 'player',
                         'styling': {},
-                        'position': position,
+                        'position': int(position),
                         'isFirstInPosition': False
                     })
                 

@@ -20,10 +20,18 @@
                 </li>
             </ul>
             <ul class="navbar-nav ms-auto">
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('main.reload_data') }}">
-                        <i class="bi bi-arrow-clockwise"></i> Reload Data
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="dataSourceDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-database"></i> <span id="currentDataSourceText">Data Source</span>
                     </a>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dataSourceDropdown">
+                        <li><a class="dropdown-item data-source-option" href="#" data-source="bowling_ergebnisse.csv">
+                            <i class="bi bi-file-earmark-text"></i> Simulated Data
+                        </a></li>
+                        <li><a class="dropdown-item data-source-option" href="#" data-source="bowling_ergebnisse_real.csv">
+                            <i class="bi bi-file-earmark-text"></i> Real Data
+                        </a></li>
+                    </ul>
                 </li>
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" id="languageDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">

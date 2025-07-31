@@ -8,8 +8,32 @@ class Server:
     # fetches basic dataframes from data adapter
     # converts basic dataframes to aggregated dataframes
     # forwards aggregated dataframes to app
+    _instance = None
+    
+    def __new__(cls):
+        if cls._instance is None:
+            cls._instance = super(Server, cls).__new__(cls)
+            cls._instance._initialized = False
+        return cls._instance
+    
     def __init__(self):
+        if not self._initialized:
+            self.data_adapter = DataAdapterFactory.create_adapter(DataAdapterSelector.PANDAS)
+            # Register this server instance with DataManager for automatic refresh
+            try:
+                from app.services.data_manager import DataManager
+                data_manager = DataManager()
+                data_manager.register_server_instance(self)
+            except ImportError:
+                # DataManager not available, continue without registration
+                pass
+            self._initialized = True
+
+    def refresh_data_adapter(self):
+        """Refresh the data adapter with the current data source"""
+        print(f"DEBUG: Server refreshing data adapter")
         self.data_adapter = DataAdapterFactory.create_adapter(DataAdapterSelector.PANDAS)
+        print(f"DEBUG: Server data adapter refreshed")
 
     def get_player_data(self, player_name: str) -> pd.DataFrame:
         return self.data_adapter.get_player_data(player_name)

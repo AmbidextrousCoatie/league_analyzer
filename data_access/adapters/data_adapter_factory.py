@@ -4,6 +4,7 @@ from enum import Enum
 from database.config import path_to_csv_data
 from abc import ABC, abstractmethod
 from data_access.models.league_models import TeamSeasonPerformance
+import pathlib
 
 class DataAdapterSelector(Enum):
     """Enum for selecting data adapter type"""
@@ -16,7 +17,24 @@ class DataAdapterFactory:
     def create_adapter(adapter_type: DataAdapterSelector) -> DataAdapter:
         if adapter_type == DataAdapterSelector.PANDAS:
             from data_access.adapters.data_adapter_pandas import DataAdapterPandas
-            return DataAdapterPandas(path_to_csv_data=path_to_csv_data)
+            # Get current data source from DataManager
+            try:
+                from app.services.data_manager import DataManager
+                data_manager = DataManager()
+                current_source = data_manager.current_source
+                print(f"DEBUG: DataAdapterFactory using source: {current_source}")
+                # Create path to current data source
+                current_path = pathlib.Path(
+                    "database",
+                    "data",
+                    current_source
+                ).absolute()
+                print(f"DEBUG: DataAdapterFactory using path: {current_path}")
+                return DataAdapterPandas(path_to_csv_data=current_path)
+            except ImportError:
+                # Fallback to config if DataManager not available
+                print(f"DEBUG: DataAdapterFactory using fallback config path")
+                return DataAdapterPandas(path_to_csv_data=path_to_csv_data)
         elif adapter_type == DataAdapterSelector.MYSQL:
             from data_access.adapters.data_adapter_mysql import MySQLAdapter
             return MySQLAdapter()
