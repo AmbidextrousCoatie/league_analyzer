@@ -731,8 +731,8 @@ class LeagueService:
                         'position': int(position),
                         'isFirstInPosition': False
                     })
-                
-                data.append(row)
+                    
+                    data.append(row)
             
             # Add team total row
             if not team_data.empty:
@@ -1934,7 +1934,8 @@ class LeagueService:
                     row.extend([total_score, total_points, pos_str])
                 else:
                     row.extend(["", "", ""])
-                    data.append(row)
+            
+            data.append(row)
             row_metadata.append({'rowType': 'match', 'styling': {}})
 
         # Add summary row

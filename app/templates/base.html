@@ -97,6 +97,13 @@
             color: var(--theme-text-on-secondary);
         }
 
+        /* Unselected state for radio buttons - ensure white background */
+        .btn-check:not(:checked) + .btn-outline-primary {
+            background-color: white !important;
+            border-color: var(--theme-secondary);
+            color: var(--theme-secondary);
+        }
+
         .btn-secondary {
             background-color: var(--theme-accent);
             border-color: var(--theme-accent);
