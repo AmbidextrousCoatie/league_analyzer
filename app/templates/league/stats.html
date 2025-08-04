@@ -380,11 +380,11 @@ function updatePositionChart() {
 }
 
 function updateTableTeamDetails() {
-    const selectedSeason = document.querySelector('input[name="season"]:checked')?.value;
-    const selectedLeague = document.querySelector('input[name="league"]:checked')?.value;
-    const selectedWeek = document.querySelector('input[name="week"]:checked')?.value;
-    const selectedTeam = document.querySelector('input[name="team"]:checked')?.value;
-    const selectedView = document.querySelector('input[name="teamView"]:checked')?.value;
+    const selectedSeason = currentState?.season || document.querySelector('input[name="season"]:checked')?.value;
+    const selectedLeague = currentState?.league || document.querySelector('input[name="league"]:checked')?.value;
+    const selectedWeek = currentState?.week || document.querySelector('input[name="week"]:checked')?.value;
+    const selectedTeam = currentState?.team || document.querySelector('input[name="team"]:checked')?.value;
+    const selectedView = currentState?.teamView || document.querySelector('input[name="teamView"]:checked')?.value;
     let endpoint = '/league/get_team_week_details_table';
     let viewMode = undefined;
     if (selectedView === 'new') {
@@ -462,9 +462,9 @@ function updateTablePosition(data) {
 
 
 function updateTableLeagueWeek() {
-    const selectedSeason = document.querySelector('input[name="season"]:checked')?.value;
-    const selectedLeague = document.querySelector('input[name="league"]:checked')?.value;
-    const selectedWeek = document.querySelector('input[name="week"]:checked')?.value;
+    const selectedSeason = currentState?.season || document.querySelector('input[name="season"]:checked')?.value;
+    const selectedLeague = currentState?.league || document.querySelector('input[name="league"]:checked')?.value;
+    const selectedWeek = currentState?.week || document.querySelector('input[name="week"]:checked')?.value;
     
     if (!selectedSeason || !selectedLeague) {
         return;
@@ -499,8 +499,8 @@ function updateTableLeagueWeek() {
 }
 
 function updateTableLeagueHistory() {
-    const selectedSeason = document.querySelector('input[name="season"]:checked')?.value;
-    const selectedLeague = document.querySelector('input[name="league"]:checked')?.value;
+    const selectedSeason = currentState?.season || document.querySelector('input[name="season"]:checked')?.value;
+    const selectedLeague = currentState?.league || document.querySelector('input[name="league"]:checked')?.value;
     
     if (!selectedSeason || !selectedLeague) {
         document.getElementById('selectionMessage').style.display = 'block';
@@ -518,6 +518,15 @@ function updateTableLeagueHistory() {
     });
 }
 
+// Global state management
+let currentState = {
+    season: null,
+    league: null,
+    week: null,
+    team: null,
+    teamView: 'classic'
+};
+
 // Initialize the page
 function initializePage() {
     console.log("Initializing page...");
@@ -531,105 +540,293 @@ function initializePage() {
     
     console.log("URL parameters:", { season: selectedSeason, league: selectedLeague, week: selectedWeek, team: selectedTeam });
 
-    // Function to update all content
-    function updateAllContent() {
-        handleSelectionChange();
-        updateChartsLeague();
-        updateTableLeagueWeek();
-        handleWeekTeamSelection();
-        updateHonorScores();
+    // --- Centralized State Management ---
+    currentState = {
+        season: selectedSeason,
+        league: selectedLeague,
+        week: selectedWeek,
+        team: selectedTeam,
+        teamView: 'classic'
+    };
+
+    // --- URL Parameter Validation System ---
+    async function validateAndFixUrlParameters() {
+        console.log("Validating URL parameters against current data source...");
+        
+        let needsUrlUpdate = false;
+        const newUrlParams = new URLSearchParams(window.location.search);
+        
+        // Validate season
+        try {
+            const availableSeasons = await fetch('/league/get_available_seasons').then(r => r.json());
+            if (currentState.season && !availableSeasons.includes(currentState.season)) {
+                console.log(`Invalid season: ${currentState.season}. Available: ${availableSeasons}`);
+                currentState.season = availableSeasons[0] || null;
+                if (currentState.season) {
+                    newUrlParams.set('season', currentState.season);
+                    needsUrlUpdate = true;
+                } else {
+                    newUrlParams.delete('season');
+                }
+            }
+        } catch (error) {
+            console.error('Error validating season:', error);
+        }
+        
+        // Validate league
+        if (currentState.season) {
+            try {
+                const availableLeagues = await fetch(`/league/get_available_leagues?season=${currentState.season}`).then(r => r.json());
+                if (currentState.league && !availableLeagues.includes(currentState.league)) {
+                    console.log(`Invalid league: ${currentState.league}. Available: ${availableLeagues}`);
+                    currentState.league = availableLeagues[0] || null;
+                    if (currentState.league) {
+                        newUrlParams.set('league', currentState.league);
+                        needsUrlUpdate = true;
+                    } else {
+                        newUrlParams.delete('league');
+                    }
+                }
+            } catch (error) {
+                console.error('Error validating league:', error);
+            }
+        }
+        
+        // Validate week
+        if (currentState.season && currentState.league) {
+            try {
+                const availableWeeks = await fetch(`/league/get_available_weeks?season=${currentState.season}&league=${currentState.league}`).then(r => r.json());
+                if (currentState.week && !availableWeeks.includes(parseInt(currentState.week))) {
+                    console.log(`Invalid week: ${currentState.week}. Available: ${availableWeeks}`);
+                    const latestWeek = Math.max(...availableWeeks);
+                    currentState.week = latestWeek.toString();
+                    newUrlParams.set('week', currentState.week);
+                    needsUrlUpdate = true;
+                }
+            } catch (error) {
+                console.error('Error validating week:', error);
+            }
+        }
+        
+        // Validate team
+        if (currentState.season && currentState.league) {
+            try {
+                const availableTeams = await fetch(`/league/get_available_teams?season=${currentState.season}&league=${currentState.league}`).then(r => r.json());
+                if (currentState.team && !availableTeams.includes(currentState.team)) {
+                    console.log(`Invalid team: ${currentState.team}. Available: ${availableTeams}`);
+                    currentState.team = availableTeams[0] || null;
+                    if (currentState.team) {
+                        newUrlParams.set('team', currentState.team);
+                        needsUrlUpdate = true;
+                    } else {
+                        newUrlParams.delete('team');
+                    }
+                }
+            } catch (error) {
+                console.error('Error validating team:', error);
+            }
+        }
+        
+        // Update URL if needed
+        if (needsUrlUpdate) {
+            const newUrl = `${window.location.pathname}?${newUrlParams.toString()}`;
+            console.log(`Updating URL from ${window.location.href} to ${newUrl}`);
+            window.history.replaceState({}, '', newUrl);
+            
+            // Show user notification
+            showUrlUpdateNotification();
+        }
+        
+        return currentState;
+    }
+    
+    async function resetToDefaultParameters() {
+        console.log("Resetting to default parameters due to data source change...");
+        
+        try {
+            // Get available data
+            const availableSeasons = await fetch('/league/get_available_seasons').then(r => r.json());
+            const defaultSeason = availableSeasons[0];
+            
+            if (defaultSeason) {
+                const availableLeagues = await fetch(`/league/get_available_leagues?season=${defaultSeason}`).then(r => r.json());
+                const defaultLeague = availableLeagues[0];
+                
+                if (defaultLeague) {
+                    const availableWeeks = await fetch(`/league/get_available_weeks?season=${defaultSeason}&league=${defaultLeague}`).then(r => r.json());
+                    const defaultWeek = Math.max(...availableWeeks);
+                    
+                    // Update state and URL
+                    currentState = {
+                        season: defaultSeason,
+                        league: defaultLeague,
+                        week: defaultWeek.toString(),
+                        team: null,
+                        teamView: 'classic'
+                    };
+                    
+                    const newUrl = `${window.location.pathname}?season=${defaultSeason}&league=${defaultLeague}&week=${defaultWeek}`;
+                    window.history.replaceState({}, '', newUrl);
+                    
+                    showUrlUpdateNotification();
+                    return true;
+                }
+            }
+        } catch (error) {
+            console.error('Error resetting to default parameters:', error);
+        }
+        
+        return false;
+    }
+    
+    function showUrlUpdateNotification() {
+        const notification = document.createElement('div');
+        notification.className = 'alert alert-info alert-dismissible fade show';
+        notification.innerHTML = `
+            <strong>Data Source Changed:</strong> Some URL parameters were automatically adjusted to match the current data source.
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        
+        // Insert at the top of the main content
+        const mainContent = document.querySelector('.container-fluid') || document.body;
+        mainContent.insertBefore(notification, mainContent.firstChild);
+        
+        // Auto-dismiss after 5 seconds
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.remove();
+            }
+        }, 5000);
     }
 
-    // Function to update week-specific content
-    function updateWeekContent() {
-        // Show the table and hide the message
-        const messageArea = document.getElementById('weekMessage');
-        const standingsTable = document.getElementById('tableLeagueWeek');
-        
-        if (messageArea) messageArea.style.display = 'none';
-        if (standingsTable) standingsTable.style.display = 'block';
-        
-        // Update tables and scores
-        updateTableLeagueWeek();
-        updateHonorScores();
+    // --- Robust Event System ---
+    const EventTypes = {
+        DATA_SOURCE_CHANGED: 'dataSourceChanged',
+        PALETTE_CHANGED: 'paletteChanged',
+        BUTTON_PRESSED: 'buttonPressed',
+        PAGE_LOADED: 'pageLoaded'
+    };
+
+    // Event handlers for different scenarios
+    const eventHandlers = {
+        [EventTypes.DATA_SOURCE_CHANGED]: async () => {
+            console.log('Data source changed - validating parameters and updating UI');
+            try {
+                await validateAndFixUrlParameters();
+                updateAllButtons();
+                updateAllContent();
+            } catch (error) {
+                console.error('Error during data source change handling:', error);
+                // If validation fails completely, reset to defaults
+                const resetSuccess = await resetToDefaultParameters();
+                if (resetSuccess) {
+                    updateAllButtons();
+                    updateAllContent();
+                } else {
+                    // Show error message if even reset fails
+                    showDataUnavailableMessage('Unable to load data after source change. Please refresh the page.', 'mainContent');
+                }
+            }
+        },
+        [EventTypes.PALETTE_CHANGED]: () => {
+            console.log('Palette changed - updating content only');
+            updateAllContent();
+        },
+        [EventTypes.BUTTON_PRESSED]: (buttonType) => {
+            console.log(`Button pressed: ${buttonType} - updating buttons and content`);
+            updateButtonsForButtonType(buttonType);
+            updateContentForButtonType(buttonType);
+        },
+        [EventTypes.PAGE_LOADED]: async () => {
+            console.log('Page loaded - initializing with smart defaults');
+            try {
+                await validateAndFixUrlParameters();
+                initializeWithSmartDefaults();
+            } catch (error) {
+                console.error('Error during page initialization:', error);
+                // If validation fails, reset to defaults
+                const resetSuccess = await resetToDefaultParameters();
+                if (resetSuccess) {
+                    initializeWithSmartDefaults();
+                } else {
+                    showDataUnavailableMessage('Unable to initialize page. Please refresh.', 'mainContent');
+                }
+            }
+        }
+    };
+
+    // Dispatch events
+    function dispatchEvent(eventType, data = null) {
+        const handler = eventHandlers[eventType];
+        if (handler) {
+            handler(data);
+        }
+    }
+    
+    // Make event system globally accessible for navbar
+    window.dispatchEvent = dispatchEvent;
+    window.EventTypes = EventTypes;
+
+    // --- Button Update Functions ---
+    function updateAllButtons() {
+        updateSeasonButtons();
+        updateLeagueButtons();
+        updateWeekButtons();
+        updateTeamButtons();
     }
 
-    // Function to load leagues
-    function loadLeagues() {
-        fetch('/league/get_available_leagues')
+    function updateSeasonButtons() {
+        fetch('/league/get_available_seasons')
+            .then(response => response.json())
+            .then(seasons => {
+                const buttonsSeason = seasons.map(season => `
+                    <input type="radio" class="btn-check" name="season" id="season_${season}" 
+                           value="${season}" ${season === currentState.season ? 'checked' : ''}>
+                    <label class="btn btn-outline-primary" for="season_${season}">${season}</label>
+                `).join('');
+                document.getElementById('buttonsSeason').innerHTML = buttonsSeason;
+                
+                // Auto-select if none selected
+                const seasonInputs = document.querySelectorAll('input[name="season"]');
+                if (![...seasonInputs].some(input => input.checked) && seasonInputs.length > 0) {
+                    seasonInputs[0].checked = true;
+                    currentState.season = seasonInputs[0].value;
+                }
+            })
+            .catch(error => {
+                console.error('Error loading seasons:', error);
+                document.getElementById('buttonsSeason').innerHTML = `
+                    <div class="alert alert-danger">
+                        <strong>Error loading seasons:</strong> ${error.message || 'Unknown error'}
+                    </div>
+                `;
+            });
+    }
+
+    function updateLeagueButtons() {
+        if (!currentState.season) return;
+        
+        fetch(`/league/get_available_leagues?season=${currentState.season}`)
             .then(response => response.json())
             .then(leagues => {
                 const buttonsLeague = leagues.map(league => `
                     <input type="radio" class="btn-check" name="league" id="league_${league}" 
-                           value="${league}" ${league === selectedLeague ? 'checked' : ''}>
+                           value="${league}" ${league === currentState.league ? 'checked' : ''}>
                     <label class="btn btn-outline-primary" for="league_${league}">${league}</label>
                 `).join('');
                 document.getElementById('buttonsLeague').innerHTML = buttonsLeague;
                 
-                if (selectedLeague && leagues.includes(selectedLeague)) {
-                    // First update available options
-                    updateAvailableOptions();
-                    
-                    // After rendering league buttons
-                    const leagueInputs = document.querySelectorAll('input[name="league"]');
-                    if (![...leagueInputs].some(input => input.checked) && leagueInputs.length > 0) {
-                        leagueInputs[0].checked = true;
-                        leagueInputs[0].dispatchEvent(new Event('change', { bubbles: true }));
+                // Auto-select highest league if none selected
+                const leagueInputs = document.querySelectorAll('input[name="league"]');
+                if (![...leagueInputs].some(input => input.checked) && leagueInputs.length > 0) {
+                    // Sort leagues and select the "highest" one (assuming alphabetical order works)
+                    const sortedLeagues = leagues.sort();
+                    const highestLeague = sortedLeagues[sortedLeagues.length - 1];
+                    const highestInput = document.querySelector(`input[name="league"][value="${highestLeague}"]`);
+                    if (highestInput) {
+                        highestInput.checked = true;
+                        currentState.league = highestLeague;
                     }
-
-                    // Then fetch weeks specifically for selected season and league
-                    fetch(`/league/get_available_weeks?season=${selectedSeason}&league=${selectedLeague}`)
-                        .then(response => response.json())
-                        .then(weeks => {
-                            const weekButtons = weeks.map(week => `
-                                <input type="radio" class="btn-check" name="week" id="week_${week}" 
-                                       value="${week}" ${week.toString() === selectedWeek ? 'checked' : ''}>
-                                <label class="btn btn-outline-primary" for="week_${week}">${week}</label>
-                            `).join('');
-                            document.getElementById('buttonsWeek').innerHTML = weekButtons;
-                            
-                            // After weeks are loaded, update all content
-                            if (selectedWeek && weeks.includes(parseInt(selectedWeek))) {
-                                updateAllContent();
-                                updateWeekContent();
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Error loading weeks:', error);
-                            document.getElementById('buttonsWeek').innerHTML = `
-                                <div class="alert alert-danger">
-                                    <strong>Error loading weeks:</strong> ${error.message || 'Unknown error'}
-                                </div>
-                            `;
-                        });
-                    
-                    // Fetch teams specifically for selected season and league
-                    fetch(`/league/get_available_teams?season=${selectedSeason}&league=${selectedLeague}`)
-                        .then(response => response.json())
-                        .then(teams => {
-                            const teamButtons = teams.map(team => `
-                                <input type="radio" class="btn-check" name="team" id="team_${team.replace(/\s+/g, '_')}" 
-                                       value="${team}" ${team === selectedTeam ? 'checked' : ''}>
-                                <label class="btn btn-outline-primary" for="team_${team.replace(/\s+/g, '_')}">${team}</label>
-                            `).join('');
-                            document.getElementById('buttonsTeam').innerHTML = teamButtons;
-                            
-                            // Select the team if it was in URL
-                            if (selectedTeam && teams.includes(selectedTeam)) {
-                                const teamInput = document.querySelector(`input[name="team"][value="${selectedTeam}"]`);
-                                if (teamInput) {
-                                    teamInput.checked = true;
-                                }
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Error loading teams:', error);
-                            document.getElementById('buttonsTeam').innerHTML = `
-                                <div class="alert alert-danger">
-                                    <strong>Error loading teams:</strong> ${error.message || 'Unknown error'}
-                                </div>
-                            `;
-                        });
                 }
             })
             .catch(error => {
@@ -642,84 +839,196 @@ function initializePage() {
             });
     }
 
-    // Load available seasons
-    fetch('/league/get_available_seasons')
-        .then(response => response.json())
-        .then(seasons => {
-            const buttonsSeason = seasons.map(season => `
-                <input type="radio" class="btn-check" name="season" id="season_${season}" 
-                       value="${season}" ${season === selectedSeason ? 'checked' : ''}>
-                <label class="btn btn-outline-primary" for="season_${season}">${season}</label>
-            `).join('');
-            document.getElementById('buttonsSeason').innerHTML = buttonsSeason;
-            
-            // After rendering season buttons
-            const seasonInputs = document.querySelectorAll('input[name="season"]');
-            if (![...seasonInputs].some(input => input.checked) && seasonInputs.length > 0) {
-                seasonInputs[0].checked = true;
-                seasonInputs[0].dispatchEvent(new Event('change', { bubbles: true }));
-            }
-
-            // Always load leagues, regardless of whether a season is selected
-            loadLeagues();
-            
-            // If we have a selected season, select it
-            if (selectedSeason && seasons.includes(selectedSeason)) {
-                const seasonInput = document.querySelector(`input[name="season"][value="${selectedSeason}"]`);
-                if (seasonInput) {
-                    seasonInput.checked = true;
+    function updateWeekButtons() {
+        if (!currentState.season || !currentState.league) return;
+        
+        fetch(`/league/get_available_weeks?season=${currentState.season}&league=${currentState.league}`)
+            .then(response => response.json())
+            .then(weeks => {
+                const weekButtons = weeks.map(week => `
+                    <input type="radio" class="btn-check" name="week" id="week_${week}" 
+                           value="${week}" ${week.toString() === currentState.week ? 'checked' : ''}>
+                    <label class="btn btn-outline-primary" for="week_${week}">${week}</label>
+                `).join('');
+                document.getElementById('buttonsWeek').innerHTML = weekButtons;
+                
+                // Auto-select latest week if none selected
+                const weekInputs = document.querySelectorAll('input[name="week"]');
+                if (![...weekInputs].some(input => input.checked) && weekInputs.length > 0) {
+                    const latestWeek = Math.max(...weeks);
+                    const latestInput = document.querySelector(`input[name="week"][value="${latestWeek}"]`);
+                    if (latestInput) {
+                        latestInput.checked = true;
+                        currentState.week = latestWeek.toString();
+                    }
                 }
-            }
-        })
-        .catch(error => {
-            console.error('Error loading seasons:', error);
-            document.getElementById('buttonsSeason').innerHTML = `
-                <div class="alert alert-danger">
-                    <strong>Error loading seasons:</strong> ${error.message || 'Unknown error'}
-                </div>
-            `;
-        });
+            })
+            .catch(error => {
+                console.error('Error loading weeks:', error);
+                document.getElementById('buttonsWeek').innerHTML = `
+                    <div class="alert alert-danger">
+                        <strong>Error loading weeks:</strong> ${error.message || 'Unknown error'}
+                    </div>
+                `;
+            });
+    }
 
-    // Add event listeners for future changes
-    // --- Centralized Refresh Functions ---
-    function refreshAllLeagueContent() {
+    function updateTeamButtons() {
+        if (!currentState.season || !currentState.league) return;
+        
+        fetch(`/league/get_available_teams?season=${currentState.season}&league=${currentState.league}`)
+            .then(response => response.json())
+            .then(teams => {
+                const teamButtons = teams.map(team => `
+                    <input type="radio" class="btn-check" name="team" id="team_${team.replace(/\s+/g, '_')}" 
+                           value="${team}" ${team === currentState.team ? 'checked' : ''}>
+                    <label class="btn btn-outline-primary" for="team_${team.replace(/\s+/g, '_')}">${team}</label>
+                `).join('');
+                document.getElementById('buttonsTeam').innerHTML = teamButtons;
+                
+                // Auto-select first team if none selected
+                const teamInputs = document.querySelectorAll('input[name="team"]');
+                if (![...teamInputs].some(input => input.checked) && teamInputs.length > 0) {
+                    teamInputs[0].checked = true;
+                    currentState.team = teamInputs[0].value;
+                }
+            })
+            .catch(error => {
+                console.error('Error loading teams:', error);
+                document.getElementById('buttonsTeam').innerHTML = `
+                    <div class="alert alert-danger">
+                        <strong>Error loading teams:</strong> ${error.message || 'Unknown error'}
+                    </div>
+                `;
+            });
+    }
+
+    function updateButtonsForButtonType(buttonType) {
+        switch (buttonType) {
+            case 'season':
+                updateLeagueButtons();
+                updateWeekButtons();
+                updateTeamButtons();
+                break;
+            case 'league':
+                updateWeekButtons();
+                updateTeamButtons();
+                break;
+            case 'week':
+                // No dependent buttons for week
+                break;
+            case 'team':
+                // No dependent buttons for team
+                break;
+        }
+    }
+
+    // --- Content Update Functions ---
+    function updateAllContent() {
         updateTableLeagueHistory();
         updateTableLeagueWeek();
         updateChartsLeague();
         updateHonorScores();
-        // Add any other league-wide refreshes here
-    }
-
-    function refreshTeamContent() {
         updateTableTeamDetails();
-        // Add any other team-specific refreshes here
     }
 
-    // Palette switcher integration
-    window.refreshAllCharts = function() {
-        refreshAllLeagueContent();
-        refreshTeamContent();
-    };
+    function updateContentForButtonType(buttonType) {
+        switch (buttonType) {
+            case 'season':
+            case 'league':
+                updateTableLeagueHistory();
+                updateTableLeagueWeek();
+                updateChartsLeague();
+                updateHonorScores();
+                updateTableTeamDetails();
+                break;
+            case 'week':
+                updateTableLeagueWeek();
+                updateHonorScores();
+                updateTableTeamDetails();
+                break;
+            case 'team':
+                updateTableTeamDetails();
+                break;
+            case 'teamView':
+                updateTableTeamDetails();
+                break;
+        }
+    }
 
-    // --- Clean Event Listeners ---
+    // --- Smart Default Initialization ---
+    function initializeWithSmartDefaults() {
+        // Start with seasons
+        updateSeasonButtons();
+        
+        // After seasons load, load leagues
+        setTimeout(() => {
+            updateLeagueButtons();
+            
+            // After leagues load, load weeks
+            setTimeout(() => {
+                updateWeekButtons();
+                
+                // After weeks load, load teams
+                setTimeout(() => {
+                    updateTeamButtons();
+                    
+                    // After everything loads, update content
+                    setTimeout(() => {
+                        updateAllContent();
+                    }, 100);
+                }, 100);
+            }, 100);
+        }, 100);
+    }
+
+    // --- Event Listeners ---
     document.addEventListener('change', event => {
         const name = event.target.name;
+        const value = event.target.value;
+        
+        // Update current state
+        if (name === 'season') {
+            currentState.season = value;
+            currentState.league = null;
+            currentState.week = null;
+            currentState.team = null;
+        } else if (name === 'league') {
+            currentState.league = value;
+            currentState.week = null;
+            currentState.team = null;
+        } else if (name === 'week') {
+            currentState.week = value;
+        } else if (name === 'team') {
+            currentState.team = value;
+        } else if (name === 'teamView') {
+            currentState.teamView = value;
+        }
+        
+        // Dispatch appropriate event
         if (name === 'season' || name === 'league') {
-            updateAvailableOptions();
-            refreshAllLeagueContent();
-            refreshTeamContent();
-        }
-        if (name === 'week') {
-            refreshAllLeagueContent();
-            refreshTeamContent();
-        }
-        if (name === 'team') {
-            refreshTeamContent();
-        }
-        if (name === 'teamView') {
-            refreshTeamContent();
+            dispatchEvent(EventTypes.BUTTON_PRESSED, name);
+        } else if (name === 'week' || name === 'team' || name === 'teamView') {
+            dispatchEvent(EventTypes.BUTTON_PRESSED, name);
         }
     });
+
+    // --- External Event Handlers (for data source and palette changes) ---
+    window.handleDataSourceChange = function() {
+        dispatchEvent(EventTypes.DATA_SOURCE_CHANGED);
+    };
+
+    window.handlePaletteChange = function() {
+        dispatchEvent(EventTypes.PALETTE_CHANGED);
+    };
+
+    // --- Palette switcher integration ---
+    window.refreshAllCharts = function() {
+        updateAllContent();
+    };
+
+    // --- Start initialization ---
+    dispatchEvent(EventTypes.PAGE_LOADED);
 }
 
 // Handle selection changes
@@ -859,9 +1168,9 @@ function handleWeekTeamSelection() {
 }
 
 function updateHonorScores() {
-    const selectedSeason = document.querySelector('input[name="season"]:checked')?.value;
-    const selectedLeague = document.querySelector('input[name="league"]:checked')?.value;
-    const selectedWeek = document.querySelector('input[name="week"]:checked')?.value;
+    const selectedSeason = currentState?.season || document.querySelector('input[name="season"]:checked')?.value;
+    const selectedLeague = currentState?.league || document.querySelector('input[name="league"]:checked')?.value;
+    const selectedWeek = currentState?.week || document.querySelector('input[name="week"]:checked')?.value;
     
     if (!selectedSeason || !selectedLeague) {
         return;
@@ -960,8 +1269,8 @@ function updateTeamAveragesChart() {
 function updateChartsLeague() {
     console.log('🔍 updateChartsLeague function called');
     
-    const selectedSeason = document.querySelector('input[name="season"]:checked')?.value;
-    const selectedLeague = document.querySelector('input[name="league"]:checked')?.value;
+    const selectedSeason = currentState?.season || document.querySelector('input[name="season"]:checked')?.value;
+    const selectedLeague = currentState?.league || document.querySelector('input[name="league"]:checked')?.value;
     
     console.log('🔍 Selected season/league:', selectedSeason, selectedLeague);
     
@@ -1027,49 +1336,49 @@ function updateChartsLeague() {
             console.error('Error loading team points:', error);
         });
 
-            fetch(`/league/get_team_averages?season=${selectedSeason}&league=${selectedLeague}`)
-        .then(response => response.json())
-        .then(data => {
-            console.log('=== TEAM AVERAGES DEBUG ===');
-            console.log('Data structure:', {
-                hasData: !!data.data,
-                dataKeys: data.data ? Object.keys(data.data) : 'no data',
-                hasOrder: !!data.sorted_by_total,
-                orderLength: data.sorted_by_total ? data.sorted_by_total.length : 'no order'
-            });
-            
-            const chartContainer = document.getElementById('chartTeamAverageScoreWeekly');
-            if (!chartContainer) {
-                console.error('❌ Chart container not found!');
-                return;
-            }
-            
-            const numWeeks = Object.values(data.data)[0].length;
-            const matchDayFormat = window.translations ? (window.translations['match_day_format'] || 'Match Day #{week}') : 'Match Day #{week}';
-            const labels = Array.from({length: numWeeks}, (_, i) => matchDayFormat.replace('{week}', i + 1));
-            
-            console.log('Creating chart with weeks:', numWeeks, 'labels:', labels.length);
-
-            try {
-                createLineChart(
-                    data.data,
-                    data.sorted_by_total,
-                    'chartTeamAverageScoreWeekly',
-                    'Average per Match Day',
-                    labels,
-                    false,
-                    'auto'
-                );
-                
-                console.log('✅ Team averages chart created successfully');
-            } catch (error) {
-                console.error('❌ Error creating team averages chart:', error);
-            }
-            console.log('=== END TEAM AVERAGES DEBUG ===');
-        })
-        .catch(error => {
-            console.error('❌ Error loading team averages:', error);
+        fetch(`/league/get_team_averages?season=${selectedSeason}&league=${selectedLeague}`)
+    .then(response => response.json())
+    .then(data => {
+        console.log('=== TEAM AVERAGES DEBUG ===');
+        console.log('Data structure:', {
+            hasData: !!data.data,
+            dataKeys: data.data ? Object.keys(data.data) : 'no data',
+            hasOrder: !!data.sorted_by_total,
+            orderLength: data.sorted_by_total ? data.sorted_by_total.length : 'no order'
         });
+        
+        const chartContainer = document.getElementById('chartTeamAverageScoreWeekly');
+        if (!chartContainer) {
+            console.error('❌ Chart container not found!');
+            return;
+        }
+        
+        const numWeeks = Object.values(data.data)[0].length;
+        const matchDayFormat = window.translations ? (window.translations['match_day_format'] || 'Match Day #{week}') : 'Match Day #{week}';
+        const labels = Array.from({length: numWeeks}, (_, i) => matchDayFormat.replace('{week}', i + 1));
+        
+        console.log('Creating chart with weeks:', numWeeks, 'labels:', labels.length);
+
+        try {
+            createLineChart(
+                data.data,
+                data.sorted_by_total,
+                'chartTeamAverageScoreWeekly',
+                'Average per Match Day',
+                labels,
+                false,
+                'auto'
+            );
+            
+            console.log('✅ Team averages chart created successfully');
+        } catch (error) {
+            console.error('❌ Error creating team averages chart:', error);
+        }
+        console.log('=== END TEAM AVERAGES DEBUG ===');
+    })
+    .catch(error => {
+        console.error('❌ Error loading team averages:', error);
+    });
 
 }
 
@@ -1087,6 +1396,31 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
+
+    // --- Error Handling and User Feedback ---
+    function showDataUnavailableMessage(message, elementId) {
+        const element = document.getElementById(elementId);
+        if (element) {
+            element.innerHTML = `
+                <div class="alert alert-warning">
+                    <strong>Data Unavailable:</strong> ${message}
+                    <br><small>This might be due to a data source change. Try refreshing the page or selecting different parameters.</small>
+                </div>
+            `;
+        }
+    }
+    
+    function handleDataRequestError(error, elementId, fallbackMessage = 'Data temporarily unavailable') {
+        console.error('Data request error:', error);
+        
+        if (error.status === 404) {
+            showDataUnavailableMessage('No data found for the current parameters. This might be due to a data source change.', elementId);
+        } else {
+            showDataUnavailableMessage(fallbackMessage, elementId);
+        }
+    }
+
+    // --- Content Update Functions ---
 </script>
 
 {% endblock %}

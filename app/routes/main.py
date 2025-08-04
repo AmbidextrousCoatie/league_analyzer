@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, session, redirect, url_for, request
 from data_access.pd_dataframes import fetch_column
 from app.services.data_manager import DataManager
+import datetime
 
 bp = Blueprint('main', __name__)
 
@@ -40,12 +41,30 @@ def reload_data():
     data_manager = DataManager()
     data_manager.reload_data(data_source)
     print(f"DEBUG: DataManager current source: {data_manager.current_source}")
-    return redirect(request.referrer or url_for('main.index'))
+    
+    # Return JSON response instead of redirect for AJAX calls
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return {
+            'success': True,
+            'current_source': data_manager.current_source,
+            'message': f'Data source switched to {data_source}'
+        }
+    else:
+        return redirect(request.referrer or url_for('main.index'))
 
 @bp.route('/get-data-source')
 def get_data_source():
     data_manager = DataManager()
     return {'current_source': data_manager.current_source}
+
+@bp.route('/data-source-changed')
+def data_source_changed():
+    """Notify frontend that data source has changed"""
+    data_manager = DataManager()
+    return {
+        'current_source': data_manager.current_source,
+        'timestamp': datetime.datetime.now().isoformat()
+    }
 
 @bp.route('/test')
 def test():

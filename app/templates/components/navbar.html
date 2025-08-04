@@ -31,6 +31,10 @@
                         <li><a class="dropdown-item data-source-option" href="#" data-source="bowling_ergebnisse_real.csv">
                             <i class="bi bi-file-earmark-text"></i> Real Data
                         </a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="#" id="refreshDataBtn">
+                            <i class="bi bi-arrow-clockwise"></i> Refresh & Validate
+                        </a></li>
                     </ul>
                 </li>
                 <li class="nav-item dropdown">
@@ -56,6 +60,62 @@
                         <li><a class="dropdown-item palette-option" href="#" data-palette="rainbowPastel">Rainbow Pastel</a></li>
                     </ul>
                 </li>
+                <script>
+                    // Palette dropdown handler
+                    document.addEventListener('DOMContentLoaded', function() {
+                        document.querySelectorAll('.palette-option').forEach(function(el) {
+                            el.addEventListener('click', function(e) {
+                                e.preventDefault();
+                                const palette = el.getAttribute('data-palette');
+                                const text = el.textContent.trim();
+                                
+                                // Update navbar text
+                                const paletteText = document.getElementById('currentPaletteText');
+                                if (paletteText) paletteText.textContent = text;
+                                
+                                // Trigger palette change event if handler exists
+                                if (typeof window.handlePaletteChange === 'function') {
+                                    window.handlePaletteChange();
+                                }
+                            });
+                        });
+                        
+                        // Refresh button handler
+                        document.getElementById('refreshDataBtn')?.addEventListener('click', function(e) {
+                            e.preventDefault();
+                            
+                            // Show loading state
+                            const btn = this;
+                            const originalText = btn.innerHTML;
+                            btn.innerHTML = '<i class="bi bi-arrow-clockwise spin"></i> Refreshing...';
+                            btn.disabled = true;
+                            
+                            // Trigger data source change event if handler exists
+                            if (typeof window.dispatchEvent === 'function' && typeof window.EventTypes !== 'undefined') {
+                                window.dispatchEvent(window.EventTypes.DATA_SOURCE_CHANGED);
+                            } else {
+                                // Fallback: reload page
+                                window.location.reload();
+                            }
+                            
+                            // Reset button after a delay
+                            setTimeout(() => {
+                                btn.innerHTML = originalText;
+                                btn.disabled = false;
+                            }, 3000);
+                        });
+                    });
+                </script>
+                <style>
+                    .spin {
+                        animation: spin 1s linear infinite;
+                    }
+                    
+                    @keyframes spin {
+                        from { transform: rotate(0deg); }
+                        to { transform: rotate(360deg); }
+                    }
+                </style>
             </ul>
         </div>
     </div>

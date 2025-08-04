@@ -373,14 +373,29 @@
         // Switch data source
         async function switchDataSource(source) {
             try {
-                const response = await fetch(`/reload-data?source=${source}`);
+                const response = await fetch(`/reload-data?source=${source}`, {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
                 
                 if (response.ok) {
-                    // Update the display
-                    updateDataSourceDisplay(source);
+                    const data = await response.json();
                     
-                    // Refresh the page to reload data
-                    window.location.reload();
+                    if (data.success) {
+                        // Update the display
+                        updateDataSourceDisplay(source);
+                        
+                        // Trigger data source change event if handler exists
+                        if (typeof window.handleDataSourceChange === 'function') {
+                            window.handleDataSourceChange();
+                        } else {
+                            // Fallback: refresh the page to reload data
+                            window.location.reload();
+                        }
+                    } else {
+                        console.error('Error switching data source:', data.message);
+                    }
                 } else {
                     console.error('Error switching data source');
                 }

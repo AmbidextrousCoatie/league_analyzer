@@ -56,34 +56,38 @@ const TEAM_COLOR_PALETTES = {
 let currentPaletteName = "rainbowPastel";
 let currentPalette = TEAM_COLOR_PALETTES[currentPaletteName];
 
-let teamColorMap = {};
+// Make teamColorMap globally available
+window.teamColorMap = window.teamColorMap || {};
 
 function updateTeamColorMap(currentTeams) {
   // Remove teams no longer present
-  Object.keys(teamColorMap).forEach(team => {
+  Object.keys(window.teamColorMap).forEach(team => {
     if (!currentTeams.includes(team)) {
-      delete teamColorMap[team];
+      delete window.teamColorMap[team];
     }
   });
 
   // Assign colors to new teams
-  const usedColors = Object.values(teamColorMap);
+  const usedColors = Object.values(window.teamColorMap);
   let paletteIdx = 0;
   currentTeams.forEach(team => {
-    if (!teamColorMap[team]) {
+    if (!window.teamColorMap[team]) {
       // Find the next unused color in the palette
       while (paletteIdx < currentPalette.length && usedColors.includes(currentPalette[paletteIdx])) {
         paletteIdx++;
       }
       // If we run out of unique colors, start reusing
-      teamColorMap[team] = currentPalette[paletteIdx % currentPalette.length];
+      window.teamColorMap[team] = currentPalette[paletteIdx % currentPalette.length];
       paletteIdx++;
     }
   });
 }
 
+// Make updateTeamColorMap globally available
+window.updateTeamColorMap = updateTeamColorMap;
+
 function getTeamColor(team) {
-  return teamColorMap[team] || "#888"; // fallback color
+  return window.teamColorMap[team] || "#888"; // fallback color
 }
 
 // --- Palette Switcher UI ---
@@ -133,7 +137,12 @@ document.addEventListener("DOMContentLoaded", function() {
         const text = el.textContent.trim();
         const paletteText = document.getElementById('currentPaletteText');
         if (paletteText) paletteText.textContent = text;
-        if (typeof window.refreshAllCharts === "function") window.refreshAllCharts();
+        // Trigger palette change event if handler exists
+        if (typeof window.handlePaletteChange === "function") {
+          window.handlePaletteChange();
+        } else if (typeof window.refreshAllCharts === "function") {
+          window.refreshAllCharts();
+        }
       }
     });
   });

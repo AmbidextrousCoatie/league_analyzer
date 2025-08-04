@@ -473,6 +473,15 @@ function createTableBootstrap3(tableId, data, options = {}) {
     // Get options with defaults
     const { disablePositionCircle = false, mergeCells = false, enableSpecialRowStyling = false } = options;
     
+    // Initialize team colors if this is a table with team data
+    if (data.data && data.data.length > 0 && data.data[0].length > 1) {
+        // Extract team names from the data (assuming team name is in the second column)
+        const teams = data.data.map(row => row[1]).filter(team => team && typeof team === 'string');
+        if (teams.length > 0 && typeof window.updateTeamColorMap === 'function') {
+            window.updateTeamColorMap(teams);
+        }
+    }
+    
     // Create table wrapper for horizontal scroll
     const tableWrapper = document.createElement('div');
     tableWrapper.className = 'table-responsive';
@@ -1130,29 +1139,53 @@ function fetchAndRenderTable(tableId, url, params = {}) {
     fetch(`${url}?${queryString}`)
         .then(response => {
             if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
+                // Create error object with status for better handling
+                const error = new Error(`HTTP error! Status: ${response.status}`);
+                error.status = response.status;
+                throw error;
             }
             return response.json();
         })
         .then(data => {
+            // Check if data indicates no results
+            if (data.message && data.message.includes('No data found')) {
+                throw new Error('No data found for these parameters');
+            }
             // Render the table with the fetched data
             createTableBootstrap3(tableId, data, params.options || {});
         })
         .catch(error => {
             console.error('Error fetching table data:', error);
-            // Show error message in the container
+            
+            // Show appropriate error message based on error type
             const container = document.getElementById(tableId);
-            container.innerHTML = `
-                <div class="alert alert-danger">
-                    <strong>Error:</strong> Failed to load table data. ${error.message}
-                </div>
-            `;
+            if (error.status === 404 || error.message.includes('No data found')) {
+                container.innerHTML = `
+                    <div class="alert alert-warning">
+                        <strong>Data Unavailable:</strong> No data found for the current parameters.
+                        <br><small>This might be due to a data source change. Try refreshing the page or selecting different parameters.</small>
+                    </div>
+                `;
+            } else {
+                container.innerHTML = `
+                    <div class="alert alert-danger">
+                        <strong>Error:</strong> Failed to load table data. ${error.message}
+                        <br><small>Please try refreshing the page or contact support if the problem persists.</small>
+                    </div>
+                `;
+            }
         });
 }
 
-// Function to get team color (keep your existing implementation)
+// Function to get team color
 function getTeamColor(teamName) {
-    // ... your existing getTeamColor function ...
+    // Use the same color mapping as charts
+    if (typeof window.teamColorMap !== 'undefined' && window.teamColorMap[teamName]) {
+        return window.teamColorMap[teamName];
+    }
+    
+    // Fallback to a default color if teamColorMap is not available
+    return "#888";
 }
 </script>
 
