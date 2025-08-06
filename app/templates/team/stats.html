@@ -224,16 +224,72 @@
         </div>
     </div>
 
-    <!-- Import Legacy JavaScript Modules -->
+    <!-- Import Legacy JavaScript Modules (Phase 1) -->
     <script src="{{ url_for('static', filename='js/legacy/team-chart-utils.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/legacy/team-filter-utils.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/legacy/team-data-utils.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/legacy/team-filter-utils-fixed.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/legacy/team-data-utils-fixed.js') }}"></script>
 
-    <!-- Initialize Application -->
+    <!-- Import Phase 2 State Management Components -->
+    <script src="{{ url_for('static', filename='js/core/url-state-manager.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/core/filter-manager.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/core/content-renderer.js') }}"></script>
+
+    <!-- Import Main Application Coordinator (Fixed Version) -->
+    <script src="{{ url_for('static', filename='js/team-stats-app-fixed.js') }}"></script>
+
+    <!-- Debug Panel (only show in development) -->
+    <div class="card mt-4" style="border-color: #28a745;">
+        <div class="card-header bg-success text-white">
+            <h6 class="mb-0">Phase 2 Debug Panel - Fixed Version</h6>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-8">
+                    <button class="btn btn-sm btn-outline-primary me-2" onclick="debugTeamStats()">Debug State</button>
+                    <button class="btn btn-sm btn-outline-secondary me-2" onclick="refreshTeamStats()">Refresh Content</button>
+                    <button class="btn btn-sm btn-outline-danger me-2" onclick="window.teamStatsApp.clearAllFilters()">Clear Filters</button>
+                    <button class="btn btn-sm btn-outline-info" onclick="window.teamStatsApp.setState({team: 'Team A', season: '23/24'})">Test URL Update</button>
+                </div>
+                <div class="col-md-4 text-end">
+                    <small class="text-muted">Phase 2: Fixed URL State Management</small>
+                </div>
+            </div>
+            <div class="row mt-2">
+                <div class="col-12">
+                    <small class="text-muted">
+                        <strong>Current URL:</strong> <span id="currentUrl"></span>
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- URL Display Script -->
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Initialize the team stats page with all functionality
-            initializeTeamStatsPage();
-        });
+        function updateUrlDisplay() {
+            const urlDisplay = document.getElementById('currentUrl');
+            if (urlDisplay) {
+                urlDisplay.textContent = window.location.href;
+            }
+        }
+        
+        // Update URL display initially and on changes
+        updateUrlDisplay();
+        
+        // Listen for URL changes
+        const originalPushState = history.pushState;
+        const originalReplaceState = history.replaceState;
+        
+        history.pushState = function() {
+            originalPushState.apply(history, arguments);
+            setTimeout(updateUrlDisplay, 10);
+        };
+        
+        history.replaceState = function() {
+            originalReplaceState.apply(history, arguments);
+            setTimeout(updateUrlDisplay, 10);
+        };
+        
+        window.addEventListener('popstate', updateUrlDisplay);
     </script>
 {% endblock %}
