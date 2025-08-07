@@ -6,8 +6,10 @@
  */
 
 class ContentRenderer {
-    constructor(urlStateManager) {
+    constructor(urlStateManager, eventBus = null, smartEventRouter = null) {
         this.urlStateManager = urlStateManager;
+        this.eventBus = eventBus || window.EventBus;
+        this.smartEventRouter = smartEventRouter;
         this.lastRenderedState = {};
         this.isRendering = false;
         

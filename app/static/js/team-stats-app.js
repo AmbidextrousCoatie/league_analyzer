@@ -47,13 +47,17 @@ class TeamStatsApp {
                 }
             });
             
+            // Initialize event system
+            this.eventBus = window.EventBus;
+            this.smartEventRouter = new SmartEventRouter(this.eventBus);
+            
             // Initialize content renderer
-        this.contentRenderer = new ContentRenderer(this.urlStateManager);
+            this.contentRenderer = new ContentRenderer(this.urlStateManager, this.eventBus, this.smartEventRouter);
             
             // Initialize filter manager with a short delay to ensure DOM is ready
             await new Promise(resolve => setTimeout(resolve, 100));
             
-            this.filterManager = new FilterManager(this.urlStateManager);
+            this.filterManager = new FilterManager(this.urlStateManager, this.eventBus, this.smartEventRouter);
             await this.filterManager.initialize();
             
             // Set up our own event listeners that properly trigger state changes
