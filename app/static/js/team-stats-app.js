@@ -1,8 +1,8 @@
 /**
  * Team Stats Application
  * 
- * Main coordinator that orchestrates all Phase 2 components
- * Provides the main entry point for the team statistics page
+ * Main coordinator that orchestrates state management and content rendering
+ * Ensures proper connection between UI events and content blocks
  */
 
 class TeamStatsApp {
@@ -11,25 +11,36 @@ class TeamStatsApp {
         this.filterManager = null;
         this.contentRenderer = null;
         this.isInitialized = false;
+        this.initializationPromise = null;
     }
     
-    /**
-     * Initialize the application
-     */
     async initialize() {
         if (this.isInitialized) {
             console.log('TeamStatsApp already initialized');
-            return;
+            return this.initializationPromise;
+        }
+        
+        if (this.initializationPromise) {
+            console.log('TeamStatsApp initialization in progress');
+            return this.initializationPromise;
         }
         
         console.log('Initializing TeamStatsApp...');
         
+        this.initializationPromise = this._doInitialize();
+        return this.initializationPromise;
+    }
+    
+    async _doInitialize() {
         try {
-            // Initialize URL state manager
+            // Signal that we're taking control to prevent legacy conflicts
+            window.teamStatsApp = this;
+            this.isInitialized = true;
+            
+            // Initialize URL state manager with content rendering callback
             this.urlStateManager = new URLStateManager({
                 onStateChange: (state) => {
-                    console.log('State changed:', state);
-                    // Content renderer will handle the state change
+                    console.log('🔄 URLStateManager: State changed:', state);
                     if (this.contentRenderer) {
                         this.contentRenderer.renderContent(state);
                     }
@@ -37,135 +48,126 @@ class TeamStatsApp {
             });
             
             // Initialize content renderer
-            this.contentRenderer = new ContentRenderer(this.urlStateManager);
+        this.contentRenderer = new ContentRenderer(this.urlStateManager);
             
-            // Initialize filter manager
+            // Initialize filter manager with a short delay to ensure DOM is ready
+            await new Promise(resolve => setTimeout(resolve, 100));
+            
             this.filterManager = new FilterManager(this.urlStateManager);
             await this.filterManager.initialize();
             
-            // Setup global error handling
-            this.setupErrorHandling();
+            // Set up our own event listeners that properly trigger state changes
+            this.setupEventListeners();
             
-            // Mark as initialized
-            this.isInitialized = true;
+            console.log('✅ TeamStatsApp initialized successfully');
             
-            console.log('TeamStatsApp initialized successfully');
-            
-            // Fire initial state change if URL has parameters
-            const initialState = this.urlStateManager.getState();
-            if (Object.values(initialState).some(value => value && value !== '' && value !== 'main')) {
-                console.log('Initial state from URL:', initialState);
-                this.contentRenderer.renderContent(initialState);
-            }
+            // Process initial URL state with delay for complete DOM setup
+            setTimeout(() => {
+                const initialState = this.urlStateManager.getState();
+                console.log('🚀 Processing initial state:', initialState);
+                
+                if (Object.values(initialState).some(value => value && value !== '' && value !== 'main')) {
+                    console.log('📊 Initial state from URL found, rendering content');
+                    this.contentRenderer.renderContent(initialState);
+                } else {
+                    console.log('🏁 No initial filters, showing default state');
+                    this.contentRenderer.renderContent({});
+                }
+            }, 200);
             
         } catch (error) {
-            console.error('Error initializing TeamStatsApp:', error);
-            this.handleInitializationError(error);
+            console.error('❌ Error initializing TeamStatsApp:', error);
+            this.isInitialized = false;
+            throw error;
         }
     }
     
     /**
-     * Setup global error handling
+     * Set up event listeners that ensure content blocks update properly
      */
-    setupErrorHandling() {
-        // Handle fetch errors gracefully
-        const originalFetch = window.fetch;
-        window.fetch = async (...args) => {
-            try {
-                const response = await originalFetch.apply(window, args);
+    setupEventListeners() {
+        console.log('🔧 Setting up event listeners...');
+        
+        // Team selection change
+        const teamSelect = document.getElementById('teamSelect');
+        if (teamSelect) {
+            teamSelect.addEventListener('change', (event) => {
+                const teamName = event.target.value;
+                console.log('🏢 Team changed:', teamName);
                 
-                if (!response.ok) {
-                    console.error(`Fetch error: ${response.status} ${response.statusText} for ${args[0]}`);
-                    this.showErrorMessage(`Failed to load data: ${response.status}`);
+                if (teamName) {
+                    this.setState({
+                        team: teamName,
+                        season: '', // Clear dependent filters
+                        week: ''
+                    });
+                } else {
+                    this.setState({
+                        team: '',
+                        season: '',
+                        week: ''
+                    });
                 }
+            });
+            console.log('✅ Team select listener attached');
+        }
+        
+        // Season button changes (delegated event handling)
+        document.addEventListener('change', (event) => {
+            if (event.target.name === 'season') {
+                const season = event.target.value;
+                console.log('📅 Season changed:', season);
                 
-                return response;
-            } catch (error) {
-                console.error('Network error:', error);
-                this.showErrorMessage('Network error occurred. Please check your connection.');
-                throw error;
+                this.setState({
+                    season: season,
+                    week: '' // Clear week when season changes
+                });
             }
-        };
+        });
+        
+        // Week button changes (delegated event handling)
+        document.addEventListener('change', (event) => {
+            if (event.target.name === 'week') {
+                const week = event.target.value;
+                console.log('📆 Week changed:', week);
+                
+                this.setState({
+                    week: week
+                });
+            }
+        });
+        
+        console.log('✅ All event listeners set up');
     }
     
     /**
-     * Handle initialization errors
+     * Set state and trigger content updates
      */
-    handleInitializationError(error) {
-        console.error('Failed to initialize app:', error);
+    setState(newState) {
+        console.log('🔄 Setting new state:', newState);
         
-        // Fallback to legacy initialization
-        console.log('Falling back to legacy initialization...');
-        try {
-            if (typeof initializeTeamStatsPage === 'function') {
-                initializeTeamStatsPage();
+        if (this.urlStateManager) {
+            // Update URL state (this will trigger onStateChange callback)
+            this.urlStateManager.setState(newState);
+            
+            // Also manually trigger content rendering to ensure it happens
+            const currentState = this.urlStateManager.getState();
+            console.log('📊 Current state after update:', currentState);
+            
+            if (this.contentRenderer) {
+                // Force a re-render by clearing the last rendered state
+                this.contentRenderer.lastRenderedState = {};
+                this.contentRenderer.renderContent(currentState);
             }
-        } catch (legacyError) {
-            console.error('Legacy initialization also failed:', legacyError);
-            this.showErrorMessage('Application failed to initialize. Please refresh the page.');
         }
     }
     
-    /**
-     * Show error message to user
-     */
-    showErrorMessage(message) {
-        // Try to find an existing alert container or create one
-        let alertContainer = document.getElementById('errorAlerts');
-        
-        if (!alertContainer) {
-            alertContainer = document.createElement('div');
-            alertContainer.id = 'errorAlerts';
-            alertContainer.className = 'position-fixed top-0 end-0 p-3';
-            alertContainer.style.zIndex = '1050';
-            document.body.appendChild(alertContainer);
-        }
-        
-        const alertHtml = `
-            <div class="alert alert-warning alert-dismissible fade show" role="alert">
-                <strong>Warning:</strong> ${message}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        `;
-        
-        alertContainer.insertAdjacentHTML('beforeend', alertHtml);
-        
-        // Auto-dismiss after 5 seconds
-        setTimeout(() => {
-            const alerts = alertContainer.querySelectorAll('.alert');
-            if (alerts.length > 0) {
-                alerts[0].remove();
-            }
-        }, 5000);
-    }
-    
-    /**
-     * Get current application state
-     */
     getState() {
         return this.urlStateManager ? this.urlStateManager.getState() : {};
     }
     
-    /**
-     * Set application state programmatically
-     */
-    setState(newState) {
-        if (this.urlStateManager) {
-            this.urlStateManager.setState(newState);
-        }
-    }
-    
-    /**
-     * Navigate to a specific state (useful for programmatic navigation)
-     */
-    navigateTo(state) {
-        this.setState(state);
-    }
-    
-    /**
-     * Clear all filters
-     */
     clearAllFilters() {
+        console.log('🧹 Clearing all filters');
         this.setState({
             team: '',
             season: '',
@@ -175,54 +177,46 @@ class TeamStatsApp {
     }
     
     /**
-     * Get information about current content mode
-     */
-    getContentInfo() {
-        if (this.contentRenderer) {
-            return {
-                mode: this.contentRenderer.getCurrentMode(),
-                state: this.getState()
-            };
-        }
-        return null;
-    }
-    
-    /**
-     * Refresh current content (useful for manual refresh)
+     * Force refresh content blocks
      */
     refreshContent() {
-        if (this.contentRenderer && this.urlStateManager) {
-            const currentState = this.urlStateManager.getState();
-            this.contentRenderer.lastRenderedState = {}; // Force re-render
-            this.contentRenderer.renderContent(currentState);
+        console.log('🔄 Force refreshing content...');
+        if (this.contentRenderer) {
+            const state = this.getState();
+            this.contentRenderer.lastRenderedState = {};
+            this.contentRenderer.renderContent(state);
         }
     }
     
     /**
-     * Debug method to log current state
+     * Test function to set a sample state
      */
+    testState() {
+        console.log('🧪 Setting test state...');
+        this.setState({
+            team: 'Team A',
+            season: '23/24'
+        });
+    }
+    
     debug() {
         console.log('=== TeamStatsApp Debug Info ===');
         console.log('Initialized:', this.isInitialized);
         console.log('Current State:', this.getState());
-        console.log('Content Info:', this.getContentInfo());
         console.log('URL:', window.location.href);
-        console.log('================================');
+        console.log('Content Renderer Debug:', this.contentRenderer ? this.contentRenderer.debug() : 'Not initialized');
+        console.log('URLStateManager callbacks:', this.urlStateManager ? !!this.urlStateManager.callbacks.onStateChange : 'No URLStateManager');
+        console.log('====================================');
+        
+        // Also test state change
+        console.log('🧪 Testing state change trigger...');
+        if (this.urlStateManager && this.urlStateManager.callbacks.onStateChange) {
+            console.log('✅ State change callback is registered');
+        } else {
+            console.log('❌ State change callback missing!');
+        }
     }
 }
 
-// Create global app instance
-window.teamStatsApp = new TeamStatsApp();
-
-// Initialize app when DOM is ready
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('DOM loaded, initializing TeamStatsApp...');
-    window.teamStatsApp.initialize();
-});
-
-// Make classes globally available for debugging
+// Make globally available
 window.TeamStatsApp = TeamStatsApp;
-
-// Expose helpful debug functions
-window.debugTeamStats = () => window.teamStatsApp.debug();
-window.refreshTeamStats = () => window.teamStatsApp.refreshContent();

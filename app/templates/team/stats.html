@@ -59,29 +59,33 @@
         </div>
     </div>
 
-    <!-- Team History Chart -->
+    <!-- Team History Chart (Content Block) -->
     <div class="row mt-4">
         <div class="col-md-12">
             <div class="card">
                 <div class="card-header">
-                    <h5>Platzierungsverlauf</h5>
+                    <h5>Platzierungsverlauf 
+                        <span class="badge bg-success ms-2">Content Block</span>
+                    </h5>
                 </div>
                 <div class="card-body">
-                    <canvas id="chartTeamHistory"></canvas>
+                    <canvas id="chartTeamHistory" width="800" height="400"></canvas>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- League Comparison Section -->
+    <!-- League Comparison Section (Content Block) -->
     <div class="row mt-4">
         <div class="col-md-8">
             <div class="card">
                 <div class="card-header">
-                    <h5>Leistung vs. Liga-Durchschnitt</h5>
+                    <h5>Leistung vs. Liga-Durchschnitt 
+                        <span class="badge bg-success ms-2">Content Block</span>
+                    </h5>
                 </div>
                 <div class="card-body">
-                    <canvas id="chartLeagueComparison"></canvas>
+                    <canvas id="chartLeagueComparison" width="600" height="400"></canvas>
                 </div>
             </div>
         </div>
@@ -98,12 +102,14 @@
         </div>
     </div>
 
-    <!-- Clutch & Consistency Section -->
+    <!-- Clutch & Consistency Section (Legacy) -->
     <div class="row mt-4">
         <div class="col-md-6">
             <div class="card">
                 <div class="card-header">
-                    <h5>Clutch Performance</h5>
+                    <h5>Clutch Performance 
+                        <span class="badge bg-success ms-2">Content Block</span>
+                    </h5>
                 </div>
                 <div class="card-body">
                     <div id="chartClutchPerformance" style="height: 300px;"></div>
@@ -117,7 +123,9 @@
         <div class="col-md-6">
             <div class="card">
                 <div class="card-header">
-                    <h5>Consistency Metrics</h5>
+                    <h5>Consistency Metrics 
+                        <span class="badge bg-success ms-2">Content Block</span>
+                    </h5>
                 </div>
                 <div class="card-body">
                     <div id="consistencyMetrics">
@@ -128,10 +136,12 @@
         </div>
     </div>
 
-    <!-- Special Moments Section -->
+    <!-- Special Moments Section (Content Block) -->
     <div class="card mb-4">
         <div class="card-header">
-            <h4>Besondere Momente</h4>
+            <h4>Besondere Momente 
+                <span class="badge bg-success ms-2">Content Block</span>
+            </h4>
         </div>
         <div class="card-body">
             <div class="row">
@@ -224,23 +234,57 @@
         </div>
     </div>
 
-    <!-- Import Legacy JavaScript Modules (Phase 1) -->
+    <!-- Import Legacy JavaScript Modules -->
     <script src="{{ url_for('static', filename='js/legacy/team-chart-utils.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/legacy/team-filter-utils-fixed.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/legacy/team-data-utils-fixed.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/legacy/team-filter-utils.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/legacy/team-data-utils.js') }}"></script>
 
-    <!-- Import Phase 2 State Management Components -->
+    <!-- Import State Management Components -->
     <script src="{{ url_for('static', filename='js/core/url-state-manager.js') }}"></script>
     <script src="{{ url_for('static', filename='js/core/filter-manager.js') }}"></script>
+
+    <!-- Import Chart Adapters -->
+    <script src="{{ url_for('static', filename='js/chart-adapters.js') }}"></script>
+
+    <!-- Import Content Blocks -->
+    <script src="{{ url_for('static', filename='js/content-blocks/base-content-block.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/content-blocks/team-history-block.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/content-blocks/league-comparison-block.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/content-blocks/clutch-analysis-block.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/content-blocks/consistency-metrics-block.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/content-blocks/special-matches-block.js') }}"></script>
+
+    <!-- Import Content Renderer -->
     <script src="{{ url_for('static', filename='js/core/content-renderer.js') }}"></script>
 
-    <!-- Import Main Application Coordinator (Fixed Version) -->
-    <script src="{{ url_for('static', filename='js/team-stats-app-fixed.js') }}"></script>
+    <!-- Import Main Application Coordinator -->
+    <script src="{{ url_for('static', filename='js/team-stats-app.js') }}"></script>
+    <script>
+        // Create global app instance
+        window.teamStatsApp = new TeamStatsApp();
 
-    <!-- Debug Panel (only show in development) -->
-    <div class="card mt-4" style="border-color: #28a745;">
-        <div class="card-header bg-success text-white">
-            <h6 class="mb-0">Phase 2 Debug Panel - Fixed Version</h6>
+        // Initialize app when DOM is ready
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 DOM loaded, initializing TeamStatsApp...');
+            
+            // Longer delay to ensure all components are ready
+            setTimeout(() => {
+                window.teamStatsApp.initialize().catch(error => {
+                    console.error('❌ Failed to initialize TeamStatsApp:', error);
+                });
+            }, 200);
+        });
+
+        // Enhanced debug functions
+        window.debugTeamStats = () => window.teamStatsApp.debug();
+        window.refreshTeamStats = () => window.teamStatsApp.refreshContent();
+        window.testTeamStats = () => window.teamStatsApp.testState();
+    </script>
+
+    <!-- Debug Panel -->
+    <div class="card mt-4" style="border-color: #6f42c1;">
+        <div class="card-header bg-primary text-white">
+            <h6 class="mb-0">Team Stats Debug Panel</h6>
         </div>
         <div class="card-body">
             <div class="row">
@@ -248,48 +292,21 @@
                     <button class="btn btn-sm btn-outline-primary me-2" onclick="debugTeamStats()">Debug State</button>
                     <button class="btn btn-sm btn-outline-secondary me-2" onclick="refreshTeamStats()">Refresh Content</button>
                     <button class="btn btn-sm btn-outline-danger me-2" onclick="window.teamStatsApp.clearAllFilters()">Clear Filters</button>
-                    <button class="btn btn-sm btn-outline-info" onclick="window.teamStatsApp.setState({team: 'Team A', season: '23/24'})">Test URL Update</button>
+                    <button class="btn btn-sm btn-outline-info me-2" onclick="testTeamStats()">Test State</button>
+                    <button class="btn btn-sm btn-outline-success" onclick="console.log('Current State:', window.teamStatsApp.getState())">Show State</button>
                 </div>
                 <div class="col-md-4 text-end">
-                    <small class="text-muted">Phase 2: Fixed URL State Management</small>
+                    <small class="text-muted">Content Block System Active</small>
                 </div>
             </div>
             <div class="row mt-2">
                 <div class="col-12">
                     <small class="text-muted">
-                        <strong>Current URL:</strong> <span id="currentUrl"></span>
+                        <span class="badge bg-success me-1">Content Block</span> = New modular system |
+                        <span class="badge bg-warning me-1">Legacy</span> = Old function calls
                     </small>
                 </div>
             </div>
         </div>
     </div>
-
-    <!-- URL Display Script -->
-    <script>
-        function updateUrlDisplay() {
-            const urlDisplay = document.getElementById('currentUrl');
-            if (urlDisplay) {
-                urlDisplay.textContent = window.location.href;
-            }
-        }
-        
-        // Update URL display initially and on changes
-        updateUrlDisplay();
-        
-        // Listen for URL changes
-        const originalPushState = history.pushState;
-        const originalReplaceState = history.replaceState;
-        
-        history.pushState = function() {
-            originalPushState.apply(history, arguments);
-            setTimeout(updateUrlDisplay, 10);
-        };
-        
-        history.replaceState = function() {
-            originalReplaceState.apply(history, arguments);
-            setTimeout(updateUrlDisplay, 10);
-        };
-        
-        window.addEventListener('popstate', updateUrlDisplay);
-    </script>
 {% endblock %}

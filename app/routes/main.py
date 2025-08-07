@@ -9,6 +9,7 @@ bp = Blueprint('main', __name__)
 def index():
     return render_template('index.html')
 
+
 @bp.route('/set-season/<season>')
 def set_season(season):
     session['selected_season'] = season

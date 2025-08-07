@@ -2,7 +2,7 @@
  * Legacy Team Chart Utilities
  * 
  * Extracted from team/stats.html with identical signatures
- * These functions preserve exact functionality during Phase 1 migration
+ * Chart rendering and data visualization functions for team statistics
  */
 
 // Global variables (preserved from original)

@@ -1,13 +1,13 @@
 /**
  * Legacy Team Filter Utilities
  * 
- * Extracted from team/stats.html with identical signatures
- * These functions preserve exact functionality during Phase 1 migration
+ * UI update functions for team filter controls
+ * Works in compatibility mode with modern state management
  */
 
 /**
  * Update team select dropdown
- * Original function signature preserved exactly
+ * Does not add event listeners when modern state management is active
  */
 function updateTeamSelect(teams) {
     const select = document.getElementById('teamSelect');
@@ -18,6 +18,14 @@ function updateTeamSelect(teams) {
         `).join('')}
     `;
 
+    // Only add legacy event listeners if modern state management is not active
+    if (window.teamStatsApp && window.teamStatsApp.isInitialized) {
+        console.log('Modern state management active - team select managed by FilterManager');
+        return;
+    }
+    
+    console.log('Adding legacy team select event listener');
+
     // Remove old event listener first to prevent duplicates
     const newSelect = select.cloneNode(true);
     select.parentNode.replaceChild(newSelect, select);
@@ -25,16 +33,16 @@ function updateTeamSelect(teams) {
     // Add event listener to new select
     newSelect.addEventListener('change', function() {
         const selectedTeam = this.value;
-        console.log('Selected team:', selectedTeam); // Debug log
+        console.log('Selected team (legacy):', selectedTeam);
         if (selectedTeam) {
             updateSeasonButtons(selectedTeam);
             updateMessageVisibility();
             updateTeamHistory(selectedTeam);
     
-            updateLeagueComparison(selectedTeam); // Call new function
+            updateLeagueComparison(selectedTeam);
             loadSpecialMatches(selectedTeam);
             
-            // Also trigger Phase 2 analysis if a season is already selected
+            // Also trigger modern analysis if a season is already selected
             const selectedSeason = document.querySelector('input[name="season"]:checked')?.value;
             if (selectedSeason && selectedSeason !== '') {
                 // Team + specific season selected
@@ -48,8 +56,6 @@ function updateTeamSelect(teams) {
                 updateClutchAnalysis(selectedTeam, null);
                 updateConsistencyMetrics(selectedTeam, null);
                 loadSpecialMatches(selectedTeam);
-                
-                // Don't trigger change event automatically - let user make the choice
             }
         } else {
             // No team selected - show all teams stats
@@ -75,9 +81,6 @@ function updateSeasonButtons(teamName) {
                 <label class="btn btn-outline-primary" for="season_${season}">${season}</label>
             `).join('');
             container.innerHTML = buttonsSeason;
-            
-            // Don't automatically select the first button - let user make the choice
-            // The "All" button is already checked by default in the HTML generation
         });
 }
 

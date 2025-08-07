@@ -1,8 +1,8 @@
 /**
  * Legacy Team Data Utilities
  * 
- * Extracted from team/stats.html with identical signatures
- * These functions preserve exact functionality during Phase 1 migration
+ * Data fetching and display functions for team statistics
+ * Works in compatibility mode with modern state management
  */
 
 /**
@@ -73,7 +73,7 @@ function displaySpecialMatches(data) {
 }
 
 /**
- * Initialize teams data on page load
+ * Initialize teams data using existing function
  * Original function signature preserved exactly
  */
 function initializeTeamsData() {
@@ -87,9 +87,17 @@ function initializeTeamsData() {
 
 /**
  * Setup global event listeners
- * Original function signature preserved exactly
+ * Only sets up legacy handlers if modern state management is not active
  */
 function setupGlobalEventListeners() {
+    // Check if modern state management is active
+    if (window.teamStatsApp && window.teamStatsApp.isInitialized) {
+        console.log('Modern state management active - skipping legacy event listeners');
+        return;
+    }
+    
+    console.log('Setting up legacy event listeners');
+    
     // Always update available options when team or season changes
     document.addEventListener('change', event => {
         if (event.target.name === 'season') {
@@ -137,9 +145,17 @@ function setupGlobalEventListeners() {
 
 /**
  * Initialize the team stats page
- * Original function signature preserved exactly
+ * Only runs legacy initialization if modern state management is not active
  */
 function initializeTeamStatsPage() {
+    // Check if modern state management is active
+    if (window.teamStatsApp && window.teamStatsApp.isInitialized) {
+        console.log('Modern state management active - skipping legacy initialization');
+        return;
+    }
+    
+    console.log('Running legacy initialization');
+    
     // Setup event listeners
     setupGlobalEventListeners();
     

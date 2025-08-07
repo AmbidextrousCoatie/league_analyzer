@@ -1,8 +1,8 @@
 /**
- * Content Renderer
+ * Content Renderer - Phase 3 Version
  * 
- * Orchestrates content display based on current filter state
- * Acts as coordinator between state management and legacy functions
+ * Updated to use content blocks instead of legacy functions
+ * Gradual migration: starts with team history and league comparison blocks
  */
 
 class ContentRenderer {
@@ -10,6 +10,12 @@ class ContentRenderer {
         this.urlStateManager = urlStateManager;
         this.lastRenderedState = {};
         this.isRendering = false;
+        
+        // Content blocks registry
+        this.contentBlocks = {};
+        
+        // Initialize content blocks
+        this.initializeContentBlocks();
         
         // Content modes based on filter combinations
         this.contentModes = {
@@ -21,7 +27,7 @@ class ContentRenderer {
             'team-only': {
                 title: 'Team Complete History',
                 description: 'All seasons overview',
-                blocks: ['team-history', 'league-comparison', 'consistency-metrics', 'special-matches']
+                blocks: ['team-history', 'league-comparison', 'clutch-analysis', 'consistency-metrics', 'special-matches']
             },
             'team-season': {
                 title: 'Team Season Analysis',
@@ -34,6 +40,51 @@ class ContentRenderer {
                 blocks: ['team-history', 'league-comparison', 'clutch-analysis', 'consistency-metrics', 'special-matches']
             }
         };
+    }
+    
+    /**
+     * Initialize content blocks
+     */
+    initializeContentBlocks() {
+        console.log('Initializing Phase 3 content blocks...');
+        
+        // Initialize available content blocks
+        try {
+            this.contentBlocks['team-history'] = new TeamHistoryBlock();
+            console.log('TeamHistoryBlock initialized');
+        } catch (error) {
+            console.error('Failed to initialize TeamHistoryBlock:', error);
+        }
+        
+        try {
+            this.contentBlocks['league-comparison'] = new LeagueComparisonBlock();
+            console.log('LeagueComparisonBlock initialized');
+        } catch (error) {
+            console.error('Failed to initialize LeagueComparisonBlock:', error);
+        }
+        
+        try {
+            this.contentBlocks['clutch-analysis'] = new ClutchAnalysisBlock();
+            console.log('ClutchAnalysisBlock initialized');
+        } catch (error) {
+            console.error('Failed to initialize ClutchAnalysisBlock:', error);
+        }
+        
+        try {
+            this.contentBlocks['consistency-metrics'] = new ConsistencyMetricsBlock();
+            console.log('ConsistencyMetricsBlock initialized');
+        } catch (error) {
+            console.error('Failed to initialize ConsistencyMetricsBlock:', error);
+        }
+        
+        try {
+            this.contentBlocks['special-matches'] = new SpecialMatchesBlock();
+            console.log('SpecialMatchesBlock initialized');
+        } catch (error) {
+            console.error('Failed to initialize SpecialMatchesBlock:', error);
+        }
+        
+        console.log('Content blocks initialized:', Object.keys(this.contentBlocks));
     }
     
     /**
@@ -105,7 +156,6 @@ class ContentRenderer {
             titleElement.textContent = 'Team Statistics';
         }
         
-        // You could add a description element here if desired
         console.log(`Mode: ${modeConfig.title} - ${modeConfig.description}`);
     }
     
@@ -114,6 +164,7 @@ class ContentRenderer {
      */
     async renderContentBlocks(mode, state) {
         const modeConfig = this.contentModes[mode];
+        console.log(`ContentRenderer: Rendering blocks for ${mode}:`, modeConfig.blocks);
         
         if (mode === 'no-selection') {
             // Clear all content areas when no team selected
@@ -121,115 +172,96 @@ class ContentRenderer {
             return;
         }
         
-        // Show loading states
-        this.showLoadingStates(modeConfig.blocks);
-        
         // Render blocks based on mode configuration
         const renderPromises = [];
         
-        if (modeConfig.blocks.includes('team-history')) {
-            renderPromises.push(this.renderTeamHistory(state));
+        // Phase 3: Use content blocks for team-history and league-comparison
+        if (modeConfig.blocks.includes('team-history') && this.contentBlocks['team-history']) {
+            renderPromises.push(this.contentBlocks['team-history'].renderWithData(state));
         }
         
-        if (modeConfig.blocks.includes('league-comparison')) {
-            renderPromises.push(this.renderLeagueComparison(state));
+        if (modeConfig.blocks.includes('league-comparison') && this.contentBlocks['league-comparison']) {
+            renderPromises.push(this.contentBlocks['league-comparison'].renderWithData(state));
         }
         
-        if (modeConfig.blocks.includes('clutch-analysis')) {
-            renderPromises.push(this.renderClutchAnalysis(state));
+        // Phase 3: Use content block for clutch analysis
+        if (modeConfig.blocks.includes('clutch-analysis') && this.contentBlocks['clutch-analysis']) {
+            console.log('ContentRenderer: Adding clutch-analysis block to render queue');
+            renderPromises.push(this.contentBlocks['clutch-analysis'].renderWithData(state));
+        } else {
+            console.log('ContentRenderer: Clutch analysis block skipped - included:', modeConfig.blocks.includes('clutch-analysis'), 'available:', !!this.contentBlocks['clutch-analysis']);
         }
         
-        if (modeConfig.blocks.includes('consistency-metrics')) {
-            renderPromises.push(this.renderConsistencyMetrics(state));
+        // Phase 3: Use content block for consistency metrics
+        if (modeConfig.blocks.includes('consistency-metrics') && this.contentBlocks['consistency-metrics']) {
+            renderPromises.push(this.contentBlocks['consistency-metrics'].renderWithData(state));
         }
         
-        if (modeConfig.blocks.includes('special-matches')) {
-            renderPromises.push(this.renderSpecialMatches(state));
+        // Phase 3: Use content block for special matches
+        if (modeConfig.blocks.includes('special-matches') && this.contentBlocks['special-matches']) {
+            console.log('ContentRenderer: Adding special-matches block to render queue');
+            renderPromises.push(this.contentBlocks['special-matches'].renderWithData(state));
+        } else {
+            console.log('ContentRenderer: Special matches block skipped - included:', modeConfig.blocks.includes('special-matches'), 'available:', !!this.contentBlocks['special-matches']);
         }
         
         // Wait for all content to render
         await Promise.allSettled(renderPromises);
         
-        // Hide loading states
-        this.hideLoadingStates();
+        console.log('All content blocks rendered');
     }
     
     /**
-     * Render team history chart
+     * Legacy fallback for clutch analysis
      */
-    async renderTeamHistory(state) {
+    async renderClutchAnalysisLegacy(state) {
         if (!state.team) return;
         
         try {
-            console.log('Rendering team history for:', state.team);
-            // Call existing legacy function
-            updateTeamHistory(state.team);
-        } catch (error) {
-            console.error('Error rendering team history:', error);
-        }
-    }
-    
-    /**
-     * Render league comparison
-     */
-    async renderLeagueComparison(state) {
-        if (!state.team) return;
-        
-        try {
-            console.log('Rendering league comparison for:', state.team);
-            // Call existing legacy function
-            updateLeagueComparison(state.team);
-        } catch (error) {
-            console.error('Error rendering league comparison:', error);
-        }
-    }
-    
-    /**
-     * Render clutch analysis
-     */
-    async renderClutchAnalysis(state) {
-        if (!state.team) return;
-        
-        try {
-            console.log('Rendering clutch analysis for:', state.team, state.season);
-            // Call existing legacy function
-            updateClutchAnalysis(state.team, state.season || null);
-        } catch (error) {
-            console.error('Error rendering clutch analysis:', error);
-        }
-    }
-    
-    /**
-     * Render consistency metrics
-     */
-    async renderConsistencyMetrics(state) {
-        if (!state.team) return;
-        
-        try {
-            console.log('Rendering consistency metrics for:', state.team, state.season);
-            // Call existing legacy function
-            updateConsistencyMetrics(state.team, state.season || null);
-        } catch (error) {
-            console.error('Error rendering consistency metrics:', error);
-        }
-    }
-    
-    /**
-     * Render special matches
-     */
-    async renderSpecialMatches(state) {
-        if (!state.team) return;
-        
-        try {
-            console.log('Rendering special matches for:', state.team, state.season);
-            // Call existing legacy function
-            if (state.season && state.season !== '') {
-                loadSpecialMatchesForSeason(state.team, state.season);
-            } else {
-                loadSpecialMatches(state.team);
+            console.log('Rendering clutch analysis (legacy) for:', state.team, state.season);
+            if (typeof updateClutchAnalysis === 'function') {
+                updateClutchAnalysis(state.team, state.season || null);
             }
         } catch (error) {
-            console.error('Error rendering special matches:', error);
+            console.error('Error rendering clutch analysis (legacy):', error);
+        }
+    }
+    
+    /**
+     * Legacy fallback for consistency metrics
+     */
+    async renderConsistencyMetricsLegacy(state) {
+        if (!state.team) return;
+        
+        try {
+            console.log('Rendering consistency metrics (legacy) for:', state.team, state.season);
+            if (typeof updateConsistencyMetrics === 'function') {
+                updateConsistencyMetrics(state.team, state.season || null);
+            }
+        } catch (error) {
+            console.error('Error rendering consistency metrics (legacy):', error);
+        }
+    }
+    
+    /**
+     * Legacy fallback for special matches
+     */
+    async renderSpecialMatchesLegacy(state) {
+        if (!state.team) return;
+        
+        try {
+            console.log('Rendering special matches (legacy) for:', state.team, state.season);
+            if (state.season && state.season !== '') {
+                if (typeof loadSpecialMatchesForSeason === 'function') {
+                    loadSpecialMatchesForSeason(state.team, state.season);
+                }
+            } else {
+                if (typeof loadSpecialMatches === 'function') {
+                    loadSpecialMatches(state.team);
+                }
+            }
+        } catch (error) {
+            console.error('Error rendering special matches (legacy):', error);
         }
     }
     
@@ -237,10 +269,19 @@ class ContentRenderer {
      * Clear all content areas
      */
     clearAllContent() {
+        console.log('Clearing all content areas');
+        
+        // Clear content blocks
+        Object.values(this.contentBlocks).forEach(block => {
+            try {
+                block.clear();
+            } catch (error) {
+                console.error('Error clearing content block:', error);
+            }
+        });
+        
+        // Clear legacy content areas
         const contentAreas = [
-            'chartTeamHistory',
-            'chartLeagueComparison', 
-            'tableLeagueComparison',
             'chartClutchPerformance',
             'clutchStats',
             'consistencyMetrics',
@@ -257,29 +298,7 @@ class ContentRenderer {
             }
         });
         
-        // Destroy charts if they exist
-        if (window.teamHistoryChart instanceof Chart) {
-            window.teamHistoryChart.destroy();
-            window.teamHistoryChart = null;
-        }
-        
         console.log('All content areas cleared');
-    }
-    
-    /**
-     * Show loading states for specified blocks
-     */
-    showLoadingStates(blocks) {
-        // You could add loading spinners here
-        console.log('Showing loading states for blocks:', blocks);
-    }
-    
-    /**
-     * Hide loading states
-     */
-    hideLoadingStates() {
-        // You could hide loading spinners here
-        console.log('Hiding loading states');
     }
     
     /**
@@ -288,6 +307,23 @@ class ContentRenderer {
     getCurrentMode() {
         const state = this.urlStateManager.getState();
         return this.determineContentMode(state);
+    }
+    
+    /**
+     * Debug information
+     */
+    debug() {
+        return {
+            lastRenderedState: this.lastRenderedState,
+            isRendering: this.isRendering,
+            currentMode: this.getCurrentMode(),
+            contentBlocks: Object.keys(this.contentBlocks),
+            availableBlocks: Object.keys(this.contentBlocks).map(key => ({
+                id: key,
+                hasContainer: this.contentBlocks[key].hasContainer(),
+                debug: this.contentBlocks[key].debug()
+            }))
+        };
     }
 }
 

@@ -2,13 +2,16 @@
  * Filter Manager
  * 
  * Manages filter state coordination and cascading updates
- * Calls existing legacy functions while adding state management
+ * Uses EventBus for intelligent cross-block communication
  */
 
 class FilterManager {
-    constructor(urlStateManager) {
+    constructor(urlStateManager, eventBus, smartEventRouter) {
         this.urlStateManager = urlStateManager;
+        this.eventBus = eventBus;
+        this.smartEventRouter = smartEventRouter;
         this.isInitializing = false;
+        this.previousState = {};
         this.availableData = {
             teams: [],
             seasons: [],
@@ -19,6 +22,21 @@ class FilterManager {
         this.urlStateManager.onStateChange((state) => {
             this.handleStateChange(state);
         });
+        
+        // Setup event listeners for block status updates
+        this.setupEventListeners();
+    }
+    
+    /**
+     * Setup event listeners for block coordination
+     */
+    setupEventListeners() {
+        // Listen for block rendering status
+        this.eventBus.subscribe('block-rendering', this.onBlockRendering, this);
+        this.eventBus.subscribe('block-rendered', this.onBlockRendered, this);
+        this.eventBus.subscribe('block-error', this.onBlockError, this);
+        
+        console.log('📡 FilterManager: Event listeners setup complete');
     }
     
     /**
@@ -28,15 +46,90 @@ class FilterManager {
         console.log('FilterManager handling state change:', state);
         
         try {
+            // Detect specific changes and route them intelligently
+            this.detectAndRouteChanges(this.previousState, state);
+            
             // Update UI filters to match state
             await this.syncFiltersToState(state);
             
-            // Update content based on current state
+            // Update content based on current state (legacy compatibility)
             this.updateContent(state);
+            
+            // Store current state as previous for next comparison
+            this.previousState = { ...state };
             
         } catch (error) {
             console.error('Error handling state change:', error);
+            this.eventBus.emit('filter-manager-error', { error, state }, { source: 'FilterManager' });
         }
+    }
+    
+    /**
+     * Detect specific changes and route them intelligently
+     */
+    detectAndRouteChanges(oldState, newState) {
+        const changes = this.detectStateChanges(oldState, newState);
+        
+        if (changes.length === 0) {
+            console.log('🔍 FilterManager: No significant changes detected');
+            return;
+        }
+        
+        console.log('🔍 FilterManager: Detected changes:', changes);
+        
+        // Route each change through the smart event router
+        changes.forEach(change => {
+            this.smartEventRouter.routeFilterChange(change.type, {
+                oldValue: change.oldValue,
+                newValue: change.newValue,
+                fullState: newState,
+                timestamp: Date.now()
+            });
+        });
+    }
+    
+    /**
+     * Detect what specifically changed between states
+     */
+    detectStateChanges(oldState, newState) {
+        const changes = [];
+        const fieldsToCheck = ['team', 'season', 'week', 'league', 'database'];
+        
+        fieldsToCheck.forEach(field => {
+            if (oldState[field] !== newState[field]) {
+                changes.push({
+                    type: field,
+                    oldValue: oldState[field] || null,
+                    newValue: newState[field] || null
+                });
+            }
+        });
+        
+        return changes;
+    }
+    
+    /**
+     * Handle block rendering events
+     */
+    onBlockRendering(eventData) {
+        console.log(`⏳ FilterManager: Block '${eventData.data.blockId}' started rendering`);
+        // Could show loading indicators, update progress, etc.
+    }
+    
+    /**
+     * Handle block rendered events
+     */
+    onBlockRendered(eventData) {
+        console.log(`✅ FilterManager: Block '${eventData.data.blockId}' finished rendering`);
+        // Could hide loading indicators, trigger dependent actions, etc.
+    }
+    
+    /**
+     * Handle block error events
+     */
+    onBlockError(eventData) {
+        console.error(`❌ FilterManager: Block '${eventData.data.blockId}' error:`, eventData.data.error);
+        // Could show error messages, trigger fallbacks, etc.
     }
     
     /**
@@ -153,26 +246,12 @@ class FilterManager {
         console.log('Updating content for state:', state);
         
         // Call existing legacy functions based on state
-        if (state.team) {
-            // Team selected - show team-specific content
-            updateTeamHistory(state.team);
-            updateLeagueComparison(state.team);
-            
-            if (state.season && state.season !== '') {
-                // Team + specific season selected
-                updateClutchAnalysis(state.team, state.season);
-                updateConsistencyMetrics(state.team, state.season);
-                loadSpecialMatchesForSeason(state.team, state.season);
-            } else {
-                // Team only selected (all seasons)
-                updateClutchAnalysis(state.team, null);
-                updateConsistencyMetrics(state.team, null);
-                loadSpecialMatches(state.team);
-            }
-        } else {
+        // Note: All team-specific functions are now handled by content blocks
+        if (!state.team) {
             // No team selected - show all teams overview
             updateAllTeamsStats();
         }
+        // All other content is now handled by content blocks in ContentRenderer
     }
     
     /**
