@@ -70,4 +70,4 @@ def data_source_changed():
 @bp.route('/test')
 def test():
     """Test page for API routes"""
-    return render_template('test.html')
+    return render_template('test_new.html')
