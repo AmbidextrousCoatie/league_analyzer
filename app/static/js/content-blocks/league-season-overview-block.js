@@ -52,57 +52,34 @@ class LeagueSeasonOverviewBlock extends BaseContentBlock {
             <div class="card mb-4">
                 <div class="card-header">
                     <h5>${state.league} - Season ${state.season}</h5>
-                    <p class="mb-0 text-muted">Season overview and timetable</p>
+                    <p class="mb-0 text-muted">Season overview and analysis</p>
                 </div>
                 <div class="card-body">
-                    <!-- Timetable Section -->
+                    <!-- 1st Row: League Standings (Full Width) -->
                     <div class="row mb-4">
                         <div class="col-12">
                             <div class="card">
                                 <div class="card-header">
-                                    <h6>Season Timetable</h6>
-                                    <p class="mb-0 text-muted small">Match day schedule and completion status</p>
-                                </div>
-                                <div class="card-body">
-                                    <div id="seasonTimetable"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- League Standings and Charts Row -->
-                    <div class="row mb-4">
-                        <div class="col-md-6">
-                            <div class="card">
-                                <div class="card-header">
                                     <h6>League Standings</h6>
+                                    <p class="mb-0 text-muted small">Current league table and team positions</p>
                                 </div>
                                 <div class="card-body">
                                     <div id="leagueStandingsTable"></div>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-6">
-                            <div class="card">
-                                <div class="card-header">
-                                    <h6>Individual Averages</h6>
-                                </div>
-                                <div class="card-body">
-                                    <div id="individualAveragesTable"></div>
-                                </div>
-                            </div>
-                        </div>
                     </div>
 
-                    <!-- Charts Section -->
+                    <!-- 2nd Row: Timetable + Position in Season Progress -->
                     <div class="row mb-4">
                         <div class="col-md-6">
                             <div class="card">
                                 <div class="card-header">
-                                    <h6>Points in Season Progress</h6>
+                                    <h6>Season Timetable</h6>
+                                    <p class="mb-0 text-muted small">Match schedule and completion status</p>
                                 </div>
                                 <div class="card-body">
-                                    <div id="chartTeamPointsCumulated" style="height: 300px;"></div>
+                                    <div id="seasonTimetable"></div>
                                 </div>
                             </div>
                         </div>
@@ -118,15 +95,40 @@ class LeagueSeasonOverviewBlock extends BaseContentBlock {
                         </div>
                     </div>
 
-                    <!-- Points per Match Day Chart -->
-                    <div class="row">
-                        <div class="col-12">
+                    <!-- 3rd Row: Points per Match Day + Points in Season Progress -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
                             <div class="card">
                                 <div class="card-header">
                                     <h6>Points per Match Day</h6>
                                 </div>
                                 <div class="card-body">
-                                    <div id="chartTeamPointsWeekly" style="height: 400px;"></div>
+                                    <div id="chartTeamPointsWeekly" style="height: 300px;"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h6>Points in Season Progress</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div id="chartTeamPointsCumulated" style="height: 300px;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 4th Row: Individual Averages (Full Width) -->
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h6>Individual Averages</h6>
+                                    <p class="mb-0 text-muted small">Player performance statistics with total points and high games</p>
+                                </div>
+                                <div class="card-body">
+                                    <div id="individualAveragesTable"></div>
                                 </div>
                             </div>
                         </div>
@@ -255,34 +257,26 @@ class LeagueSeasonOverviewBlock extends BaseContentBlock {
     }
 
     createTimetable(data) {
+        console.log('DEBUG: createTimetable called with data:', data);
         const container = document.getElementById('seasonTimetable');
-        if (!container || !data) return;
-
-        // Create a visual timetable showing match days and their status
-        let html = '<div class="row">';
-        
-        if (data.weeks) {
-            data.weeks.forEach((week, index) => {
-                const isCompleted = week.completed || false;
-                const statusClass = isCompleted ? 'bg-success text-white' : 'bg-light text-dark';
-                const statusIcon = isCompleted ? '✓' : '○';
-                
-                html += `
-                    <div class="col-md-2 col-sm-3 col-4 mb-2">
-                        <div class="card ${statusClass}">
-                            <div class="card-body text-center py-2">
-                                <small><strong>Week ${week.week}</strong></small><br>
-                                <small>${week.date || 'TBD'}</small><br>
-                                <span class="badge ${isCompleted ? 'badge-light' : 'badge-secondary'}">${statusIcon}</span>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            });
+        if (!container || !data) {
+            console.warn('No container or data for timetable');
+            return;
         }
-        
-        html += '</div>';
-        container.innerHTML = html;
+
+        // Use createTableBootstrap3 for structured table data
+        if (typeof createTableBootstrap3 === 'function' && data.columns && data.data) {
+            console.log('Creating timetable using createTableBootstrap3');
+            createTableBootstrap3('seasonTimetable', data, { 
+                disablePositionCircle: true,
+                enableSpecialRowStyling: true 
+            });
+        } else {
+            console.warn('createTableBootstrap3 not available or invalid data format, falling back');
+            // Fallback for legacy format
+            let html = '<div class="alert alert-info">Timetable data not available in expected format</div>';
+            container.innerHTML = html;
+        }
     }
 
     createStandingsTable(data) {

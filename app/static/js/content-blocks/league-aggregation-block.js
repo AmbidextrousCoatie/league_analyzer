@@ -69,7 +69,7 @@ class LeagueAggregationBlock extends BaseContentBlock {
                         <div class="col-md-6">
                             <div class="card">
                                 <div class="card-header">
-                                    <h6>Points to Win League</h6>
+                                    <h6>League Points to Win</h6>
                                 </div>
                                 <div class="card-body">
                                     <div id="chartPointsToWin" style="height: 300px;"></div>
@@ -311,7 +311,7 @@ class LeagueAggregationBlock extends BaseContentBlock {
                 data.data,                              // {Points to Win: [169.2, 176.3, ...]}
                 Object.keys(data.data),                 // ['Points to Win']
                 'chartPointsToWin',                     // container ID
-                'Points to Win League by Season',       // title
+                'League Points Needed to Win by Season', // title
                 data.labels || data.seasons,            // x-axis labels
                 false,                                  // invertYAxis
                 'auto'                                  // yAxisRange

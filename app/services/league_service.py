@@ -2055,7 +2055,7 @@ class LeagueService:
             return {'data': {}, 'seasons': [], 'labels': []}
 
     def get_points_to_win_history(self, league: str, debug: bool = False) -> Dict[str, Any]:
-        """Get points needed to win the league across seasons"""
+        """Get total league points earned by the winning team across seasons"""
         try:
             if debug:
                 print(f"DEBUG: get_points_to_win_history called for league: {league}")
@@ -2069,72 +2069,44 @@ class LeagueService:
             for season in seasons:
                 try:
                     if debug:
-                        print(f"DEBUG: Processing season {season} for points to win")
-                    # Get league history (final standings)
-                    history_data = self.get_league_history_table_data(league, season)
-                    if debug:
-                        print(f"DEBUG: History data for {season}: has_data={history_data and history_data.data}, rows={len(history_data.data) if history_data and history_data.data else 0}")
+                        print(f"DEBUG: Processing season {season} for winning team total league points")
                     
-                    if history_data and history_data.data:
-                        # Winner is first row, get their total points
-                        first_row = history_data.data[0]
+                    # Filter data for league + season
+                    filters = {
+                        Columns.league_name: {'value': league, 'operator': 'eq'},
+                        Columns.season: {'value': season, 'operator': 'eq'}
+                    }
+                    
+                    season_data = self.adapter.get_filtered_data(filters=filters)
+                    if debug:
+                        print(f"DEBUG: Found {len(season_data)} total records for {league} {season}")
+                    
+                    if not season_data.empty:
+                        # Group by team_name and sum Columns.points
+                        team_totals = season_data.groupby(Columns.team_name)[Columns.points].sum().reset_index()
                         if debug:
-                            print(f"DEBUG: First row (winner): {first_row}")
-                            print(f"DEBUG: History columns structure: {[str(col) for col in history_data.columns]}")
+                            print(f"DEBUG: Team totals: {team_totals.to_dict('records')}")
                         
-                        # Look for the season points column specifically
-                        # From debug output: index 21 is season_points (league points)
-                        # But we want actual winning points, so try index 20 (season_score/total score) or 21 
-                        winning_points = None
-                        
-                        # Try indices that typically contain total points for winning
-                        # Index 20 usually contains season_score (total score)
-                        # Index 21 usually contains season_points (league points earned)
-                        if len(first_row) > 21:
-                            # Prefer league points (index 21) as it represents points earned to win
-                            potential_points = first_row[21]  # season_points
-                            if isinstance(potential_points, (int, float)) and potential_points > 50:  # League points should be > 50
-                                winning_points = potential_points
-                                if debug:
-                                    print(f"DEBUG: Found league points at index 21: {winning_points}")
-                            elif len(first_row) > 20:
-                                # Fallback to total score if league points don't look right
-                                potential_score = first_row[20]  # season_score
-                                if isinstance(potential_score, (int, float)) and potential_score > 10000:  # Total score should be > 10k
-                                    winning_points = potential_score
-                                    if debug:
-                                        print(f"DEBUG: Found total score at index 20: {winning_points}")
-                        
-                        # Fallback to original logic if specific indices don't work
-                        if winning_points is None and len(first_row) > 0:
-                            for idx in [21, 20, -3, -2, 2, 3, 4]:  # Try league points, total score, then others
-                                try:
-                                    if idx < 0:
-                                        test_idx = len(first_row) + idx
-                                    else:
-                                        test_idx = idx
-                                    
-                                    if 0 <= test_idx < len(first_row):
-                                        value = first_row[test_idx]
-                                        if isinstance(value, (int, float)) and value > 50:  # Must be reasonable winning points
-                                            winning_points = value
-                                            if debug:
-                                                print(f"DEBUG: Found points at index {test_idx}: {winning_points}")
-                                            break
-                                except (IndexError, TypeError):
-                                    continue
-                        
-                        if winning_points is not None:
-                            season_points[season] = winning_points
-                            valid_seasons.append(season)
+                        if not team_totals.empty:
+                            # Sort by sum of points (descending) and take top entry
+                            team_totals = team_totals.sort_values(by=Columns.points, ascending=False)
+                            winning_team_points = team_totals.iloc[0][Columns.points]
+                            winning_team_name = team_totals.iloc[0][Columns.team_name]
+                            
                             if debug:
-                                print(f"DEBUG: Using winning points for {season}: {winning_points}")
+                                print(f"DEBUG: Winning team: {winning_team_name} with {winning_team_points} total points")
+                            
+                            season_points[season] = winning_team_points
+                            valid_seasons.append(season)
                         else:
                             if debug:
-                                print(f"DEBUG: Could not find valid points for {season}, row: {first_row}")
+                                print(f"DEBUG: No team totals found for {league} {season}")
+                    else:
+                        if debug:
+                            print(f"DEBUG: No data found for {league} {season}")
                                 
                 except Exception as e:
-                    print(f"ERROR getting points to win for {league} {season}: {e}")
+                    print(f"ERROR getting winning team league points for {league} {season}: {e}")
                     if debug:
                         import traceback
                         print(f"TRACEBACK: {traceback.format_exc()}")
@@ -2145,11 +2117,11 @@ class LeagueService:
                 print(f"DEBUG: Valid seasons: {valid_seasons}")
             
             result = {
-                'data': {'Points to Win': [season_points.get(season, 0) for season in valid_seasons]},
+                'data': {'League Points to Win': [season_points.get(season, 0) for season in valid_seasons]},
                 'seasons': valid_seasons,
                 'labels': valid_seasons,
-                'title': f'{league} - Points Needed to Win by Season',
-                'y_axis_title': 'Total Points'
+                'title': f'{league} - League Points Needed to Win by Season',
+                'y_axis_title': 'Total League Points'
             }
             if debug:
                 print(f"DEBUG: Returning points to win result: {result}")
@@ -2216,40 +2188,93 @@ class LeagueService:
             print(f"Error in get_top_team_performances: {e}")
             return TableData(columns=[], data=[], title="Error loading data")
 
-    def get_season_timetable(self, league: str, season: str) -> Dict[str, Any]:
-        """Get season timetable with match day schedule"""
+    def get_season_timetable(self, league: str, season: str) -> TableData:
+        """Get season timetable with match day schedule as structured table data"""
         try:
             # Get available weeks for the season
             available_weeks = self.get_available_weeks(season, league)
             
             if not available_weeks:
-                return {'weeks': []}
+                return TableData(
+                    columns=[],
+                    data=[],
+                    title=f"No timetable available for {league} - {season}"
+                )
             
             latest_week = self.get_latest_week(season, league)
             
-            # Create week objects with completion status
-            weeks = []
-            for week_num in range(1, max(available_weeks) + 3):  # Add few extra weeks for future
-                is_completed = week_num in available_weeks and week_num <= latest_week
-                
-                weeks.append({
-                    'week': week_num,
-                    'date': 'TBD',  # Could be enhanced with actual dates if available
-                    'completed': is_completed,
-                    'has_data': week_num in available_weeks
-                })
-            
-            return {
-                'weeks': weeks,
-                'total_weeks': len(weeks),
-                'completed_weeks': len([w for w in weeks if w['completed']]),
-                'league': league,
-                'season': season
+            # Get actual week data with dates and locations from the database
+            filters = {
+                Columns.league_name: {'value': league, 'operator': 'eq'},
+                Columns.season: {'value': season, 'operator': 'eq'},
+                Columns.computed_data: {'value': True, 'operator': 'eq'}  # Get team summary data
             }
+            
+            week_data = self.adapter.get_filtered_data(filters=filters)
+            print(f"DEBUG: Retrieved {len(week_data)} week records for timetable")
+            
+            # Group data by week to get unique week info
+            week_info = {}
+            for _, row in week_data.iterrows():
+                week_num = row[Columns.week]
+                if week_num not in week_info:
+                    week_info[week_num] = {
+                        'date': row.get(Columns.date, 'TBD'),
+                        'location': row.get(Columns.location, f"{league} Venue"),
+                        'has_data': True
+                    }
+            
+            # Create table data only for existing weeks
+            table_data = []
+            for week_num in sorted(available_weeks):
+                is_completed = week_num <= latest_week
+                
+                # Get real data if available
+                if week_num in week_info:
+                    date = week_info[week_num]['date']
+                    location = week_info[week_num]['location']
+                else:
+                    date = "TBD"
+                    location = f"{league} Venue"
+                
+                # Determine status
+                if is_completed:
+                    status = "✅ Completed"
+                elif week_num in available_weeks:
+                    status = "📊 Data Available"
+                else:
+                    status = "⏳ Pending"
+                
+                table_data.append([
+                    f"Week {week_num}",
+                    date if date and str(date) != 'nan' else "TBD",
+                    location if location and str(location) != 'nan' else f"{league} Venue",
+                    status
+                ])
+            
+            # Create table structure
+            columns = [
+                ColumnGroup(
+                    title="Season Timetable",
+                    columns=[
+                        Column(title="Week", field="week", width="100px", align="center"),
+                        Column(title="Date", field="date", width="120px", align="center"),
+                        Column(title="Location", field="location", width="200px", align="left"),
+                        Column(title="Status", field="status", width="150px", align="center")
+                    ]
+                )
+            ]
+            
+            return TableData(
+                columns=columns,
+                data=table_data,
+                title=f"{league} {season} - Match Schedule",
+                description="Season timetable and completion status"
+            )
             
         except Exception as e:
             print(f"Error in get_season_timetable: {e}")
-            return {'weeks': []}
+            return TableData(columns=[], data=[], title="Error loading timetable")
 
     def get_individual_averages(self, league: str, season: str) -> TableData:
         """Get individual player averages for a season, sorted by performance"""
@@ -2285,6 +2310,10 @@ class LeagueService:
                 team_name = row[Columns.team_name]
                 score = row[Columns.score]
                 
+                # Skip rows with missing essential data
+                if pd.isna(player_name) or pd.isna(team_name):
+                    continue
+                
                 # Create unique player identifier
                 player_key = f"{player_name}|{team_name}"
                 
@@ -2296,9 +2325,12 @@ class LeagueService:
                         'games': 0
                     }
                 
+                # Count all games, even if score is missing (DNP, etc.)
+                player_stats[player_key]['games'] += 1
+                
+                # Only add valid scores to the calculation
                 if pd.notna(score) and isinstance(score, (int, float)):
                     player_stats[player_key]['scores'].append(score)
-                    player_stats[player_key]['games'] += 1
             
             print(f"DEBUG: Processed {len(player_stats)} unique players")
             
@@ -2306,18 +2338,30 @@ class LeagueService:
             table_data = []
             for player_key, stats in player_stats.items():
                 if stats['games'] > 0:
-                    average = sum(stats['scores']) / len(stats['scores'])
+                    # Handle players with no valid scores (DNP, etc.)
+                    if len(stats['scores']) > 0:
+                        average = sum(stats['scores']) / len(stats['scores'])
+                        total_points = sum(stats['scores'])
+                        high_game = max(stats['scores'])
+                    else:
+                        # Player has games but no valid scores
+                        average = 0.0
+                        total_points = 0.0
+                        high_game = 0.0
+                    
                     table_data.append([
                         stats['player_name'],
                         stats['team_name'],
                         stats['games'],
-                        round(average, 1)
+                        round(total_points, 1),
+                        round(average, 1),
+                        round(high_game, 1)
                     ])
             
             print(f"DEBUG: Created {len(table_data)} table rows")
             
-            # Sort by average descending
-            table_data.sort(key=lambda x: x[3], reverse=True)
+            # Sort by average descending (index 4 now contains average)
+            table_data.sort(key=lambda x: x[4], reverse=True)
             
             if table_data:
                 print(f"DEBUG: Top player: {table_data[0]}")
@@ -2327,10 +2371,12 @@ class LeagueService:
                 ColumnGroup(
                     title="Individual Averages",
                     columns=[
-                        Column(title="Player", field="player", width="200px", align="left"),
-                        Column(title="Team", field="team", width="150px", align="left"),
-                        Column(title="Games", field="games", width="80px", align="center"),
-                        Column(title="Average", field="average", width="100px", align="center")
+                        Column(title="Player", field="player", width="180px", align="left"),
+                        Column(title="Team", field="team", width="130px", align="left"),
+                        Column(title="Games", field="games", width="70px", align="center"),
+                        Column(title="Total Points", field="total_points", width="100px", align="center"),
+                        Column(title="Average", field="average", width="90px", align="center"),
+                        Column(title="High Game", field="high_game", width="90px", align="center")
                     ]
                 )
             ]
@@ -2391,13 +2437,13 @@ class LeagueService:
                         print(f"DEBUG: Sample row from {season}: {individual_data.data[0] if individual_data.data else 'None'}")
                         # Take top 5 from each season
                         for row in individual_data.data[:5]:
-                            if len(row) >= 4:
+                            # New individual_averages structure: [player_name, team_name, games, total_points, average, high_game]
+                            if len(row) >= 6:
                                 performance_entry = [
                                     season,
                                     row[0],  # player_name
                                     row[1],  # team_name
-                                    row[2],  # games
-                                    row[3]   # average
+                                    row[4]   # average (index 4 in the new structure)
                                 ]
                                 all_performances.append(performance_entry)
                                 print(f"DEBUG: Added performance: {performance_entry}")
@@ -2410,10 +2456,10 @@ class LeagueService:
             
             print(f"DEBUG: Total performances collected: {len(all_performances)}")
             
-            # Sort by average descending
-            all_performances.sort(key=lambda x: x[4] if isinstance(x[4], (int, float)) else 0, reverse=True)
+            # Sort by average descending (now index 3 since we removed games column)
+            all_performances.sort(key=lambda x: x[3] if isinstance(x[3], (int, float)) else 0, reverse=True)
             
-            # Create table structure
+            # Create table structure (removed Games column as requested)
             columns = [
                 ColumnGroup(
                     title="Individual Performance",
@@ -2421,7 +2467,6 @@ class LeagueService:
                         Column(title="Season", field="season", width="100px", align="center"),
                         Column(title="Player", field="player", width="200px", align="left"),
                         Column(title="Team", field="team", width="150px", align="left"),
-                        Column(title="Games", field="games", width="80px", align="center"),
                         Column(title="Average", field="average", width="100px", align="center")
                     ]
                 )
