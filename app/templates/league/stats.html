@@ -16,14 +16,36 @@
         </div>
     </div>
 
-    <!-- Season Overview Block -->
-    <div id="seasonOverviewContainer">
-        <!-- Season overview content will be rendered here -->
+    <!-- League Aggregation Block (League only) -->
+    <div id="leagueAggregationContainer">
+        <!-- League aggregation content will be rendered here -->
+        <div class="text-center py-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading league aggregation...</span>
+            </div>
+            <p class="text-muted mt-2">Initializing league aggregation...</p>
+        </div>
+    </div>
+
+    <!-- League Season Overview Block (League + Season) -->
+    <div id="leagueSeasonOverviewContainer">
+        <!-- League season overview content will be rendered here -->
         <div class="text-center py-5">
             <div class="spinner-border text-primary" role="status">
                 <span class="visually-hidden">Loading season overview...</span>
             </div>
             <p class="text-muted mt-2">Initializing season overview...</p>
+        </div>
+    </div>
+
+    <!-- Season Overview Block (League + Season + Week/Team) -->
+    <div id="seasonOverviewContainer">
+        <!-- Season overview content will be rendered here -->
+        <div class="text-center py-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading detailed overview...</span>
+            </div>
+            <p class="text-muted mt-2">Initializing detailed overview...</p>
         </div>
     </div>
 
@@ -59,6 +81,8 @@
 
 <!-- Content blocks -->
 <script src="{{ url_for('static', filename='js/content-blocks/filter-controls-block.js') }}"></script>
+<script src="{{ url_for('static', filename='js/content-blocks/league-aggregation-block.js') }}"></script>
+<script src="{{ url_for('static', filename='js/content-blocks/league-season-overview-block.js') }}"></script>
 <script src="{{ url_for('static', filename='js/content-blocks/season-overview-block.js') }}"></script>
 <script src="{{ url_for('static', filename='js/content-blocks/matchday-block.js') }}"></script>
 <script src="{{ url_for('static', filename='js/content-blocks/team-details-block.js') }}"></script>

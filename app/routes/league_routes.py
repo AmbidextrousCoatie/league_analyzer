@@ -464,3 +464,177 @@ def get_team_individual_scores_table():
         print(f"Error in get_team_individual_scores_table: {str(e)}")
         print(f"Traceback: {traceback.format_exc()}")
         return jsonify({'error': str(e)}), 500
+
+# ==========================================
+# AGGREGATION ENDPOINTS (League-wide over time)
+# ==========================================
+
+@bp.route('/league/get_league_averages_history')
+def get_league_averages_history():
+    """Get league average scores across all seasons"""
+    try:
+        league = request.args.get('league')
+        
+        if not league:
+            return jsonify({'error': 'Missing required parameter: league'}), 400
+        
+        print(f"League Averages History - Received request with: league={league}")
+        
+        debug = request.args.get('debug', 'false').lower() == 'true'
+        data = league_service.get_league_averages_history(league=league, debug=debug)
+        return jsonify(data)
+        
+    except Exception as e:
+        print(f"Error in get_league_averages_history: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
+@bp.route('/league/get_points_to_win_history')
+def get_points_to_win_history():
+    """Get points needed to win the league across seasons"""
+    try:
+        league = request.args.get('league')
+        
+        if not league:
+            return jsonify({'error': 'Missing required parameter: league'}), 400
+        
+        print(f"Points to Win History - Received request with: league={league}")
+        
+        debug = request.args.get('debug', 'false').lower() == 'true'
+        data = league_service.get_points_to_win_history(league=league, debug=debug)
+        return jsonify(data)
+        
+    except Exception as e:
+        print(f"Error in get_points_to_win_history: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
+@bp.route('/league/get_top_team_performances')
+def get_top_team_performances():
+    """Get top team performances across all seasons"""
+    try:
+        league = request.args.get('league')
+        
+        if not league:
+            return jsonify({'error': 'Missing required parameter: league'}), 400
+        
+        print(f"Top Team Performances - Received request with: league={league}")
+        
+        table_data = league_service.get_top_team_performances(league=league)
+        return jsonify(table_data.to_dict())
+        
+    except Exception as e:
+        print(f"Error in get_top_team_performances: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
+@bp.route('/league/get_top_individual_performances')
+def get_top_individual_performances():
+    """Get top individual performances across all seasons"""
+    try:
+        league = request.args.get('league')
+        
+        if not league:
+            return jsonify({'error': 'Missing required parameter: league'}), 400
+        
+        print(f"Top Individual Performances - Received request with: league={league}")
+        
+        table_data = league_service.get_top_individual_performances(league=league)
+        return jsonify(table_data.to_dict())
+        
+    except Exception as e:
+        print(f"Error in get_top_individual_performances: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
+@bp.route('/league/get_record_games')
+def get_record_games():
+    """Get record games (highest scoring) across all seasons"""
+    try:
+        league = request.args.get('league')
+        
+        if not league:
+            return jsonify({'error': 'Missing required parameter: league'}), 400
+        
+        print(f"Record Games - Received request with: league={league}")
+        
+        table_data = league_service.get_record_games(league=league)
+        return jsonify(table_data.to_dict())
+        
+    except Exception as e:
+        print(f"Error in get_record_games: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
+@bp.route('/league/get_record_individual_games')
+def get_record_individual_games():
+    """Get record individual games (highest scoring individual performances)"""
+    try:
+        league = request.args.get('league')
+        
+        if not league:
+            return jsonify({'error': 'Missing required parameter: league'}), 400
+        
+        print(f"Record Individual Games - Received request with: league={league}")
+        
+        table_data = league_service.get_record_individual_games(league=league)
+        return jsonify(table_data.to_dict())
+        
+    except Exception as e:
+        print(f"Error in get_record_individual_games: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
+@bp.route('/league/get_record_team_games')
+def get_record_team_games():
+    """Get record team games (highest scoring team performances)"""
+    try:
+        league = request.args.get('league')
+        
+        if not league:
+            return jsonify({'error': 'Missing required parameter: league'}), 400
+        
+        print(f"Record Team Games - Received request with: league={league}")
+        
+        table_data = league_service.get_record_team_games(league=league)
+        return jsonify(table_data.to_dict())
+        
+    except Exception as e:
+        print(f"Error in get_record_team_games: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
+# ==========================================
+# SEASON ENDPOINTS (Season-specific data)
+# ==========================================
+
+@bp.route('/league/get_season_timetable')
+def get_season_timetable():
+    """Get season timetable with match day schedule"""
+    try:
+        league = request.args.get('league')
+        season = request.args.get('season')
+        
+        if not all([league, season]):
+            return jsonify({'error': 'Missing required parameters: league, season'}), 400
+        
+        print(f"Season Timetable - Received request with: league={league}, season={season}")
+        
+        data = league_service.get_season_timetable(league=league, season=season)
+        return jsonify(data)
+        
+    except Exception as e:
+        print(f"Error in get_season_timetable: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
+@bp.route('/league/get_individual_averages')
+def get_individual_averages():
+    """Get individual player averages for a season"""
+    try:
+        league = request.args.get('league')
+        season = request.args.get('season')
+        
+        if not all([league, season]):
+            return jsonify({'error': 'Missing required parameters: league, season'}), 400
+        
+        print(f"Individual Averages - Received request with: league={league}, season={season}")
+        
+        table_data = league_service.get_individual_averages(league=league, season=season)
+        return jsonify(table_data.to_dict())
+        
+    except Exception as e:
+        print(f"Error in get_individual_averages: {str(e)}")
+        return jsonify({'error': str(e)}), 500

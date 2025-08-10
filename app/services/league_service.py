@@ -1974,3 +1974,597 @@ class LeagueService:
                     "compact": False
             }
         )
+
+    # ==========================================
+    # AGGREGATION ENDPOINTS (League-wide over time)
+    # ==========================================
+
+    def get_league_averages_history(self, league: str, debug: bool = False) -> Dict[str, Any]:
+        """Get league average scores across all seasons"""
+        try:
+            if debug:
+                print(f"DEBUG: get_league_averages_history called for league: {league}")
+            seasons = self.get_seasons()
+            if debug:
+                print(f"DEBUG: Available seasons: {seasons}")
+            
+            # Get league averages for each season
+            season_averages = {}
+            valid_seasons = []
+            
+            for season in seasons:
+                try:
+                    if debug:
+                        print(f"DEBUG: Processing season {season} for averages")
+                    # Use existing team averages method and calculate league average
+                    team_averages = self.get_team_averages_simple(league, season)
+                    if debug:
+                        print(f"DEBUG: Team averages for {season}: has_data={team_averages and 'data' in team_averages}")
+                    
+                    if team_averages and 'data' in team_averages:
+                        if debug:
+                            print(f"DEBUG: Team averages data keys: {list(team_averages['data'].keys())}")
+                        # Calculate overall league average for the season
+                        all_averages = []
+                        for team_name, team_data in team_averages['data'].items():
+                            if isinstance(team_data, list) and team_data:
+                                # Get final average (last value in the series)
+                                final_avg = team_data[-1] if team_data[-1] is not None else 0
+                                all_averages.append(final_avg)
+                                if debug:
+                                    print(f"DEBUG: Team {team_name} final average: {final_avg}")
+                        
+                        if all_averages:
+                            league_avg = sum(all_averages) / len(all_averages)
+                            season_averages[season] = league_avg
+                            valid_seasons.append(season)
+                            if debug:
+                                print(f"DEBUG: League average for {season}: {league_avg}")
+                        else:
+                            if debug:
+                                print(f"DEBUG: No valid averages found for {season}")
+                            
+                except Exception as e:
+                    print(f"ERROR calculating average for {league} {season}: {e}")
+                    if debug:
+                        import traceback
+                        print(f"TRACEBACK: {traceback.format_exc()}")
+                    continue
+            
+            if debug:
+                print(f"DEBUG: Final season_averages: {season_averages}")
+                print(f"DEBUG: Valid seasons: {valid_seasons}")
+            
+            # Prepare data for line chart
+            result = {
+                'data': {'League Average': [season_averages.get(season, 0) for season in valid_seasons]},
+                'seasons': valid_seasons,
+                'labels': valid_seasons,
+                'title': f'{league} - Average Scores by Season',
+                'y_axis_title': 'Average Score'
+            }
+            if debug:
+                print(f"DEBUG: Returning league averages result: {result}")
+            return result
+            
+        except Exception as e:
+            print(f"ERROR in get_league_averages_history: {e}")
+            if debug:
+                import traceback
+                print(f"TRACEBACK: {traceback.format_exc()}")
+            return {'data': {}, 'seasons': [], 'labels': []}
+
+    def get_points_to_win_history(self, league: str, debug: bool = False) -> Dict[str, Any]:
+        """Get points needed to win the league across seasons"""
+        try:
+            if debug:
+                print(f"DEBUG: get_points_to_win_history called for league: {league}")
+            seasons = self.get_seasons()
+            if debug:
+                print(f"DEBUG: Available seasons: {seasons}")
+            
+            season_points = {}
+            valid_seasons = []
+            
+            for season in seasons:
+                try:
+                    if debug:
+                        print(f"DEBUG: Processing season {season} for points to win")
+                    # Get league history (final standings)
+                    history_data = self.get_league_history_table_data(league, season)
+                    if debug:
+                        print(f"DEBUG: History data for {season}: has_data={history_data and history_data.data}, rows={len(history_data.data) if history_data and history_data.data else 0}")
+                    
+                    if history_data and history_data.data:
+                        # Winner is first row, get their total points
+                        first_row = history_data.data[0]
+                        if debug:
+                            print(f"DEBUG: First row (winner): {first_row}")
+                            print(f"DEBUG: History columns structure: {[str(col) for col in history_data.columns]}")
+                        
+                        # Look for the season points column specifically
+                        # From debug output: index 21 is season_points (league points)
+                        # But we want actual winning points, so try index 20 (season_score/total score) or 21 
+                        winning_points = None
+                        
+                        # Try indices that typically contain total points for winning
+                        # Index 20 usually contains season_score (total score)
+                        # Index 21 usually contains season_points (league points earned)
+                        if len(first_row) > 21:
+                            # Prefer league points (index 21) as it represents points earned to win
+                            potential_points = first_row[21]  # season_points
+                            if isinstance(potential_points, (int, float)) and potential_points > 50:  # League points should be > 50
+                                winning_points = potential_points
+                                if debug:
+                                    print(f"DEBUG: Found league points at index 21: {winning_points}")
+                            elif len(first_row) > 20:
+                                # Fallback to total score if league points don't look right
+                                potential_score = first_row[20]  # season_score
+                                if isinstance(potential_score, (int, float)) and potential_score > 10000:  # Total score should be > 10k
+                                    winning_points = potential_score
+                                    if debug:
+                                        print(f"DEBUG: Found total score at index 20: {winning_points}")
+                        
+                        # Fallback to original logic if specific indices don't work
+                        if winning_points is None and len(first_row) > 0:
+                            for idx in [21, 20, -3, -2, 2, 3, 4]:  # Try league points, total score, then others
+                                try:
+                                    if idx < 0:
+                                        test_idx = len(first_row) + idx
+                                    else:
+                                        test_idx = idx
+                                    
+                                    if 0 <= test_idx < len(first_row):
+                                        value = first_row[test_idx]
+                                        if isinstance(value, (int, float)) and value > 50:  # Must be reasonable winning points
+                                            winning_points = value
+                                            if debug:
+                                                print(f"DEBUG: Found points at index {test_idx}: {winning_points}")
+                                            break
+                                except (IndexError, TypeError):
+                                    continue
+                        
+                        if winning_points is not None:
+                            season_points[season] = winning_points
+                            valid_seasons.append(season)
+                            if debug:
+                                print(f"DEBUG: Using winning points for {season}: {winning_points}")
+                        else:
+                            if debug:
+                                print(f"DEBUG: Could not find valid points for {season}, row: {first_row}")
+                                
+                except Exception as e:
+                    print(f"ERROR getting points to win for {league} {season}: {e}")
+                    if debug:
+                        import traceback
+                        print(f"TRACEBACK: {traceback.format_exc()}")
+                    continue
+            
+            if debug:
+                print(f"DEBUG: Final season_points: {season_points}")
+                print(f"DEBUG: Valid seasons: {valid_seasons}")
+            
+            result = {
+                'data': {'Points to Win': [season_points.get(season, 0) for season in valid_seasons]},
+                'seasons': valid_seasons,
+                'labels': valid_seasons,
+                'title': f'{league} - Points Needed to Win by Season',
+                'y_axis_title': 'Total Points'
+            }
+            if debug:
+                print(f"DEBUG: Returning points to win result: {result}")
+            return result
+            
+        except Exception as e:
+            print(f"ERROR in get_points_to_win_history: {e}")
+            if debug:
+                import traceback
+                print(f"TRACEBACK: {traceback.format_exc()}")
+            return {'data': {}, 'seasons': [], 'labels': []}
+
+    def get_top_team_performances(self, league: str) -> TableData:
+        """Get top team performances across all seasons based on team averages"""
+        try:
+            seasons = self.get_seasons()
+            all_performances = []
+            
+            for season in seasons:
+                try:
+                    # Get team averages for the season
+                    team_averages_data = self.get_team_averages_simple(league, season)
+                    
+                    if team_averages_data and 'data' in team_averages_data:
+                        # Extract team averages (final values from the season)
+                        for team_name, avg_series in team_averages_data['data'].items():
+                            if isinstance(avg_series, list) and avg_series:
+                                # Get final average (last value in the series)
+                                final_average = avg_series[-1] if avg_series[-1] is not None else 0
+                                
+                                all_performances.append([
+                                    season,
+                                    team_name,
+                                    round(final_average, 1)
+                                ])
+                                
+                except Exception as e:
+                    print(f"Error processing season {season}: {e}")
+                    continue
+            
+            # Sort by average descending
+            all_performances.sort(key=lambda x: x[2] if isinstance(x[2], (int, float)) else 0, reverse=True)
+            
+            # Create table structure
+            columns = [
+                ColumnGroup(
+                    title="Team Performance",
+                    columns=[
+                        Column(title="Season", field="season", width="120px", align="center"),
+                        Column(title="Team", field="team", width="250px", align="left"),
+                        Column(title="Average", field="average", width="130px", align="center")
+                    ]
+                )
+            ]
+            
+            return TableData(
+                columns=columns,
+                data=all_performances[:20],  # Top 20 performances by average
+                title=f"{league} - Top Team Performances",
+                description="Best team season averages across all years"
+            )
+            
+        except Exception as e:
+            print(f"Error in get_top_team_performances: {e}")
+            return TableData(columns=[], data=[], title="Error loading data")
+
+    def get_season_timetable(self, league: str, season: str) -> Dict[str, Any]:
+        """Get season timetable with match day schedule"""
+        try:
+            # Get available weeks for the season
+            available_weeks = self.get_available_weeks(season, league)
+            
+            if not available_weeks:
+                return {'weeks': []}
+            
+            latest_week = self.get_latest_week(season, league)
+            
+            # Create week objects with completion status
+            weeks = []
+            for week_num in range(1, max(available_weeks) + 3):  # Add few extra weeks for future
+                is_completed = week_num in available_weeks and week_num <= latest_week
+                
+                weeks.append({
+                    'week': week_num,
+                    'date': 'TBD',  # Could be enhanced with actual dates if available
+                    'completed': is_completed,
+                    'has_data': week_num in available_weeks
+                })
+            
+            return {
+                'weeks': weeks,
+                'total_weeks': len(weeks),
+                'completed_weeks': len([w for w in weeks if w['completed']]),
+                'league': league,
+                'season': season
+            }
+            
+        except Exception as e:
+            print(f"Error in get_season_timetable: {e}")
+            return {'weeks': []}
+
+    def get_individual_averages(self, league: str, season: str) -> TableData:
+        """Get individual player averages for a season, sorted by performance"""
+        try:
+            print(f"DEBUG: get_individual_averages called for {league} {season}")
+            # Get all player data for the league/season
+            filters = {
+                Columns.league_name: {'value': league, 'operator': 'eq'},
+                Columns.season: {'value': season, 'operator': 'eq'},
+                Columns.computed_data: {'value': False, 'operator': 'eq'}  # Individual players only
+            }
+            print(f"DEBUG: Using filters: {filters}")
+            
+            player_data = self.adapter.get_filtered_data(filters=filters)
+            print(f"DEBUG: Retrieved {len(player_data)} rows from adapter")
+            
+            if player_data.empty:
+                print(f"DEBUG: No data found for {league} {season}")
+                return TableData(
+                    columns=[],
+                    data=[],
+                    title=f"No individual data available for {league} - {season}"
+                )
+            
+            print(f"DEBUG: Sample player data columns: {list(player_data.columns)}")
+            print(f"DEBUG: Sample player data row: {player_data.iloc[0].to_dict() if len(player_data) > 0 else 'None'}")
+            
+            # Calculate averages per player
+            player_stats = {}
+            
+            for _, row in player_data.iterrows():
+                player_name = row[Columns.player_name]
+                team_name = row[Columns.team_name]
+                score = row[Columns.score]
+                
+                # Create unique player identifier
+                player_key = f"{player_name}|{team_name}"
+                
+                if player_key not in player_stats:
+                    player_stats[player_key] = {
+                        'player_name': player_name,
+                        'team_name': team_name,
+                        'scores': [],
+                        'games': 0
+                    }
+                
+                if pd.notna(score) and isinstance(score, (int, float)):
+                    player_stats[player_key]['scores'].append(score)
+                    player_stats[player_key]['games'] += 1
+            
+            print(f"DEBUG: Processed {len(player_stats)} unique players")
+            
+            # Calculate averages and prepare table data
+            table_data = []
+            for player_key, stats in player_stats.items():
+                if stats['games'] > 0:
+                    average = sum(stats['scores']) / len(stats['scores'])
+                    table_data.append([
+                        stats['player_name'],
+                        stats['team_name'],
+                        stats['games'],
+                        round(average, 1)
+                    ])
+            
+            print(f"DEBUG: Created {len(table_data)} table rows")
+            
+            # Sort by average descending
+            table_data.sort(key=lambda x: x[3], reverse=True)
+            
+            if table_data:
+                print(f"DEBUG: Top player: {table_data[0]}")
+            
+            # Create table structure
+            columns = [
+                ColumnGroup(
+                    title="Individual Averages",
+                    columns=[
+                        Column(title="Player", field="player", width="200px", align="left"),
+                        Column(title="Team", field="team", width="150px", align="left"),
+                        Column(title="Games", field="games", width="80px", align="center"),
+                        Column(title="Average", field="average", width="100px", align="center")
+                    ]
+                )
+            ]
+            
+            return TableData(
+                columns=columns,
+                data=table_data,
+                title=f"{league} {season} - Individual Averages",
+                description="Player averages sorted by performance"
+            )
+            
+        except Exception as e:
+            print(f"ERROR in get_individual_averages: {e}")
+            import traceback
+            print(f"TRACEBACK: {traceback.format_exc()}")
+            return TableData(columns=[], data=[], title="Error loading individual averages")
+
+    def get_top_individual_performances(self, league: str) -> TableData:
+        """Get top individual performances across all seasons"""
+        try:
+            print(f"DEBUG: get_top_individual_performances called for league: {league}")
+            seasons = self.get_seasons()
+            print(f"DEBUG: Available seasons: {seasons}")
+            
+            # Also check what leagues exist in the data
+            league_filters = {}
+            all_league_data = self.adapter.get_filtered_data(filters=league_filters)
+            unique_leagues = all_league_data[Columns.league_name].unique() if not all_league_data.empty else []
+            print(f"DEBUG: Available leagues in data: {list(unique_leagues)}")
+            print(f"DEBUG: Looking for league: '{league}' - Found: {league in unique_leagues}")
+            
+            all_performances = []
+            
+            for season in seasons:
+                try:
+                    print(f"DEBUG: Processing season {season} for league {league}")
+                    
+                    # First check if any data exists for this league/season combination
+                    basic_filters = {
+                        Columns.league_name: {'value': league, 'operator': 'eq'},
+                        Columns.season: {'value': season, 'operator': 'eq'}
+                    }
+                    basic_data = self.adapter.get_filtered_data(filters=basic_filters)
+                    print(f"DEBUG: Basic data for {league} {season}: {len(basic_data)} total rows")
+                    
+                    if not basic_data.empty:
+                        computed_data_values = basic_data[Columns.computed_data].unique()
+                        print(f"DEBUG: computed_data values in {league} {season}: {computed_data_values}")
+                        individual_rows = basic_data[basic_data[Columns.computed_data] == False]
+                        team_rows = basic_data[basic_data[Columns.computed_data] == True]
+                        print(f"DEBUG: Individual rows: {len(individual_rows)}, Team rows: {len(team_rows)}")
+                    
+                    # Get individual averages for each season
+                    individual_data = self.get_individual_averages(league, season)
+                    print(f"DEBUG: Individual data for {season}: has_data={individual_data and individual_data.data}, data_count={len(individual_data.data) if individual_data and individual_data.data else 0}")
+                    
+                    if individual_data and individual_data.data:
+                        print(f"DEBUG: Sample row from {season}: {individual_data.data[0] if individual_data.data else 'None'}")
+                        # Take top 5 from each season
+                        for row in individual_data.data[:5]:
+                            if len(row) >= 4:
+                                performance_entry = [
+                                    season,
+                                    row[0],  # player_name
+                                    row[1],  # team_name
+                                    row[2],  # games
+                                    row[3]   # average
+                                ]
+                                all_performances.append(performance_entry)
+                                print(f"DEBUG: Added performance: {performance_entry}")
+                                
+                except Exception as e:
+                    print(f"ERROR: processing individual data for season {season}: {e}")
+                    import traceback
+                    print(f"TRACEBACK: {traceback.format_exc()}")
+                    continue
+            
+            print(f"DEBUG: Total performances collected: {len(all_performances)}")
+            
+            # Sort by average descending
+            all_performances.sort(key=lambda x: x[4] if isinstance(x[4], (int, float)) else 0, reverse=True)
+            
+            # Create table structure
+            columns = [
+                ColumnGroup(
+                    title="Individual Performance",
+                    columns=[
+                        Column(title="Season", field="season", width="100px", align="center"),
+                        Column(title="Player", field="player", width="200px", align="left"),
+                        Column(title="Team", field="team", width="150px", align="left"),
+                        Column(title="Games", field="games", width="80px", align="center"),
+                        Column(title="Average", field="average", width="100px", align="center")
+                    ]
+                )
+            ]
+            
+            result_data = all_performances[:30]  # Top 30 individual performances
+            print(f"DEBUG: Returning {len(result_data)} individual performances")
+            
+            return TableData(
+                columns=columns,
+                data=result_data,
+                title=f"{league} - Top Individual Performances",
+                description="Best individual averages across all seasons"
+            )
+            
+        except Exception as e:
+            print(f"ERROR in get_top_individual_performances: {e}")
+            import traceback
+            print(f"TRACEBACK: {traceback.format_exc()}")
+            return TableData(columns=[], data=[], title="Error loading data")
+
+    def get_record_individual_games(self, league: str) -> TableData:
+        """Get record individual games (highest scoring individual performances)"""
+        try:
+            seasons = self.get_seasons()
+            record_games = []
+            
+            for season in seasons:
+                try:
+                    # Get all individual data for the season to find high scores
+                    filters = {
+                        Columns.league_name: {'value': league, 'operator': 'eq'},
+                        Columns.season: {'value': season, 'operator': 'eq'},
+                        Columns.computed_data: {'value': False, 'operator': 'eq'}
+                    }
+                    
+                    player_data = self.adapter.get_filtered_data(filters=filters)
+                    
+                    if not player_data.empty:
+                        # Find highest individual games (top 3 per season)
+                        highest_individual = player_data.nlargest(3, Columns.score)
+                        
+                        for _, row in highest_individual.iterrows():
+                            record_games.append([
+                                season,
+                                row[Columns.player_name],
+                                row[Columns.team_name],
+                                row[Columns.week] if Columns.week in row else '',
+                                row[Columns.score]
+                            ])
+                            
+                except Exception as e:
+                    print(f"Error processing individual record games for season {season}: {e}")
+                    continue
+            
+            # Sort by score descending
+            record_games.sort(key=lambda x: x[4] if isinstance(x[4], (int, float)) else 0, reverse=True)
+            
+            # Create table structure
+            columns = [
+                ColumnGroup(
+                    title="Record Individual Games",
+                    columns=[
+                        Column(title="Season", field="season", width="100px", align="center"),
+                        Column(title="Player", field="player", width="200px", align="left"),
+                        Column(title="Team", field="team", width="150px", align="left"),
+                        Column(title="Week", field="week", width="80px", align="center"),
+                        Column(title="Score", field="score", width="100px", align="center")
+                    ]
+                )
+            ]
+            
+            return TableData(
+                columns=columns,
+                data=record_games[:15],  # Top 15 individual record games
+                title=f"{league} - Record Individual Games",
+                description="Highest scoring individual performances across all seasons"
+            )
+            
+        except Exception as e:
+            print(f"Error in get_record_individual_games: {e}")
+            return TableData(columns=[], data=[], title="Error loading individual record games")
+
+    def get_record_team_games(self, league: str) -> TableData:
+        """Get record team games (highest scoring team performances)"""
+        try:
+            seasons = self.get_seasons()
+            record_games = []
+            
+            for season in seasons:
+                try:
+                    # Get team totals for the season
+                    team_filters = {
+                        Columns.league_name: {'value': league, 'operator': 'eq'},
+                        Columns.season: {'value': season, 'operator': 'eq'},
+                        Columns.computed_data: {'value': True, 'operator': 'eq'}
+                    }
+                    
+                    team_data = self.adapter.get_filtered_data(filters=team_filters)
+                    
+                    if not team_data.empty:
+                        # Find highest team games (top 2 per season)
+                        highest_team = team_data.nlargest(2, Columns.score)
+                        
+                        for _, row in highest_team.iterrows():
+                            record_games.append([
+                                season,
+                                row[Columns.team_name],
+                                row[Columns.week] if Columns.week in row else '',
+                                row[Columns.score]
+                            ])
+                            
+                except Exception as e:
+                    print(f"Error processing team record games for season {season}: {e}")
+                    continue
+            
+            # Sort by score descending
+            record_games.sort(key=lambda x: x[3] if isinstance(x[3], (int, float)) else 0, reverse=True)
+            
+            # Create table structure
+            columns = [
+                ColumnGroup(
+                    title="Record Team Games",
+                    columns=[
+                        Column(title="Season", field="season", width="100px", align="center"),
+                        Column(title="Team", field="team", width="200px", align="left"),
+                        Column(title="Week", field="week", width="80px", align="center"),
+                        Column(title="Score", field="score", width="100px", align="center")
+                    ]
+                )
+            ]
+            
+            return TableData(
+                columns=columns,
+                data=record_games[:15],  # Top 15 team record games
+                title=f"{league} - Record Team Games",
+                description="Highest scoring team performances across all seasons"
+            )
+            
+        except Exception as e:
+            print(f"Error in get_record_team_games: {e}")
+            return TableData(columns=[], data=[], title="Error loading team record games")
+
+    def get_record_games(self, league: str) -> TableData:
+        """Legacy method - returns individual records for backward compatibility"""
+        return self.get_record_individual_games(league)
