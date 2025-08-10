@@ -74,31 +74,19 @@ class FilterControlsBlock extends BaseContentBlock {
                         <div class="col-md-4">
                             <h5 data-i18n="season">Season</h5>
                             <div id="buttonsSeason" class="btn-group-horizontal w-100">
-                                <div class="text-center py-2">
-                                    <div class="spinner-border spinner-border-sm text-primary" role="status">
-                                        <span class="visually-hidden">Loading...</span>
-                                    </div>
-                                </div>
+                                <span class="text-muted small">Loading seasons...</span>
                             </div>
                         </div>
                         <div class="col-md-4">
                             <h5 data-i18n="league">League</h5>
                             <div id="buttonsLeague" class="btn-group-horizontal w-100">
-                                <div class="text-center py-2">
-                                    <div class="spinner-border spinner-border-sm text-primary" role="status">
-                                        <span class="visually-hidden">Loading...</span>
-                                    </div>
-                                </div>
+                                <span class="text-muted small">Loading leagues...</span>
                             </div>
                         </div>
                         <div class="col-md-4">
                             <h5 data-i18n="week">Week</h5>
                             <div id="buttonsWeek" class="btn-group-horizontal w-100">
-                                <div class="text-center py-2">
-                                    <div class="spinner-border spinner-border-sm text-primary" role="status">
-                                        <span class="visually-hidden">Loading...</span>
-                                    </div>
-                                </div>
+                                <span class="text-muted small">Select season and league</span>
                             </div>
                         </div>
                     </div>
@@ -106,11 +94,7 @@ class FilterControlsBlock extends BaseContentBlock {
                         <div class="col-md-12">
                             <h5 data-i18n="team">Team</h5>
                             <div id="buttonsTeam" class="btn-group-horizontal w-100">
-                                <div class="text-center py-2">
-                                    <div class="spinner-border spinner-border-sm text-primary" role="status">
-                                        <span class="visually-hidden">Loading...</span>
-                                    </div>
-                                </div>
+                                <span class="text-muted small">Select season and league</span>
                             </div>
                         </div>
                     </div>
@@ -128,10 +112,31 @@ class FilterControlsBlock extends BaseContentBlock {
     }
 
     attachEventListeners() {
-        // Attach change event listeners for filter selections
-        this.container.addEventListener('change', (event) => {
-            if (event.target.type === 'radio') {
-                this.handleFilterChange(event.target.name, event.target.value);
+        // Use click event but with proper state management
+        this.container.addEventListener('click', (event) => {
+            if (event.target.type === 'radio' || event.target.tagName === 'LABEL') {
+                // Get the radio input (either the clicked radio or the radio associated with the clicked label)
+                const radio = event.target.type === 'radio' ? event.target : 
+                             document.getElementById(event.target.getAttribute('for'));
+                
+                if (radio && radio.type === 'radio') {
+                    // Prevent the default radio behavior completely
+                    event.preventDefault();
+                    event.stopPropagation();
+                    
+                    const filterType = radio.name;
+                    const value = radio.value;
+                    const currentState = this.getCurrentState();
+                    
+                    // Toggle logic: if already selected, deselect; otherwise select
+                    if (currentState[filterType] === value) {
+                        // Toggle off: set to null
+                        this.handleFilterChange(filterType, null);
+                    } else {
+                        // Toggle on: set value
+                        this.handleFilterChange(filterType, value);
+                    }
+                }
             }
         });
     }
@@ -163,6 +168,7 @@ class FilterControlsBlock extends BaseContentBlock {
 
     async updateSeasonButtons(state) {
         try {
+            // Always show all available seasons
             const response = await fetch('/league/get_available_seasons');
             const data = await response.json();
             
@@ -181,7 +187,7 @@ class FilterControlsBlock extends BaseContentBlock {
 
     async updateLeagueButtons(state) {
         try {
-            // If season is selected, get leagues for that season; otherwise get all leagues
+            // Always show all available leagues (filter by season if selected for relevance)
             const url = state.season ? 
                 `/league/get_available_leagues?season=${state.season}` : 
                 '/league/get_available_leagues';
@@ -212,6 +218,7 @@ class FilterControlsBlock extends BaseContentBlock {
         }
 
         try {
+            // Always show all available weeks for the season/league combination
             const response = await fetch(`/league/get_available_weeks?season=${selectedSeason}&league=${selectedLeague}`);
             const data = await response.json();
             
@@ -238,6 +245,7 @@ class FilterControlsBlock extends BaseContentBlock {
         }
 
         try {
+            // Always show all available teams for the season/league combination
             const response = await fetch(`/league/get_available_teams?season=${selectedSeason}&league=${selectedLeague}`);
             const data = await response.json();
             
@@ -483,25 +491,36 @@ class FilterControlsBlock extends BaseContentBlock {
     }
 
     syncButtonsWithState(state) {
-        // Uncheck buttons that conflict with the validated state
+        // Sync buttons to match the validated state (including null values)
         const filterTypes = ['season', 'league', 'week', 'team'];
         
         filterTypes.forEach(filterType => {
             const currentlyChecked = document.querySelector(`input[name="${filterType}"]:checked`);
             const shouldBeChecked = state[filterType];
             
-            if (currentlyChecked && currentlyChecked.value !== shouldBeChecked) {
-                // Uncheck the conflicting button
-                currentlyChecked.checked = false;
-                console.log(`Unchecked conflicting ${filterType}: ${currentlyChecked.value}`);
-            }
-            
-            if (shouldBeChecked) {
-                // Check the correct button
-                const correctButton = document.querySelector(`input[name="${filterType}"][value="${shouldBeChecked}"]`);
-                if (correctButton && !correctButton.checked) {
-                    correctButton.checked = true;
-                    console.log(`Checked correct ${filterType}: ${shouldBeChecked}`);
+            // Only sync if there's actually a mismatch
+            const currentValue = currentlyChecked?.value || null;
+            if (currentValue !== shouldBeChecked) {
+                // If state says null, uncheck any currently checked button
+                if (!shouldBeChecked) {
+                    if (currentlyChecked) {
+                        currentlyChecked.checked = false;
+                        console.log(`Synced: Unchecked ${filterType}: ${currentlyChecked.value} (state is null)`);
+                    }
+                } else {
+                    // If state has a value, ensure the correct button is checked
+                    // Uncheck conflicting button if exists
+                    if (currentlyChecked) {
+                        currentlyChecked.checked = false;
+                        console.log(`Synced: Unchecked conflicting ${filterType}: ${currentlyChecked.value}`);
+                    }
+                    
+                    // Check the correct button
+                    const correctButton = document.querySelector(`input[name="${filterType}"][value="${shouldBeChecked}"]`);
+                    if (correctButton) {
+                        correctButton.checked = true;
+                        console.log(`Synced: Checked correct ${filterType}: ${shouldBeChecked}`);
+                    }
                 }
             }
         });
