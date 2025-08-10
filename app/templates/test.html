@@ -440,7 +440,10 @@ function displayResult(containerId, data, isError = false) {
         try {
             if (data.columns && data.data) {
                 // This is a TableData object
-                createTableBootstrap3(`${containerId}-table-content`, data);
+                createTableBootstrap3(`${containerId}-table-content`, data, { 
+                    disablePositionCircle: false, // API test tables can show team colors if appropriate
+                    enableSpecialRowStyling: true 
+                });
             } else {
                 // Try to create a generic table
                 createGenericTable(`${containerId}-table-content`, data);
@@ -521,14 +524,20 @@ function createGenericTable(containerId, data) {
                 columns: columns,
                 data: data.map(item => columns.map(col => item[col]))
             };
-            createTableBootstrap3(containerId, tableData);
+            createTableBootstrap3(containerId, tableData, { 
+                disablePositionCircle: false, // API test tables can show team colors if appropriate
+                enableSpecialRowStyling: true 
+            });
         } else {
             // Simple array
             const tableData = {
                 columns: ['Index', 'Value'],
                 data: data.map((item, index) => [index, item])
             };
-            createTableBootstrap3(containerId, tableData);
+            createTableBootstrap3(containerId, tableData, { 
+                disablePositionCircle: false, // API test tables can show team colors if appropriate
+                enableSpecialRowStyling: true 
+            });
         }
     } else if (typeof data === 'object') {
         // Object

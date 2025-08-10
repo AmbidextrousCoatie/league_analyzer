@@ -1,0 +1,239 @@
+/**
+ * TeamDetailsBlock - Shows team-specific score sheets and details
+ * Displays when: Season + League + Week + Team are selected
+ */
+class TeamDetailsBlock extends BaseContentBlock {
+    constructor() {
+        super({
+            id: 'team-details',
+            containerId: 'teamDetailsContainer',
+            dataEndpoint: '/league/get_team_week_details_table',
+            requiredFilters: ['season', 'league', 'week', 'team'],
+            title: 'Team Details'
+        });
+        this.dependencies = ['season', 'league', 'week', 'team'];
+        this.currentView = 'classic';
+        this.container = document.getElementById(this.containerId);
+    }
+
+    hide() {
+        if (this.container) {
+            this.container.style.display = 'none';
+        }
+    }
+
+    show() {
+        if (this.container) {
+            this.container.style.display = 'block';
+        }
+    }
+
+    renderError(message) {
+        return `
+            <div class="alert alert-danger" role="alert">
+                <h4 class="alert-heading">Error</h4>
+                <p>${message}</p>
+            </div>
+        `;
+    }
+
+    async render(state = {}) {
+        try {
+            // Check if required dependencies are met
+            if (!this.shouldRender(state)) {
+                this.container.innerHTML = this.renderSelectionMessage(state);
+                this.hide();
+                return;
+            }
+
+            this.show();
+            const html = this.generateHTML(state);
+            this.container.innerHTML = html;
+            
+            // Set up event listeners for view toggle
+            this.attachEventListeners();
+            
+            // Load team data
+            await this.loadTeamData(state);
+            
+            console.log('team-details: Team details rendered');
+        } catch (error) {
+            console.error('Error rendering team details:', error);
+            this.container.innerHTML = this.renderError('Failed to load team details');
+        }
+    }
+
+    shouldRender(state) {
+        return state.season && state.league && state.week && state.team;
+    }
+
+    generateHTML(state) {
+        const matchDayText = window.translations ? 
+            (window.translations['match_day'] || 'Match Day') : 
+            'Match Day';
+
+        return `
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <div>
+                                <h5 data-i18n="score_sheet_selected_team">Score Sheet for Selected Team</h5>
+                                <div id="teamDetailsMetadata" class="text-muted small">
+                                    ${state.team} - ${matchDayText} ${state.week}
+                                </div>
+                            </div>
+                            <div class="btn-group" role="group" aria-label="View options">
+                                <input type="radio" class="btn-check" name="teamView" id="teamViewClassic" value="classic" checked>
+                                <label class="btn btn-outline-primary btn-sm" for="teamViewClassic">Classic</label>
+                                <input type="radio" class="btn-check" name="teamView" id="teamViewNew" value="new">
+                                <label class="btn btn-outline-primary btn-sm" for="teamViewNew">New</label>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div id="teamTableWeekDetails">
+                                <div class="text-center py-3">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="visually-hidden">Loading team details...</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>  
+                </div>
+            </div>
+        `;
+    }
+
+    renderSelectionMessage(state) {
+        let message = '';
+        
+        if (!state.season || !state.league) {
+            message = 'Please select a season and league first.';
+        } else if (!state.week) {
+            message = 'Please select a match day to view team details.';
+        } else if (!state.team) {
+            message = 'Please select a team to display the score sheet.';
+        }
+
+        return `
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <div>
+                                <h5 data-i18n="score_sheet_selected_team">Score Sheet for Selected Team</h5>
+                                <div id="teamDetailsMetadata" class="text-muted small"></div>
+                            </div>
+                            <div class="btn-group" role="group" aria-label="View options">
+                                <input type="radio" class="btn-check" name="teamView" id="teamViewClassic" value="classic" checked>
+                                <label class="btn btn-outline-primary btn-sm" for="teamViewClassic">Classic</label>
+                                <input type="radio" class="btn-check" name="teamView" id="teamViewNew" value="new">
+                                <label class="btn btn-outline-primary btn-sm" for="teamViewNew">New</label>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div id="teamTableWeekDetails">
+                                <div class="alert alert-info" data-i18n="please_select_team">${message}</div>
+                            </div>
+                        </div>
+                    </div>  
+                </div>
+            </div>
+        `;
+    }
+
+    attachEventListeners() {
+        // Listen for view toggle changes
+        this.container.addEventListener('change', (event) => {
+            if (event.target.name === 'teamView') {
+                this.currentView = event.target.value;
+                this.handleViewChange();
+            }
+        });
+    }
+
+    async loadTeamData(state) {
+        const { season, league, week, team } = state;
+        
+        try {
+            await this.loadTeamWeekDetails(season, league, week, team, this.currentView);
+        } catch (error) {
+            console.error('Error loading team data:', error);
+        }
+    }
+
+    async loadTeamWeekDetails(season, league, week, team, view = 'classic') {
+        try {
+            // Determine endpoint based on view
+            let endpoint = '/league/get_team_week_details_table';
+            if (view === 'new') {
+                endpoint = '/league/get_team_individual_scores_table';
+            } else if (view === 'newFull') {
+                endpoint = '/league/get_team_week_head_to_head_table';
+            }
+            
+            console.log(`Loading team details with view: ${view}, endpoint: ${endpoint}`);
+            
+            const response = await fetch(`${endpoint}?season=${season}&league=${league}&week=${week}&team=${team}`);
+            const tableData = await response.json();
+            
+            console.log('Team week details table data:', tableData); // Debug logging
+            
+            const container = document.getElementById('teamTableWeekDetails');
+            if (container) {
+                // Determine table options based on view
+                const tableOptions = {
+                    disablePositionCircle: true, // Team details should never show color circles for player numbers
+                    mergeCells: view === 'newFull',
+                    enableSpecialRowStyling: true
+                };
+                
+                // Use the proper createTableBootstrap3 function for structured TableData
+                if (typeof createTableBootstrap3 === 'function') {
+                    console.log(`Using createTableBootstrap3 function for team details (${view} view)`);
+                    createTableBootstrap3('teamTableWeekDetails', tableData, tableOptions);
+                } else if (typeof createTable === 'function') {
+                    console.log('Fallback: Using createTable function');
+                    const tableHTML = createTable(tableData);
+                    container.innerHTML = tableHTML;
+                } else {
+                    console.error('No table creation function available');
+                    container.innerHTML = '<div class="alert alert-warning">Table creation function not available</div>';
+                }
+            }
+        } catch (error) {
+            console.error('Error loading team week details:', error);
+            const container = document.getElementById('teamTableWeekDetails');
+            if (container) {
+                container.innerHTML = '<div class="alert alert-danger">Error loading team details</div>';
+            }
+        }
+    }
+
+    async handleViewChange() {
+        // Get current state from the parent app
+        const currentState = this.getCurrentState();
+        
+        if (this.shouldRender(currentState)) {
+            // Reload team details with new view
+            await this.loadTeamWeekDetails(
+                currentState.season, 
+                currentState.league, 
+                currentState.week, 
+                currentState.team, 
+                this.currentView
+            );
+        }
+    }
+
+    getCurrentState() {
+        // Get state from filter controls or parent app
+        return {
+            season: document.querySelector('input[name="season"]:checked')?.value || null,
+            league: document.querySelector('input[name="league"]:checked')?.value || null,
+            week: document.querySelector('input[name="week"]:checked')?.value || null,
+            team: document.querySelector('input[name="team"]:checked')?.value || null
+        };
+    }
+}

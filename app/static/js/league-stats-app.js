@@ -1,0 +1,215 @@
+/**
+ * LeagueStatsApp - Main application coordinator for league statistics page
+ * Manages content blocks and state synchronization
+ */
+class LeagueStatsApp {
+    constructor() {
+        this.contentBlocks = new Map();
+        this.currentState = {
+            season: null,
+            league: null,
+            week: null,
+            team: null
+        };
+        this.urlStateManager = new URLStateManager();
+        this.contentRenderer = new LeagueStatsContentRenderer();
+        
+        // Debouncing for content updates
+        this.contentUpdateTimeout = null;
+        this.isRenderingContent = false;
+    }
+
+    async initialize() {
+        try {
+            console.log('🚀 Initializing LeagueStatsApp...');
+            
+            // Get initial state from URL (URLStateManager initializes in constructor)
+            this.currentState = { ...this.currentState, ...this.urlStateManager.getState() };
+            
+            // Initialize content blocks
+            await this.initializeContentBlocks();
+            
+            // Set up event listeners
+            this.setupEventListeners();
+            
+            // Initial render
+            await this.renderContent();
+            
+            console.log('✅ LeagueStatsApp initialized successfully');
+        } catch (error) {
+            console.error('❌ Error initializing LeagueStatsApp:', error);
+            throw error;
+        }
+    }
+
+    async initializeContentBlocks() {
+        console.log('🧱 Initializing content blocks...');
+        
+        try {
+            // Create content blocks (they initialize in their constructors)
+            const filterControlsBlock = new FilterControlsBlock();
+            const seasonOverviewBlock = new SeasonOverviewBlock();
+            const matchDayBlock = new MatchDayBlock();
+            const teamDetailsBlock = new TeamDetailsBlock();
+            
+            // Store blocks
+            this.contentBlocks.set('filter-controls', filterControlsBlock);
+            this.contentBlocks.set('season-overview', seasonOverviewBlock);
+            this.contentBlocks.set('matchday', matchDayBlock);
+            this.contentBlocks.set('team-details', teamDetailsBlock);
+            
+            console.log('✅ Content blocks initialized');
+        } catch (error) {
+            console.error('❌ Error initializing content blocks:', error);
+            throw error;
+        }
+    }
+
+    setupEventListeners() {
+        // Listen for filter changes from the filter controls block
+        document.addEventListener('filterChange', (event) => {
+            this.handleStateChange(event.detail);
+        });
+
+        // Listen for external events (data source changes, palette changes)
+        window.handleDataSourceChange = () => {
+            console.log('📊 Data source changed - refreshing content');
+            this.renderContent();
+        };
+
+        window.handlePaletteChange = () => {
+            console.log('🎨 Palette changed - refreshing content');
+            this.renderContent();
+        };
+
+        // For backward compatibility
+        window.refreshAllCharts = () => {
+            this.renderContent();
+        };
+    }
+
+    async handleStateChange(newState) {
+        console.log('🔄 State changed:', newState);
+        
+        // Check if state actually changed to prevent unnecessary updates
+        const stateChanged = JSON.stringify(this.currentState) !== JSON.stringify(newState);
+        if (!stateChanged) {
+            console.log('State unchanged, skipping update');
+            return;
+        }
+        
+        // Update current state
+        this.currentState = { ...newState };
+        
+        // Update URL (debounced)
+        this.urlStateManager.setState(this.currentState);
+        
+        // Debounce content rendering to prevent excessive updates
+        if (this.contentUpdateTimeout) {
+            clearTimeout(this.contentUpdateTimeout);
+        }
+        
+        this.contentUpdateTimeout = setTimeout(() => {
+            this.renderContent();
+        }, 200); // 200ms debounce for content updates
+    }
+
+    async renderContent() {
+        if (this.isRenderingContent) {
+            console.log('Content rendering already in progress, skipping');
+            return;
+        }
+        
+        try {
+            this.isRenderingContent = true;
+            console.log('🎨 Rendering content for state:', this.currentState);
+            
+            // Render all content blocks in parallel for better performance
+            const renderPromises = Array.from(this.contentBlocks.entries()).map(async ([blockName, block]) => {
+                try {
+                    await block.render(this.currentState);
+                    console.log(`✅ Rendered block: ${blockName}`);
+                } catch (error) {
+                    console.error(`❌ Error rendering block ${blockName}:`, error);
+                }
+            });
+            
+            await Promise.all(renderPromises);
+            console.log('✅ Content rendering complete');
+            
+        } catch (error) {
+            console.error('❌ Error during content rendering:', error);
+        } finally {
+            this.isRenderingContent = false;
+        }
+    }
+
+    // Public methods for external access
+    getCurrentState() {
+        return { ...this.currentState };
+    }
+
+    async setState(newState) {
+        await this.handleStateChange(newState);
+    }
+
+    getContentBlock(blockName) {
+        return this.contentBlocks.get(blockName);
+    }
+}
+
+/**
+ * LeagueStatsContentRenderer - Specialized content renderer for league stats
+ */
+class LeagueStatsContentRenderer {
+    constructor() {
+        this.contentBlocks = [];
+    }
+
+    addContentBlock(block) {
+        this.contentBlocks.push(block);
+    }
+
+    async renderContent(state) {
+        const renderPromises = this.contentBlocks.map(async (block) => {
+            try {
+                await block.render(state);
+            } catch (error) {
+                console.error(`Error rendering content block:`, error);
+            }
+        });
+
+        await Promise.all(renderPromises);
+    }
+}
+
+// Global initialization
+let leagueStatsApp;
+
+document.addEventListener('DOMContentLoaded', async () => {
+    try {
+        console.log('📄 DOM loaded, initializing LeagueStatsApp...');
+        
+        leagueStatsApp = new LeagueStatsApp();
+        await leagueStatsApp.initialize();
+        
+        // Make app globally accessible for debugging
+        window.leagueStatsApp = leagueStatsApp;
+        
+    } catch (error) {
+        console.error('❌ Failed to initialize LeagueStatsApp:', error);
+        
+        // Show error message to user
+        const container = document.querySelector('.container-fluid');
+        if (container) {
+            container.innerHTML = `
+                <div class="alert alert-danger" role="alert">
+                    <h4 class="alert-heading">Initialization Error</h4>
+                    <p>Failed to initialize the league statistics application. Please refresh the page.</p>
+                    <hr>
+                    <p class="mb-0">Error: ${error.message}</p>
+                </div>
+            `;
+        }
+    }
+});
