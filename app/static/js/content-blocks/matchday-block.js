@@ -60,7 +60,9 @@ class MatchDayBlock extends BaseContentBlock {
     }
 
     shouldRender(state) {
-        return state.season && state.league && state.week;
+        // Show only when season, league, and week are selected but NO team is selected
+        const hasTeam = state.team && state.team !== '' && state.team !== 'null';
+        return state.season && state.league && state.week && !hasTeam;
     }
 
     generateHTML(state) {
@@ -115,6 +117,27 @@ class MatchDayBlock extends BaseContentBlock {
                             </div>
                         </div>
                     </div>
+                    
+                    <!-- Individual Averages Section (Full Width) -->
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h6 data-i18n="individual_averages_week">Individual Averages - Week</h6>
+                                    <p class="mb-0 text-muted small">Player performance statistics for this specific week</p>
+                                </div>
+                                <div class="card-body">
+                                    <div id="weekIndividualAveragesTable">
+                                        <div class="text-center py-3">
+                                            <div class="spinner-border text-primary" role="status">
+                                                <span class="visually-hidden">Loading individual averages...</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         `;
@@ -140,10 +163,11 @@ class MatchDayBlock extends BaseContentBlock {
         const { season, league, week } = state;
         
         try {
-            // Load both table and honor scores in parallel
+            // Load table, honor scores, and individual averages in parallel
             await Promise.all([
                 this.loadLeagueWeekTable(season, league, week),
-                this.loadHonorScores(season, league, week)
+                this.loadHonorScores(season, league, week),
+                this.loadIndividualAverages(state)
             ]);
             
         } catch (error) {
@@ -313,6 +337,48 @@ class MatchDayBlock extends BaseContentBlock {
             const loadingSpinner = honorScoresCard.querySelector('.spinner-border');
             if (loadingSpinner) {
                 loadingSpinner.parentElement.innerHTML = '<div class="alert alert-danger alert-sm">Error loading honor scores</div>';
+            }
+        }
+    }
+
+    async loadIndividualAverages(state) {
+        const { season, league, week } = state;
+        
+        try {
+            console.log(`Loading individual averages for ${league} ${season} week ${week}`);
+            
+            const url = `/league/get_individual_averages?league=${encodeURIComponent(league)}&season=${encodeURIComponent(season)}&week=${encodeURIComponent(week)}`;
+            console.log(`Fetching individual averages from: ${url}`);
+            
+            const response = await fetch(url);
+            
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}`);
+            }
+            
+            const data = await response.json();
+            console.log('Individual averages data received:', data);
+            
+            // Create the table using the existing createTableBootstrap3 function
+            if (typeof createTableBootstrap3 === 'function' && data) {
+                createTableBootstrap3('weekIndividualAveragesTable', data, {
+                    disablePositionCircle: true, // Individual averages don't need team colors
+                    enableSpecialRowStyling: true
+                });
+                console.log('Individual averages table created successfully');
+            } else {
+                console.warn('createTableBootstrap3 not available or no data received');
+                const container = document.getElementById('weekIndividualAveragesTable');
+                if (container) {
+                    container.innerHTML = '<div class="alert alert-info">Individual averages data not available</div>';
+                }
+            }
+            
+        } catch (error) {
+            console.error('Error loading individual averages:', error);
+            const container = document.getElementById('weekIndividualAveragesTable');
+            if (container) {
+                container.innerHTML = '<div class="alert alert-danger">Error loading individual averages</div>';
             }
         }
     }

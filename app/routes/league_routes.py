@@ -622,17 +622,32 @@ def get_season_timetable():
 
 @bp.route('/league/get_individual_averages')
 def get_individual_averages():
-    """Get individual player averages for a season"""
+    """Get individual player averages for a season, optionally filtered by week and/or team"""
     try:
         league = request.args.get('league')
         season = request.args.get('season')
+        week_str = request.args.get('week')  # Optional parameter
+        team = request.args.get('team')  # Optional parameter
         
         if not all([league, season]):
             return jsonify({'error': 'Missing required parameters: league, season'}), 400
         
-        print(f"Individual Averages - Received request with: league={league}, season={season}")
+        # Parse week if provided
+        week = None
+        if week_str:
+            try:
+                week = int(week_str)
+            except ValueError:
+                return jsonify({'error': 'Invalid week parameter: must be an integer'}), 400
         
-        table_data = league_service.get_individual_averages(league=league, season=season)
+        filter_info = ""
+        if week is not None:
+            filter_info += f", week={week}"
+        if team is not None:
+            filter_info += f", team={team}"
+        print(f"Individual Averages - Received request with: league={league}, season={season}{filter_info}")
+        
+        table_data = league_service.get_individual_averages(league=league, season=season, week=week, team=team)
         return jsonify(table_data.to_dict())
         
     except Exception as e:

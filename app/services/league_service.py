@@ -2276,16 +2276,30 @@ class LeagueService:
             print(f"Error in get_season_timetable: {e}")
             return TableData(columns=[], data=[], title="Error loading timetable")
 
-    def get_individual_averages(self, league: str, season: str) -> TableData:
-        """Get individual player averages for a season, sorted by performance"""
+    def get_individual_averages(self, league: str, season: str, week: int = None, team: str = None) -> TableData:
+        """Get individual player averages for a season, optionally filtered by week and/or team, sorted by performance"""
         try:
-            print(f"DEBUG: get_individual_averages called for {league} {season}")
-            # Get all player data for the league/season
+            filter_text = ""
+            if week is not None:
+                filter_text += f" for week {week}"
+            if team is not None:
+                filter_text += f" for team {team}"
+            print(f"DEBUG: get_individual_averages called for {league} {season}{filter_text}")
+            
+            # Get all player data for the league/season (and optionally week/team)
             filters = {
                 Columns.league_name: {'value': league, 'operator': 'eq'},
                 Columns.season: {'value': season, 'operator': 'eq'},
                 Columns.computed_data: {'value': False, 'operator': 'eq'}  # Individual players only
             }
+            
+            # Add week filter if specified
+            if week is not None:
+                filters[Columns.week] = {'value': week, 'operator': 'eq'}
+                
+            # Add team filter if specified
+            if team is not None:
+                filters[Columns.team_name] = {'value': team, 'operator': 'eq'}
             print(f"DEBUG: Using filters: {filters}")
             
             player_data = self.adapter.get_filtered_data(filters=filters)
@@ -2381,10 +2395,15 @@ class LeagueService:
                 )
             ]
             
+            title_suffix = ""
+            if week is not None:
+                title_suffix += f" - Week {week}"
+            if team is not None:
+                title_suffix += f" - {team}"
             return TableData(
                 columns=columns,
                 data=table_data,
-                title=f"{league} {season} - Individual Averages",
+                title=f"{league} {season} - Individual Averages{title_suffix}",
                 description="Player averages sorted by performance"
             )
             

@@ -72,15 +72,15 @@ class FilterControlsBlock extends BaseContentBlock {
                 <div class="card-body">
                     <div class="row mb-3">
                         <div class="col-md-4">
-                            <h5 data-i18n="season">Season</h5>
-                            <div id="buttonsSeason" class="btn-group-horizontal w-100">
-                                <span class="text-muted small">Loading seasons...</span>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
                             <h5 data-i18n="league">League</h5>
                             <div id="buttonsLeague" class="btn-group-horizontal w-100">
                                 <span class="text-muted small">Loading leagues...</span>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <h5 data-i18n="season">Season</h5>
+                            <div id="buttonsSeason" class="btn-group-horizontal w-100">
+                                <span class="text-muted small">Loading seasons...</span>
                             </div>
                         </div>
                         <div class="col-md-4">
@@ -96,14 +96,6 @@ class FilterControlsBlock extends BaseContentBlock {
                             <div id="buttonsTeam" class="btn-group-horizontal w-100">
                                 <span class="text-muted small">Select season and league</span>
                             </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Current Filter State Display -->
-                    <div class="current-filters mt-3">
-                        <small class="text-muted">Active Filters:</small>
-                        <div class="filter-display">
-                            <span class="text-muted">No filters selected</span>
                         </div>
                     </div>
                 </div>
@@ -161,9 +153,6 @@ class FilterControlsBlock extends BaseContentBlock {
             // If only league is selected, update seasons to show compatible ones
             await this.updateSeasonButtons(state);
         }
-        
-        // Update filter display
-        this.updateFilterDisplay(state);
     }
 
     async updateSeasonButtons(state) {
@@ -305,9 +294,6 @@ class FilterControlsBlock extends BaseContentBlock {
             // Batch update dependent filter buttons
             await this.batchUpdateDependentFilters(filterType, validatedState);
             
-            // Update filter display
-            this.updateFilterDisplay(validatedState);
-            
             // Dispatch filter change event (this will trigger content updates)
             this.dispatchEvent('filterChange', validatedState);
             
@@ -375,20 +361,7 @@ class FilterControlsBlock extends BaseContentBlock {
         return this.batchUpdateDependentFilters(changedFilter, state);
     }
 
-    updateFilterDisplay(state) {
-        const display = this.container.querySelector('.filter-display');
-        if (!display) return;
-        
-        const filters = [];
-        if (state.season) filters.push(`Season: ${state.season}`);
-        if (state.league) filters.push(`League: ${state.league}`);
-        if (state.week) filters.push(`Week: ${state.week}`);
-        if (state.team) filters.push(`Team: ${state.team}`);
-        
-        display.innerHTML = filters.length > 0 
-            ? filters.map(f => `<span class="badge bg-primary me-1">${f}</span>`).join('')
-            : '<span class="text-muted">No filters selected</span>';
-    }
+
 
     async validateAndFixState(state, changedFilter) {
         const validatedState = { ...state };

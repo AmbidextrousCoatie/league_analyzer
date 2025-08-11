@@ -100,6 +100,23 @@ class TeamDetailsBlock extends BaseContentBlock {
                             </div>
                         </div>
                     </div>  
+                    
+                    <!-- Team Individual Averages Section -->
+                    <div class="card mt-4">
+                        <div class="card-header">
+                            <h6 data-i18n="team_individual_averages">Team Individual Averages</h6>
+                            <p class="mb-0 text-muted small">Player statistics for this team in this specific week</p>
+                        </div>
+                        <div class="card-body">
+                            <div id="teamIndividualAveragesTable">
+                                <div class="text-center py-3">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="visually-hidden">Loading team individual averages...</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         `;
@@ -157,7 +174,11 @@ class TeamDetailsBlock extends BaseContentBlock {
         const { season, league, week, team } = state;
         
         try {
-            await this.loadTeamWeekDetails(season, league, week, team, this.currentView);
+            // Load team details and individual averages in parallel
+            await Promise.all([
+                this.loadTeamWeekDetails(season, league, week, team, this.currentView),
+                this.loadTeamIndividualAverages(state)
+            ]);
         } catch (error) {
             console.error('Error loading team data:', error);
         }
@@ -235,5 +256,47 @@ class TeamDetailsBlock extends BaseContentBlock {
             week: document.querySelector('input[name="week"]:checked')?.value || null,
             team: document.querySelector('input[name="team"]:checked')?.value || null
         };
+    }
+
+    async loadTeamIndividualAverages(state) {
+        const { season, league, week, team } = state;
+        
+        try {
+            console.log(`Loading team individual averages for ${team} in ${league} ${season} week ${week}`);
+            
+            const url = `/league/get_individual_averages?league=${encodeURIComponent(league)}&season=${encodeURIComponent(season)}&week=${encodeURIComponent(week)}&team=${encodeURIComponent(team)}`;
+            console.log(`Fetching team individual averages from: ${url}`);
+            
+            const response = await fetch(url);
+            
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}`);
+            }
+            
+            const data = await response.json();
+            console.log('Team individual averages data received:', data);
+            
+            // Create the table using the existing createTableBootstrap3 function
+            if (typeof createTableBootstrap3 === 'function' && data) {
+                createTableBootstrap3('teamIndividualAveragesTable', data, {
+                    disablePositionCircle: true, // Individual averages don't need team colors
+                    enableSpecialRowStyling: true
+                });
+                console.log('Team individual averages table created successfully');
+            } else {
+                console.warn('createTableBootstrap3 not available or no data received');
+                const container = document.getElementById('teamIndividualAveragesTable');
+                if (container) {
+                    container.innerHTML = '<div class="alert alert-info">Team individual averages data not available</div>';
+                }
+            }
+            
+        } catch (error) {
+            console.error('Error loading team individual averages:', error);
+            const container = document.getElementById('teamIndividualAveragesTable');
+            if (container) {
+                container.innerHTML = '<div class="alert alert-danger">Error loading team individual averages</div>';
+            }
+        }
     }
 }
