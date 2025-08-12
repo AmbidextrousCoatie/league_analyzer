@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, session, redirect, url_for, request
+from flask import Blueprint, render_template, session, redirect, url_for, request, jsonify
 from data_access.pd_dataframes import fetch_column
 from app.services.data_manager import DataManager
 import datetime
@@ -37,18 +37,24 @@ def player_stats(analysis):
 
 @bp.route('/get-data-sources-info')
 def get_data_sources_info():
-    """Get detailed information about all available data sources"""
     try:
         data_manager = DataManager()
+        # Force reload from session to ensure consistency across workers
+        data_manager.force_reload_from_session()
         return {
             'success': True,
-            'sources': data_manager.get_sources_info(),
-            'current_source': data_manager.current_source
+            'current_source': data_manager.current_source,
+            'current_display_name': data_manager.get_source_display_name(data_manager.current_source),
+            'available_sources': data_manager.get_available_sources(),
+            'sources_info': data_manager.get_sources_info()
         }
     except Exception as e:
         print(f"ERROR: Exception in get_data_sources_info: {e}")
         return {
             'success': False,
+            'current_source': 'bowling_ergebnisse.csv',
+            'current_display_name': 'Simulated Data',
+            'available_sources': ['bowling_ergebnisse.csv', 'bowling_ergebnisse_real.csv'],
             'message': f'Server error: {str(e)}'
         }, 500
 
@@ -59,6 +65,8 @@ def reload_data():
     
     try:
         data_manager = DataManager()
+        # Force reload from session to ensure consistency across workers
+        data_manager.force_reload_from_session()
         
         # Validate the requested source
         if not data_manager.validate_source(data_source):
@@ -104,6 +112,8 @@ def reload_data():
 def get_data_source():
     try:
         data_manager = DataManager()
+        # Force reload from session to ensure consistency across workers
+        data_manager.force_reload_from_session()
         return {
             'success': True,
             'current_source': data_manager.current_source,
@@ -152,3 +162,27 @@ def test():
 def database_test():
     """Test page for database switching functionality"""
     return render_template('database_test.html')
+
+@bp.route('/debug-session')
+def debug_session():
+    """Debug endpoint to check session and data source status"""
+    try:
+        from flask import session
+        data_manager = DataManager()
+        
+        debug_info = {
+            'session_id': session.get('_id', 'No session ID'),
+            'session_source': session.get('selected_database', 'No source in session'),
+            'data_manager_source': data_manager.current_source,
+            'data_loaded': data_manager.df is not None,
+            'data_rows': len(data_manager.df) if data_manager.df is not None else 0,
+            'available_sources': data_manager.get_available_sources(),
+            'session_keys': list(session.keys())
+        }
+        
+        return jsonify(debug_info)
+    except Exception as e:
+        return jsonify({
+            'error': str(e),
+            'traceback': str(e.__traceback__)
+        }), 500

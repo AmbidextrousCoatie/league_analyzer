@@ -7,17 +7,12 @@ from typing import Optional
 from app.config.database_config import database_config
 
 class DataManager:
-    _instance = None
-    _df = None
-    _current_source = None
     _server_instances = []
     _session_key = 'selected_database'
 
-    def __new__(cls):
-        if cls._instance is None:
-            cls._instance = super(DataManager, cls).__new__(cls)
-            cls._instance._load_data()
-        return cls._instance
+    def __init__(self):
+        # Always load data from session, don't rely on singleton
+        self._load_data()
 
     def _load_data(self, source=None):
         # Get source from session if available, otherwise use default
@@ -110,7 +105,9 @@ class DataManager:
     def _get_session_source(self) -> Optional[str]:
         """Get the selected database source from Flask session"""
         try:
-            return session.get(self._session_key)
+            source = session.get(self._session_key)
+            print(f"DEBUG: Session source: {source}")
+            return source
         except Exception as e:
             print(f"Warning: Could not access session: {e}")
             return None
@@ -120,8 +117,20 @@ class DataManager:
         try:
             session[self._session_key] = source
             session.modified = True
+            print(f"DEBUG: Saved to session: {source}")
         except Exception as e:
             print(f"Warning: Could not save to session: {e}")
+
+    def force_reload_from_session(self):
+        """Force reload data from session - useful for production with multiple workers"""
+        print("DEBUG: Force reloading from session")
+        # Clear any cached data
+        self._df = None
+        self._current_source = None
+        # Reload from session
+        self._load_data()
+        print(f"DEBUG: Force reload complete. Current source: {self._current_source}")
+        print(f"DEBUG: Data loaded: {len(self._df) if self._df is not None else 'None'} rows")
 
     def get_available_sources(self) -> list:
         """Get list of available data sources"""

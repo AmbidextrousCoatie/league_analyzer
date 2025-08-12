@@ -184,9 +184,13 @@ class DatabaseSelector {
             });
             const data = await response.json();
             
+            console.log('Sources info response:', data);
+            
             if (data.success) {
-                this.sourcesInfo = data.sources;
+                this.sourcesInfo = data.sources_info;
                 this.currentSource = data.current_source;
+                console.log('Loaded sources info:', this.sourcesInfo);
+                console.log('Current source:', this.currentSource);
                 this.renderOptions();
             } else {
                 console.error('Failed to load sources info:', data.message);
@@ -201,6 +205,12 @@ class DatabaseSelector {
     renderOptions() {
         const container = document.getElementById('databaseOptions');
         if (!container) return;
+
+        if (!this.sourcesInfo || typeof this.sourcesInfo !== 'object') {
+            console.error('sourcesInfo is not available or invalid:', this.sourcesInfo);
+            container.innerHTML = '<li><div class="text-muted">Loading database options...</div></li>';
+            return;
+        }
 
         const optionsHtml = Object.entries(this.sourcesInfo).map(([sourceId, info]) => {
             const isActive = sourceId === this.currentSource;
@@ -446,9 +456,11 @@ class DatabaseSelector {
 
     updateDisplay() {
         const textElement = document.getElementById('currentDatabaseText');
-        if (textElement && this.currentSource) {
+        if (textElement && this.currentSource && this.sourcesInfo) {
             const info = this.sourcesInfo[this.currentSource];
             textElement.textContent = info ? info.display_name : 'Unknown';
+        } else if (textElement) {
+            textElement.textContent = 'Loading...';
         }
     }
 
