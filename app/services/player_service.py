@@ -158,9 +158,8 @@ class PlayerService:
             # Calculate change from previous season
             if last_seasons_average is not None:
                 vs_last_season = average - last_seasons_average
-                
             else:
-                vs_last_season = 0.0
+                vs_last_season = None  # Use None instead of 0.0 for first season
             
             last_seasons_average = average
 
@@ -174,7 +173,7 @@ class PlayerService:
                 'total_pins': int(total_pins),
                 'average': float(round(average, 2)),
                 'dev_from_avg': float(round(dev_from_avg, 2)),
-                'vs_last_season': vs_last_season,
+                'vs_last_season': float(round(vs_last_season, 2)) if vs_last_season is not None else None,
 
                 'best_game': {
                     'score': int(best_game.at[Columns.score]),
@@ -185,15 +184,13 @@ class PlayerService:
                 'worst_game': {
                     'score': int(worst_game.at[Columns.score]),
                     'date': 'tbd',
-                    'event': f"{worst_game.at[Columns.league_name]} Week {worst_game.at[Columns.week]}"       
+                    'event': f"{best_game.at[Columns.league_name]} Week {best_game.at[Columns.week]}"       
                 }
             })
 
         collected_data = dict(seasons=season_stats)
 
         # calculate the lifetime stats
-
-
         
         # Calculate basic stats
         total_games = len(games_df)
@@ -212,44 +209,44 @@ class PlayerService:
 
         # For most improved, calculate differences between consecutive seasons
         season_improvements = season_means.diff()  # Calculates difference to previous season
-        most_improved_season = season_improvements.idxmax()  # Gets the season name
-        most_improved_improvement = season_improvements.max()
-
         
+        # Handle NaN values in improvements
+        if season_improvements.empty or season_improvements.isna().all():
+            most_improved_season = None
+            most_improved_improvement = None
+        else:
+            # Filter out NaN values and find the maximum improvement
+            valid_improvements = season_improvements.dropna()
+            if valid_improvements.empty:
+                most_improved_season = None
+                most_improved_improvement = None
+            else:
+                most_improved_season = valid_improvements.idxmax()  # Gets the season name
+                most_improved_improvement = valid_improvements.max()
 
         collected_data['lifetime'] = {
             'total_games': int(total_games),
             'total_pins': int(total_pins),
             'average_score': float(round(avg_score, 2)),
 
-
             'best_game': {
-
                 'score': int(best_game.at[Columns.score]),
                 'date': 'tbd',
                 'event': f"{best_game.at[Columns.season]} {best_game.at[Columns.league_name]} Week {best_game.at[Columns.week]}"
-
-
-
             },
             'worst_game': {
                 'score': int(worst_game.at[Columns.score]),
                 'date': 'tbd',
                 'event': f"{worst_game.at[Columns.season]} {worst_game.at[Columns.league_name]} Week {worst_game.at[Columns.week]}"
-
-
-
             },
             'best_season': {
                 'season': best_season,
                 'average': float(round(best_season_avg, 2))    
             },
-
             'most_improved': {
                 'season': most_improved_season,
-                'improvement': float(round(most_improved_improvement, 2))
+                'improvement': float(round(most_improved_improvement, 2)) if most_improved_improvement is not None else None
             }
-
         }
 
         return collected_data

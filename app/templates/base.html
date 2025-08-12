@@ -163,22 +163,111 @@
             setupLanguageToggle();
         });
         
-        // Load translations from server
+        // Load translations
         async function loadTranslations() {
             try {
                 const response = await fetch('/league/get_translations');
+                
+                if (!response.ok) {
+                    console.error('❌ HTTP error loading translations:', response.status, response.statusText);
+                    return;
+                }
+                
                 const data = await response.json();
                 
-                if (data.translations) {
+                if (data.success) {
                     translations = data.translations;
-                    window.translations = translations; // Update global reference
-                    currentLanguage = data.language;
-                    updateLanguageDisplay();
+                    currentLanguage = data.current_language;
+                    updateLanguageDisplay(currentLanguage);
+                    
+                    // Update page content with new translations
                     updatePageContent();
+                } else {
+                    console.error('❌ Failed to load translations:', data.message || 'Unknown error');
                 }
             } catch (error) {
-                console.error('Error loading translations:', error);
+                console.error('❌ Error loading translations:', error);
             }
+        }
+        
+        // Update page content with translations
+        function updatePageContent() {
+            // Update all elements with data-i18n attributes
+            const elements = document.querySelectorAll('[data-i18n]');
+            elements.forEach(element => {
+                const key = element.getAttribute('data-i18n');
+                if (translations[key]) {
+                    element.textContent = translations[key];
+                }
+            });
+            
+            // Update chart labels if charts exist
+            updateChartLabels();
+        }
+        
+        // Update chart labels
+        function updateChartLabels() {
+            const matchDayLabel = translations['match_day_label'] || 'Match Day';
+            const matchDayFormat = translations['match_day_format'] || 'Match Day #{week}';
+            
+            // Update any existing Chart.js charts that use week labels
+            if (typeof Chart !== 'undefined') {
+                // Find all canvas elements that might have charts
+                const canvasElements = document.querySelectorAll('canvas');
+                canvasElements.forEach(canvas => {
+                    try {
+                        // Try to get the chart instance from the canvas
+                        const chart = Chart.getChart ? Chart.getChart(canvas) : null;
+                        if (chart && chart.config && chart.config.data && chart.config.data.labels) {
+                            // Update x-axis labels that contain "Match Day"
+                            chart.config.data.labels = chart.config.data.labels.map(label => {
+                                if (typeof label === 'string' && label.includes('Match Day')) {
+                                    // Extract week number if present
+                                    const weekMatch = label.match(/Match Day #?(\d+)/);
+                                    if (weekMatch) {
+                                        const week = weekMatch[1];
+                                        return matchDayFormat.replace('{week}', week);
+                                    }
+                                    return label.replace('Match Day', matchDayLabel);
+                                }
+                                return label;
+                            });
+                            chart.update();
+                        }
+                    } catch (error) {
+                        // Ignore errors for canvases without charts
+                        console.debug('Canvas without chart:', error);
+                    }
+                });
+            }
+            
+            // Update Highcharts if they exist
+            if (typeof Highcharts !== 'undefined' && Highcharts.charts) {
+                Highcharts.charts.forEach(chart => {
+                    if (chart && chart.xAxis && chart.xAxis[0]) {
+                        const xAxis = chart.xAxis[0];
+                        if (xAxis.categories) {
+                            xAxis.categories = xAxis.categories.map(category => {
+                                if (typeof category === 'string' && category.includes('Match Day')) {
+                                    const weekMatch = category.match(/Match Day #?(\d+)/);
+                                    if (weekMatch) {
+                                        const week = weekMatch[1];
+                                        return matchDayFormat.replace('{week}', week);
+                                    }
+                                    return category.replace('Match Day', matchDayLabel);
+                                }
+                                return category;
+                            });
+                            chart.redraw();
+                        }
+                    }
+                });
+            }
+        }
+        
+        // Helper function to get translated text
+        function t(key) {
+            return translations[key] || key;
         }
         
         // Setup language toggle functionality

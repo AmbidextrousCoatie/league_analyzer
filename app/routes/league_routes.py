@@ -415,7 +415,8 @@ def get_translations():
     """Get all translations for the current language"""
     try:
         return jsonify({
-            "language": i18n_service.get_current_language().value,
+            "success": True,
+            "current_language": i18n_service.get_current_language().value,
             "available_languages": i18n_service.get_available_languages(),
             "translations": {
                 key: i18n_service.get_text(key) 
@@ -440,7 +441,10 @@ def get_translations():
             }
         })
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        return jsonify({
+            "success": False,
+            "message": str(e)
+        }), 500
 
 @bp.route('/league/get_team_individual_scores_table')
 def get_team_individual_scores_table():

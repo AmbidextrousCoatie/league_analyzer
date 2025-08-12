@@ -174,8 +174,14 @@ document.addEventListener('DOMContentLoaded', function() {
         // Season records
         document.getElementById('bestSeason').textContent = 
             `${stats.best_season.season} (${stats.best_season.average.toFixed(2)})`;
-        document.getElementById('mostImproved').textContent = 
-            `${stats.most_improved.season} (+${stats.most_improved.improvement.toFixed(2)})`;
+        
+        // Handle null values for most improved
+        if (stats.most_improved.season && stats.most_improved.improvement !== null) {
+            document.getElementById('mostImproved').textContent = 
+                `${stats.most_improved.season} (+${stats.most_improved.improvement.toFixed(2)})`;
+        } else {
+            document.getElementById('mostImproved').textContent = 'N/A';
+        }
     }
 
     function displaySeasonStats(seasons) {
@@ -187,7 +193,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 <td>${season.total_pins.toLocaleString()}</td>
                 <td>${season.average.toFixed(2)}</td>
                 <td>${season.dev_from_avg > 0 ? '+' : ''}${season.dev_from_avg.toFixed(2)}</td>
-                <td>${season.vs_last_season ? (season.vs_last_season > 0 ? '+' : '') + season.vs_last_season.toFixed(2) : '-'}</td>
+                <td>${season.vs_last_season !== null ? (season.vs_last_season > 0 ? '+' : '') + season.vs_last_season.toFixed(2) : '-'}</td>
                 <td title="${season.best_game.date} - ${season.best_game.event}">${season.best_game.score}</td>
                 <td title="${season.worst_game.date} - ${season.worst_game.event}">${season.worst_game.score}</td>
             </tr>
