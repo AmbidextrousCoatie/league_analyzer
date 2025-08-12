@@ -254,181 +254,201 @@
         }
         
         // Update language display in navbar
-        function updateLanguageDisplay() {
+        function updateLanguageDisplay(language) {
             const flagElement = document.getElementById('currentLanguageFlag');
             const textElement = document.getElementById('currentLanguageText');
             
             if (flagElement && textElement) {
-                if (currentLanguage === 'en') {
-                    flagElement.textContent = '🇺🇸';
-                    textElement.textContent = 'English';
-                } else if (currentLanguage === 'de') {
+                if (language === 'de') {
                     flagElement.textContent = '🇩🇪';
                     textElement.textContent = 'Deutsch';
+                } else if (language === 'en') {
+                    flagElement.textContent = '🇺🇸';
+                    textElement.textContent = 'English';
                 }
             }
         }
         
-        // Update page content with translations
-        function updatePageContent() {
-            // Update all elements with data-i18n attributes
-            const elements = document.querySelectorAll('[data-i18n]');
-            elements.forEach(element => {
-                const key = element.getAttribute('data-i18n');
-                if (translations[key]) {
-                    element.textContent = translations[key];
-                }
-            });
+        // Setup language selector
+        function setupLanguageSelector() {
+            const languageItems = document.querySelectorAll('[data-language]');
             
-            // Update chart labels if charts exist
-            updateChartLabels();
-        }
-        
-        // Update chart labels
-        function updateChartLabels() {
-            const matchDayLabel = translations['match_day_label'] || 'Match Day';
-            const matchDayFormat = translations['match_day_format'] || 'Match Day #{week}';
-            
-            // Update any existing Chart.js charts that use week labels
-            if (typeof Chart !== 'undefined') {
-                // Find all canvas elements that might have charts
-                const canvasElements = document.querySelectorAll('canvas');
-                canvasElements.forEach(canvas => {
-                    try {
-                        // Try to get the chart instance from the canvas
-                        const chart = Chart.getChart ? Chart.getChart(canvas) : null;
-                        if (chart && chart.config && chart.config.data && chart.config.data.labels) {
-                            // Update x-axis labels that contain "Match Day"
-                            chart.config.data.labels = chart.config.data.labels.map(label => {
-                                if (typeof label === 'string' && label.includes('Match Day')) {
-                                    // Extract week number if present
-                                    const weekMatch = label.match(/Match Day #?(\d+)/);
-                                    if (weekMatch) {
-                                        const week = weekMatch[1];
-                                        return matchDayFormat.replace('{week}', week);
-                                    }
-                                    return label.replace('Match Day', matchDayLabel);
-                                }
-                                return label;
-                            });
-                            chart.update();
-                        }
-                    } catch (error) {
-                        // Ignore errors for canvases without charts
-                        console.debug('Canvas without chart:', error);
-                    }
-                });
-            }
-            
-            // Update Highcharts if they exist
-            if (typeof Highcharts !== 'undefined' && Highcharts.charts) {
-                Highcharts.charts.forEach(chart => {
-                    if (chart && chart.xAxis && chart.xAxis[0]) {
-                        const xAxis = chart.xAxis[0];
-                        if (xAxis.categories) {
-                            xAxis.categories = xAxis.categories.map(category => {
-                                if (typeof category === 'string' && category.includes('Match Day')) {
-                                    const weekMatch = category.match(/Match Day #?(\d+)/);
-                                    if (weekMatch) {
-                                        const week = weekMatch[1];
-                                        return matchDayFormat.replace('{week}', week);
-                                    }
-                                    return category.replace('Match Day', matchDayLabel);
-                                }
-                                return category;
-                            });
-                            chart.redraw();
-                        }
-                    }
-                });
-            }
-        }
-        
-        // Helper function to get translated text
-        function t(key) {
-            return translations[key] || key;
-        }
-        
-        // Data source selector functionality
-        document.addEventListener('DOMContentLoaded', function() {
-            setupDataSourceSelector();
-        });
-        
-        // Setup data source selector
-        function setupDataSourceSelector() {
-            const dataSourceItems = document.querySelectorAll('.data-source-option');
-            
-            dataSourceItems.forEach(item => {
+            languageItems.forEach(item => {
                 item.addEventListener('click', async function(e) {
                     e.preventDefault();
-                    const source = this.getAttribute('data-source');
-                    await switchDataSource(source);
+                    const language = this.getAttribute('data-language');
+                    await switchLanguage(language);
                 });
             });
-            
-            // Load current data source on page load
-            loadCurrentDataSource();
         }
         
-        // Switch data source
-        async function switchDataSource(source) {
-            try {
-                const response = await fetch(`/reload-data?source=${source}`, {
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest'
-                    }
+        // Setup palette selector
+        function setupPaletteSelector() {
+            const paletteItems = document.querySelectorAll('.palette-option');
+            
+            paletteItems.forEach(item => {
+                item.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const palette = this.getAttribute('data-palette');
+                    switchPalette(palette);
                 });
-                
-                if (response.ok) {
-                    const data = await response.json();
-                    
-                    if (data.success) {
-                        // Update the display
-                        updateDataSourceDisplay(source);
-                        
-                        // Trigger data source change event if handler exists
-                        if (typeof window.handleDataSourceChange === 'function') {
-                            window.handleDataSourceChange();
-                        } else {
-                            // Fallback: refresh the page to reload data
-                            window.location.reload();
-                        }
-                    } else {
-                        console.error('Error switching data source:', data.message);
-                    }
-                } else {
-                    console.error('Error switching data source');
-                }
-            } catch (error) {
-                console.error('Error switching data source:', error);
-            }
+            });
         }
         
-        // Load current data source
-        async function loadCurrentDataSource() {
-            try {
-                const response = await fetch('/get-data-source');
-                const data = await response.json();
-                
-                if (data.current_source) {
-                    updateDataSourceDisplay(data.current_source);
-                }
-            } catch (error) {
-                console.error('Error loading current data source:', error);
-            }
-        }
-        
-        // Update data source display
-        function updateDataSourceDisplay(source) {
-            const textElement = document.getElementById('currentDataSourceText');
-            
+        // Switch palette
+        function switchPalette(palette) {
+            // Update palette display
+            const textElement = document.getElementById('currentPaletteText');
             if (textElement) {
-                if (source === 'bowling_ergebnisse.csv') {
-                    textElement.textContent = 'Simulated Data';
-                } else if (source === 'bowling_ergebnisse_real.csv') {
-                    textElement.textContent = 'Real Data';
+                if (palette === 'harmonic10') {
+                    textElement.textContent = 'Harmonic 10';
+                } else if (palette === 'rainbowPastel') {
+                    textElement.textContent = 'Rainbow Pastel';
+                }
+            }
+            
+            // Trigger palette change event
+            window.dispatchEvent(new CustomEvent('paletteChanged', { detail: { palette } }));
+        }
+        
+        // Initialize everything when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 Initializing application...');
+            
+            // Setup selectors
+            setupLanguageSelector();
+            setupPaletteSelector();
+            
+            // Load initial data
+            loadTranslations();
+            
+            // Setup global database change listener
+            setupGlobalDatabaseListener();
+            
+            console.log('✅ Application initialized');
+        });
+        
+        // Global database change listener
+        function setupGlobalDatabaseListener() {
+            window.addEventListener('databaseChanged', async (event) => {
+                console.log('🌐 Global database change detected:', event.detail);
+                
+                // Wait a moment for the server to process the change
+                await new Promise(resolve => setTimeout(resolve, 300));
+                
+                // Try to refresh any active components
+                await refreshActiveComponents();
+            });
+        }
+        
+        // Refresh active components based on current page
+        async function refreshActiveComponents() {
+            const currentPath = window.location.pathname;
+            
+            try {
+                if (currentPath.includes('/league/')) {
+                    await refreshLeagueComponents();
+                } else if (currentPath.includes('/team/')) {
+                    await refreshTeamComponents();
+                } else if (currentPath.includes('/player/')) {
+                    await refreshPlayerComponents();
                 } else {
-                    textElement.textContent = 'Data Source';
+                    // Generic refresh for other pages
+                    await refreshGenericComponents();
+                }
+            } catch (error) {
+                console.error('Error refreshing components:', error);
+            }
+        }
+        
+        async function refreshLeagueComponents() {
+            console.log('🔄 Refreshing league components...');
+            
+            // Try to refresh league-specific components
+            const methods = [
+                'updateSeasonButtons',
+                'updateLeagueButtons',
+                'updateWeekButtons', 
+                'updateTeamButtons',
+                'updateTableLeagueHistory',
+                'updateTableLeagueWeek',
+                'updateChartsLeague'
+            ];
+            
+            for (const method of methods) {
+                if (typeof window[method] === 'function') {
+                    try {
+                        await window[method]();
+                    } catch (error) {
+                        console.warn(`Error calling ${method}:`, error);
+                    }
+                }
+            }
+        }
+        
+        async function refreshTeamComponents() {
+            console.log('🔄 Refreshing team components...');
+            
+            const methods = [
+                'updateTeamSelect',
+                'updateSeasonButtons',
+                'updateWeeksData',
+                'updateTeamHistory',
+                'updateLeagueComparison',
+                'updateClutchAnalysis',
+                'updateConsistencyMetrics',
+                'updateSpecialMatches'
+            ];
+            
+            for (const method of methods) {
+                if (typeof window[method] === 'function') {
+                    try {
+                        await window[method]();
+                    } catch (error) {
+                        console.warn(`Error calling ${method}:`, error);
+                    }
+                }
+            }
+        }
+        
+        async function refreshPlayerComponents() {
+            console.log('🔄 Refreshing player components...');
+            
+            const methods = [
+                'loadPlayerStats',
+                'displayLifetimeStats',
+                'displaySeasonStats',
+                'updateTrendChart'
+            ];
+            
+            for (const method of methods) {
+                if (typeof window[method] === 'function') {
+                    try {
+                        await window[method]();
+                    } catch (error) {
+                        console.warn(`Error calling ${method}:`, error);
+                    }
+                }
+            }
+        }
+        
+        async function refreshGenericComponents() {
+            console.log('🔄 Refreshing generic components...');
+            
+            const methods = [
+                'refreshCurrentData',
+                'handleDataSourceChange',
+                'updateContent',
+                'renderContent'
+            ];
+            
+            for (const method of methods) {
+                if (typeof window[method] === 'function') {
+                    try {
+                        await window[method]();
+                    } catch (error) {
+                        console.warn(`Error calling ${method}:`, error);
+                    }
                 }
             }
         }

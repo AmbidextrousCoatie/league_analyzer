@@ -20,22 +20,8 @@
                 </li>
             </ul>
             <ul class="navbar-nav ms-auto">
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="dataSourceDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="bi bi-database"></i> <span id="currentDataSourceText">Data Source</span>
-                    </a>
-                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dataSourceDropdown">
-                        <li><a class="dropdown-item data-source-option" href="#" data-source="bowling_ergebnisse.csv">
-                            <i class="bi bi-file-earmark-text"></i> Simulated Data
-                        </a></li>
-                        <li><a class="dropdown-item data-source-option" href="#" data-source="bowling_ergebnisse_real.csv">
-                            <i class="bi bi-file-earmark-text"></i> Real Data
-                        </a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="#" id="refreshDataBtn">
-                            <i class="bi bi-arrow-clockwise"></i> Refresh & Validate
-                        </a></li>
-                    </ul>
+                <li class="nav-item">
+                    {% include "components/database_selector.html" %}
                 </li>
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" id="languageDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
