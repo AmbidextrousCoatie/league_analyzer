@@ -48,7 +48,9 @@ class LeagueStatsApp {
         try {
             // Create content blocks (they initialize in their constructors)
             console.log('🔄 Creating FilterControlsBlock...');
+            console.log('🔄 FilterControlsBlock class available:', typeof FilterControlsBlock);
             const filterControlsBlock = new FilterControlsBlock();
+            console.log('🔄 FilterControlsBlock created successfully:', !!filterControlsBlock);
             console.log('🔄 Creating LeagueAggregationBlock...');
             const leagueAggregationBlock = new LeagueAggregationBlock();
             console.log('🔄 Creating LeagueSeasonOverviewBlock...');

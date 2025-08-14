@@ -51,6 +51,12 @@ class FilterControlsBlock extends BaseContentBlock {
 
     async render(state = {}) {
         console.log('🔄 FilterControlsBlock.render called with state:', state);
+        console.log('🔄 FilterControlsBlock container exists:', !!this.container);
+        console.log('🔄 FilterControlsBlock container ID:', this.containerId);
+        
+        // Simple test to see if console.log is working
+        console.log('🔄 TEST: Console.log is working in FilterControlsBlock.render');
+        
         try {
             const html = this.generateHTML(state);
             this.container.innerHTML = html;
@@ -152,6 +158,7 @@ class FilterControlsBlock extends BaseContentBlock {
 
     async loadFilterData(state) {
         console.log('🔄 loadFilterData called with state:', state);
+        console.log('🔄 Current database parameter:', getCurrentDatabase());
         
         try {
             // Load seasons and leagues in parallel (both should be available initially)
