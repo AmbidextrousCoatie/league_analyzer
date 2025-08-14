@@ -1,8 +1,11 @@
 /**
  * FilterControlsBlock - Manages season, league, week, and team filter controls
  */
+console.log('🔄 FilterControlsBlock class definition loaded');
+
 class FilterControlsBlock extends BaseContentBlock {
     constructor() {
+        console.log('🔄 FilterControlsBlock constructor called');
         super({
             id: 'filter-controls',
             containerId: 'filterControlsContainer',
@@ -12,6 +15,7 @@ class FilterControlsBlock extends BaseContentBlock {
         });
         this.dependencies = [];
         this.container = document.getElementById(this.containerId);
+        console.log('🔄 FilterControlsBlock container found:', !!this.container);
         
         // Debouncing and update management
         this.updateDebounceTimeout = null;

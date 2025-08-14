@@ -5,6 +5,8 @@
  * Provides common functionality for data fetching, rendering, and lifecycle management
  */
 
+console.log('🔄 BaseContentBlock class definition loaded');
+
 class BaseContentBlock {
     constructor(config) {
         // Required configuration

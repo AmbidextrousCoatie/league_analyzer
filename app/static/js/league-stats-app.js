@@ -47,11 +47,17 @@ class LeagueStatsApp {
         
         try {
             // Create content blocks (they initialize in their constructors)
+            console.log('🔄 Creating FilterControlsBlock...');
             const filterControlsBlock = new FilterControlsBlock();
+            console.log('🔄 Creating LeagueAggregationBlock...');
             const leagueAggregationBlock = new LeagueAggregationBlock();
+            console.log('🔄 Creating LeagueSeasonOverviewBlock...');
             const leagueSeasonOverviewBlock = new LeagueSeasonOverviewBlock();
+            console.log('🔄 Creating SeasonOverviewBlock...');
             const seasonOverviewBlock = new SeasonOverviewBlock();
+            console.log('🔄 Creating MatchDayBlock...');
             const matchDayBlock = new MatchDayBlock();
+            console.log('🔄 Creating TeamDetailsBlock...');
             const teamDetailsBlock = new TeamDetailsBlock();
             
             // Store blocks

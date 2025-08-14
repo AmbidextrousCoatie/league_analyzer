@@ -122,6 +122,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.log('🔄 Current URL:', window.location.href);
                 console.log('🔄 Database parameter:', getCurrentDatabase());
                 
+                // Test if classes are available
+                console.log('🔄 BaseContentBlock available:', typeof BaseContentBlock);
+                console.log('🔄 FilterControlsBlock available:', typeof FilterControlsBlock);
+                
                 // Test the fetchWithDatabase function
                 const response = await fetchWithDatabase('/league/get_available_seasons');
                 const data = await response.json();
