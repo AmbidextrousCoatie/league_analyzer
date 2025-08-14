@@ -545,7 +545,9 @@
         // Helper functions for database parameter handling
         function getCurrentDatabase() {
             const urlParams = new URLSearchParams(window.location.search);
-            return urlParams.get('database');
+            const database = urlParams.get('database');
+            console.log('🔄 getCurrentDatabase called, returning:', database);
+            return database;
         }
         
         function addDatabaseParam(url) {
@@ -559,6 +561,7 @@
         
         function fetchWithDatabase(url, options = {}) {
             const urlWithDatabase = addDatabaseParam(url);
+            console.log('🔄 fetchWithDatabase called:', { originalUrl: url, urlWithDatabase });
             return fetch(urlWithDatabase, options);
         }
     </script>

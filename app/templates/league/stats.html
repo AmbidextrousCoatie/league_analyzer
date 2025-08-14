@@ -5,6 +5,16 @@
     {% include "components/charts.html" %}
 
 <div class="container-fluid">
+    <!-- Debug Test Button -->
+    <div class="row mb-3">
+        <div class="col-12">
+            <button id="debugTestBtn" class="btn btn-warning btn-sm">
+                🐛 Test Frontend Database Parameter
+            </button>
+            <span id="debugResult" class="ms-2"></span>
+        </div>
+    </div>
+
     <!-- Filter Controls Block -->
     <div id="filterControlsContainer">
         <!-- Filter controls will be rendered here -->
@@ -96,6 +106,37 @@
     window.translations = {{ translations|tojson }};
 </script>
 {% endif %}
+
+<!-- Debug test script -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const debugBtn = document.getElementById('debugTestBtn');
+    const debugResult = document.getElementById('debugResult');
+    
+    if (debugBtn) {
+        debugBtn.addEventListener('click', async function() {
+            debugResult.textContent = '🔄 Testing...';
+            
+            try {
+                console.log('🔄 Debug test button clicked');
+                console.log('🔄 Current URL:', window.location.href);
+                console.log('🔄 Database parameter:', getCurrentDatabase());
+                
+                // Test the fetchWithDatabase function
+                const response = await fetchWithDatabase('/league/get_available_seasons');
+                const data = await response.json();
+                
+                console.log('✅ Debug test successful:', data);
+                debugResult.textContent = `✅ Success: ${JSON.stringify(data)}`;
+                
+            } catch (error) {
+                console.error('❌ Debug test failed:', error);
+                debugResult.textContent = `❌ Error: ${error.message}`;
+            }
+        });
+    }
+});
+</script>
 
 <!-- Legacy compatibility for external integrations -->
 <script>

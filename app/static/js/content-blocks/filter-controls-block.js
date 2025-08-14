@@ -46,19 +46,24 @@ class FilterControlsBlock extends BaseContentBlock {
     }
 
     async render(state = {}) {
+        console.log('🔄 FilterControlsBlock.render called with state:', state);
         try {
             const html = this.generateHTML(state);
             this.container.innerHTML = html;
+            console.log('✅ HTML generated and set');
             
             // Set up event listeners
             this.attachEventListeners();
+            console.log('✅ Event listeners attached');
             
             // Load initial data
+            console.log('🔄 Starting to load filter data...');
             await this.loadFilterData(state);
+            console.log('✅ Filter data loaded');
             
             console.log('filter-controls: Filter controls rendered');
         } catch (error) {
-            console.error('Error rendering filter controls:', error);
+            console.error('❌ Error rendering filter controls:', error);
             this.container.innerHTML = this.renderError('Failed to load filter controls');
         }
     }
@@ -142,24 +147,36 @@ class FilterControlsBlock extends BaseContentBlock {
     }
 
     async loadFilterData(state) {
-        // Load seasons and leagues in parallel (both should be available initially)
-        await Promise.all([
-            this.updateSeasonButtons(state),
-            this.updateLeagueButtons(state)
-        ]);
+        console.log('🔄 loadFilterData called with state:', state);
         
-        // Load dependent filters if state has values
-        if (state.season && state.league) {
+        try {
+            // Load seasons and leagues in parallel (both should be available initially)
+            console.log('🔄 Starting parallel load of seasons and leagues...');
             await Promise.all([
-                this.updateWeekButtons(state),
-                this.updateTeamButtons(state)
+                this.updateSeasonButtons(state),
+                this.updateLeagueButtons(state)
             ]);
-        } else if (state.season) {
-            // If only season is selected, update leagues to show compatible ones
-            await this.updateLeagueButtons(state);
-        } else if (state.league) {
-            // If only league is selected, update seasons to show compatible ones
-            await this.updateSeasonButtons(state);
+            console.log('✅ Parallel load of seasons and leagues completed');
+            
+            // Load dependent filters if state has values
+            if (state.season && state.league) {
+                console.log('🔄 Loading dependent filters (weeks and teams)...');
+                await Promise.all([
+                    this.updateWeekButtons(state),
+                    this.updateTeamButtons(state)
+                ]);
+                console.log('✅ Dependent filters loaded');
+            } else if (state.season) {
+                // If only season is selected, update leagues to show compatible ones
+                console.log('🔄 Updating leagues for selected season...');
+                await this.updateLeagueButtons(state);
+            } else if (state.league) {
+                // If only league is selected, update seasons to show compatible ones
+                console.log('🔄 Updating seasons for selected league...');
+                await this.updateSeasonButtons(state);
+            }
+        } catch (error) {
+            console.error('❌ Error in loadFilterData:', error);
         }
     }
 
