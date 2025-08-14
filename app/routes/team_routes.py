@@ -3,7 +3,10 @@ from app.services.team_service import TeamService
 
 bp = Blueprint('team', __name__)
 
-team_service=TeamService()
+def get_team_service():
+    """Helper function to get TeamService with database parameter"""
+    database = request.args.get('database')
+    return TeamService(database=database)
 
 @bp.route('/team/stats')
 def stats():
@@ -12,7 +15,7 @@ def stats():
 @bp.route('/team/get_teams')
 def get_teams():
     try:
-
+        team_service = get_team_service()
         teams = team_service.get_all_teams(
             league_name=None,
             season=None
@@ -34,6 +37,7 @@ def get_available_seasons():
 
         print(f"Team Route: Get Available Seasons - Received request with: team_name={team_name}")
 
+        team_service = get_team_service()
         return jsonify(team_service.get_available_seasons(team_name=team_name))
     except Exception as e:
         print(f"Error in get_available_seasons: {str(e)}")
@@ -50,6 +54,7 @@ def get_available_weeks():
             return jsonify({'error': 'Missing required parameters'}), 400
 
         print(f"Team Route: Get Available Weeks - Received request with: team_name={team_name}, season={season}")
+        team_service = get_team_service()
         return jsonify(team_service.get_available_weeks(team_name=team_name, season=season))
     except Exception as e:
         print(f"Error in get_available_seasons: {str(e)}")
@@ -68,6 +73,7 @@ def get_team_history():
         #     "19/20": {"league_name": "Liga A", "final_position": 8},
         #     "20/21": {"league_name": "Liga B", "final_position": 1}
         # }
+        team_service = get_team_service()
         history = team_service.get_team_history(team_name=team_name)
 
         return jsonify(history)
@@ -93,6 +99,7 @@ def get_special_matches():
             return jsonify({'error': 'Missing team_name parameter'}), 400
         
         # Use unified method that handles both cases
+        team_service = get_team_service()
         special_matches = team_service.get_special_matches(team_name=team_name, season=season if season and season != '' else None)
         
         print(f"DEBUG: get_special_matches returned {len(special_matches)} matches")
@@ -115,11 +122,13 @@ def get_clutch_analysis():
         
         # If season is provided, derive league_name from team history
         if season and season != '' and season != 'All':
+            team_service = get_team_service()
             team_history = team_service.get_team_history(team_name)
             if season in team_history:
                 league_name = team_history[season]['league_name']
                 print(f"DEBUG: Derived league_name={league_name} from team history")
         
+        team_service = get_team_service()
         clutch_data = team_service.get_clutch_performance(team_name=team_name, league_name=league_name, season=season if season and season != '' else None)
         
         print(f"DEBUG: get_clutch_analysis returned data with {len(clutch_data.get('opponent_clutch', {}))} opponents")
@@ -140,6 +149,7 @@ def get_consistency_metrics():
         # Determine scope based on parameters
         if season and season != '':
             # Team + specific season - get league name from team history
+            team_service = get_team_service()
             team_history = team_service.get_team_history(team_name)
             if season not in team_history:
                 return jsonify({'error': f'Team {team_name} not found in season {season}'}), 400
@@ -148,6 +158,7 @@ def get_consistency_metrics():
             consistency_data = team_service.get_consistency_metrics(team_name, league_name, season)
         else:
             # Team only (all seasons) - pass None for season to get all seasons
+            team_service = get_team_service()
             consistency_data = team_service.get_consistency_metrics(team_name, None, None)
         
         return jsonify(consistency_data)
@@ -167,6 +178,7 @@ def get_margin_analysis():
         # Determine scope based on parameters
         if season and season != '':
             # Team + specific season - get league name from team history
+            team_service = get_team_service()
             team_history = team_service.get_team_history(team_name)
             if season not in team_history:
                 return jsonify({'error': f'Team {team_name} not found in season {season}'}), 400
@@ -175,6 +187,7 @@ def get_margin_analysis():
             margin_data = team_service.get_margin_analysis(team_name, league_name, season)
         else:
             # Team only (all seasons) - pass None for season to get all seasons
+            team_service = get_team_service()
             margin_data = team_service.get_margin_analysis(team_name, None, None)
         
         return jsonify(margin_data)
@@ -189,6 +202,7 @@ def get_league_comparison():
         if not team_name:
             return jsonify({'error': 'Missing team_name parameter'}), 400
         
+        team_service = get_team_service()
         comparison_data = team_service.get_league_comparison_data(team_name=team_name)
         #print(comparison_data)
         return jsonify(comparison_data)

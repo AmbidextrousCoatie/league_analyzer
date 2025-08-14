@@ -541,6 +541,26 @@
                 }
             }
         }
+        
+        // Helper functions for database parameter handling
+        function getCurrentDatabase() {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get('database');
+        }
+        
+        function addDatabaseParam(url) {
+            const database = getCurrentDatabase();
+            if (database) {
+                const separator = url.includes('?') ? '&' : '?';
+                return `${url}${separator}database=${encodeURIComponent(database)}`;
+            }
+            return url;
+        }
+        
+        function fetchWithDatabase(url, options = {}) {
+            const urlWithDatabase = addDatabaseParam(url);
+            return fetch(urlWithDatabase, options);
+        }
     </script>
     
     {% block scripts %}{% endblock %}

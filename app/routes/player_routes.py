@@ -2,7 +2,11 @@ from flask import Blueprint, render_template, jsonify, request
 from app.services.player_service import PlayerService
 
 bp = Blueprint('player', __name__, url_prefix='/player')
-player_service = PlayerService()
+
+def get_player_service():
+    """Helper function to get PlayerService with database parameter"""
+    database = request.args.get('database')
+    return PlayerService(database=database)
 
 @bp.route('/stats')
 def stats():
@@ -11,12 +15,14 @@ def stats():
 @bp.route('/search')
 def search_players():
     search_term = request.args.get('search', '')
+    player_service = get_player_service()
     players = player_service.search_players(search_term)
     return jsonify(players)
 
 @bp.route('/get-stats')
 def get_stats():
     player_id = request.args.get('player_id')
+    player_service = get_player_service()
     stats = player_service.get_personal_stats(player_id)
     return jsonify(stats)
 
@@ -30,6 +36,7 @@ def get_lifetime_stats():
     
     print(f"Player Route: Get Lifetime Stats - Received request with: player_name={player_name}")
     
+    player_service = get_player_service()
     stats = player_service.get_lifetime_stats(player_name)  # This will now return both lifetime and season stats
     
     return jsonify(stats)

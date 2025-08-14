@@ -159,7 +159,7 @@ class LeagueAggregationBlock extends BaseContentBlock {
 
     async loadLeagueAverages(league) {
         // TODO: Create endpoint for league averages over time
-        const response = await fetch(`/league/get_league_averages_history?league=${league}`);
+        const response = await fetchWithDatabase(`/league/get_league_averages_history?league=${league}`);
         return await response.json();
     }
 
@@ -169,7 +169,7 @@ class LeagueAggregationBlock extends BaseContentBlock {
             const url = `/league/get_points_to_win_history?league=${league}`;
             console.log(`DEBUG: Fetching from: ${url}`);
             
-            const response = await fetch(url);
+            const response = await fetchWithDatabase(url);
             console.log(`DEBUG: Response status: ${response.status}, ok: ${response.ok}`);
             
             if (!response.ok) {
@@ -188,7 +188,7 @@ class LeagueAggregationBlock extends BaseContentBlock {
 
     async loadTopTeams(league) {
         // TODO: Create endpoint for top team performances
-        const response = await fetch(`/league/get_top_team_performances?league=${league}`);
+        const response = await fetchWithDatabase(`/league/get_top_team_performances?league=${league}`);
         return await response.json();
     }
 
@@ -198,7 +198,7 @@ class LeagueAggregationBlock extends BaseContentBlock {
             const url = `/league/get_top_individual_performances?league=${league}`;
             console.log(`DEBUG: Fetching from: ${url}`);
             
-            const response = await fetch(url);
+            const response = await fetchWithDatabase(url);
             console.log(`DEBUG: Response status: ${response.status}, ok: ${response.ok}`);
             
             if (!response.ok) {
@@ -225,7 +225,7 @@ class LeagueAggregationBlock extends BaseContentBlock {
             const url = `/league/get_record_individual_games?league=${league}`;
             console.log(`DEBUG: Fetching from: ${url}`);
             
-            const response = await fetch(url);
+            const response = await fetchWithDatabase(url);
             console.log(`DEBUG: Response status: ${response.status}, ok: ${response.ok}`);
             
             if (!response.ok) {
@@ -248,7 +248,7 @@ class LeagueAggregationBlock extends BaseContentBlock {
             const url = `/league/get_record_team_games?league=${league}`;
             console.log(`DEBUG: Fetching from: ${url}`);
             
-            const response = await fetch(url);
+            const response = await fetchWithDatabase(url);
             console.log(`DEBUG: Response status: ${response.status}, ok: ${response.ok}`);
             
             if (!response.ok) {

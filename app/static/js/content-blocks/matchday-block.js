@@ -177,7 +177,7 @@ class MatchDayBlock extends BaseContentBlock {
 
     async loadLeagueWeekTable(season, league, week) {
         try {
-            const response = await fetch(`/league/get_league_week_table?season=${season}&league=${league}&week=${week}`);
+            const response = await fetchWithDatabase(`/league/get_league_week_table?season=${season}&league=${league}&week=${week}`);
             const tableData = await response.json();
             
             console.log('League week table data:', tableData); // Debug logging
@@ -211,7 +211,7 @@ class MatchDayBlock extends BaseContentBlock {
 
     async loadHonorScores(season, league, week) {
         try {
-            const response = await fetch(`/league/get_honor_scores?season=${season}&league=${league}&week=${week}`);
+            const response = await fetchWithDatabase(`/league/get_honor_scores?season=${season}&league=${league}&week=${week}`);
             const data = await response.json();
             
             console.log('Honor scores data:', data); // Debug logging
@@ -350,7 +350,7 @@ class MatchDayBlock extends BaseContentBlock {
             const url = `/league/get_individual_averages?league=${encodeURIComponent(league)}&season=${encodeURIComponent(season)}&week=${encodeURIComponent(week)}`;
             console.log(`Fetching individual averages from: ${url}`);
             
-            const response = await fetch(url);
+            const response = await fetchWithDatabase(url);
             
             if (!response.ok) {
                 throw new Error(`HTTP ${response.status}`);

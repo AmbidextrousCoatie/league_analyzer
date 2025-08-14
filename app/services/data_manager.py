@@ -10,9 +10,9 @@ class DataManager:
     _server_instances = []
     _session_key = 'selected_database'
 
-    def __init__(self):
+    def __init__(self, source=None):
         # Always load data from session, don't rely on singleton
-        self._load_data()
+        self._load_data(source)
 
     def _load_data(self, source=None):
         # Get source from session if available, otherwise use default
@@ -105,9 +105,14 @@ class DataManager:
     def _get_session_source(self) -> Optional[str]:
         """Get the selected database source from Flask session"""
         try:
-            source = session.get(self._session_key)
-            print(f"DEBUG: Session source: {source}")
-            return source
+            from flask import has_request_context
+            if has_request_context():
+                source = session.get(self._session_key)
+                print(f"DEBUG: Session source: {source}")
+                return source
+            else:
+                print("DEBUG: No request context, skipping session access")
+                return None
         except Exception as e:
             print(f"Warning: Could not access session: {e}")
             return None
@@ -115,9 +120,13 @@ class DataManager:
     def _save_session_source(self, source: str):
         """Save the selected database source to Flask session"""
         try:
-            session[self._session_key] = source
-            session.modified = True
-            print(f"DEBUG: Saved to session: {source}")
+            from flask import has_request_context
+            if has_request_context():
+                session[self._session_key] = source
+                session.modified = True
+                print(f"DEBUG: Saved to session: {source}")
+            else:
+                print("DEBUG: No request context, skipping session save")
         except Exception as e:
             print(f"Warning: Could not save to session: {e}")
 

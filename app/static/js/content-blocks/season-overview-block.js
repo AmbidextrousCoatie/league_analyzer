@@ -195,7 +195,7 @@ class SeasonOverviewBlock extends BaseContentBlock {
 
     async loadLeagueHistoryTable(season, league) {
         try {
-            const response = await fetch(`/league/get_league_history?season=${season}&league=${league}`);
+            const response = await fetchWithDatabase(`/league/get_league_history?season=${season}&league=${league}`);
             const tableData = await response.json();
             
             console.log('League history table data:', tableData); // Debug logging
@@ -229,7 +229,7 @@ class SeasonOverviewBlock extends BaseContentBlock {
 
     async loadPositionChart(season, league) {
         try {
-            const response = await fetch(`/league/get_team_positions?season=${season}&league=${league}`);
+            const response = await fetchWithDatabase(`/league/get_team_positions?season=${season}&league=${league}`);
             const data = await response.json();
             
             console.log('Position chart data:', data); // Debug logging
@@ -267,7 +267,7 @@ class SeasonOverviewBlock extends BaseContentBlock {
 
     async loadPointsCharts(season, league) {
         try {
-            const response = await fetch(`/league/get_team_points?season=${season}&league=${league}`);
+            const response = await fetchWithDatabase(`/league/get_team_points?season=${season}&league=${league}`);
             const data = await response.json();
             
             // Create labels based on number of weeks
@@ -308,7 +308,7 @@ class SeasonOverviewBlock extends BaseContentBlock {
 
     async loadAverageChart(season, league) {
         try {
-            const response = await fetch(`/league/get_team_averages?season=${season}&league=${league}`);
+            const response = await fetchWithDatabase(`/league/get_team_averages?season=${season}&league=${league}`);
             const data = await response.json();
             
             // Create labels based on number of weeks

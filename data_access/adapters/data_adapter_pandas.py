@@ -27,19 +27,39 @@ OPERATORS = {
 }
 
 class DataAdapterPandas(DataAdapter):
-    def __init__(self, path_to_csv_data: pathlib.Path=None, df: pd.DataFrame=None):
+    def __init__(self, path_to_csv_data: pathlib.Path=None, df: pd.DataFrame=None, database: str=None):
         self.data_path = path_to_csv_data
         self.df = None
+        self.database = database
         
         if path_to_csv_data is not None and path_to_csv_data.exists():
             self._load_data()
         elif df is not None:
             self.df = df
+        elif database is not None:
+            # Load from database parameter
+            self._load_data_from_database()
         else:
             print(type(path_to_csv_data))
             print(type(df))
-            raise ValueError("Either path_to_csv_data or df must be provided")
+            print(type(database))
+            raise ValueError("Either path_to_csv_data, df, or database must be provided")
     
+    def _load_data_from_database(self):
+        """Load data from database parameter"""
+        if self.database is None:
+            raise ValueError("Database parameter is required")
+        
+        # Construct path to the database file
+        database_path = pathlib.Path("database", "data", self.database).absolute()
+        print(f"Loading data from database: {self.database} at path: {database_path}")
+        
+        if not database_path.exists():
+            raise ValueError(f"Database file not found: {database_path}")
+        
+        self.data_path = database_path
+        self._load_data()
+
     def _load_data(self):
         """Load data from CSV file"""
         print(f"Loading data from {self.data_path}")

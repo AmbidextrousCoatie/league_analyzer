@@ -196,7 +196,7 @@ class TeamDetailsBlock extends BaseContentBlock {
             
             console.log(`Loading team details with view: ${view}, endpoint: ${endpoint}`);
             
-            const response = await fetch(`${endpoint}?season=${season}&league=${league}&week=${week}&team=${team}`);
+            const response = await fetchWithDatabase(`${endpoint}?season=${season}&league=${league}&week=${week}&team=${team}`);
             const tableData = await response.json();
             
             console.log('Team week details table data:', tableData); // Debug logging
@@ -267,7 +267,7 @@ class TeamDetailsBlock extends BaseContentBlock {
             const url = `/league/get_individual_averages?league=${encodeURIComponent(league)}&season=${encodeURIComponent(season)}&week=${encodeURIComponent(week)}&team=${encodeURIComponent(team)}`;
             console.log(`Fetching team individual averages from: ${url}`);
             
-            const response = await fetch(url);
+            const response = await fetchWithDatabase(url);
             
             if (!response.ok) {
                 throw new Error(`HTTP ${response.status}`);

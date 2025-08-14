@@ -187,7 +187,7 @@ class FilterManager {
      */
     async loadTeamsData() {
         try {
-            const response = await fetch('/team/get_teams');
+            const response = await fetchWithDatabase('/team/get_teams');
             const teams = await response.json();
             this.availableData.teams = teams;
             
@@ -206,7 +206,7 @@ class FilterManager {
      */
     async loadSeasonsData(teamName) {
         try {
-            const response = await fetch(`/team/get_available_seasons?team_name=${teamName}`);
+            const response = await fetchWithDatabase(`/team/get_available_seasons?team_name=${teamName}`);
             const seasons = await response.json();
             this.availableData.seasons = seasons;
             
@@ -225,7 +225,7 @@ class FilterManager {
      */
     async loadWeeksData(teamName, season) {
         try {
-            const response = await fetch(`/team/get_available_weeks?team_name=${teamName}&season=${season}`);
+            const response = await fetchWithDatabase(`/team/get_available_weeks?team_name=${teamName}&season=${season}`);
             const weeks = await response.json();
             this.availableData.weeks = weeks;
             

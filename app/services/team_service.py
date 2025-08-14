@@ -16,9 +16,10 @@ class TeamService:
     # converts dataframes to dicts
     # jsonifies dicts   
     # forwards JSON dict to app routes
-    def __init__(self):
-        self.server = Server()
-        self.stats_service = StatisticsService()
+    def __init__(self, database: str = None):
+        self.database = database
+        self.server = Server(database=database)
+        self.stats_service = StatisticsService(database=database)
 
     def get_all_teams(self, league_name: str=None, season: str=None):
         """Returns all teams for a given league and season"""

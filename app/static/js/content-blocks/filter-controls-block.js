@@ -104,8 +104,13 @@ class FilterControlsBlock extends BaseContentBlock {
     }
 
     attachEventListeners() {
-        // Use click event but with proper state management
-        this.container.addEventListener('click', (event) => {
+        // Remove any existing event listeners to prevent duplicates
+        if (this._clickHandler) {
+            this.container.removeEventListener('click', this._clickHandler);
+        }
+        
+        // Create the event handler function
+        this._clickHandler = (event) => {
             if (event.target.type === 'radio' || event.target.tagName === 'LABEL') {
                 // Get the radio input (either the clicked radio or the radio associated with the clicked label)
                 const radio = event.target.type === 'radio' ? event.target : 
@@ -130,7 +135,10 @@ class FilterControlsBlock extends BaseContentBlock {
                     }
                 }
             }
-        });
+        };
+        
+        // Add the event listener
+        this.container.addEventListener('click', this._clickHandler);
     }
 
     async loadFilterData(state) {
@@ -158,7 +166,7 @@ class FilterControlsBlock extends BaseContentBlock {
     async updateSeasonButtons(state) {
         try {
             // Always show all available seasons
-            const response = await fetch('/league/get_available_seasons');
+            const response = await fetchWithDatabase('/league/get_available_seasons');
             const data = await response.json();
             
             let buttonsHtml = data.map(season => `
@@ -181,7 +189,7 @@ class FilterControlsBlock extends BaseContentBlock {
                 `/league/get_available_leagues?season=${state.season}` : 
                 '/league/get_available_leagues';
             
-            const response = await fetch(url);
+            const response = await fetchWithDatabase(url);
             const data = await response.json();
             
             let buttonsHtml = data.map(league => `
@@ -208,7 +216,7 @@ class FilterControlsBlock extends BaseContentBlock {
 
         try {
             // Always show all available weeks for the season/league combination
-            const response = await fetch(`/league/get_available_weeks?season=${selectedSeason}&league=${selectedLeague}`);
+            const response = await fetchWithDatabase(`/league/get_available_weeks?season=${selectedSeason}&league=${selectedLeague}`);
             const data = await response.json();
             
             let buttonsHtml = data.map(week => `
@@ -235,7 +243,7 @@ class FilterControlsBlock extends BaseContentBlock {
 
         try {
             // Always show all available teams for the season/league combination
-            const response = await fetch(`/league/get_available_teams?season=${selectedSeason}&league=${selectedLeague}`);
+            const response = await fetchWithDatabase(`/league/get_available_teams?season=${selectedSeason}&league=${selectedLeague}`);
             const data = await response.json();
             
             let buttonsHtml = data.map(team => `
@@ -432,7 +440,7 @@ class FilterControlsBlock extends BaseContentBlock {
 
     async isValidSeasonLeagueCombo(season, league) {
         try {
-            const response = await fetch(`/league/get_available_leagues?season=${season}`);
+            const response = await fetchWithDatabase(`/league/get_available_leagues?season=${season}`);
             const leagues = await response.json();
             return leagues.includes(league);
         } catch (error) {
@@ -443,7 +451,7 @@ class FilterControlsBlock extends BaseContentBlock {
 
     async isValidWeek(season, league, week) {
         try {
-            const response = await fetch(`/league/get_available_weeks?season=${season}&league=${league}`);
+            const response = await fetchWithDatabase(`/league/get_available_weeks?season=${season}&league=${league}`);
             const weeks = await response.json();
             return weeks.includes(parseInt(week));
         } catch (error) {
@@ -454,7 +462,7 @@ class FilterControlsBlock extends BaseContentBlock {
 
     async isValidTeam(season, league, team) {
         try {
-            const response = await fetch(`/league/get_available_teams?season=${season}&league=${league}`);
+            const response = await fetchWithDatabase(`/league/get_available_teams?season=${season}&league=${league}`);
             const teams = await response.json();
             return teams.includes(team);
         } catch (error) {

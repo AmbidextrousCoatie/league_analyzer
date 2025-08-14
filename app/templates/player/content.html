@@ -127,7 +127,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const playerList = document.getElementById('playerList');
     
     // Load all players immediately
-    fetch('{{ url_for("player.search_players") }}')
+    fetchWithDatabase('{{ url_for("player.search_players") }}')
         .then(response => response.json())
         .then(players => {
             // Populate datalist with options
@@ -149,7 +149,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function loadPlayerStats(playerName) {
         console.log("loadPlayerStats: " + playerName);
-        fetch(`{{ url_for("player.get_lifetime_stats") }}?player_name=${playerName}`)
+        fetchWithDatabase(`{{ url_for("player.get_lifetime_stats") }}?player_name=${playerName}`)
             .then(response => response.json())
 
 

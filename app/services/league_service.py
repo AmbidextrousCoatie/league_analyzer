@@ -16,9 +16,10 @@ from itertools import accumulate
 
 
 class LeagueService:
-    def __init__(self, adapter_type=DataAdapterSelector.PANDAS):
-        self.adapter = DataAdapterFactory.create_adapter(adapter_type)
-        self.stats_service = StatisticsService()
+    def __init__(self, adapter_type=DataAdapterSelector.PANDAS, database: str = None):
+        self.database = database
+        self.adapter = DataAdapterFactory.create_adapter(adapter_type, database=database)
+        self.stats_service = StatisticsService(database=database)
         
         # Register this adapter with DataManager for automatic refresh
         try:
@@ -29,10 +30,12 @@ class LeagueService:
             # DataManager not available, continue without registration
             pass
 
-    def refresh_data_adapter(self):
+    def refresh_data_adapter(self, database: str = None):
         """Refresh the data adapter with the current data source"""
-        print(f"DEBUG: LeagueService refreshing data adapter")
-        self.adapter = DataAdapterFactory.create_adapter(DataAdapterSelector.PANDAS)
+        if database:
+            self.database = database
+        print(f"DEBUG: LeagueService refreshing data adapter with database: {self.database}")
+        self.adapter = DataAdapterFactory.create_adapter(DataAdapterSelector.PANDAS, database=self.database)
         print(f"DEBUG: LeagueService data adapter refreshed")
 
     def get_available_weeks(self, season: str, league: str) -> List[int]:
@@ -2292,6 +2295,8 @@ class LeagueService:
                 Columns.season: {'value': season, 'operator': 'eq'},
                 Columns.computed_data: {'value': False, 'operator': 'eq'}  # Individual players only
             }
+            if isinstance(week, str) and week.isdigit():
+                week = int(week)
             
             # Add week filter if specified
             if week is not None:

@@ -38,16 +38,39 @@ def player_stats(analysis):
 @bp.route('/get-data-sources-info')
 def get_data_sources_info():
     try:
-        data_manager = DataManager()
-        # Force reload from session to ensure consistency across workers
-        data_manager.force_reload_from_session()
-        return {
-            'success': True,
-            'current_source': data_manager.current_source,
-            'current_display_name': data_manager.get_source_display_name(data_manager.current_source),
-            'available_sources': data_manager.get_available_sources(),
-            'sources_info': data_manager.get_sources_info()
-        }
+        # Get database parameter from request
+        database = request.args.get('database')
+        
+        if database:
+            # Use the specified database
+            data_manager = DataManager()
+            # Validate the database
+            if not data_manager.validate_source(database):
+                return {
+                    'success': False,
+                    'message': f'Invalid data source: {database}',
+                    'available_sources': data_manager.get_available_sources()
+                }, 400
+            
+            return {
+                'success': True,
+                'current_source': database,
+                'current_display_name': data_manager.get_source_display_name(database),
+                'available_sources': data_manager.get_available_sources(),
+                'sources_info': data_manager.get_sources_info()
+            }
+        else:
+            # Use current session-based approach
+            data_manager = DataManager()
+            # Force reload from session to ensure consistency across workers
+            data_manager.force_reload_from_session()
+            return {
+                'success': True,
+                'current_source': data_manager.current_source,
+                'current_display_name': data_manager.get_source_display_name(data_manager.current_source),
+                'available_sources': data_manager.get_available_sources(),
+                'sources_info': data_manager.get_sources_info()
+            }
     except Exception as e:
         print(f"ERROR: Exception in get_data_sources_info: {e}")
         return {
@@ -185,4 +208,48 @@ def debug_session():
         return jsonify({
             'error': str(e),
             'traceback': str(e.__traceback__)
+        }), 500
+
+@bp.route('/test-database-param')
+def test_database_param():
+    """Test route to verify database parameter is passed correctly through all layers"""
+    try:
+        database = request.args.get('database')
+        
+        if not database:
+            return jsonify({
+                'success': False,
+                'message': 'No database parameter provided'
+            }), 400
+        
+        # Test the full chain: Route -> Service -> Server -> DataAdapterFactory -> DataAdapterPandas
+        from app.services.league_service import LeagueService
+        from business_logic.server import Server
+        from data_access.adapters.data_adapter_factory import DataAdapterFactory, DataAdapterSelector
+        
+        # Test LeagueService
+        league_service = LeagueService(database=database)
+        
+        # Test Server
+        server = Server(database=database)
+        
+        # Test DataAdapterFactory
+        adapter = DataAdapterFactory.create_adapter(DataAdapterSelector.PANDAS, database=database)
+        
+        # Get some basic data to verify it's working
+        seasons = league_service.get_seasons()
+        leagues = league_service.get_leagues()
+        
+        return jsonify({
+            'success': True,
+            'database': database,
+            'seasons': seasons,
+            'leagues': leagues,
+            'message': 'Database parameter passed successfully through all layers'
+        })
+        
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'message': f'Error testing database parameter: {str(e)}'
         }), 500

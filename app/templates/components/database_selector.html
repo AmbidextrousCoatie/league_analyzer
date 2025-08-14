@@ -179,7 +179,17 @@ class DatabaseSelector {
 
     async loadSourcesInfo() {
         try {
-            const response = await fetch('/get-data-sources-info', {
+            // Get current database from URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const currentDatabase = urlParams.get('database');
+            
+            // Build the URL with database parameter if present
+            let url = '/get-data-sources-info';
+            if (currentDatabase) {
+                url += `?database=${encodeURIComponent(currentDatabase)}`;
+            }
+            
+            const response = await fetch(url, {
                 headers: { 'Cache-Control': 'no-cache' }
             });
             const data = await response.json();
@@ -272,40 +282,16 @@ class DatabaseSelector {
         this.showLoadingState();
 
         try {
-            const response = await fetch(`/reload-data?source=${encodeURIComponent(sourceId)}`, {
-                method: 'GET',
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'Cache-Control': 'no-cache'
-                }
-            });
-
-            const data = await response.json();
-
-            if (response.ok && data.success) {
-                this.currentSource = data.current_source;
-                this.sourcesInfo = data.sources_info;
-                this.renderOptions();
-                this.updateDisplay();
-                this.showSuccess(`Switched to ${data.current_display_name}`);
-                
-                // Trigger custom event for other components
-                window.dispatchEvent(new CustomEvent('databaseChanged', {
-                    detail: { source: this.currentSource, displayName: data.current_display_name }
-                }));
-
-                // Trigger dynamic component refreshes
-                await this.refreshDynamicComponents();
-                
-            } else {
-                this.showError(data.message || 'Failed to switch database');
-                await this.loadSourcesInfo(); // Reload to get current state
-            }
+            // Update URL with database parameter
+            const url = new URL(window.location);
+            url.searchParams.set('database', sourceId);
+            
+            // Navigate to the new URL (this will reload the page with the new database)
+            window.location.href = url.toString();
+            
         } catch (error) {
             console.error('Error switching database:', error);
-            this.showError('Network error while switching database');
-            await this.loadSourcesInfo(); // Reload to get current state
-        } finally {
+            this.showError('Failed to switch database');
             this.isLoading = false;
             this.hideLoadingState();
         }

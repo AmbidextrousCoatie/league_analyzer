@@ -203,7 +203,7 @@ class LeagueSeasonOverviewBlock extends BaseContentBlock {
 
     async loadTimetable(league, season) {
         // TODO: Create endpoint for season timetable
-        const response = await fetch(`/league/get_season_timetable?league=${league}&season=${season}`);
+        const response = await fetchWithDatabase(`/league/get_season_timetable?league=${league}&season=${season}`);
         if (!response.ok) {
             throw new Error(`HTTP ${response.status}`);
         }
@@ -212,13 +212,13 @@ class LeagueSeasonOverviewBlock extends BaseContentBlock {
 
     async loadLeagueStandings(league, season) {
         // Use existing endpoint
-        const response = await fetch(`/league/get_league_history?season=${season}&league=${league}`);
+        const response = await fetchWithDatabase(`/league/get_league_history?season=${season}&league=${league}`);
         return await response.json();
     }
 
     async loadIndividualAverages(league, season) {
         // TODO: Create endpoint for individual averages
-        const response = await fetch(`/league/get_individual_averages?league=${league}&season=${season}`);
+        const response = await fetchWithDatabase(`/league/get_individual_averages?league=${league}&season=${season}`);
         if (!response.ok) {
             throw new Error(`HTTP ${response.status}`);
         }
@@ -240,19 +240,19 @@ class LeagueSeasonOverviewBlock extends BaseContentBlock {
 
     async loadTeamPoints(league, season) {
         // Use existing endpoint
-        const response = await fetch(`/league/get_team_points?season=${season}&league=${league}`);
+        const response = await fetchWithDatabase(`/league/get_team_points?season=${season}&league=${league}`);
         return await response.json();
     }
 
     async loadTeamPositions(league, season) {
         // Use existing endpoint
-        const response = await fetch(`/league/get_team_positions?season=${season}&league=${league}`);
+        const response = await fetchWithDatabase(`/league/get_team_positions?season=${season}&league=${league}`);
         return await response.json();
     }
 
     async loadWeeklyPoints(league, season) {
         // Use same data as team points for scatter plot
-        const response = await fetch(`/league/get_team_points?season=${season}&league=${league}`);
+        const response = await fetchWithDatabase(`/league/get_team_points?season=${season}&league=${league}`);
         return await response.json();
     }
 
@@ -298,51 +298,90 @@ class LeagueSeasonOverviewBlock extends BaseContentBlock {
     }
 
     createPointsChart(data) {
-        if (typeof createLineChart === 'function' && data.data_accumulated) {
-            const numWeeks = Object.values(data.data_accumulated)[0].length;
-            const labels = Array.from({length: numWeeks}, (_, i) => `Week ${i + 1}`);
-            
-            createLineChart(
-                data.data_accumulated,
-                data.sorted_by_total,
-                'chartTeamPointsCumulated',
-                'Points in Season Progress',
-                labels,
-                false,
-                'auto'
-            );
+        console.log('DEBUG: createPointsChart called with data:', data);
+        
+        if (typeof createLineChart === 'function' && data && data.data_accumulated) {
+            const firstTeamData = Object.values(data.data_accumulated)[0];
+            if (firstTeamData && Array.isArray(firstTeamData)) {
+                const numWeeks = firstTeamData.length;
+                const labels = Array.from({length: numWeeks}, (_, i) => `Week ${i + 1}`);
+                
+                createLineChart(
+                    data.data_accumulated,
+                    data.sorted_by_total,
+                    'chartTeamPointsCumulated',
+                    'Points in Season Progress',
+                    labels,
+                    false,
+                    'auto'
+                );
+            } else {
+                console.warn('createPointsChart: data.data_accumulated does not contain valid array data');
+            }
+        } else {
+            console.warn('createPointsChart: createLineChart not available or data.data_accumulated missing', {
+                hasCreateLineChart: typeof createLineChart === 'function',
+                hasData: !!data,
+                hasDataAccumulated: data && !!data.data_accumulated
+            });
         }
     }
 
     createPositionsChart(data) {
-        if (typeof createLineChart === 'function' && data.data) {
-            const numWeeks = Object.values(data.data)[0].length;
-            const labels = Array.from({length: numWeeks}, (_, i) => `Week ${i + 1}`);
-            
-            createLineChart(
-                data.data,
-                data.sorted_by_best || data.sorted_by_total || Object.keys(data.data),
-                'chartTeamPositionCumulated',
-                'Position in Season Progress',
-                labels,
-                true, // reverse Y axis for positions
-                'exact' // use exact Y-axis limits for positions
-            );
+        console.log('DEBUG: createPositionsChart called with data:', data);
+        
+        if (typeof createLineChart === 'function' && data && data.data) {
+            const firstTeamData = Object.values(data.data)[0];
+            if (firstTeamData && Array.isArray(firstTeamData)) {
+                const numWeeks = firstTeamData.length;
+                const labels = Array.from({length: numWeeks}, (_, i) => `Week ${i + 1}`);
+                
+                createLineChart(
+                    data.data,
+                    data.sorted_by_best || data.sorted_by_total || Object.keys(data.data),
+                    'chartTeamPositionCumulated',
+                    'Position in Season Progress',
+                    labels,
+                    true, // reverse Y axis for positions
+                    'exact' // use exact Y-axis limits for positions
+                );
+            } else {
+                console.warn('createPositionsChart: data.data does not contain valid array data');
+            }
+        } else {
+            console.warn('createPositionsChart: createLineChart not available or data.data missing', {
+                hasCreateLineChart: typeof createLineChart === 'function',
+                hasData: !!data,
+                hasDataProperty: data && !!data.data
+            });
         }
     }
 
     createWeeklyPointsChart(data) {
-        if (typeof createScatterChartMultiAxis === 'function' && data.data) {
-            const numWeeks = Object.values(data.data)[0].length;
-            const labels = Array.from({length: numWeeks}, (_, i) => `Week ${i + 1}`);
-            
-            createScatterChartMultiAxis(
-                data.data,
-                data.sorted_by_total,
-                'chartTeamPointsWeekly',
-                'Points per Match Day',
-                labels
-            );
+        console.log('DEBUG: createWeeklyPointsChart called with data:', data);
+        
+        if (typeof createScatterChartMultiAxis === 'function' && data && data.data) {
+            const firstTeamData = Object.values(data.data)[0];
+            if (firstTeamData && Array.isArray(firstTeamData)) {
+                const numWeeks = firstTeamData.length;
+                const labels = Array.from({length: numWeeks}, (_, i) => `Week ${i + 1}`);
+                
+                createScatterChartMultiAxis(
+                    data.data,
+                    data.sorted_by_total,
+                    'chartTeamPointsWeekly',
+                    'Points per Match Day',
+                    labels
+                );
+            } else {
+                console.warn('createWeeklyPointsChart: data.data does not contain valid array data');
+            }
+        } else {
+            console.warn('createWeeklyPointsChart: createScatterChartMultiAxis not available or data.data missing', {
+                hasCreateScatterChartMultiAxis: typeof createScatterChartMultiAxis === 'function',
+                hasData: !!data,
+                hasDataProperty: data && !!data.data
+            });
         }
     }
 

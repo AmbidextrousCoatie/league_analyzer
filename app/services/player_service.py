@@ -9,10 +9,11 @@ from app.models.statistics_models import PlayerStatistics
 from typing import Dict, List, Any, Optional
 
 class PlayerService:
-    def __init__(self):
-        self.data_manager = DataManager()
-        self.server = Server()
-        self.stats_service = StatisticsService()
+    def __init__(self, database: str = None):
+        self.database = database
+        self.data_manager = DataManager(source=database) if database else DataManager()
+        self.server = Server(database=database)
+        self.stats_service = StatisticsService(database=database)
 
     def get_all_players(self):
         """Get list of all players for selection"""

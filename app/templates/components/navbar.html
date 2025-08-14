@@ -7,16 +7,16 @@
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav">
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('player.stats') }}">Player Stats</a>
+                    <a class="nav-link" href="{{ url_for('player.stats') }}" id="playerStatsLink">Player Stats</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('league.stats') }}">League Stats</a>
+                    <a class="nav-link" href="{{ url_for('league.stats') }}" id="leagueStatsLink">League Stats</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('team.stats') }}">Team Stats</a>
+                    <a class="nav-link" href="{{ url_for('team.stats') }}" id="teamStatsLink">Team Stats</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('main.test') }}">API Test</a>
+                    <a class="nav-link" href="{{ url_for('main.test') }}" id="apiTestLink">API Test</a>
                 </li>
             </ul>
             <ul class="navbar-nav ms-auto">
@@ -47,6 +47,30 @@
                     </ul>
                 </li>
                 <script>
+                    // Preserve database parameter in navigation links
+                    document.addEventListener('DOMContentLoaded', function() {
+                        const currentDatabase = new URLSearchParams(window.location.search).get('database');
+                        
+                        if (currentDatabase) {
+                            // Update all navigation links to include the database parameter
+                            const navLinks = [
+                                'playerStatsLink',
+                                'leagueStatsLink', 
+                                'teamStatsLink',
+                                'apiTestLink'
+                            ];
+                            
+                            navLinks.forEach(linkId => {
+                                const link = document.getElementById(linkId);
+                                if (link) {
+                                    const url = new URL(link.href);
+                                    url.searchParams.set('database', currentDatabase);
+                                    link.href = url.toString();
+                                }
+                            });
+                        }
+                    });
+                    
                     // Palette dropdown handler
                     document.addEventListener('DOMContentLoaded', function() {
                         document.querySelectorAll('.palette-option').forEach(function(el) {

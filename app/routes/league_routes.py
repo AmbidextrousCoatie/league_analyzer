@@ -8,11 +8,16 @@ import traceback
 from app.services.data_dict import DataDict
 
 bp = Blueprint('league', __name__)
-league_service = LeagueService()
+
+def get_league_service():
+    """Helper function to get LeagueService with database parameter"""
+    database = request.args.get('database')
+    return LeagueService(database=database)
 
 @bp.route('/league/stats')
 def stats():
     try:
+        league_service = get_league_service()
         weeks = league_service.get_weeks()
         print(f"Available weeks: {weeks}")  # Debug output
         return render_template('league/stats.html', 
@@ -26,6 +31,7 @@ def stats():
 @bp.route('/league/get_combinations')
 def get_combinations():
     try:
+        league_service = get_league_service()
         return jsonify(league_service.get_valid_combinations())
     except Exception as e:
         print(f"Error in get_combinations: {str(e)}")
@@ -40,7 +46,8 @@ def get_available_weeks():
         
         if not season or not league:
             return jsonify({"error": "Season and league are required"}), 400
-            
+        
+        league_service = get_league_service()
         weeks = league_service.get_weeks(league_name=league, season=season)
         return jsonify(weeks)
     except Exception as e:
@@ -54,7 +61,8 @@ def get_available_teams():
         
         if not season or not league:
             return jsonify({"error": "Season and league are required"}), 400
-            
+        
+        league_service = get_league_service()
         teams = league_service.get_teams_in_league_season(league, season)
 
         return jsonify(teams)
@@ -74,6 +82,7 @@ def get_league_history():
             return jsonify({'error': 'Missing required parameters'}), 400
         
         # Use the new method that returns TableData
+        league_service = get_league_service()
         table_data = league_service.get_league_history_table_data(
             league_name=league,
             season=season
@@ -105,6 +114,7 @@ def get_league_week_table():
 
         # Get the table data from the service
         # This now returns a TableData object
+        league_service = get_league_service()
         table_data = league_service.get_league_week_table_simple(season=season, league=league, week=week)
         
         #print("############################")
@@ -136,6 +146,7 @@ def get_team_week_details():
 
     week = int(request.args.get('week'))
     
+    league_service = get_league_service()
     details = league_service.get_team_week_details(league, season, team, week)
     print(details)
     
@@ -155,10 +166,11 @@ def get_team_week_details_table():
             return jsonify({'error': i18n_service.get_text('missing_parameters')}), 400
         
         # Get the table data from the service
+        league_service = get_league_service()
         table_data = league_service.get_team_week_details_table_data(
             league=league, 
             season=season, 
-            team=team, 
+            team=team,
             week=week
         )
         
@@ -192,6 +204,7 @@ def get_team_week_head_to_head_table():
         week = int(week_str)
         
         # Get the table data from the service
+        league_service = get_league_service()
         table_data = league_service.get_team_week_head_to_head_table_data(
             league=league, 
             season=season, 
@@ -216,6 +229,7 @@ def get_team_week_head_to_head_table():
 @bp.route('/league/get_available_seasons')
 def get_available_seasons():
     try:
+        league_service = get_league_service()
         seasons = league_service.get_seasons()
         return jsonify(seasons)
     except Exception as e:
@@ -224,6 +238,7 @@ def get_available_seasons():
 @bp.route('/league/get_available_leagues')
 def get_available_leagues():
     try:
+        league_service = get_league_service()
         leagues = league_service.get_leagues()
         return jsonify(leagues)
     except Exception as e:
@@ -236,6 +251,7 @@ def get_honor_scores():
         league = request.args.get('league')
         week = int(request.args.get('week'))
         
+        league_service = get_league_service()
         honor_scores = league_service.get_honor_scores(
             league=league, 
             season=season, 
@@ -262,6 +278,7 @@ def get_team_points():
         if not all([season, league]):
             return jsonify({'error': i18n_service.get_text('missing_parameters')}), 400
             
+        league_service = get_league_service()
         points = league_service.get_team_points_simple(
             league_name=league,
             season=season
@@ -288,6 +305,7 @@ def get_team_points_vs_average():
         if not all([season, league]):
             return jsonify({'error': i18n_service.get_text('missing_parameters')}), 400
             
+        league_service = get_league_service()
         points_data = league_service.get_team_points_during_season(
             league_name=league,
             season=season
@@ -330,6 +348,7 @@ def get_latest_events():
         if limit <= 0:
             return jsonify({'error': 'Limit must be greater than 0'}), 400
             
+        league_service = get_league_service()
         events = league_service.get_latest_events(limit=limit)
         #print("league_routes.get_latest_events")
         #print(events)
@@ -352,6 +371,7 @@ def get_team_positions():
         if not all([season, league]):
             return jsonify({'error': i18n_service.get_text('missing_parameters')}), 400
             
+        league_service = get_league_service()
         positions = league_service.get_team_positions_simple(
             league_name=league,
             season=season
@@ -376,6 +396,7 @@ def get_team_averages():
         if not all([season, league]):
             return jsonify({'error': i18n_service.get_text('missing_parameters')}), 400
             
+        league_service = get_league_service()
         averages = league_service.get_team_averages_simple(
             league_name=league,
             season=season
@@ -456,6 +477,7 @@ def get_team_individual_scores_table():
         if not all([season, league, week_str, team]):
             return jsonify({'error': 'Missing required parameters'}), 400
         week = int(week_str)
+        league_service = get_league_service()
         table_data = league_service.get_team_individual_scores_table(
             league=league,
             season=season,
@@ -485,6 +507,7 @@ def get_league_averages_history():
         print(f"League Averages History - Received request with: league={league}")
         
         debug = request.args.get('debug', 'false').lower() == 'true'
+        league_service = get_league_service()
         data = league_service.get_league_averages_history(league=league, debug=debug)
         return jsonify(data)
         
@@ -504,6 +527,7 @@ def get_points_to_win_history():
         print(f"Points to Win History - Received request with: league={league}")
         
         debug = request.args.get('debug', 'false').lower() == 'true'
+        league_service = get_league_service()
         data = league_service.get_points_to_win_history(league=league, debug=debug)
         return jsonify(data)
         
@@ -522,6 +546,7 @@ def get_top_team_performances():
         
         print(f"Top Team Performances - Received request with: league={league}")
         
+        league_service = get_league_service()
         table_data = league_service.get_top_team_performances(league=league)
         return jsonify(table_data.to_dict())
         
@@ -540,6 +565,7 @@ def get_top_individual_performances():
         
         print(f"Top Individual Performances - Received request with: league={league}")
         
+        league_service = get_league_service()
         table_data = league_service.get_top_individual_performances(league=league)
         return jsonify(table_data.to_dict())
         
@@ -558,6 +584,7 @@ def get_record_games():
         
         print(f"Record Games - Received request with: league={league}")
         
+        league_service = get_league_service()
         table_data = league_service.get_record_games(league=league)
         return jsonify(table_data.to_dict())
         
@@ -576,6 +603,7 @@ def get_record_individual_games():
         
         print(f"Record Individual Games - Received request with: league={league}")
         
+        league_service = get_league_service()
         table_data = league_service.get_record_individual_games(league=league)
         return jsonify(table_data.to_dict())
         
@@ -594,6 +622,7 @@ def get_record_team_games():
         
         print(f"Record Team Games - Received request with: league={league}")
         
+        league_service = get_league_service()
         table_data = league_service.get_record_team_games(league=league)
         return jsonify(table_data.to_dict())
         
@@ -617,6 +646,7 @@ def get_season_timetable():
         
         print(f"Season Timetable - Received request with: league={league}, season={season}")
         
+        league_service = get_league_service()
         data = league_service.get_season_timetable(league=league, season=season)
         return jsonify(data)
         
@@ -651,6 +681,7 @@ def get_individual_averages():
             filter_info += f", team={team}"
         print(f"Individual Averages - Received request with: league={league}, season={season}{filter_info}")
         
+        league_service = get_league_service()
         table_data = league_service.get_individual_averages(league=league, season=season, week=week, team=team)
         return jsonify(table_data.to_dict())
         

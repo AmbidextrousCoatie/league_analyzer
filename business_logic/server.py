@@ -10,15 +10,17 @@ class Server:
     # forwards aggregated dataframes to app
     _instance = None
     
-    def __new__(cls):
+    def __new__(cls, database: str = None):
         if cls._instance is None:
             cls._instance = super(Server, cls).__new__(cls)
             cls._instance._initialized = False
+            cls._instance._database = database
         return cls._instance
     
-    def __init__(self):
+    def __init__(self, database: str = None):
         if not self._initialized:
-            self.data_adapter = DataAdapterFactory.create_adapter(DataAdapterSelector.PANDAS)
+            self._database = database
+            self.data_adapter = DataAdapterFactory.create_adapter(DataAdapterSelector.PANDAS, database=database)
             # Register this server instance with DataManager for automatic refresh
             try:
                 from app.services.data_manager import DataManager
@@ -29,10 +31,12 @@ class Server:
                 pass
             self._initialized = True
 
-    def refresh_data_adapter(self):
+    def refresh_data_adapter(self, database: str = None):
         """Refresh the data adapter with the current data source"""
-        print(f"DEBUG: Server refreshing data adapter")
-        self.data_adapter = DataAdapterFactory.create_adapter(DataAdapterSelector.PANDAS)
+        if database:
+            self._database = database
+        print(f"DEBUG: Server refreshing data adapter with database: {self._database}")
+        self.data_adapter = DataAdapterFactory.create_adapter(DataAdapterSelector.PANDAS, database=self._database)
         print(f"DEBUG: Server data adapter refreshed")
 
     def get_player_data(self, player_name: str) -> pd.DataFrame:

@@ -10,8 +10,9 @@ from data_access.models.raw_data_models import RawTeamData, RawLeagueData, RawPl
 from data_access.schema import Columns
 
 class StatisticsService:
-    def __init__(self):
-        self.server = Server()
+    def __init__(self, database: str = None):
+        self.database = database
+        self.server = Server(database=database)
 
     def get_team_statistics(self, team: str, season: str) -> Optional[TeamStatistics]:
         """Get comprehensive team statistics for a specific team and season."""
