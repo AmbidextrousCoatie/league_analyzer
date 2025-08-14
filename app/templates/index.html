@@ -41,14 +41,18 @@
 <!-- Add JavaScript for latest events -->
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    fetch('{{ url_for("league.get_latest_events") }}')
+    console.log('🔄 Loading latest events with database:', getCurrentDatabase());
+    
+    // Use fetchWithDatabase to include the database parameter
+    fetchWithDatabase('{{ url_for("league.get_latest_events") }}')
         .then(response => response.json())
         .then(data => {
+            console.log('✅ Latest events loaded:', data);
             const eventsList = document.getElementById('latestEvents');
             if (data && Array.isArray(data)) {
                 eventsList.innerHTML = data.map(event => `
                     <li class="list-group-item">
-                        <a href="{{ url_for('league.stats') }}?season=${encodeURIComponent(event.Season)}&league=${encodeURIComponent(event.League)}&week=${event.Week}" 
+                        <a href="{{ url_for('league.stats') }}?season=${encodeURIComponent(event.Season)}&league=${encodeURIComponent(event.League)}&week=${event.Week}&database=${encodeURIComponent(getCurrentDatabase())}" 
                            class="text-decoration-none">
                             ${event.Season} - ${event.League} - Woche ${event.Week}
                             <small class="text-muted">(${event.Date})</small>
@@ -60,7 +64,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         })
         .catch(error => {
-            console.error('Error fetching events:', error);
+            console.error('❌ Error fetching events:', error);
             const eventsList = document.getElementById('latestEvents');
             eventsList.innerHTML = '<li class="list-group-item text-danger">Fehler beim Laden der Events</li>';
         });

@@ -165,9 +165,11 @@ class FilterControlsBlock extends BaseContentBlock {
 
     async updateSeasonButtons(state) {
         try {
+            console.log('🔄 Loading seasons with database:', getCurrentDatabase());
             // Always show all available seasons
             const response = await fetchWithDatabase('/league/get_available_seasons');
             const data = await response.json();
+            console.log('✅ Seasons loaded:', data);
             
             let buttonsHtml = data.map(season => `
                 <input type="radio" class="btn-check" name="season" id="season${season}" value="${season}" 
@@ -177,13 +179,14 @@ class FilterControlsBlock extends BaseContentBlock {
             
             document.getElementById('buttonsSeason').innerHTML = buttonsHtml;
         } catch (error) {
-            console.error('Error loading seasons:', error);
+            console.error('❌ Error loading seasons:', error);
             document.getElementById('buttonsSeason').innerHTML = '<span class="text-danger">Error loading seasons</span>';
         }
     }
 
     async updateLeagueButtons(state) {
         try {
+            console.log('🔄 Loading leagues with database:', getCurrentDatabase(), 'season:', state.season);
             // Always show all available leagues (filter by season if selected for relevance)
             const url = state.season ? 
                 `/league/get_available_leagues?season=${state.season}` : 
@@ -191,6 +194,7 @@ class FilterControlsBlock extends BaseContentBlock {
             
             const response = await fetchWithDatabase(url);
             const data = await response.json();
+            console.log('✅ Leagues loaded:', data);
             
             let buttonsHtml = data.map(league => `
                 <input type="radio" class="btn-check" name="league" id="league${league}" value="${league}"
@@ -200,7 +204,7 @@ class FilterControlsBlock extends BaseContentBlock {
             
             document.getElementById('buttonsLeague').innerHTML = buttonsHtml;
         } catch (error) {
-            console.error('Error loading leagues:', error);
+            console.error('❌ Error loading leagues:', error);
             document.getElementById('buttonsLeague').innerHTML = '<span class="text-danger">Error loading leagues</span>';
         }
     }

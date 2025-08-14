@@ -330,3 +330,113 @@ def test_database_param():
             'success': False,
             'message': f'Error testing database parameter: {str(e)}'
         }), 500
+
+@bp.route('/test-filter-endpoints')
+def test_filter_endpoints():
+    """Test all filter endpoints to ensure they use database parameter"""
+    try:
+        from app.config.database_config import database_config
+        
+        database = request.args.get('database')
+        print(f"DEBUG: test-filter-endpoints called with database={database}")
+        
+        if not database:
+            return jsonify({
+                'success': False,
+                'message': 'No database parameter provided'
+            }), 400
+        
+        # Test all filter endpoints
+        from app.services.league_service import LeagueService
+        league_service = LeagueService(database=database)
+        
+        # Test each endpoint
+        results = {}
+        
+        # Test seasons
+        try:
+            seasons = league_service.get_seasons()
+            results['seasons'] = {
+                'success': True,
+                'count': len(seasons),
+                'data': seasons[:5]  # First 5 for brevity
+            }
+        except Exception as e:
+            results['seasons'] = {
+                'success': False,
+                'error': str(e)
+            }
+        
+        # Test leagues
+        try:
+            leagues = league_service.get_leagues()
+            results['leagues'] = {
+                'success': True,
+                'count': len(leagues),
+                'data': leagues[:5]  # First 5 for brevity
+            }
+        except Exception as e:
+            results['leagues'] = {
+                'success': False,
+                'error': str(e)
+            }
+        
+        # Test weeks (if we have a season and league)
+        season = request.args.get('season')
+        league = request.args.get('league')
+        if season and league:
+            try:
+                weeks = league_service.get_weeks(league_name=league, season=season)
+                results['weeks'] = {
+                    'success': True,
+                    'count': len(weeks),
+                    'data': weeks[:5]  # First 5 for brevity
+                }
+            except Exception as e:
+                results['weeks'] = {
+                    'success': False,
+                    'error': str(e)
+                }
+        
+        # Test teams (if we have a season and league)
+        if season and league:
+            try:
+                teams = league_service.get_teams_in_league_season(league, season)
+                results['teams'] = {
+                    'success': True,
+                    'count': len(teams),
+                    'data': teams[:5]  # First 5 for brevity
+                }
+            except Exception as e:
+                results['teams'] = {
+                    'success': False,
+                    'error': str(e)
+                }
+        
+        # Test latest events
+        try:
+            events = league_service.get_latest_events(limit=3)
+            results['latest_events'] = {
+                'success': True,
+                'count': len(events),
+                'data': events
+            }
+        except Exception as e:
+            results['latest_events'] = {
+                'success': False,
+                'error': str(e)
+            }
+        
+        return jsonify({
+            'success': True,
+            'database': database,
+            'results': results,
+            'message': 'Filter endpoints tested successfully'
+        })
+        
+    except Exception as e:
+        print(f"DEBUG: Error in test-filter-endpoints: {str(e)}")
+        return jsonify({
+            'success': False,
+            'message': f'Error testing filter endpoints: {str(e)}'
+        }), 500
