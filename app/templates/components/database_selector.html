@@ -282,16 +282,57 @@ class DatabaseSelector {
         this.showLoadingState();
 
         try {
-            // Update URL with database parameter
-            const url = new URL(window.location);
-            url.searchParams.set('database', sourceId);
+            console.log(`🔄 Switching database to: ${sourceId}`);
             
-            // Navigate to the new URL (this will reload the page with the new database)
-            window.location.href = url.toString();
+            // First, try to switch via AJAX to avoid page reload
+            const response = await fetch('/main/switch-database', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ database: sourceId })
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                console.log('✅ Database switched successfully via AJAX');
+                
+                // Update URL without page reload
+                const url = new URL(window.location);
+                url.searchParams.set('database', sourceId);
+                window.history.pushState({}, '', url.toString());
+                
+                // Update the display
+                this.currentSource = sourceId;
+                this.updateDisplay();
+                this.renderOptions();
+                
+                // Trigger a global event to notify other components
+                window.dispatchEvent(new CustomEvent('databaseChanged', { 
+                    detail: { database: sourceId } 
+                }));
+                
+                // Show success message
+                this.showSuccess(`Switched to ${this.sourcesInfo[sourceId]?.display_name || sourceId}`);
+                
+            } else {
+                console.warn('AJAX switch failed, falling back to page reload');
+                // Fallback to page reload if AJAX fails
+                const url = new URL(window.location);
+                url.searchParams.set('database', sourceId);
+                window.location.href = url.toString();
+            }
             
         } catch (error) {
             console.error('Error switching database:', error);
-            this.showError('Failed to switch database');
+            console.log('Falling back to page reload method');
+            
+            // Fallback to page reload
+            const url = new URL(window.location);
+            url.searchParams.set('database', sourceId);
+            window.location.href = url.toString();
+        } finally {
             this.isLoading = false;
             this.hideLoadingState();
         }

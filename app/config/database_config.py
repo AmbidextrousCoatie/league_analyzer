@@ -71,6 +71,27 @@ class DatabaseConfig:
         available = self.get_available_sources()
         return available[0] if available else 'bowling_ergebnisse.csv'
     
+    def get_current_source(self) -> str:
+        """Get the currently active data source"""
+        # This should be determined by the request context or session
+        # For now, return the default source
+        return self.get_default_source()
+    
+    def set_current_source(self, source_id: str) -> bool:
+        """Set the current active data source"""
+        if not self.validate_source(source_id):
+            return False
+        
+        # Update the default source to the selected one
+        for config in self._sources.values():
+            config.is_default = False
+        
+        config = self.get_source_config(source_id)
+        if config:
+            config.is_default = True
+            return True
+        return False
+    
     def validate_source(self, source_id: str) -> bool:
         """Validate if a data source exists and is accessible"""
         config = self.get_source_config(source_id)

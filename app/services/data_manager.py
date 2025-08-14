@@ -15,8 +15,8 @@ class DataManager:
         self._load_data(source)
 
     def _load_data(self, source=None):
-        # Get source from session if available, otherwise use default
-        if source:
+        # Prioritize explicit source parameter over session
+        if source and database_config.validate_source(source):
             self._current_source = source
         else:
             # Try to get from session
@@ -27,7 +27,7 @@ class DataManager:
                 # Use default from config
                 self._current_source = database_config.get_default_source()
         
-        # Save to session
+        # Save to session for consistency
         self._save_session_source(self._current_source)
         
         try:
@@ -179,4 +179,25 @@ class DataManager:
     
     @property
     def current_source(self):
-        return self._current_source 
+        return self._current_source
+    
+    def force_source(self, source: str) -> bool:
+        """Force a specific data source and reload data"""
+        if not database_config.validate_source(source):
+            print(f"❌ Invalid source: {source}")
+            return False
+        
+        print(f"🔄 Forcing data source to: {source}")
+        self._current_source = source
+        self._save_session_source(source)
+        
+        # Reload data with the new source
+        try:
+            config = database_config.get_source_config(source)
+            file_path = config.file_path if config else f'database/data/{source}'
+            self._df = pd.read_csv(file_path, sep=';')
+            print(f"✅ Successfully switched to: {source}")
+            return True
+        except Exception as e:
+            print(f"❌ Error forcing source {source}: {e}")
+            return False 

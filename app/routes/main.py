@@ -35,6 +35,66 @@ def player_stats(analysis):
     season = session.get('selected_season', 'all')
     return render_template('player/content.html', analysis=analysis, season=season)
 
+@bp.route('/impressum')
+def impressum():
+    """Impressum page - German legal requirement"""
+    return render_template('impressum.html')
+
+@bp.route('/switch-database', methods=['POST'])
+def switch_database():
+    """Switch database via AJAX"""
+    try:
+        from flask import request, jsonify
+        from app.services.data_manager import DataManager
+        from app.config.database_config import database_config
+        
+        data = request.get_json()
+        database = data.get('database')
+        
+        print(f"🔄 Database switch request received: {database}")
+        
+        if not database:
+            return jsonify({
+                'success': False,
+                'message': 'No database specified'
+            }), 400
+        
+        # Validate the database exists
+        if not database_config.validate_source(database):
+            available = database_config.get_available_sources()
+            return jsonify({
+                'success': False,
+                'message': f'Invalid database: {database}. Available: {available}'
+            }), 400
+        
+        print(f"✅ Database {database} is valid, proceeding with switch")
+        
+        # Force the database switch
+        data_manager = DataManager()
+        success = data_manager.force_source(database)
+        
+        if success:
+            print(f"✅ Successfully switched to {database}")
+            return jsonify({
+                'success': True,
+                'message': f'Successfully switched to {database}',
+                'database': database,
+                'current_source': data_manager.current_source
+            })
+        else:
+            print(f"❌ Failed to switch to {database}")
+            return jsonify({
+                'success': False,
+                'message': f'Failed to switch to {database}'
+            }), 400
+            
+    except Exception as e:
+        print(f"❌ Error in switch_database: {str(e)}")
+        return jsonify({
+            'success': False,
+            'message': f'Error switching database: {str(e)}'
+        }), 500
+
 @bp.route('/get-data-sources-info')
 def get_data_sources_info():
     try:
@@ -214,7 +274,10 @@ def debug_session():
 def test_database_param():
     """Test route to verify database parameter is passed correctly through all layers"""
     try:
+        from app.config.database_config import database_config
+        
         database = request.args.get('database')
+        print(f"DEBUG: test-database-param called with database={database}")
         
         if not database:
             return jsonify({
@@ -222,10 +285,20 @@ def test_database_param():
                 'message': 'No database parameter provided'
             }), 400
         
+        # Validate database exists
+        if not database_config.validate_source(database):
+            available = database_config.get_available_sources()
+            return jsonify({
+                'success': False,
+                'message': f'Invalid database: {database}. Available: {available}'
+            }), 400
+        
         # Test the full chain: Route -> Service -> Server -> DataAdapterFactory -> DataAdapterPandas
         from app.services.league_service import LeagueService
         from business_logic.server import Server
         from data_access.adapters.data_adapter_factory import DataAdapterFactory, DataAdapterSelector
+        
+        print(f"DEBUG: Testing database chain with: {database}")
         
         # Test LeagueService
         league_service = LeagueService(database=database)
@@ -240,15 +313,19 @@ def test_database_param():
         seasons = league_service.get_seasons()
         leagues = league_service.get_leagues()
         
+        print(f"DEBUG: Successfully retrieved {len(seasons)} seasons and {len(leagues)} leagues")
+        
         return jsonify({
             'success': True,
             'database': database,
             'seasons': seasons,
             'leagues': leagues,
+            'available_sources': database_config.get_available_sources(),
             'message': 'Database parameter passed successfully through all layers'
         })
         
     except Exception as e:
+        print(f"DEBUG: Error in test-database-param: {str(e)}")
         return jsonify({
             'success': False,
             'message': f'Error testing database parameter: {str(e)}'
