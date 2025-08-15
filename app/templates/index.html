@@ -13,17 +13,31 @@
             <div class="card-body">
                 <!-- We'll add stats here later -->
                 <p>Diese Seite ist ein Proof of Concept zur Darstellung von Ergebnissen und Statistiken rund um Bowling Ligen, Tuniere und Pokalwettbewerbe.</p>
-                <p>Die Auswertungen sind oben über die Navigation zu "League Stats" und "Player Stats" zu finden.</p>
-                <p>Hauptaugenmerk liegt derzeit auf den Ligastatistiken. Alle Daten sind fiktiv, jedoch ist die Seite so aufgabeut, dass reale Daten einfach importiert werden könnten.</p>
+                <p>Die Auswertungen sind oben über die Navigation zu "League Stats" und "Player Stats" zu finden, ich hab auch ein paar Beispiele verlinkt.</p>
+                <p>Hauptaugenmerk liegt derzeit auf den Ligastatistiken. Die meisten Daten sind fiktiv, jedoch ist die Seite so aufgabeut, dass reale Daten einfach integriert werden könnten.</p>
+                <p>Ihr könnte auf den Seiten meist die Ebene der angezeigten Infos verändern, in dem ihr die Buttons für z.B. die Saison auswählt. Einfach ein wenig herumprobieren.</p>
+                
                 <p>Bitte kommt mit Feedback und Vorschlägen gerne per Whatsapp oder im Traning auf mich zu.</p>
                 <p>  Cheers, Chris</p>
             </div>
-        </div>
-
-
+        </div>       
     </div>
 
-    
+
+    <!-- New Examples Card -->
+    <div class="col-md-6 mt-4">
+        <div class="card">
+            <div class="card-header">
+                Beispiele
+            </div>
+            <div class="card-body">
+                <ul class="list-group" id="exampleQueries">
+                    <!-- Will be populated via JavaScript -->
+                </ul>
+            </div>
+        </div>
+    </div>
+   
     <div class="col-md-6">
         <div class="card">
             <div class="card-header">
@@ -68,6 +82,124 @@ document.addEventListener('DOMContentLoaded', function() {
             const eventsList = document.getElementById('latestEvents');
             eventsList.innerHTML = '<li class="list-group-item text-danger">Fehler beim Laden der Events</li>';
         });
+    
+    // Populate example queries
+    const examplesList = document.getElementById('exampleQueries');
+    
+    // Define sample queries with labels and parameters
+    const examples = [
+        {
+            label: 'Liga Historie (simuliert): LL 1 Nord',
+            params: {
+                league: 'LL 1 Nord',
+                database: 'bowling_ergebnisse.csv'
+            }
+        },
+        {
+            label: 'Liga Saison (simuliert): BZOL 2 Nord - 21/22',
+            params: {
+                season: '21/22',
+                league: 'BZOL 2 Nord',
+                database: 'bowling_ergebnisse.csv'
+            }
+        },
+        {
+            label: 'Liga Spieltag (simuliert): BayL - 23/24 - Week 3',
+            params: {
+                season: '23/24',
+                league: 'BayL',
+                week: '3',
+                database: 'bowling_ergebnisse.csv'
+            }
+        },
+        {
+            label: 'Liga Spieltag (reale Daten): BayL - 24/25 - week 1',
+            params: {
+                season: '24/25',
+                league: 'BayL',
+                week: '1',
+                database: 'bowling_ergebnisse_real.csv'
+            }
+        },
+        {
+            label: 'Liga Spielzettel (reale Daten): BayL - 24/25 - week 1 - BK München 3',
+            params: {
+                season: '24/25',
+                league: 'BayL',
+                week: '1',
+                team: 'BK München 3',
+                database: 'bowling_ergebnisse_real.csv'
+            }
+        },
+        {
+            label: 'Team Historie (simuliert): Aschaffenburg 3',
+            params: {
+                team: 'Aschaffenburg 3',
+                database: 'bowling_ergebnisse.csv'
+            }
+        },
+        {
+            label: 'Team Saison (simuliert): Aschaffenburg 3 - 23/24',
+            params: {
+                team: 'Aschaffenburg 3',
+                season: '23/24',
+                database: 'bowling_ergebnisse.csv'
+            }
+        },
+        {
+            label: 'Team Historie (real): Bowlinghaus Bamberg 1',
+            params: {
+                team: 'Bowlinghaus Bamberg 1',
+                database: 'bowling_ergebnisse_real.csv'
+            }
+        },
+        {
+            label: 'Spieler Statistiken (simuliert): Matthew Davis',
+            params: {
+                player_name: 'Matthew Davis',
+                database: 'bowling_ergebnisse.csv'
+            }
+        },
+        {
+            label: 'Spieler Statistiken (real): Altenfeld, Marco',
+            params: {
+                player_name: 'Altenfeld, Marco',
+                database: 'bowling_ergebnisse_real.csv'
+            }
+        }
+    ];
+    
+    // Generate the example links
+    examplesList.innerHTML = examples.map(example => {
+        // Build query string from parameters
+        const params = new URLSearchParams();
+        Object.entries(example.params).forEach(([key, value]) => {
+            if (value) {
+                params.set(key, value);
+            }
+        });
+        
+        const queryString = params.toString();
+        
+        // Determine the appropriate URL based on the example type
+        let url;
+        if (example.label.includes('Spieler Statistiken')) {
+            url = `{{ url_for('player.stats') }}?${queryString}`;
+        } else if (example.label.includes('Team')) {
+            url = `{{ url_for('team.stats') }}?${queryString}`;
+        } else {
+            url = `{{ url_for('league.stats') }}?${queryString}`;
+        }
+        
+        return `
+            <li class="list-group-item">
+                <a href="${url}" 
+                   class="text-decoration-none">
+                    ${example.label}
+                </a>
+            </li>
+        `;
+    }).join('');
 });
 </script>
 {% endblock %} 

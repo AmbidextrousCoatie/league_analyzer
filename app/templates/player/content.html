@@ -126,6 +126,15 @@ document.addEventListener('DOMContentLoaded', function() {
     const playerInput = document.getElementById('playerInput');
     const playerList = document.getElementById('playerList');
     
+    // Parse URL parameters
+    function parseUrlParams() {
+        const params = new URLSearchParams(window.location.search);
+        return {
+            player_name: params.get('player_name'),
+            database: params.get('database')
+        };
+    }
+    
     // Load all players immediately
     fetchWithDatabase('{{ url_for("player.search_players") }}')
         .then(response => response.json())
@@ -134,6 +143,30 @@ document.addEventListener('DOMContentLoaded', function() {
             playerList.innerHTML = players.map(player => 
                 `<option value="${player.name}" data-id="${player.id}">`
             ).join('');
+            
+            // Check for URL parameters and auto-select player
+            const urlParams = parseUrlParams();
+            if (urlParams.player_name) {
+                console.log('URL parameter found: player_name =', urlParams.player_name);
+                
+                // Find the player in the list
+                const matchingPlayer = players.find(player => 
+                    player.name === urlParams.player_name || player.id === urlParams.player_name
+                );
+                
+                if (matchingPlayer) {
+                    console.log('Found matching player:', matchingPlayer);
+                    playerInput.value = matchingPlayer.name;
+                    loadPlayerStats(matchingPlayer.name);
+                } else {
+                    console.warn('Player not found in database:', urlParams.player_name);
+                    document.getElementById('playerStats').innerHTML = `
+                        <div class="alert alert-warning">
+                            <strong>Player not found:</strong> "${urlParams.player_name}" was not found in the current database.
+                        </div>
+                    `;
+                }
+            }
         });
 
     // Handle player selection
@@ -142,14 +175,14 @@ document.addEventListener('DOMContentLoaded', function() {
         const option = Array.from(playerList.options).find(opt => opt.value === selectedName);
         
         if (option) {
-            const playerName = option.dataset.id;
-            loadPlayerStats(playerName);
+            // Use the selected name directly since id and name are the same
+            loadPlayerStats(selectedName);
         }
     });
 
     function loadPlayerStats(playerName) {
         console.log("loadPlayerStats: " + playerName);
-        fetchWithDatabase(`{{ url_for("player.get_lifetime_stats") }}?player_name=${playerName}`)
+        fetchWithDatabase(`{{ url_for("player.get_lifetime_stats") }}?player_name=${encodeURIComponent(playerName)}`)
             .then(response => response.json())
             .then(data => {
                 // Check if data is null or missing required properties
