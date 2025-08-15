@@ -154,7 +154,7 @@ class LeagueFilterManager {
     async loadSeasonsData() {
         try {
             console.log('Loading seasons data...');
-            const response = await fetch('/league/get_available_seasons');
+            const response = await fetchWithDatabase('/league/get_available_seasons');
             this.filterData.seasons = await response.json();
             
                             // Update season buttons
@@ -177,7 +177,7 @@ class LeagueFilterManager {
             const currentState = this.urlStateManager.parseUrlParams();
             
             if (currentState.season) {
-                const response = await fetch(`/league/get_available_leagues?season=${currentState.season}`);
+                const response = await fetchWithDatabase(`/league/get_available_leagues?season=${currentState.season}`);
                 this.filterData.leagues[currentState.season] = await response.json();
                 
                 // Update league buttons
@@ -201,7 +201,7 @@ class LeagueFilterManager {
             const currentState = this.urlStateManager.parseUrlParams();
             
             if (currentState.season && currentState.league) {
-                const response = await fetch(`/league/get_available_weeks?season=${currentState.season}&league=${currentState.league}`);
+                const response = await fetchWithDatabase(`/league/get_available_weeks?season=${currentState.season}&league=${currentState.league}`);
                 const key = `${currentState.season}-${currentState.league}`;
                 this.filterData.weeks[key] = await response.json();
                 
@@ -226,7 +226,7 @@ class LeagueFilterManager {
             const currentState = this.urlStateManager.parseUrlParams();
             
             if (currentState.season && currentState.league) {
-                const response = await fetch(`/league/get_available_teams?season=${currentState.season}&league=${currentState.league}`);
+                const response = await fetchWithDatabase(`/league/get_available_teams?season=${currentState.season}&league=${currentState.league}`);
                 const key = `${currentState.season}-${currentState.league}`;
                 this.filterData.teams[key] = await response.json();
                 

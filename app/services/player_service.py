@@ -134,8 +134,9 @@ class PlayerService:
 
     def get_lifetime_stats(self, player_name):
         """Get lifetime statistics for a player."""
+        print(f"DEBUG: PlayerService.get_lifetime_stats called with database: {self.database}, player: {player_name}")
+        
         # Get all games for the player
-               
         games_df = self.server.get_games_for_player(player_name)
         
         if games_df.empty:

@@ -11,12 +11,20 @@
  */
 function updateTeamSelect(teams) {
     const select = document.getElementById('teamSelect');
-    select.innerHTML = `
+    
+    if (!select) {
+        console.error('Team select element not found!');
+        return;
+    }
+    
+    const html = `
         <option value="">Bitte wählen...</option>
         ${teams.map(team => `
             <option value="${team}">${team}</option>
         `).join('')}
     `;
+    
+    select.innerHTML = html;
 
     // Only add legacy event listeners if modern state management is not active
     if (window.teamStatsApp && window.teamStatsApp.isInitialized) {
@@ -71,7 +79,7 @@ function updateTeamSelect(teams) {
  * Original function signature preserved exactly
  */
 function updateSeasonButtons(teamName) {
-    fetch(`/team/get_available_seasons?team_name=${teamName}`)
+    fetchWithDatabase(`/team/get_available_seasons?team_name=${teamName}`)
         .then(response => response.json())
         .then(seasons => {
             const container = document.getElementById('buttonsSeason');
@@ -89,7 +97,7 @@ function updateSeasonButtons(teamName) {
  * Original function signature preserved exactly
  */
 function updateWeekButtons(teamName, season) {
-    fetch(`/team/get_available_weeks?team_name=${teamName}&season=${season}`)
+    fetchWithDatabase(`/team/get_available_weeks?team_name=${teamName}&season=${season}`)
         .then(response => response.json())
         .then(weeks => {
             const container = document.getElementById('buttonsWeek');

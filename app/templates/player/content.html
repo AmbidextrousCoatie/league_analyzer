@@ -151,32 +151,70 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log("loadPlayerStats: " + playerName);
         fetchWithDatabase(`{{ url_for("player.get_lifetime_stats") }}?player_name=${playerName}`)
             .then(response => response.json())
-
-
             .then(data => {
+                // Check if data is null or missing required properties
+                if (!data || !data.lifetime || !data.seasons) {
+                    console.error('Invalid or missing player data:', data);
+                    // Display error message to user
+                    document.getElementById('playerStats').innerHTML = `
+                        <div class="alert alert-warning">
+                            <strong>No data available</strong> for player "${playerName}" in the selected database.
+                        </div>
+                    `;
+                    // Clear other sections
+                    document.getElementById('lifetimeGames').textContent = '-';
+                    document.getElementById('lifetimePins').textContent = '-';
+                    document.getElementById('lifetimeAvg').textContent = '-';
+                    document.getElementById('bestGame').textContent = '-';
+                    document.getElementById('bestGameEvent').textContent = '-';
+                    document.getElementById('bestGameDate').textContent = '-';
+                    document.getElementById('bestSeason').textContent = '-';
+                    document.getElementById('mostImproved').textContent = '-';
+                    document.getElementById('seasonStatsBody').innerHTML = '';
+                    return;
+                }
+                
                 displayLifetimeStats(data.lifetime);
                 displaySeasonStats(data.seasons);
                 updateTrendChart(data);  // We'll keep the existing chart functionality
+            })
+            .catch(error => {
+                console.error('Error loading player stats:', error);
+                document.getElementById('playerStats').innerHTML = `
+                    <div class="alert alert-danger">
+                        <strong>Error loading data</strong> for player "${playerName}": ${error.message}
+                    </div>
+                `;
             });
     }
 
     function displayLifetimeStats(stats) {
-        // Update lifetime stats card
-        document.getElementById('lifetimeGames').textContent = stats.total_games;
-        document.getElementById('lifetimePins').textContent = stats.total_pins.toLocaleString();
-        document.getElementById('lifetimeAvg').textContent = stats.average_score.toFixed(2);
+        // Update lifetime stats card with null checks
+        document.getElementById('lifetimeGames').textContent = stats.total_games || '-';
+        document.getElementById('lifetimePins').textContent = (stats.total_pins || 0).toLocaleString();
+        document.getElementById('lifetimeAvg').textContent = (stats.average_score || 0).toFixed(2);
         
-        // Best game info
-        document.getElementById('bestGame').textContent = stats.best_game.score;
-        document.getElementById('bestGameEvent').textContent = stats.best_game.event;
-        document.getElementById('bestGameDate').textContent = stats.best_game.date;
+        // Best game info with null checks
+        if (stats.best_game) {
+            document.getElementById('bestGame').textContent = stats.best_game.score || '-';
+            document.getElementById('bestGameEvent').textContent = stats.best_game.event || '-';
+            document.getElementById('bestGameDate').textContent = stats.best_game.date || '-';
+        } else {
+            document.getElementById('bestGame').textContent = '-';
+            document.getElementById('bestGameEvent').textContent = '-';
+            document.getElementById('bestGameDate').textContent = '-';
+        }
         
-        // Season records
-        document.getElementById('bestSeason').textContent = 
-            `${stats.best_season.season} (${stats.best_season.average.toFixed(2)})`;
+        // Season records with null checks
+        if (stats.best_season && stats.best_season.season) {
+            document.getElementById('bestSeason').textContent = 
+                `${stats.best_season.season} (${(stats.best_season.average || 0).toFixed(2)})`;
+        } else {
+            document.getElementById('bestSeason').textContent = '-';
+        }
         
         // Handle null values for most improved
-        if (stats.most_improved.season && stats.most_improved.improvement !== null) {
+        if (stats.most_improved && stats.most_improved.season && stats.most_improved.improvement !== null) {
             document.getElementById('mostImproved').textContent = 
                 `${stats.most_improved.season} (+${stats.most_improved.improvement.toFixed(2)})`;
         } else {
@@ -186,16 +224,21 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function displaySeasonStats(seasons) {
         const tbody = document.getElementById('seasonStatsBody');
+        if (!seasons || !Array.isArray(seasons) || seasons.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="8" class="text-center text-muted">No season data available</td></tr>';
+            return;
+        }
+        
         tbody.innerHTML = seasons.map(season => `
             <tr>
-                <td>${season.season}</td>
-                <td>${season.games}</td>
-                <td>${season.total_pins.toLocaleString()}</td>
-                <td>${season.average.toFixed(2)}</td>
-                <td>${season.dev_from_avg > 0 ? '+' : ''}${season.dev_from_avg.toFixed(2)}</td>
+                <td>${season.season || '-'}</td>
+                <td>${season.games || 0}</td>
+                <td>${(season.total_pins || 0).toLocaleString()}</td>
+                <td>${(season.average || 0).toFixed(2)}</td>
+                <td>${(season.dev_from_avg || 0) > 0 ? '+' : ''}${(season.dev_from_avg || 0).toFixed(2)}</td>
                 <td>${season.vs_last_season !== null ? (season.vs_last_season > 0 ? '+' : '') + season.vs_last_season.toFixed(2) : '-'}</td>
-                <td title="${season.best_game.date} - ${season.best_game.event}">${season.best_game.score}</td>
-                <td title="${season.worst_game.date} - ${season.worst_game.event}">${season.worst_game.score}</td>
+                <td title="${season.best_game?.date || ''} - ${season.best_game?.event || ''}">${season.best_game?.score || '-'}</td>
+                <td title="${season.worst_game?.date || ''} - ${season.worst_game?.event || ''}">${season.worst_game?.score || '-'}</td>
             </tr>
         `).join('');
     }
@@ -207,14 +250,23 @@ document.addEventListener('DOMContentLoaded', function() {
             existingChart.destroy();
         }
 
+        // Check if we have valid data for the chart
+        if (!data || !data.seasons || !Array.isArray(data.seasons) || data.seasons.length === 0 || !data.lifetime) {
+            console.warn('Insufficient data for trend chart:', data);
+            ctx.style.display = 'none';
+            return;
+        }
+
+        ctx.style.display = 'block';
+
         const chartData = {
             datasets: [
                 {
                     label: 'Season Average',
                     data: data.seasons.map((season, i) => ({
-                        x: season.season,
-                        y: season.average,
-                        r: season.games / 5
+                        x: season.season || `Season ${i}`,
+                        y: season.average || 0,
+                        r: (season.games || 0) / 5
                     })),
                     backgroundColor: 'rgba(54, 162, 235, 0.6)',
                     borderColor: 'rgba(54, 162, 235, 1)',
@@ -224,8 +276,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     label: 'Trend Line',
                     showInLegend: false,
                     data: data.seasons.map((season, i) => ({
-                        x: season.season,
-                        y: season.average
+                        x: season.season || `Season ${i}`,
+                        y: season.average || 0
                     })),
                     type: 'line',
                     borderColor: 'rgba(54, 162, 235, 0.6)',
@@ -237,8 +289,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 {
                     label: 'All-Time Average',
                     data: data.seasons.map(season => ({
-                        x: season.season,
-                        y: data.lifetime.average_score
+                        x: season.season || 'Unknown',
+                        y: data.lifetime.average_score || 0
                     })),
                     type: 'line',
                     borderColor: 'rgba(128, 128, 128, 0.6)',
@@ -279,11 +331,11 @@ document.addEventListener('DOMContentLoaded', function() {
                                 const dataIndex = context.dataIndex;
                                 if (context.dataset.label === 'Season Average') {
                                     return [
-                                        `Average: ${data.seasons[dataIndex].average.toFixed(1)}`,
-                                        `Games: ${data.seasons[dataIndex].games}`
+                                        `Average: ${(data.seasons[dataIndex]?.average || 0).toFixed(1)}`,
+                                        `Games: ${data.seasons[dataIndex]?.games || 0}`
                                     ];
                                 }
-                                return `All-Time Average: ${data.lifetime.average_score.toFixed(1)}`;
+                                return `All-Time Average: ${(data.lifetime?.average_score || 0).toFixed(1)}`;
                             }
                         }
                     },

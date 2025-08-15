@@ -63,7 +63,7 @@ function updatePositionChart() {
         console.log('🔍 Fetching position chart from:', url);
         console.log('🔍 State values:', { selectedSeason, selectedLeague, currentWeek });
         
-        fetch(url)
+        fetchWithDatabase(url)
             .then(response => {
                 console.log('📊 Position chart response status:', response.status);
                 if (!response.ok) {

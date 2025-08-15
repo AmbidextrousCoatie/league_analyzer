@@ -91,7 +91,7 @@ class BaseContentBlock {
         console.log(`${this.id}: Fetching data from ${url}`);
         
         try {
-            const response = await fetch(url);
+            const response = await fetchWithDatabase(url);
             
             if (!response.ok) {
                 throw new Error(`HTTP ${response.status}: ${response.statusText}`);

@@ -10,7 +10,7 @@
  * Original function signature preserved exactly
  */
 function loadSpecialMatches(teamName) {
-    fetch(`/team/get_special_matches?team_name=${encodeURIComponent(teamName)}`)
+    fetchWithDatabase(`/team/get_special_matches?team_name=${encodeURIComponent(teamName)}`)
         .then(response => response.json())
         .then(data => displaySpecialMatches(data));
 }
@@ -20,7 +20,7 @@ function loadSpecialMatches(teamName) {
  * Original function signature preserved exactly
  */
 function loadSpecialMatchesForSeason(teamName, season) {
-    fetch(`/team/get_special_matches?team_name=${encodeURIComponent(teamName)}&season=${encodeURIComponent(season)}`)
+    fetchWithDatabase(`/team/get_special_matches?team_name=${encodeURIComponent(teamName)}&season=${encodeURIComponent(season)}`)
         .then(response => response.json())
         .then(data => displaySpecialMatches(data));
 }
@@ -78,7 +78,7 @@ function displaySpecialMatches(data) {
  */
 function initializeTeamsData() {
     // Initial load of teams
-    fetch('/team/get_teams')
+    fetchWithDatabase('/team/get_teams')
         .then(response => response.json())
         .then(teams => {
             updateTeamSelect(teams);

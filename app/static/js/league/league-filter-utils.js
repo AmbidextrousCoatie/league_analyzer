@@ -19,7 +19,7 @@ function updateAllButtons() {
  * Update season buttons
  */
 function updateSeasonButtons() {
-    fetch('/league/get_available_seasons')
+    fetchWithDatabase('/league/get_available_seasons')
         .then(response => response.json())
         .then(seasons => {
             const buttonsSeason = seasons.map(season => `
@@ -52,7 +52,7 @@ function updateSeasonButtons() {
 function updateLeagueButtons() {
     if (!currentState.season) return;
     
-    fetch(`/league/get_available_leagues?season=${currentState.season}`)
+    fetchWithDatabase(`/league/get_available_leagues?season=${currentState.season}`)
         .then(response => response.json())
         .then(leagues => {
             const buttonsLeague = leagues.map(league => `
@@ -90,7 +90,7 @@ function updateLeagueButtons() {
 function updateWeekButtons() {
     if (!currentState.season || !currentState.league) return;
     
-    fetch(`/league/get_available_weeks?season=${currentState.season}&league=${currentState.league}`)
+    fetchWithDatabase(`/league/get_available_weeks?season=${currentState.season}&league=${currentState.league}`)
         .then(response => response.json())
         .then(weeks => {
             const weekButtons = weeks.map(week => `
@@ -127,7 +127,7 @@ function updateWeekButtons() {
 function updateTeamButtons() {
     if (!currentState.season || !currentState.league) return;
     
-    fetch(`/league/get_available_teams?season=${currentState.season}&league=${currentState.league}`)
+    fetchWithDatabase(`/league/get_available_teams?season=${currentState.season}&league=${currentState.league}`)
         .then(response => response.json())
         .then(teams => {
             const teamButtons = teams.map(team => `

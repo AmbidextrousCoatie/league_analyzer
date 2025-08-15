@@ -128,7 +128,7 @@ class APITestApp {
             if (value) url.searchParams.append(key, value);
         });
         
-        const response = await fetch(url);
+        const response = await fetchWithDatabase(url);
         if (!response.ok) {
             throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }

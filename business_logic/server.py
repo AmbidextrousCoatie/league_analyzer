@@ -14,11 +14,11 @@ class Server:
         if cls._instance is None:
             cls._instance = super(Server, cls).__new__(cls)
             cls._instance._initialized = False
-            cls._instance._database = database
         return cls._instance
     
     def __init__(self, database: str = None):
-        if not self._initialized:
+        # Always update the database parameter and refresh if it changed
+        if not self._initialized or self._database != database:
             self._database = database
             self.data_adapter = DataAdapterFactory.create_adapter(DataAdapterSelector.PANDAS, database=database)
             # Register this server instance with DataManager for automatic refresh
@@ -678,6 +678,8 @@ class Server:
 
     def get_games_for_player(self, player_name: str) -> pd.DataFrame:
         """Get all games for a player"""
+        print(f"DEBUG: Server.get_games_for_player called with database: {self._database}, player: {player_name}")
+        
         player_filters = {
             Columns.player_name: {
                 'value': player_name,
@@ -686,7 +688,9 @@ class Server:
         }
 
         columns = [Columns.player_id, Columns.player_name, Columns.date, Columns.week, Columns.season, Columns.league_name, Columns.team_name, Columns.score, Columns.points]
-        return self.data_adapter.get_filtered_data(columns=columns, filters=player_filters)
+        result = self.data_adapter.get_filtered_data(columns=columns, filters=player_filters)
+        print(f"DEBUG: Server.get_games_for_player returned {len(result)} games for player {player_name}")
+        return result
 
     def get_matches(self, team: str = None, season: str = None, league: str = None, opponent_team_name: str = None) -> pd.DataFrame:
         """Get matches data with team and opponent scores

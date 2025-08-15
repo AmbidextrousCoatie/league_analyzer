@@ -377,7 +377,7 @@ class RouteTestBlock extends BaseContentBlock {
             const url = this.buildTestURL(endpoint, requiredParams, paramMapping);
             
             const startTime = performance.now();
-            const response = await fetch(url, { method });
+            const response = await fetchWithDatabase(url, { method });
             const endTime = performance.now();
             
             let responseData;

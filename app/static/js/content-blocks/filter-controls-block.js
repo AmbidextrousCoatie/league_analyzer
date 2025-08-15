@@ -50,13 +50,7 @@ class FilterControlsBlock extends BaseContentBlock {
     }
 
     async render(state = {}) {
-        // Force immediate console output to see if this method is called
-        console.warn('🚨 FilterControlsBlock.render called with state:', state);
-        console.warn('🚨 FilterControlsBlock container exists:', !!this.container);
-        console.warn('🚨 FilterControlsBlock container ID:', this.containerId);
-        
-        // Simple test to see if console.log is working
-        console.warn('🚨 TEST: Console.log is working in FilterControlsBlock.render');
+        console.log('🔄 FilterControlsBlock.render called with state:', state);
         
         try {
             const html = this.generateHTML(state);
@@ -68,14 +62,13 @@ class FilterControlsBlock extends BaseContentBlock {
             console.log('✅ Event listeners attached');
             
             // Load initial data
-            console.warn('🚨 Starting to load filter data...');
+            console.log('🔄 Starting to load filter data...');
             await this.loadFilterData(state);
-            console.warn('🚨 Filter data loaded');
+            console.log('✅ Filter data loaded');
             
             console.log('filter-controls: Filter controls rendered');
         } catch (error) {
             console.error('❌ Error rendering filter controls:', error);
-            console.error('❌ Error stack:', error.stack);
             this.container.innerHTML = this.renderError('Failed to load filter controls');
         }
     }
@@ -159,8 +152,8 @@ class FilterControlsBlock extends BaseContentBlock {
     }
 
     async loadFilterData(state) {
-        console.warn('🚨 loadFilterData called with state:', state);
-        console.warn('🚨 Current database parameter:', getCurrentDatabase());
+        console.log('🔄 loadFilterData called with state:', state);
+        console.log('🔄 Current database parameter:', getCurrentDatabase());
         
         try {
             // Load seasons and leagues in parallel (both should be available initially)

@@ -17,7 +17,7 @@ function updateTeamHistory(teamName) {
     // Set current team name for use in other charts
     window.currentTeamName = teamName;
     
-    fetch(`/team/get_team_history?team_name=${teamName}`)
+    fetchWithDatabase(`/team/get_team_history?team_name=${teamName}`)
         .then(response => response.json())
         .then(data => {
             const seasons = Object.keys(data);
@@ -152,7 +152,7 @@ function updateTeamHistory(teamName) {
  * Original function signature preserved exactly
  */
 function updateLeagueComparison(teamName) {
-    fetch(`/team/get_league_comparison?team_name=${teamName}`)
+    fetchWithDatabase(`/team/get_league_comparison?team_name=${teamName}`)
         .then(response => {
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
@@ -230,7 +230,7 @@ function updateClutchAnalysis(teamName, season) {
         url += `&season=${encodeURIComponent(season)}`;
     }
 
-    fetch(url)
+    fetchWithDatabase(url)
         .then(response => {
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
@@ -326,7 +326,7 @@ function updateConsistencyMetrics(teamName, season) {
         url += `&season=${encodeURIComponent(season)}`;
     }
 
-    fetch(url)
+    fetchWithDatabase(url)
         .then(response => {
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
