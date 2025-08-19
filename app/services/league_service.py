@@ -12,6 +12,7 @@ from app.models.statistics_models import LeagueStatistics, LeagueResults
 from app.models.series_data import SeriesData
 from data_access.schema import Columns
 from itertools import accumulate
+from app.config.debug_config import debug_config
 # from data_access.series_data import calculate_series_data, get_player_series_data, get_team_series_data
 
 
@@ -34,9 +35,8 @@ class LeagueService:
         """Refresh the data adapter with the current data source"""
         if database:
             self.database = database
-        print(f"DEBUG: LeagueService refreshing data adapter with database: {self.database}")
+        debug_config.log_service('LeagueService', 'refresh_adapter', f"database={self.database}")
         self.adapter = DataAdapterFactory.create_adapter(DataAdapterSelector.PANDAS, database=self.database)
-        print(f"DEBUG: LeagueService data adapter refreshed")
 
     def get_available_weeks(self, season: str, league: str) -> List[int]:
         """Get available weeks for a season and league"""
@@ -416,25 +416,39 @@ class LeagueService:
         Returns:
             List of event dictionaries
         """
+        # Import Columns dataclass
+        from data_access.schema import Columns
+        
         # Get all events from the adapter
         events_df = self.adapter.get_filtered_data(
             filters={},
-            sort_by="Date",
-            ascending=False,
-            limit=limit
+            columns=[Columns.season, Columns.league_name, Columns.week, Columns.date]
         )
         
         # If no events, return empty list
         if events_df.empty:
             return []
         
+        # Group by league, season, and week to get unique events
+        # Take the first occurrence of each group (which will have the date)
+        unique_events_df = events_df.groupby([Columns.league_name, Columns.season, Columns.week]).first().reset_index()
+        
+        # Sort by date (descending) to get the latest events
+        unique_events_df = unique_events_df.sort_values(by=Columns.date, ascending=False)
+        
+        # Limit the results
+        if limit is not None and limit > 0:
+            unique_events_df = unique_events_df.head(limit)
+        
         # Convert to list of dictionaries
         events = []
-        for _, row in events_df.iterrows():
-            event = {}
-            for col in ["Season", "League", "Week", "Date"]:
-                if col in row:
-                    event[col] = row[col]
+        for _, row in unique_events_df.iterrows():
+            event = {
+                "Season": row[Columns.season],
+                "League": row[Columns.league_name],
+                "Week": row[Columns.week],
+                "Date": row[Columns.date]
+            }
             events.append(event)
         
         return events
@@ -2214,7 +2228,7 @@ class LeagueService:
             }
             
             week_data = self.adapter.get_filtered_data(filters=filters)
-            print(f"DEBUG: Retrieved {len(week_data)} week records for timetable")
+    
             
             # Group data by week to get unique week info
             week_info = {}
@@ -2287,7 +2301,7 @@ class LeagueService:
                 filter_text += f" for week {week}"
             if team is not None:
                 filter_text += f" for team {team}"
-            print(f"DEBUG: get_individual_averages called for {league} {season}{filter_text}")
+    
             
             # Get all player data for the league/season (and optionally week/team)
             filters = {
@@ -2305,21 +2319,19 @@ class LeagueService:
             # Add team filter if specified
             if team is not None:
                 filters[Columns.team_name] = {'value': team, 'operator': 'eq'}
-            print(f"DEBUG: Using filters: {filters}")
+    
             
             player_data = self.adapter.get_filtered_data(filters=filters)
-            print(f"DEBUG: Retrieved {len(player_data)} rows from adapter")
+
             
             if player_data.empty:
-                print(f"DEBUG: No data found for {league} {season}")
                 return TableData(
                     columns=[],
                     data=[],
                     title=f"No individual data available for {league} - {season}"
                 )
             
-            print(f"DEBUG: Sample player data columns: {list(player_data.columns)}")
-            print(f"DEBUG: Sample player data row: {player_data.iloc[0].to_dict() if len(player_data) > 0 else 'None'}")
+
             
             # Calculate averages per player
             player_stats = {}
@@ -2351,7 +2363,7 @@ class LeagueService:
                 if pd.notna(score) and isinstance(score, (int, float)):
                     player_stats[player_key]['scores'].append(score)
             
-            print(f"DEBUG: Processed {len(player_stats)} unique players")
+    
             
             # Calculate averages and prepare table data
             table_data = []
@@ -2377,13 +2389,10 @@ class LeagueService:
                         round(high_game, 1)
                     ])
             
-            print(f"DEBUG: Created {len(table_data)} table rows")
+    
             
             # Sort by average descending (index 4 now contains average)
             table_data.sort(key=lambda x: x[4], reverse=True)
-            
-            if table_data:
-                print(f"DEBUG: Top player: {table_data[0]}")
             
             # Create table structure
             columns = [
@@ -2421,22 +2430,17 @@ class LeagueService:
     def get_top_individual_performances(self, league: str) -> TableData:
         """Get top individual performances across all seasons"""
         try:
-            print(f"DEBUG: get_top_individual_performances called for league: {league}")
             seasons = self.get_seasons()
-            print(f"DEBUG: Available seasons: {seasons}")
             
             # Also check what leagues exist in the data
             league_filters = {}
             all_league_data = self.adapter.get_filtered_data(filters=league_filters)
             unique_leagues = all_league_data[Columns.league_name].unique() if not all_league_data.empty else []
-            print(f"DEBUG: Available leagues in data: {list(unique_leagues)}")
-            print(f"DEBUG: Looking for league: '{league}' - Found: {league in unique_leagues}")
             
             all_performances = []
             
             for season in seasons:
                 try:
-                    print(f"DEBUG: Processing season {season} for league {league}")
                     
                     # First check if any data exists for this league/season combination
                     basic_filters = {
@@ -2444,21 +2448,16 @@ class LeagueService:
                         Columns.season: {'value': season, 'operator': 'eq'}
                     }
                     basic_data = self.adapter.get_filtered_data(filters=basic_filters)
-                    print(f"DEBUG: Basic data for {league} {season}: {len(basic_data)} total rows")
                     
                     if not basic_data.empty:
                         computed_data_values = basic_data[Columns.computed_data].unique()
-                        print(f"DEBUG: computed_data values in {league} {season}: {computed_data_values}")
                         individual_rows = basic_data[basic_data[Columns.computed_data] == False]
                         team_rows = basic_data[basic_data[Columns.computed_data] == True]
-                        print(f"DEBUG: Individual rows: {len(individual_rows)}, Team rows: {len(team_rows)}")
                     
                     # Get individual averages for each season
                     individual_data = self.get_individual_averages(league, season)
-                    print(f"DEBUG: Individual data for {season}: has_data={individual_data and individual_data.data}, data_count={len(individual_data.data) if individual_data and individual_data.data else 0}")
                     
                     if individual_data and individual_data.data:
-                        print(f"DEBUG: Sample row from {season}: {individual_data.data[0] if individual_data.data else 'None'}")
                         # Take top 5 from each season
                         for row in individual_data.data[:5]:
                             # New individual_averages structure: [player_name, team_name, games, total_points, average, high_game]
@@ -2470,7 +2469,6 @@ class LeagueService:
                                     row[4]   # average (index 4 in the new structure)
                                 ]
                                 all_performances.append(performance_entry)
-                                print(f"DEBUG: Added performance: {performance_entry}")
                                 
                 except Exception as e:
                     print(f"ERROR: processing individual data for season {season}: {e}")
@@ -2478,7 +2476,7 @@ class LeagueService:
                     print(f"TRACEBACK: {traceback.format_exc()}")
                     continue
             
-            print(f"DEBUG: Total performances collected: {len(all_performances)}")
+
             
             # Sort by average descending (now index 3 since we removed games column)
             all_performances.sort(key=lambda x: x[3] if isinstance(x[3], (int, float)) else 0, reverse=True)
@@ -2497,7 +2495,7 @@ class LeagueService:
             ]
             
             result_data = all_performances[:30]  # Top 30 individual performances
-            print(f"DEBUG: Returning {len(result_data)} individual performances")
+
             
             return TableData(
                 columns=columns,

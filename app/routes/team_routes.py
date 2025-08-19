@@ -93,7 +93,7 @@ def get_special_matches():
         team_name = request.args.get('team_name')
         season = request.args.get('season')  # Optional - if not provided, shows all seasons
         
-        print(f"DEBUG: get_special_matches called with team_name={team_name}, season={season}")
+    
         
         if not team_name:
             return jsonify({'error': 'Missing team_name parameter'}), 400
@@ -102,7 +102,7 @@ def get_special_matches():
         team_service = get_team_service()
         special_matches = team_service.get_special_matches(team_name=team_name, season=season if season and season != '' else None)
         
-        print(f"DEBUG: get_special_matches returned {len(special_matches)} matches")
+
         return jsonify(special_matches)
     except Exception as e:
         print(f"Error in get_special_matches: {str(e)}")
@@ -115,7 +115,7 @@ def get_clutch_analysis():
         season = request.args.get('season')
         league_name = request.args.get('league_name')
         
-        print(f"DEBUG: get_clutch_analysis called with team_name={team_name}, season={season}, league_name={league_name}")
+    
         
         if not team_name:
             return jsonify({'error': 'Missing team_name parameter'}), 400
@@ -126,12 +126,12 @@ def get_clutch_analysis():
             team_history = team_service.get_team_history(team_name)
             if season in team_history:
                 league_name = team_history[season]['league_name']
-                print(f"DEBUG: Derived league_name={league_name} from team history")
+    
         
         team_service = get_team_service()
         clutch_data = team_service.get_clutch_performance(team_name=team_name, league_name=league_name, season=season if season and season != '' else None)
         
-        print(f"DEBUG: get_clutch_analysis returned data with {len(clutch_data.get('opponent_clutch', {}))} opponents")
+
         return jsonify(clutch_data)
     except Exception as e:
         print(f"Error in get_clutch_analysis: {str(e)}")

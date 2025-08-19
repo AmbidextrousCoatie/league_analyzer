@@ -29,7 +29,7 @@ class URLStateManager {
             season: params.get('season') || '',
             week: params.get('week') || '',
             league: params.get('league') || '',
-            database: params.get('database') || 'main'
+            database: params.get('database') || 'db_sim'
         };
     }
     
@@ -43,7 +43,7 @@ class URLStateManager {
         // Build URL parameters
         const params = new URLSearchParams();
         Object.entries(this.state).forEach(([key, value]) => {
-            if (value && value !== '' && value !== 'main') {
+            if (value && value !== '' && value !== 'db_sim') {
                 params.set(key, value);
             }
         });

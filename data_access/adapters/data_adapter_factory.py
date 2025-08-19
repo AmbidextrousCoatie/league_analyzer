@@ -18,27 +18,28 @@ class DataAdapterFactory:
         if adapter_type == DataAdapterSelector.PANDAS:
             from data_access.adapters.data_adapter_pandas import DataAdapterPandas
             if database:
-                # Use the database parameter directly
-                print(f"DEBUG: DataAdapterFactory using database parameter: {database}")
-                return DataAdapterPandas(database=database)
+                # Map abstract database ID to actual filename
+                from app.config.database_config import database_config
+                actual_filename = database_config.get_filename_for_source(database)
+                return DataAdapterPandas(database=actual_filename)
             else:
                 # Fallback to current DataManager logic
                 try:
                     from app.services.data_manager import DataManager
                     data_manager = DataManager()
                     current_source = data_manager.current_source
-                    print(f"DEBUG: DataAdapterFactory using source: {current_source}")
+
                     # Create path to current data source
                     current_path = pathlib.Path(
                         "database",
                         "data",
                         current_source
                     ).absolute()
-                    print(f"DEBUG: DataAdapterFactory using path: {current_path}")
+
                     return DataAdapterPandas(path_to_csv_data=current_path)
                 except ImportError:
                     # Fallback to config if DataManager not available
-                    print(f"DEBUG: DataAdapterFactory using fallback config path")
+
                     return DataAdapterPandas(path_to_csv_data=path_to_csv_data)
         elif adapter_type == DataAdapterSelector.MYSQL:
             from data_access.adapters.data_adapter_mysql import MySQLAdapter

@@ -32,21 +32,23 @@ class DataManager:
         
         try:
             config = database_config.get_source_config(self._current_source)
-            file_path = config.file_path if config else f'database/data/{self._current_source}'
+            file_path = config.file_path if config else f'database/data/{database_config.get_filename_for_source(self._current_source)}'
             
             self._df = pd.read_csv(file_path, sep=';')
-            print(f"✅ Data loaded successfully from: {self._current_source}")
+
         except Exception as e:
-            print(f"❌ Error loading data from {self._current_source}: {e}")
+            print(f"Error loading data from {self._current_source}: {e}")
             # Fallback to default if current source fails
             default_source = database_config.get_default_source()
             if self._current_source != default_source:
                 self._current_source = default_source
                 self._save_session_source(self._current_source)
                 config = database_config.get_source_config(self._current_source)
-                file_path = config.file_path if config else f'database/data/{self._current_source}'
+                file_path = config.file_path if config else f'database/data/{database_config.get_filename_for_source(self._current_source)}'
                 self._df = pd.read_csv(file_path, sep=';')
-                print(f"✅ Fallback to default data source: {self._current_source}")
+                print(f"Fallback to default data source: {self._current_source}")
+            else:
+                return False
 
     def reload_data(self, source=None):
         """Reload data with better error handling and state management"""
@@ -61,22 +63,20 @@ class DataManager:
             if source:
                 self._current_source = source
             
-            print(f"DEBUG: DataManager reloading data from: {self._current_source}")
+    
             
             # Save to session before loading data
             self._save_session_source(self._current_source)
             
             # Load the new data
             config = database_config.get_source_config(self._current_source)
-            file_path = config.file_path if config else f'database/data/{self._current_source}'
+            file_path = config.file_path if config else f'database/data/{database_config.get_filename_for_source(self._current_source)}'
             self._df = pd.read_csv(file_path, sep=';')
             
-            print(f"✅ DATA SOURCE SWITCHED: {self._current_source}")
-            print(f"📊 Table dimensions: {len(self._df)} rows × {len(self._df.columns)} columns")
-            print(f"📋 Columns: {list(self._df.columns)}")
+            # Data source switched successfully
             
             # Refresh all server instances
-            print(f"DEBUG: DataManager refreshing {len(self._server_instances)} server instances")
+    
             self._refresh_server_instances()
             
             return True
@@ -108,10 +108,8 @@ class DataManager:
             from flask import has_request_context
             if has_request_context():
                 source = session.get(self._session_key)
-                print(f"DEBUG: Session source: {source}")
                 return source
             else:
-                print("DEBUG: No request context, skipping session access")
                 return None
         except Exception as e:
             print(f"Warning: Could not access session: {e}")
@@ -124,22 +122,18 @@ class DataManager:
             if has_request_context():
                 session[self._session_key] = source
                 session.modified = True
-                print(f"DEBUG: Saved to session: {source}")
             else:
-                print("DEBUG: No request context, skipping session save")
+                pass
         except Exception as e:
             print(f"Warning: Could not save to session: {e}")
 
     def force_reload_from_session(self):
         """Force reload data from session - useful for production with multiple workers"""
-        print("DEBUG: Force reloading from session")
         # Clear any cached data
         self._df = None
         self._current_source = None
         # Reload from session
         self._load_data()
-        print(f"DEBUG: Force reload complete. Current source: {self._current_source}")
-        print(f"DEBUG: Data loaded: {len(self._df) if self._df is not None else 'None'} rows")
 
     def get_available_sources(self) -> list:
         """Get list of available data sources"""
@@ -161,14 +155,14 @@ class DataManager:
         """Register a server instance to be refreshed when data source changes"""
         if server_instance not in self._server_instances:
             self._server_instances.append(server_instance)
-            print(f"DEBUG: DataManager registered server instance, total: {len(self._server_instances)}")
+    
 
     def _refresh_server_instances(self):
         """Refresh all registered server instances"""
         for server in self._server_instances:
             if hasattr(server, 'refresh_data_adapter'):
                 try:
-                    print(f"DEBUG: DataManager refreshing server instance")
+    
                     server.refresh_data_adapter()
                 except Exception as e:
                     print(f"Warning: Error refreshing server instance: {e}")

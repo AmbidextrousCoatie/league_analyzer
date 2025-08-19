@@ -5,30 +5,32 @@ from app.services.i18n_service import i18n_service, Language
 from business_logic.statistics import query_database
 from data_access.adapters.data_adapter_factory import DataAdapterSelector
 import traceback
+import sys
 from app.services.data_dict import DataDict
+from app.config.debug_config import debug_config
 
 bp = Blueprint('league', __name__)
 
 def get_league_service():
     """Helper function to get LeagueService with database parameter"""
     database = request.args.get('database')
-    print(f"🔄 get_league_service called with database: {database}")
-    league_service = LeagueService(database=database)
-    print(f"✅ LeagueService created with database: {getattr(league_service, 'database', 'None')}")
-    return league_service
+    debug_config.log_service('LeagueService', 'create', f"database={database}")
+    return LeagueService(database=database)
 
 @bp.route('/league/stats')
 def stats():
     try:
+        params = dict(request.args)
+        debug_config.log_route('league.stats', params)
+        
         league_service = get_league_service()
         weeks = league_service.get_weeks()
-        print(f"Available weeks: {weeks}")  # Debug output
         return render_template('league/stats.html', 
                             season=league_service.get_seasons(),
                             league=league_service.get_leagues(),
                             week=weeks)
     except Exception as e:
-        print(f"Error in stats route: {str(e)}")
+        debug_config.log_route('league.stats', params, f"ERROR: {str(e)}")
         return jsonify({"error": str(e)}), 500
 
 @bp.route('/league/get_combinations')
@@ -75,69 +77,59 @@ def get_available_teams():
 @bp.route('/league/get_league_history')
 def get_league_history():
     try:
-        # Get query parameters
+        params = dict(request.args)
+        debug_config.log_route('league.get_league_history', params)
+        
         season = request.args.get('season')
         league = request.args.get('league')
-        
-        print(f"League History - Received request with: season={season}, league={league}")
         
         if not all([season, league]):
             return jsonify({'error': 'Missing required parameters'}), 400
         
-        # Use the new method that returns TableData
         league_service = get_league_service()
         table_data = league_service.get_league_history_table_data(
             league_name=league,
             season=season
         )
         
-        #print("::::::::::::::::::::::::::::")
-        #print(table_data)
-        #print("::::::::::::::::::::::::::::")
+        response_data = table_data.to_dict()
+        response_size = sys.getsizeof(str(response_data))
+        debug_config.log_route('league.get_league_history', params, response_size)
         
-        # Convert to dictionary and return as JSON
-        return jsonify(table_data.to_dict())
+        return jsonify(response_data)
         
     except Exception as e:
-        print(f"Error: {str(e)}")
+        debug_config.log_route('league.get_league_history', dict(request.args), f"ERROR: {str(e)}")
         return jsonify({'error': str(e)}), 500
 
 @bp.route('/league/get_league_week_table')
 def get_league_week_table():
     try:
+        params = dict(request.args)
+        debug_config.log_route('league.get_league_week_table', params)
+        
         season = request.args.get('season')
         league = request.args.get('league')
-        # week should be int
         week = int(request.args.get('week'))
-        # print("get_league_week")
-        print(f"🔄 League Standings - Received request with: season={season}, league={league}, week={week}")
         
         if not season or not league:
             return jsonify({"error": i18n_service.get_text("season_league_required")}), 400
 
-        # Get the table data from the service
-        # This now returns a TableData object
         league_service = get_league_service()
-        print(f"✅ LeagueService created with database: {getattr(league_service, 'database', 'None')}")
-        
         table_data = league_service.get_league_week_table_simple(season=season, league=league, week=week)
-        print(f"✅ League week table data: {table_data.to_dict() if table_data else 'None'}")
-        
-        #print("############################")
-        #print("league_routes.get_league_week_table: ", end="")
-        #print(table_data)
-        
-        #print("############################")
         
         if not table_data:
             return jsonify({"message": "No data found for these filters"}), 404
         
-        # Convert TableData to dictionary and return as JSON
-        return jsonify(table_data.to_dict())
+        response_data = table_data.to_dict()
+        response_size = sys.getsizeof(str(response_data))
+        debug_config.log_route('league.get_league_week_table', params, response_size)
+        
+        return jsonify(response_data)
     except Exception as e:
-        import traceback
-        print(f"❌ Error in get_league_week: {str(e)}")
-        print(f"Traceback: {traceback.format_exc()}")  # This will show the full error trace
+        debug_config.log_route('league.get_league_week_table', dict(request.args), f"ERROR: {str(e)}")
+        if debug_config.is_debug_enabled('routes'):
+            traceback.print_exc()
         return jsonify({"error": str(e)}), 500
 
 @bp.route('/league/get_team_week_details')
@@ -166,8 +158,6 @@ def get_team_week_details_table():
         week = int(request.args.get('week'))
         team = request.args.get('team')
         
-        print(f"Team Week Details Table - Received request with: season={season}, league={league}, week={week}, team={team}")
-        
         if not all([season, league, week, team]):
             return jsonify({'error': i18n_service.get_text('missing_parameters')}), 400
         
@@ -184,7 +174,6 @@ def get_team_week_details_table():
             return jsonify({"message": "No data found for these filters"}), 404
         
         # Convert TableData to dictionary and return as JSON
-        print(table_data)
         return jsonify(table_data.to_dict())
         
     except Exception as e:
@@ -201,8 +190,6 @@ def get_team_week_head_to_head_table():
         week_str = request.args.get('week')
         team = request.args.get('team')
         view_mode = request.args.get('view_mode', 'own_team')
-        
-        print(f"Team Week Head-to-Head Table - Received request with: season={season}, league={league}, week={week_str}, team={team}, view_mode={view_mode}")
         
         if not all([season, league, week_str, team]):
             return jsonify({'error': 'Missing required parameters'}), 400
@@ -223,7 +210,6 @@ def get_team_week_head_to_head_table():
             return jsonify({"message": "No data found for these filters"}), 404
         
         # Convert TableData to dictionary and return as JSON
-        print(table_data)
         return jsonify(table_data.to_dict())
         
     except Exception as e:
@@ -235,28 +221,30 @@ def get_team_week_head_to_head_table():
 @bp.route('/league/get_available_seasons')
 def get_available_seasons():
     try:
-        print(f"🔄 get_available_seasons called")
+        params = dict(request.args)
+        debug_config.log_route('league.get_available_seasons', params)
+        
         league_service = get_league_service()
-        print(f"✅ LeagueService created with database: {getattr(league_service, 'database', 'None')}")
         seasons = league_service.get_seasons()
-        print(f"✅ Seasons retrieved: {seasons}")
+        
+        response_size = sys.getsizeof(str(seasons))
+        debug_config.log_route('league.get_available_seasons', params, response_size)
+        
         return jsonify(seasons)
     except Exception as e:
-        print(f"❌ Error in get_available_seasons: {str(e)}")
+        debug_config.log_route('league.get_available_seasons', dict(request.args), f"ERROR: {str(e)}")
         return jsonify({"error": str(e)}), 500
 
 @bp.route('/league/get_available_leagues')
 def get_available_leagues():
     try:
         season = request.args.get('season')
-        print(f"🔄 get_available_leagues called with season: {season}")
+    
         league_service = get_league_service()
-        print(f"✅ LeagueService created with database: {getattr(league_service, 'database', 'None')}")
         leagues = league_service.get_leagues()
-        print(f"✅ Leagues retrieved: {leagues}")
         return jsonify(leagues)
     except Exception as e:
-        print(f"❌ Error in get_available_leagues: {str(e)}")
+        print(f"Error in get_available_leagues: {str(e)}")
         return jsonify({"error": str(e)}), 500
 
 @bp.route('/league/get_honor_scores')
@@ -266,10 +254,9 @@ def get_honor_scores():
         league = request.args.get('league')
         week = int(request.args.get('week'))
         
-        print(f"🔄 Honor Scores - Received request with: league={league}, season={season}, week={week}")
+
         
         league_service = get_league_service()
-        print(f"✅ LeagueService created with database: {getattr(league_service, 'database', 'None')}")
         
         honor_scores = league_service.get_honor_scores(
             league=league, 
@@ -281,10 +268,10 @@ def get_honor_scores():
             number_of_team_averages=3
         )
         
-        print(f"✅ Honor scores data: {honor_scores}")
+
         return jsonify(honor_scores)
     except Exception as e:
-        print(f"❌ Error in get_honor_scores: {str(e)}")
+        print(f"Error in get_honor_scores: {str(e)}")
         return jsonify({"error": str(e)}), 500
 
 @bp.route('/league/get_team_points')
@@ -359,25 +346,26 @@ def get_team_points_vs_average():
 @bp.route('/get_latest_events')
 def get_latest_events():
     try:
-        # Get limit parameter with default value of 5
+        params = dict(request.args)
+        debug_config.log_route('league.get_latest_events', params)
+        
         limit = request.args.get('limit', default=10, type=int)
         
-        print(f"Latest Events - Received request with limit={limit}")
-        
-        # Validate limit
         if limit <= 0:
             return jsonify({'error': 'Limit must be greater than 0'}), 400
             
         league_service = get_league_service()
         events = league_service.get_latest_events(limit=limit)
-        #print("league_routes.get_latest_events")
-        #print(events)
-        print(f"Found {len(events)} latest events")
+        
+        response_size = sys.getsizeof(str(events))
+        debug_config.log_route('league.get_latest_events', params, response_size)
+        
         return jsonify(events)
         
     except Exception as e:
-        print(f"Error in get_latest_events: {str(e)}")
-        print(traceback.format_exc())
+        debug_config.log_route('league.get_latest_events', dict(request.args), f"ERROR: {str(e)}")
+        if debug_config.is_debug_enabled('routes'):
+            traceback.print_exc()
         return jsonify({'error': str(e)}), 500
 
 @bp.route('/league/get_team_positions')
@@ -699,14 +687,11 @@ def get_individual_averages():
             filter_info += f", week={week}"
         if team is not None:
             filter_info += f", team={team}"
-        print(f"🔄 Individual Averages - Received request with: league={league}, season={season}{filter_info}")
-        
         league_service = get_league_service()
-        print(f"✅ LeagueService created with database: {getattr(league_service, 'database', 'None')}")
         table_data = league_service.get_individual_averages(league=league, season=season, week=week, team=team)
-        print(f"✅ Individual averages data: {table_data.to_dict() if table_data else 'None'}")
+
         return jsonify(table_data.to_dict())
         
     except Exception as e:
-        print(f"❌ Error in get_individual_averages: {str(e)}")
+        print(f"Error in get_individual_averages: {str(e)}")
         return jsonify({'error': str(e)}), 500

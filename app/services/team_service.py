@@ -154,7 +154,7 @@ class TeamService:
         """Calculate league averages for a given season"""
         try:
             # First, let's see what data is actually available
-            print(f"Investigating data structure for {league_name} {season}")
+    
             
             # Try to get individual player data
             individual_columns = [Columns.team_name, Columns.player_name, Columns.score, Columns.points, Columns.week, Columns.round_number, Columns.input_data]

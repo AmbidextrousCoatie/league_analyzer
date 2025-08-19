@@ -3,6 +3,7 @@ import numpy as np
 from data_access.adapters.data_adapter_factory import DataAdapterFactory, DataAdapterSelector   
 from typing import List
 from data_access.schema import Columns, ColumnsExtra
+from app.config.debug_config import debug_config
 
 class Server:
     # fetches basic dataframes from data adapter
@@ -35,9 +36,8 @@ class Server:
         """Refresh the data adapter with the current data source"""
         if database:
             self._database = database
-        print(f"DEBUG: Server refreshing data adapter with database: {self._database}")
+        debug_config.log_business('Server', f"refreshing data adapter with database: {self._database}")
         self.data_adapter = DataAdapterFactory.create_adapter(DataAdapterSelector.PANDAS, database=self._database)
-        print(f"DEBUG: Server data adapter refreshed")
 
     def get_player_data(self, player_name: str) -> pd.DataFrame:
         return self.data_adapter.get_player_data(player_name)
@@ -67,7 +67,7 @@ class Server:
     def get_final_position_in_league(self, team_name: str, season: str, league_name: str) -> int:
         
         # print all parameters
-        print(f"get_final_position_in_league: team_name: {team_name}, season: {season}, league_name: {league_name}")
+
         
         filters = {
             Columns.season: {
@@ -83,8 +83,8 @@ class Server:
         league_season_data = self.data_adapter.get_filtered_data(columns=columns_to_fetch, filters=filters)   
         
         # Debug: Check what columns we actually have
-        print(f"Available columns in league_season_data: {list(league_season_data.columns)}")
-        print(f"Looking for columns: {Columns.team_name} and {Columns.points}")
+
+
         
         if league_season_data.empty:
             print(f"No data found for {team_name} in {league_name} {season}")
@@ -678,7 +678,7 @@ class Server:
 
     def get_games_for_player(self, player_name: str) -> pd.DataFrame:
         """Get all games for a player"""
-        print(f"DEBUG: Server.get_games_for_player called with database: {self._database}, player: {player_name}")
+
         
         player_filters = {
             Columns.player_name: {
@@ -689,7 +689,7 @@ class Server:
 
         columns = [Columns.player_id, Columns.player_name, Columns.date, Columns.week, Columns.season, Columns.league_name, Columns.team_name, Columns.score, Columns.points]
         result = self.data_adapter.get_filtered_data(columns=columns, filters=player_filters)
-        print(f"DEBUG: Server.get_games_for_player returned {len(result)} games for player {player_name}")
+
         return result
 
     def get_matches(self, team: str = None, season: str = None, league: str = None, opponent_team_name: str = None) -> pd.DataFrame:

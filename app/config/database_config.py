@@ -26,14 +26,14 @@ class DatabaseConfig:
     
     def __init__(self):
         self._sources = {
-            'bowling_ergebnisse.csv': DataSourceConfig(
+            'db_sim': DataSourceConfig(
                 filename='bowling_ergebnisse.csv',
                 display_name='Simulated Data',
                 description='Generated test data for development and testing',
                 is_default=True,
                 is_enabled=True
             ),
-            'bowling_ergebnisse_real.csv': DataSourceConfig(
+            'db_real': DataSourceConfig(
                 filename='bowling_ergebnisse_real.csv',
                 display_name='Real Data',
                 description='Actual bowling league data',
@@ -63,13 +63,18 @@ class DatabaseConfig:
         return self._sources.get(source_id)
     
     def get_default_source(self) -> str:
-        """Get the default data source filename"""
+        """Get the default data source ID"""
         for source_id, config in self._sources.items():
             if config.is_default and config.is_enabled:
                 return source_id
         # Fallback to first available source
         available = self.get_available_sources()
-        return available[0] if available else 'bowling_ergebnisse.csv'
+        return available[0] if available else 'db_sim'
+    
+    def get_filename_for_source(self, source_id: str) -> str:
+        """Get the actual filename for an abstract source ID"""
+        config = self.get_source_config(source_id)
+        return config.filename if config else source_id
     
     def get_current_source(self) -> str:
         """Get the currently active data source"""

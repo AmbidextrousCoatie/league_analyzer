@@ -135,16 +135,16 @@ def get_data_sources_info():
         print(f"ERROR: Exception in get_data_sources_info: {e}")
         return {
             'success': False,
-            'current_source': 'bowling_ergebnisse.csv',
+            'current_source': 'db_sim',
             'current_display_name': 'Simulated Data',
-            'available_sources': ['bowling_ergebnisse.csv', 'bowling_ergebnisse_real.csv'],
+            'available_sources': ['db_sim', 'db_real'],
             'message': f'Server error: {str(e)}'
         }, 500
 
 @bp.route('/reload-data')
 def reload_data():
-    data_source = request.args.get('source', 'bowling_ergebnisse.csv')
-    print(f"DEBUG: Reloading data with source: {data_source}")
+    data_source = request.args.get('source', 'db_sim')
+
     
     try:
         data_manager = DataManager()
@@ -164,7 +164,7 @@ def reload_data():
         success = data_manager.reload_data(data_source)
         
         if success:
-            print(f"DEBUG: DataManager current source: {data_manager.current_source}")
+        
             return {
                 'success': True,
                 'current_source': data_manager.current_source,
@@ -188,7 +188,7 @@ def reload_data():
         return {
             'success': False,
             'message': f'Server error: {str(e)}',
-            'available_sources': ['bowling_ergebnisse.csv', 'bowling_ergebnisse_real.csv']
+            'available_sources': ['db_sim', 'db_real']
         }, 500
 
 @bp.route('/get-data-source')
@@ -208,9 +208,9 @@ def get_data_source():
         print(f"ERROR: Exception in get_data_source: {e}")
         return {
             'success': False,
-            'current_source': 'bowling_ergebnisse.csv',
+            'current_source': 'db_sim',
             'current_display_name': 'Simulated Data',
-            'available_sources': ['bowling_ergebnisse.csv', 'bowling_ergebnisse_real.csv'],
+            'available_sources': ['db_sim', 'db_real'],
             'message': f'Server error: {str(e)}'
         }, 500
 
@@ -231,7 +231,7 @@ def data_source_changed():
         print(f"ERROR: Exception in data_source_changed: {e}")
         return {
             'success': False,
-            'current_source': 'bowling_ergebnisse.csv',
+            'current_source': 'db_sim',
             'current_display_name': 'Simulated Data',
             'message': f'Server error: {str(e)}'
         }, 500
@@ -277,7 +277,7 @@ def test_database_param():
         from app.config.database_config import database_config
         
         database = request.args.get('database')
-        print(f"DEBUG: test-database-param called with database={database}")
+    
         
         if not database:
             return jsonify({
@@ -298,7 +298,7 @@ def test_database_param():
         from business_logic.server import Server
         from data_access.adapters.data_adapter_factory import DataAdapterFactory, DataAdapterSelector
         
-        print(f"DEBUG: Testing database chain with: {database}")
+
         
         # Test LeagueService
         league_service = LeagueService(database=database)
@@ -313,7 +313,7 @@ def test_database_param():
         seasons = league_service.get_seasons()
         leagues = league_service.get_leagues()
         
-        print(f"DEBUG: Successfully retrieved {len(seasons)} seasons and {len(leagues)} leagues")
+
         
         return jsonify({
             'success': True,
@@ -325,7 +325,7 @@ def test_database_param():
         })
         
     except Exception as e:
-        print(f"DEBUG: Error in test-database-param: {str(e)}")
+        print(f"Error in test-database-param: {str(e)}")
         return jsonify({
             'success': False,
             'message': f'Error testing database parameter: {str(e)}'
@@ -338,7 +338,7 @@ def test_filter_endpoints():
         from app.config.database_config import database_config
         
         database = request.args.get('database')
-        print(f"DEBUG: test-filter-endpoints called with database={database}")
+    
         
         if not database:
             return jsonify({
@@ -435,7 +435,7 @@ def test_filter_endpoints():
         })
         
     except Exception as e:
-        print(f"DEBUG: Error in test-filter-endpoints: {str(e)}")
+        print(f"Error in test-filter-endpoints: {str(e)}")
         return jsonify({
             'success': False,
             'message': f'Error testing filter endpoints: {str(e)}'

@@ -61,7 +61,7 @@ document.addEventListener('DOMContentLoaded', function() {
     fetchWithDatabase('{{ url_for("league.get_latest_events") }}')
         .then(response => response.json())
         .then(data => {
-            console.log('✅ Latest events loaded:', data);
+            //console.log('✅ Latest events loaded:', data);
             const eventsList = document.getElementById('latestEvents');
             if (data && Array.isArray(data)) {
                 eventsList.innerHTML = data.map(event => `
@@ -78,7 +78,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         })
         .catch(error => {
-            console.error('❌ Error fetching events:', error);
+            //console.error('❌ Error fetching events:', error);
             const eventsList = document.getElementById('latestEvents');
             eventsList.innerHTML = '<li class="list-group-item text-danger">Fehler beim Laden der Events</li>';
         });
@@ -92,7 +92,7 @@ document.addEventListener('DOMContentLoaded', function() {
             label: 'Liga Historie (simuliert): LL 1 Nord',
             params: {
                 league: 'LL 1 Nord',
-                database: 'bowling_ergebnisse.csv'
+                database: 'db_sim'
             }
         },
         {
@@ -100,7 +100,7 @@ document.addEventListener('DOMContentLoaded', function() {
             params: {
                 season: '21/22',
                 league: 'BZOL 2 Nord',
-                database: 'bowling_ergebnisse.csv'
+                database: 'db_sim'
             }
         },
         {
@@ -109,7 +109,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 season: '23/24',
                 league: 'BayL',
                 week: '3',
-                database: 'bowling_ergebnisse.csv'
+                database: 'db_sim'
             }
         },
         {
@@ -118,7 +118,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 season: '24/25',
                 league: 'BayL',
                 week: '1',
-                database: 'bowling_ergebnisse_real.csv'
+                database: 'db_real'
             }
         },
         {
@@ -128,14 +128,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 league: 'BayL',
                 week: '1',
                 team: 'BK München 3',
-                database: 'bowling_ergebnisse_real.csv'
+                database: 'db_real'
             }
         },
         {
             label: 'Team Historie (simuliert): Aschaffenburg 3',
             params: {
                 team: 'Aschaffenburg 3',
-                database: 'bowling_ergebnisse.csv'
+                database: 'db_sim'
             }
         },
         {
@@ -143,28 +143,28 @@ document.addEventListener('DOMContentLoaded', function() {
             params: {
                 team: 'Aschaffenburg 3',
                 season: '23/24',
-                database: 'bowling_ergebnisse.csv'
+                database: 'db_sim'
             }
         },
         {
             label: 'Team Historie (real): Bowlinghaus Bamberg 1',
             params: {
                 team: 'Bowlinghaus Bamberg 1',
-                database: 'bowling_ergebnisse_real.csv'
+                database: 'db_real'
             }
         },
         {
             label: 'Spieler Statistiken (simuliert): Matthew Davis',
             params: {
                 player_name: 'Matthew Davis',
-                database: 'bowling_ergebnisse.csv'
+                database: 'db_sim'
             }
         },
         {
             label: 'Spieler Statistiken (real): Altenfeld, Marco',
             params: {
                 player_name: 'Altenfeld, Marco',
-                database: 'bowling_ergebnisse_real.csv'
+                database: 'db_real'
             }
         }
     ];

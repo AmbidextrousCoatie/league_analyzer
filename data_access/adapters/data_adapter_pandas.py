@@ -52,7 +52,7 @@ class DataAdapterPandas(DataAdapter):
         
         # Construct path to the database file
         database_path = pathlib.Path("database", "data", self.database).absolute()
-        print(f"Loading data from database: {self.database} at path: {database_path}")
+
         
         if not database_path.exists():
             raise ValueError(f"Database file not found: {database_path}")
@@ -62,7 +62,7 @@ class DataAdapterPandas(DataAdapter):
 
     def _load_data(self):
         """Load data from CSV file"""
-        print(f"Loading data from {self.data_path}")
+
         self.df = pd.read_csv(self.data_path, sep=';')
 
     def set_dataframe(self, df):
