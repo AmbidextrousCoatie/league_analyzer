@@ -26,6 +26,7 @@ class BaseContentBlock {
         this.isRendering = false;
         this.lastRenderedState = {};
         this.lastData = null;
+        this.renderTimeout = null;
         
         // Error handling
         this.retryCount = 0;
@@ -75,6 +76,23 @@ class BaseContentBlock {
             'league': 'league_name'
         };
         return mapping[filterName] || filterName;
+    }
+    
+    /**
+     * Generate a stable state key for comparison
+     */
+    getStateKey(filterState) {
+        if (!filterState || typeof filterState !== 'object') {
+            return '';
+        }
+        
+        // Only include required and optional filters in the key
+        const relevantFilters = [...this.requiredFilters, ...this.optionalFilters];
+        const stateParts = relevantFilters
+            .map(filter => `${filter}:${filterState[filter] || ''}`)
+            .sort(); // Sort for consistent ordering
+        
+        return stateParts.join('|');
     }
     
     /**
@@ -138,14 +156,23 @@ class BaseContentBlock {
      * Main rendering pipeline
      */
     async renderWithData(filterState) {
+        // Clear any pending render timeout
+        if (this.renderTimeout) {
+            clearTimeout(this.renderTimeout);
+            this.renderTimeout = null;
+        }
+        
         // Check if already rendering
         if (this.isRendering) {
             console.log(`${this.id}: Already rendering, skipping...`);
             return;
         }
         
-        // Check if state actually changed
-        if (JSON.stringify(filterState) === JSON.stringify(this.lastRenderedState)) {
+        // Check if state actually changed (more robust comparison)
+        const currentStateKey = this.getStateKey(filterState);
+        const lastStateKey = this.getStateKey(this.lastRenderedState);
+        
+        if (currentStateKey === lastStateKey) {
             console.log(`${this.id}: State unchanged, skipping render`);
             return;
         }
@@ -157,27 +184,30 @@ class BaseContentBlock {
             return;
         }
         
-        this.isRendering = true;
-        this.lastRenderedState = { ...filterState };
-        
-        try {
-            // Show loading state
-            this.showLoading();
+        // Debounce rapid successive renders
+        this.renderTimeout = setTimeout(async () => {
+            this.isRendering = true;
+            this.lastRenderedState = { ...filterState };
             
-            // Fetch data
-            const data = await this.fetchData(filterState);
-            
-            // Render with data
-            await this.render(data, filterState);
-            
-            console.log(`${this.id}: Rendered successfully`);
-            
-        } catch (error) {
-            console.error(`${this.id}: Render error:`, error);
-            this.showError(error);
-        } finally {
-            this.isRendering = false;
-        }
+            try {
+                // Show loading state
+                this.showLoading();
+                
+                // Fetch data
+                const data = await this.fetchData(filterState);
+                
+                // Render with data
+                await this.render(data, filterState);
+                
+                console.log(`${this.id}: Rendered successfully`);
+                
+            } catch (error) {
+                console.error(`${this.id}: Render error:`, error);
+                this.showError(error);
+            } finally {
+                this.isRendering = false;
+            }
+        }, 100); // 100ms debounce
     }
     
     /**
@@ -300,7 +330,11 @@ class BaseContentBlock {
      * Cleanup method for subclasses to override
      */
     cleanup() {
-        // Override in subclasses if needed
+        // Clear any pending render timeout
+        if (this.renderTimeout) {
+            clearTimeout(this.renderTimeout);
+            this.renderTimeout = null;
+        }
     }
     
     /**

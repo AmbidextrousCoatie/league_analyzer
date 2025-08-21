@@ -63,6 +63,9 @@ class LeagueComparisonBlock extends BaseContentBlock {
         // Destroy existing chart
         this.destroyChart();
         
+        // Wait a bit to ensure canvas is properly sized
+        await new Promise(resolve => setTimeout(resolve, 50));
+        
         // Use the new canvas-compatible area chart function
         if (typeof createAreaChart_forContentBlock === 'function') {
             this.chartInstance = createAreaChart_forContentBlock(

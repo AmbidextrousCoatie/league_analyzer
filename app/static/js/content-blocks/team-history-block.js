@@ -62,6 +62,9 @@ class TeamHistoryBlock extends BaseContentBlock {
         // Destroy existing chart
         this.destroyChart();
         
+        // Wait a bit to ensure canvas is properly sized
+        await new Promise(resolve => setTimeout(resolve, 50));
+        
         // Create new chart
         const ctx = canvas.getContext('2d');
         
@@ -85,6 +88,7 @@ class TeamHistoryBlock extends BaseContentBlock {
             },
             options: {
                 responsive: true,
+                maintainAspectRatio: false,
                 scales: {
                     y: {
                         reverse: true,

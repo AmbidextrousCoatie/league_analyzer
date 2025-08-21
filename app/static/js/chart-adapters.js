@@ -63,6 +63,7 @@ function createAreaChart_forContentBlock(referenceData, actualData, canvas, titl
         },
         options: {
             responsive: true,
+            maintainAspectRatio: false,
             plugins: {
                 title: {
                     display: true,
