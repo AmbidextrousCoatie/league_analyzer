@@ -6,14 +6,41 @@
 
 <div class="container-fluid">
 
-    <!-- Filter Controls Block -->
-    <div id="filterControlsContainer">
-        <!-- Filter controls will be rendered here -->
-        <div class="text-center py-5">
-            <div class="spinner-border text-primary" role="status">
-                <span class="visually-hidden">Loading filters...</span>
+    <!-- Filter Controls -->
+    <div class="card">
+        <div class="card-header">
+            <h4>League Statistics</h4>
+        </div>
+        <div class="card-body">
+            <!-- Selection Area -->
+            <div class="row">
+                <div class="col-md-4">
+                    <h5>League</h5>
+                    <div id="buttonsLeague" class="btn-group-horizontal w-100">
+                        <!-- Leagues will be inserted here -->
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <h5>Season</h5>
+                    <div id="buttonsSeason" class="btn-group-horizontal w-100">
+                        <!-- Seasons will be inserted here -->
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <h5>Week</h5>
+                    <div id="buttonsWeek" class="btn-group-horizontal w-100">
+                        <!-- Weeks will be inserted here -->
+                    </div>
+                </div>
             </div>
-            <p class="text-muted mt-2">Initializing filter controls...</p>
+            <div class="row mt-3">
+                <div class="col-md-12">
+                    <h5>Team</h5>
+                    <div id="buttonsTeam" class="btn-group-horizontal w-100">
+                        <!-- Teams will be inserted here -->
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -78,10 +105,10 @@
 {% block scripts %}
 <!-- Core dependencies -->
 <script src="{{ url_for('static', filename='js/core/url-state-manager.js') }}"></script>
+<script src="{{ url_for('static', filename='js/core/simple-filter-manager.js') }}"></script>
 <script src="{{ url_for('static', filename='js/content-blocks/base-content-block.js') }}"></script>
 
 <!-- Content blocks -->
-<script src="{{ url_for('static', filename='js/content-blocks/filter-controls-block.js') }}"></script>
 <script src="{{ url_for('static', filename='js/content-blocks/league-aggregation-block.js') }}"></script>
 <script src="{{ url_for('static', filename='js/content-blocks/league-season-overview-block.js') }}"></script>
 <script src="{{ url_for('static', filename='js/content-blocks/season-overview-block.js') }}"></script>

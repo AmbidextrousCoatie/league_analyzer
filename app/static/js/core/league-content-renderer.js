@@ -6,10 +6,9 @@
  */
 
 class LeagueContentRenderer {
-    constructor(urlStateManager, eventBus = null, smartEventRouter = null) {
+    constructor(urlStateManager, eventBus = null) {
         this.urlStateManager = urlStateManager;
         this.eventBus = eventBus || window.EventBus;
-        this.smartEventRouter = smartEventRouter;
         this.lastRenderedState = {};
         this.isRendering = false;
         

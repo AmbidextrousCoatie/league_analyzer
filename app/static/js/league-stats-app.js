@@ -13,6 +13,7 @@ class LeagueStatsApp {
         };
         this.urlStateManager = new URLStateManager();
         this.contentRenderer = new LeagueStatsContentRenderer();
+        this.filterManager = null;
         
         // Debouncing for content updates
         this.contentUpdateTimeout = null;
@@ -32,7 +33,14 @@ class LeagueStatsApp {
             // Set up event listeners
             this.setupEventListeners();
             
-            // Initial render
+            // Wait a bit for filter manager to finish processing initial state
+            // This ensures the default league is set before we render content
+            await new Promise(resolve => setTimeout(resolve, 100));
+            
+            // Get the final state after filter manager processing
+            this.currentState = { ...this.currentState, ...this.urlStateManager.getState() };
+            
+            // Initial render with final state
             await this.renderContent();
             
             console.log('✅ LeagueStatsApp initialized successfully');
@@ -46,11 +54,11 @@ class LeagueStatsApp {
         console.log('🧱 Initializing content blocks...');
         
         try {
+            // Initialize unified filter manager for league mode
+            this.filterManager = new SimpleFilterManager(this.urlStateManager, 'league');
+            await this.filterManager.initialize();
+            
             // Create content blocks (they initialize in their constructors)
-            console.log('🔄 Creating FilterControlsBlock...');
-            console.log('🔄 FilterControlsBlock class available:', typeof FilterControlsBlock);
-            const filterControlsBlock = new FilterControlsBlock();
-            console.log('🔄 FilterControlsBlock created successfully:', !!filterControlsBlock);
             console.log('🔄 Creating LeagueAggregationBlock...');
             const leagueAggregationBlock = new LeagueAggregationBlock();
             console.log('🔄 Creating LeagueSeasonOverviewBlock...');
@@ -62,8 +70,7 @@ class LeagueStatsApp {
             console.log('🔄 Creating TeamDetailsBlock...');
             const teamDetailsBlock = new TeamDetailsBlock();
             
-            // Store blocks
-            this.contentBlocks.set('filter-controls', filterControlsBlock);
+            // Store blocks (no filter-controls block needed anymore)
             this.contentBlocks.set('league-aggregation', leagueAggregationBlock);
             this.contentBlocks.set('league-season-overview', leagueSeasonOverviewBlock);
             this.contentBlocks.set('season-overview', seasonOverviewBlock);
@@ -105,13 +112,17 @@ class LeagueStatsApp {
         
         // Check if state actually changed to prevent unnecessary updates
         const stateChanged = JSON.stringify(this.currentState) !== JSON.stringify(newState);
-        if (!stateChanged) {
-            console.log('State unchanged, skipping update');
-            return;
-        }
         
         // Update current state
         this.currentState = { ...newState };
+        
+        // Always render content on initial load or if state changed
+        if (!stateChanged && Object.values(this.currentState).some(val => val && val !== '')) {
+            console.log('Initial load with state, rendering content');
+        } else if (!stateChanged) {
+            console.log('State unchanged, skipping update');
+            return;
+        }
         
         // Update URL (debounced)
         this.urlStateManager.setState(this.currentState);

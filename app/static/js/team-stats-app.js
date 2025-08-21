@@ -53,8 +53,8 @@ class TeamStatsApp {
             // Initialize filter manager with a short delay to ensure DOM is ready
             await new Promise(resolve => setTimeout(resolve, 100));
             
-            // Simplified filter manager without event bus
-            this.filterManager = new SimpleFilterManager(this.urlStateManager);
+            // Simplified filter manager without event bus (team mode)
+            this.filterManager = new SimpleFilterManager(this.urlStateManager, 'team');
             await this.filterManager.initialize();
             
             // Set up our own event listeners that properly trigger state changes

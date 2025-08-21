@@ -200,7 +200,7 @@ function updateMessageVisibility() {
 }
 
 /**
- * Alias for updateTeamButtons - used by LeagueFilterManager
+ * Alias for updateTeamButtons - used by SimpleFilterManager
  */
 function updateLeagueTeamButtons(teams) {
     if (teams) {

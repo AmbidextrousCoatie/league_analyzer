@@ -28,7 +28,7 @@ function updateTeamSelect(teams) {
 
     // Only add legacy event listeners if modern state management is not active
     if (window.teamStatsApp && window.teamStatsApp.isInitialized) {
-        console.log('Modern state management active - team select managed by FilterManager');
+        console.log('Modern state management active - team select managed by SimpleFilterManager');
         return;
     }
     

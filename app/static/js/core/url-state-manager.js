@@ -43,8 +43,11 @@ class URLStateManager {
         // Build URL parameters
         const params = new URLSearchParams();
         Object.entries(this.state).forEach(([key, value]) => {
-            if (value && value !== '' && value !== 'db_sim') {
-                params.set(key, value);
+            if (value && value !== '') {
+                // Always include database parameter, even if it's 'db_sim'
+                if (key === 'database' || value !== 'db_sim') {
+                    params.set(key, value);
+                }
             }
         });
         
