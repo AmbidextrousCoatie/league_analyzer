@@ -545,7 +545,7 @@
         // Helper functions for database parameter handling
         function getCurrentDatabase() {
             const urlParams = new URLSearchParams(window.location.search);
-            const database = urlParams.get('database');
+            const database = urlParams.get('database') || 'db_sim';
             console.log('🔄 getCurrentDatabase called, returning:', database);
             return database;
         }
@@ -553,8 +553,10 @@
         function addDatabaseParam(url) {
             const database = getCurrentDatabase();
             if (database) {
-                const separator = url.includes('?') ? '&' : '?';
-                return `${url}${separator}database=${encodeURIComponent(database)}`;
+                // Handle both string and URL objects
+                const urlString = url.toString();
+                const separator = urlString.includes('?') ? '&' : '?';
+                return `${urlString}${separator}database=${encodeURIComponent(database)}`;
             }
             return url;
         }

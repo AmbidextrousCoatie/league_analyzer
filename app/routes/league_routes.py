@@ -13,7 +13,7 @@ bp = Blueprint('league', __name__)
 
 def get_league_service():
     """Helper function to get LeagueService with database parameter"""
-    database = request.args.get('database')
+    database = request.args.get('database') or 'db_sim'  # Default to db_sim if no database specified
     debug_config.log_service('LeagueService', 'create', f"database={database}")
     return LeagueService(database=database)
 

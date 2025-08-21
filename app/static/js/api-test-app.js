@@ -104,18 +104,40 @@ class APITestApp {
             const leagues = await this.fetchData('/league/get_available_leagues');
             this.updateLeagueOptions(leagues);
             
+            // Select initial values from URL state after buttons are created
+            this.selectInitialValues();
+            
             // If we have initial season and league from URL, load dependent data
             if (this.currentState.season && this.currentState.league) {
                 console.log('Loading initial dependent data for:', this.currentState);
                 await this.updateWeekOptions();
                 await this.updateTeamOptions();
+                
+                // Retry selecting initial values after dependent data is loaded
+                this.selectInitialValues();
             }
-            
-            // Select initial values from URL state
-            this.selectInitialValues();
             
         } catch (error) {
             console.error('Error loading initial data:', error);
+            
+            // Show error messages in the containers
+            const seasonContainer = document.getElementById('seasonSelector');
+            const leagueContainer = document.getElementById('leagueSelector');
+            const weekContainer = document.getElementById('weekSelector');
+            const teamContainer = document.getElementById('teamSelector');
+            
+            if (seasonContainer) {
+                seasonContainer.innerHTML = '<div class="alert alert-danger">Error loading seasons</div>';
+            }
+            if (leagueContainer) {
+                leagueContainer.innerHTML = '<div class="alert alert-danger">Error loading leagues</div>';
+            }
+            if (weekContainer) {
+                weekContainer.innerHTML = '<div class="alert alert-danger">Error loading weeks</div>';
+            }
+            if (teamContainer) {
+                teamContainer.innerHTML = '<div class="alert alert-danger">Error loading teams</div>';
+            }
         }
     }
     
@@ -143,6 +165,11 @@ class APITestApp {
         const container = document.getElementById('seasonSelector');
         if (!container) return;
         
+        if (!Array.isArray(seasons) || seasons.length === 0) {
+            container.innerHTML = '<div class="alert alert-warning">No seasons available</div>';
+            return;
+        }
+        
         const options = ['All', ...seasons];
         container.innerHTML = options.map(season => `
             <input type="radio" class="btn-check" name="season" id="season_${season}" 
@@ -161,6 +188,11 @@ class APITestApp {
     updateLeagueOptions(leagues) {
         const container = document.getElementById('leagueSelector');
         if (!container) return;
+        
+        if (!Array.isArray(leagues) || leagues.length === 0) {
+            container.innerHTML = '<div class="alert alert-warning">No leagues available</div>';
+            return;
+        }
         
         container.innerHTML = leagues.map(league => `
             <input type="radio" class="btn-check" name="league" id="league_${league}" 
@@ -307,7 +339,7 @@ class APITestApp {
                     input.checked = true;
                     console.log(`Selected ${filterName}: ${value}`);
                 } else {
-                    console.warn(`Could not find input for ${filterName}: ${value}`);
+                    console.warn(`Could not find input for ${filterName}: ${value} - will retry after dependent data loads`);
                 }
             }
         });

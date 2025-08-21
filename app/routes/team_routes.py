@@ -5,7 +5,7 @@ bp = Blueprint('team', __name__)
 
 def get_team_service():
     """Helper function to get TeamService with database parameter"""
-    database = request.args.get('database')
+    database = request.args.get('database') or 'db_sim'  # Default to db_sim if no database specified
     return TeamService(database=database)
 
 @bp.route('/team/stats')

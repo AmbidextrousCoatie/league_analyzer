@@ -240,14 +240,18 @@ class DataAdapterPandas(DataAdapter):
     
     def get_seasons(self, league_name: str=None, team_name: str=None) -> List[str]:
         filters_eq = dict()
-        filters_eq[Columns.league_name] = league_name
-        filters_eq[Columns.team_name] = team_name
+        if league_name is not None:
+            filters_eq[Columns.league_name] = league_name
+        if team_name is not None:
+            filters_eq[Columns.team_name] = team_name
         return self.get_filtered_data__deprecated(columns=[Columns.season], filters_eq=filters_eq)[Columns.season].unique().tolist()
     
     def get_leagues(self, season: str=None, team_name: str=None) -> List[str]:
         filters_eq = dict()
-        filters_eq[Columns.season] = season
-        filters_eq[Columns.team_name] = team_name
+        if season is not None:
+            filters_eq[Columns.season] = season
+        if team_name is not None:
+            filters_eq[Columns.team_name] = team_name
         return self.get_filtered_data__deprecated(columns=[Columns.league_name], filters_eq=filters_eq)[Columns.league_name].unique().tolist()
     
     def get_weeks__deprecated(self, league_name: str=None, season: str=None, team_name: str=None) -> List[int]:

@@ -5,7 +5,7 @@ bp = Blueprint('player', __name__, url_prefix='/player')
 
 def get_player_service():
     """Helper function to get PlayerService with database parameter"""
-    database = request.args.get('database')
+    database = request.args.get('database') or 'db_sim'  # Default to db_sim if no database specified
     return PlayerService(database=database)
 
 @bp.route('/stats')
