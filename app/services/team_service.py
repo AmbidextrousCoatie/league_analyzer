@@ -334,44 +334,45 @@ class TeamService:
         try:
             # Get team matches - if season is None, get all seasons
             if season:
-                team_matches = self.server.get_matches(team=team_name, season=season, league=league_name)
+                team_matches = self.server.get_matches(team=team_name, season=season)
             else:
                 team_matches = self.server.get_matches(team=team_name)
             
             if team_matches.empty:
                 return {"error": "No team data found"}
             
-            # Initialize opponent clutch tracking
-            opponent_clutch = {}
-            total_games = 0
-            total_clutch_games = 0
-            total_clutch_wins = 0
-            total_clutch_losses = 0
+            # Calculate margin for each match
+            team_matches['margin'] = team_matches[Columns.score] - team_matches['opponent_score']
+            team_matches['abs_margin'] = abs(team_matches['margin'])
             
-            # Analyze each match
-            for _, row in team_matches.iterrows():
-                team_score = row[Columns.score]
-                opponent_score = row['opponent_score']
-                opponent_name = row[Columns.team_name_opponent]
+            # Filter for clutch games (margin < 10)
+            clutch_games = team_matches[team_matches['abs_margin'] < 10].copy()
+            
+            # Calculate totals
+            total_games = len(team_matches)
+            total_clutch_games = len(clutch_games)
+            total_clutch_wins = len(clutch_games[clutch_games['margin'] > 0])
+            total_clutch_losses = len(clutch_games[clutch_games['margin'] < 0])
+            
+            # Calculate opponent-specific clutch performance using groupby
+            opponent_clutch = {}
+            if not clutch_games.empty:
+                # Create win/loss indicators
+                clutch_games['is_win'] = clutch_games['margin'] > 0
+                clutch_games['is_loss'] = clutch_games['margin'] < 0
                 
-                margin = abs(team_score - opponent_score)
-                total_games += 1
+                # Group by opponent and calculate wins/losses
+                opponent_stats = clutch_games.groupby(Columns.team_name_opponent).agg({
+                    'is_win': 'sum',
+                    'is_loss': 'sum'
+                })
                 
-                # Check if it's a clutch game (margin < 10)
-                if margin < 10:
-                    total_clutch_games += 1
-                    
-                    # Initialize opponent if not seen before
-                    if opponent_name not in opponent_clutch:
-                        opponent_clutch[opponent_name] = {"wins": 0, "losses": 0}
-                    
-                    # Determine win/loss
-                    if team_score > opponent_score:
-                        opponent_clutch[opponent_name]["wins"] += 1
-                        total_clutch_wins += 1
-                    else:
-                        opponent_clutch[opponent_name]["losses"] += 1
-                        total_clutch_losses += 1
+                # Create the opponent_clutch dictionary
+                for opponent_name, row in opponent_stats.iterrows():
+                    opponent_clutch[opponent_name] = {
+                        "wins": int(row['is_win']),
+                        "losses": int(row['is_loss'])
+                    }
             
             clutch_percentage = (total_clutch_wins / total_clutch_games * 100) if total_clutch_games > 0 else 0
             

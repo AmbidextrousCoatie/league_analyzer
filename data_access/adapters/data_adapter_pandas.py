@@ -512,8 +512,6 @@ class DataAdapterPandas(DataAdapter):
         # Get team data
         team_data = self.get_filtered_data(filters=team_filters)
         
-
-        
         if team_data.empty:
             return pd.DataFrame()
         
@@ -526,28 +524,47 @@ class DataAdapterPandas(DataAdapter):
         
         result_df = team_data[result_columns].copy()
         
-        # Add opponent_score column
-        result_df['opponent_score'] = 0
+        # Get all computed data for the same matches to find opponent scores
+        # We need to get all teams that played in the same matches as our team
+        all_match_filters = {
+            Columns.computed_data: {'value': True, 'operator': 'eq'}
+        }
         
-        # For each match (combination of season, league, week, round_number), 
-        # find the opponent's score and add it to the result
-        for idx, row in result_df.iterrows():
-            # Find the opponent's data for this specific match
-            opponent_filters = {
-                Columns.season: {'value': row[Columns.season], 'operator': 'eq'},
-                Columns.league_name: {'value': row[Columns.league_name], 'operator': 'eq'},
-                Columns.week: {'value': row[Columns.week], 'operator': 'eq'},
-                Columns.round_number: {'value': row[Columns.round_number], 'operator': 'eq'},
-                Columns.team_name: {'value': row[Columns.team_name_opponent], 'operator': 'eq'},
-                Columns.computed_data: {'value': True, 'operator': 'eq'}
-            }
-            
-            opponent_data = self.get_filtered_data(filters=opponent_filters)
-            
-            if not opponent_data.empty:
-                # Get the opponent's score for this match
-                opponent_score = opponent_data[Columns.score].iloc[0]
-                result_df.at[idx, 'opponent_score'] = opponent_score
+        # Add season filter if specified
+        if season:
+            all_match_filters[Columns.season] = {'value': season, 'operator': 'eq'}
+        if league:
+            all_match_filters[Columns.league_name] = {'value': league, 'operator': 'eq'}
+        
+        # Get all computed data for these matches
+        all_match_data = self.get_filtered_data(filters=all_match_filters)
+        
+        if all_match_data.empty:
+            return result_df
+        
+        # Create opponent data by filtering for the opponent teams
+        opponent_data = all_match_data[all_match_data[Columns.team_name].isin(result_df[Columns.team_name_opponent].unique())].copy()
+        
+        # Merge result_df with opponent_data to get opponent scores
+        # We'll merge on season, league, week, round_number, and match the team_name with team_name_opponent
+        merge_columns = [Columns.season, Columns.league_name, Columns.week, Columns.round_number]
+        
+        # Select only the columns we need from opponent_data and rename them
+        opponent_data_for_merge = opponent_data[merge_columns + [Columns.team_name, Columns.score]].copy()
+        opponent_data_for_merge = opponent_data_for_merge.rename(columns={
+            Columns.team_name: Columns.team_name_opponent,
+            Columns.score: 'opponent_score'
+        })
+        
+        # Merge the dataframes
+        result_df = result_df.merge(
+            opponent_data_for_merge,
+            on=merge_columns + [Columns.team_name_opponent],
+            how='left'
+        )
+        
+        # Fill any missing opponent scores with 0
+        result_df['opponent_score'] = result_df['opponent_score'].fillna(0)
         
         return result_df
     
