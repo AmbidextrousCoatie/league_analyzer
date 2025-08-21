@@ -235,30 +235,30 @@
     </div>
 
     <!-- Import Legacy JavaScript Modules -->
-    <script src="{{ url_for('static', filename='js/legacy/team-chart-utils.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/legacy/team-filter-utils.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/legacy/team-data-utils.js') }}"></script>
+    <script src="{{ static_url('js/legacy/team-chart-utils.js') }}"></script>
+    <script src="{{ static_url('js/legacy/team-filter-utils.js') }}"></script>
+    <script src="{{ static_url('js/legacy/team-data-utils.js') }}"></script>
 
     <!-- Import State Management Components -->
-            <script src="{{ url_for('static', filename='js/core/url-state-manager.js') }}"></script>
-        <script src="{{ url_for('static', filename='js/core/simple-filter-manager.js') }}"></script>
+    <script src="{{ static_url('js/core/url-state-manager.js') }}"></script>
+    <script src="{{ static_url('js/core/simple-filter-manager.js') }}"></script>
 
     <!-- Import Chart Adapters -->
-    <script src="{{ url_for('static', filename='js/chart-adapters.js') }}"></script>
+    <script src="{{ static_url('js/chart-adapters.js') }}"></script>
 
     <!-- Import Content Blocks -->
-    <script src="{{ url_for('static', filename='js/content-blocks/base-content-block.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/content-blocks/team-history-block.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/content-blocks/league-comparison-block.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/content-blocks/clutch-analysis-block.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/content-blocks/consistency-metrics-block.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/content-blocks/special-matches-block.js') }}"></script>
+    <script src="{{ static_url('js/content-blocks/base-content-block.js') }}"></script>
+    <script src="{{ static_url('js/content-blocks/team-history-block.js') }}"></script>
+    <script src="{{ static_url('js/content-blocks/league-comparison-block.js') }}"></script>
+    <script src="{{ static_url('js/content-blocks/clutch-analysis-block.js') }}"></script>
+    <script src="{{ static_url('js/content-blocks/consistency-metrics-block.js') }}"></script>
+    <script src="{{ static_url('js/content-blocks/special-matches-block.js') }}"></script>
 
     <!-- Import Content Renderer -->
-    <script src="{{ url_for('static', filename='js/core/content-renderer.js') }}"></script>
+    <script src="{{ static_url('js/core/content-renderer.js') }}"></script>
 
     <!-- Import Main Application Coordinator -->
-    <script src="{{ url_for('static', filename='js/team-stats-app.js') }}"></script>
+    <script src="{{ static_url('js/team-stats-app.js') }}"></script>
     <script>
         // Create global app instance
         window.teamStatsApp = new TeamStatsApp();
