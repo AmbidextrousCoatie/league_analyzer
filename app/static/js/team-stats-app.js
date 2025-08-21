@@ -47,17 +47,14 @@ class TeamStatsApp {
                 }
             });
             
-            // Initialize event system
-            this.eventBus = window.EventBus;
-            this.smartEventRouter = new SmartEventRouter(this.eventBus);
-            
-            // Initialize content renderer
-            this.contentRenderer = new ContentRenderer(this.urlStateManager, this.eventBus, this.smartEventRouter);
+            // Initialize content renderer (simplified - no event bus)
+            this.contentRenderer = new ContentRenderer(this.urlStateManager);
             
             // Initialize filter manager with a short delay to ensure DOM is ready
             await new Promise(resolve => setTimeout(resolve, 100));
             
-            this.filterManager = new FilterManager(this.urlStateManager, this.eventBus, this.smartEventRouter);
+            // Simplified filter manager without event bus
+            this.filterManager = new SimpleFilterManager(this.urlStateManager);
             await this.filterManager.initialize();
             
             // Set up our own event listeners that properly trigger state changes
@@ -201,6 +198,41 @@ class TeamStatsApp {
             team: 'Team A',
             season: '23/24'
         });
+    }
+    
+    /**
+     * Update clutch threshold and trigger refresh
+     */
+    updateClutchThreshold(newThreshold) {
+        console.log('🎚️ Updating clutch threshold to:', newThreshold);
+        
+        // Find the clutch analysis block and update its threshold
+        if (this.contentRenderer && this.contentRenderer.contentBlocks) {
+            const clutchBlock = this.contentRenderer.contentBlocks['clutch-analysis'];
+            if (clutchBlock) {
+                clutchBlock.updateThreshold(newThreshold);
+            }
+        }
+    }
+    
+    /**
+     * Refresh clutch analysis with current threshold
+     */
+    refreshClutchAnalysis() {
+        console.log('🔄 Refreshing clutch analysis...');
+        
+        if (this.contentRenderer && this.contentRenderer.contentBlocks) {
+            const clutchBlock = this.contentRenderer.contentBlocks['clutch-analysis'];
+            if (clutchBlock) {
+                // Clear the last rendered state to force a refresh
+                clutchBlock.lastRenderedState = {};
+                clutchBlock.lastData = null;
+                
+                // Force a re-render of the clutch analysis block
+                const currentState = this.getState();
+                clutchBlock.renderWithData(currentState);
+            }
+        }
     }
     
     debug() {

@@ -114,8 +114,7 @@ def get_clutch_analysis():
         team_name = request.args.get('team_name')
         season = request.args.get('season')
         league_name = request.args.get('league_name')
-        
-    
+        clutch_threshold = request.args.get('clutch_threshold', 10, type=int)
         
         if not team_name:
             return jsonify({'error': 'Missing team_name parameter'}), 400
@@ -127,9 +126,13 @@ def get_clutch_analysis():
             if season in team_history:
                 league_name = team_history[season]['league_name']
     
-        
         team_service = get_team_service()
-        clutch_data = team_service.get_clutch_performance(team_name=team_name, league_name=league_name, season=season if season and season != '' else None)
+        clutch_data = team_service.get_clutch_performance(
+            team_name=team_name, 
+            league_name=league_name, 
+            season=season if season and season != '' else None,
+            clutch_threshold=clutch_threshold
+        )
         
 
         return jsonify(clutch_data)

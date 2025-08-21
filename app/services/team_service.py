@@ -319,14 +319,15 @@ class TeamService:
         
         return special_matches
 
-    def get_clutch_performance(self, team_name: str, league_name: str, season: str) -> Dict[str, Any]:
+    def get_clutch_performance(self, team_name: str, league_name: str, season: str, clutch_threshold: int = 10) -> Dict[str, Any]:
         """
-        Analyze clutch performance - games decided by close margins (<10 points)
+        Analyze clutch performance - games decided by close margins
         
         Args:
             team_name: Name of the team
             league_name: Name of the league
             season: Season identifier (can be None for all seasons)
+            clutch_threshold: Point margin threshold for clutch games (default: 10)
             
         Returns:
             Dictionary with opponent clutch data: {"opponent_name": {"wins": X, "losses": Y}, ...}
@@ -345,8 +346,8 @@ class TeamService:
             team_matches['margin'] = team_matches[Columns.score] - team_matches['opponent_score']
             team_matches['abs_margin'] = abs(team_matches['margin'])
             
-            # Filter for clutch games (margin < 10)
-            clutch_games = team_matches[team_matches['abs_margin'] < 10].copy()
+            # Filter for clutch games (margin < threshold)
+            clutch_games = team_matches[team_matches['abs_margin'] < clutch_threshold].copy()
             
             # Calculate totals
             total_games = len(team_matches)

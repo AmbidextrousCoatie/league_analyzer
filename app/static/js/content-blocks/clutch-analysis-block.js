@@ -22,6 +22,12 @@ class ClutchAnalysisBlock extends BaseContentBlock {
         
         // Stats container ID
         this.statsContainerId = 'clutchStats';
+        
+        // Clutch threshold (default 10 points)
+        this.clutchThreshold = 10;
+        
+        // Slider container ID
+        this.sliderContainerId = 'clutchThresholdSlider';
     }
     
     /**
@@ -52,6 +58,135 @@ class ClutchAnalysisBlock extends BaseContentBlock {
     }
     
     /**
+     * Render the clutch threshold slider in the card header
+     */
+    renderSlider() {
+        // Find the card header for this block
+        const cardHeader = this.findCardHeader();
+        if (!cardHeader) {
+            console.warn(`${this.id}: Could not find card header for slider`);
+            return;
+        }
+        
+        // Check if slider already exists
+        let sliderContainer = cardHeader.querySelector(`#${this.sliderContainerId}`);
+        if (!sliderContainer) {
+            // Create slider container
+            sliderContainer = document.createElement('div');
+            sliderContainer.id = this.sliderContainerId;
+            sliderContainer.className = 'mt-2';
+            cardHeader.appendChild(sliderContainer);
+        }
+        
+        // Create slider HTML
+        sliderContainer.innerHTML = `
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <label for="clutchThresholdRange" class="form-label mb-1">
+                        <small>Clutch Threshold: <span id="clutchThresholdValue">${this.clutchThreshold}</span> points</small>
+                    </label>
+                    <input type="range" class="form-range" id="clutchThresholdRange" 
+                           min="0" max="100" value="${this.clutchThreshold}" 
+                           oninput="window.teamStatsApp.updateClutchThreshold(this.value)">
+                </div>
+                <div class="col-md-4 text-end">
+                    <button class="btn btn-sm btn-outline-primary" onclick="window.teamStatsApp.refreshClutchAnalysis()">
+                        <i class="fas fa-sync-alt"></i> Update
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        console.log(`${this.id}: Slider rendered with threshold: ${this.clutchThreshold}`);
+    }
+    
+    /**
+     * Find the card header for this content block
+     */
+    findCardHeader() {
+        // Look for the card that contains our chart container
+        const chartContainer = document.getElementById(this.containerId);
+        if (!chartContainer) return null;
+        
+        // Find the parent card
+        const card = chartContainer.closest('.card');
+        if (!card) return null;
+        
+        // Find the card header
+        return card.querySelector('.card-header');
+    }
+    
+    /**
+     * Update the clutch threshold and trigger refresh
+     */
+    updateThreshold(newThreshold) {
+        this.clutchThreshold = parseInt(newThreshold);
+        
+        // Update the display value
+        const valueDisplay = document.getElementById('clutchThresholdValue');
+        if (valueDisplay) {
+            valueDisplay.textContent = this.clutchThreshold;
+        }
+        
+        // Clear the last rendered state to force a refresh
+        this.lastRenderedState = {};
+        
+        console.log(`${this.id}: Clutch threshold updated to: ${this.clutchThreshold}`);
+    }
+    
+    /**
+     * Override the data fetching to include clutch threshold parameter
+     */
+    async fetchData(filterState) {
+        const url = new URL(this.dataEndpoint, window.location.origin);
+        
+        // Map filter state keys to expected parameter names
+        const parameterMapping = {
+            'team': 'team_name',
+            'season': 'season',
+            'league': 'league_name'
+        };
+        
+        // Add filter parameters with proper mapping
+        Object.entries(filterState).forEach(([key, value]) => {
+            if (value && value !== '') {
+                const paramName = parameterMapping[key] || key;
+                url.searchParams.append(paramName, value);
+            }
+        });
+        
+        // Add clutch threshold parameter
+        url.searchParams.append('clutch_threshold', this.clutchThreshold);
+        
+        console.log(`${this.id}: Fetching data with URL:`, url.toString());
+        
+        try {
+            const response = await fetch(url);
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            
+            const data = await response.json();
+            console.log(`${this.id}: Data fetched successfully:`, data);
+            return data;
+        } catch (error) {
+            console.error(`${this.id}: Error fetching data:`, error);
+            throw error;
+        }
+    }
+    
+    /**
+     * Override the initial render to include slider setup
+     */
+    async renderWithData(filterState) {
+        // Render the slider first
+        this.renderSlider();
+        
+        // Call the parent method
+        await super.renderWithData(filterState);
+    }
+    
+    /**
      * Render the clutch performance chart
      */
     async renderChart(data, filterState) {
@@ -79,7 +214,7 @@ class ClutchAnalysisBlock extends BaseContentBlock {
                 createClutchPerformanceChart(
                     opponentClutch,
                     this.containerId,
-                    'Clutch Games Performance per Opponent (<10 point margin)'
+                    `Clutch Games Performance per Opponent (<${this.clutchThreshold} point margin)`
                 );
                 
                 // Store reference to the chart instance created by the legacy function

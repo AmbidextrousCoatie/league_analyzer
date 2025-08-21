@@ -744,11 +744,11 @@ function createClutchPerformanceChart(opponentData, containerId, title) {
     // Extract opponent names and prepare data
     const opponents = Object.keys(opponentData);
     const winsData = opponents.map(opponent => opponentData[opponent].wins);
-    const lossesData = opponents.map(opponent => opponentData[opponent].losses);
+    const lossesData = opponents.map(opponent => -opponentData[opponent].losses); // Negative values for losses
     
     console.log('Chart data prepared:', { opponents, winsData, lossesData });
 
-    // Create stacked bar chart using ECharts approach
+    // Create single series with stacked bars extending in both directions
     const series = [
         {
             name: 'Wins',
@@ -760,26 +760,28 @@ function createClutchPerformanceChart(opponentData, containerId, title) {
             },
             label: {
                 show: true,
-                position: 'inside',
+                position: 'right',
                 formatter: function(params) {
                     return params.value > 0 ? params.value : '';
-                }
+                },
+                color: '#333'
             }
         },
         {
             name: 'Losses',
             type: 'bar',
             stack: 'total',
-            data: lossesData,
+            data: lossesData,  // Already negative values
             itemStyle: {
                 color: getSemanticColor('negative')  // Red for losses
             },
             label: {
                 show: true,
-                position: 'inside',
+                position: 'left',
                 formatter: function(params) {
-                    return params.value > 0 ? params.value : '';
-                }
+                    return params.value < 0 ? Math.abs(params.value) : '';
+                },
+                color: '#333'
             }
         }
     ];
@@ -799,7 +801,7 @@ function createClutchPerformanceChart(opponentData, containerId, title) {
             formatter: function(params) {
                 const opponent = opponents[params[0].dataIndex];
                 const wins = params[0].value;
-                const losses = params[1].value;
+                const losses = Math.abs(params[1].value);
                 const total = wins + losses;
                 const winRate = total > 0 ? ((wins / total) * 100).toFixed(1) : 0;
                 
@@ -815,13 +817,13 @@ function createClutchPerformanceChart(opponentData, containerId, title) {
             top: 40,
             data: ['Wins', 'Losses']
         },
-        grid: {
-            top: '20%',
-            right: '10%',
-            bottom: '10%',
-            left: '10%',
-            containLabel: true
-        },
+                 grid: {
+             top: '25%',
+             right: '10%',
+             bottom: '10%',
+             left: '10%',
+             containLabel: true
+         },
         xAxis: {
             type: 'value',
             axisLine: {
@@ -834,7 +836,10 @@ function createClutchPerformanceChart(opponentData, containerId, title) {
                 show: false
             },
             axisLabel: {
-                show: true
+                show: true,
+                formatter: function(value) {
+                    return Math.abs(value);
+                }
             },
             splitLine: {
                 show: true,
@@ -844,20 +849,20 @@ function createClutchPerformanceChart(opponentData, containerId, title) {
                 }
             }
         },
-        yAxis: {
-            type: 'category',
-            data: opponents,
-            axisLine: {
-                show: false
-            },
-            axisTick: {
-                show: false
-            },
-            axisLabel: {
-                show: true,
-                color: '#333'
-            }
-        },
+                 yAxis: {
+             type: 'category',
+             data: opponents,
+             axisLine: {
+                 show: false
+             },
+             axisTick: {
+                 show: false
+             },
+             axisLabel: {
+                 show: true,
+                 color: '#333'
+             }
+         },
         series: series,
         animation: false
     };
