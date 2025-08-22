@@ -23,6 +23,9 @@ class APITestApp {
             team: '',
             player: ''
         };
+        
+        // Track currently selected buttons for deselection detection
+        this.selectedButtons = new Map(); // Map of filter type to value
     }
     
     async initialize() {
@@ -282,6 +285,7 @@ class APITestApp {
             if (['season', 'league', 'week', 'team', 'player'].includes(name)) {
                 const oldValue = this.currentState[name];
                 this.currentState[name] = value;
+                this.selectedButtons.set(name, value);
                 
                 console.log('Updated state:', this.currentState);
                 
@@ -313,6 +317,70 @@ class APITestApp {
                 }
             }
         });
+        
+        // Add click event listeners for deselection functionality
+        document.addEventListener('click', async (event) => {
+            let target = event.target;
+            let radioInput = null;
+            
+            // Check if clicked element is a label for a radio button
+            if (target.tagName === 'LABEL' && target.getAttribute('for')) {
+                radioInput = document.getElementById(target.getAttribute('for'));
+            } else if (target.type === 'radio') {
+                radioInput = target;
+            }
+            
+            // Check if clicked element is a radio button filter
+            if (radioInput && radioInput.type === 'radio' && ['season', 'league', 'week', 'team', 'player'].includes(radioInput.name)) {
+                const buttonName = radioInput.name;
+                const buttonValue = radioInput.value;
+                const currentlySelected = this.selectedButtons.get(buttonName);
+                
+                console.log(`🔍 APITest: Click detected on ${buttonName} button: ${buttonValue}, currently selected: ${currentlySelected}`);
+                
+                // Check if clicking the same button that was already selected
+                if (currentlySelected === buttonValue) {
+                    console.log(`🎯 APITest: Deselecting ${buttonName}: ${buttonValue}`);
+                    
+                    // Prevent the default radio button behavior by unchecking it
+                    event.preventDefault();
+                    event.stopPropagation();
+                    radioInput.checked = false;
+                    
+                    // Update state and tracking
+                    this.currentState[buttonName] = '';
+                    this.selectedButtons.delete(buttonName);
+                    
+                    console.log(`${buttonName} deselected`);
+                    
+                    // Update URL state
+                    this.urlStateManager.setState({ [buttonName]: '' });
+                    
+                    // Clear dependent selections if needed
+                    if (buttonName === 'season') {
+                        this.clearSelection('league');
+                        this.clearSelection('week');
+                        this.clearSelection('team');
+                        await this.updateWeekOptions();
+                        await this.updateTeamOptions();
+                    } else if (buttonName === 'league') {
+                        this.clearSelection('week');
+                        this.clearSelection('team');
+                        await this.updateWeekOptions();
+                        await this.updateTeamOptions();
+                    }
+                    
+                    // Re-render content
+                    if (this.contentRenderer) {
+                        await this.contentRenderer.renderContent(this.currentState);
+                    }
+                    
+                    return;
+                }
+                
+                // If this is not a deselection, the change event will handle updating the tracking
+            }
+        });
     }
     
     /**
@@ -320,6 +388,7 @@ class APITestApp {
      */
     clearSelection(filterName) {
         this.currentState[filterName] = '';
+        this.selectedButtons.delete(filterName);
         
         const radios = document.querySelectorAll(`input[name="${filterName}"]`);
         radios.forEach(radio => radio.checked = false);
@@ -337,6 +406,8 @@ class APITestApp {
                 const input = document.querySelector(`input[name="${filterName}"][value="${value}"]`);
                 if (input) {
                     input.checked = true;
+                    // Update tracking map for deselection detection
+                    this.selectedButtons.set(filterName, value);
                     console.log(`Selected ${filterName}: ${value}`);
                 } else {
                     console.warn(`Could not find input for ${filterName}: ${value} - will retry after dependent data loads`);

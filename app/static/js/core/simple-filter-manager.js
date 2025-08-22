@@ -18,6 +18,9 @@ class SimpleFilterManager {
             leagues: []
         };
         
+        // Track currently selected buttons for deselection detection
+        this.selectedButtons = new Map(); // Map of filter type to value
+        
         // Listen for state changes from URL manager
         this.urlStateManager.onStateChange((state) => {
             this.handleStateChange(state);
@@ -111,28 +114,44 @@ class SimpleFilterManager {
             }
             
             // Load dependent data based on current state
-            if (state.league && !state.season) {
-                // League selected but no season - load seasons for this league
+            if (state.league) {
+                // League selected - load seasons for this league
                 await this.updateSeasonsForLeague(state.league);
-                await this.populateSeasonButtons();
+                await this.populateSeasonButtons(state);
+                
+                if (state.season) {
+                    // League and season available - load weeks
+                    await this.updateWeeksForLeagueSeason(state.league, state.season);
+                    await this.populateWeekButtons(state);
+                    
+                    if (state.week) {
+                        // League, season, and week available - load teams
+                        await this.updateTeamsForLeagueSeason(state.league, state.season);
+                        await this.populateTeamButtons(state);
+                    }
+                }
             }
-            
-            if (state.league && state.season && !state.week) {
-                // League and season selected but no week - load weeks
-                await this.updateWeeksForLeagueSeason(state.league, state.season);
-                await this.populateWeekButtons();
-            }
-            
-            if (state.league && state.season && !state.team) {
-                // League and season selected but no team - load teams
-                await this.updateTeamsForLeagueSeason(state.league, state.season);
-                await this.populateTeamButtons();
+        } else if (this.mode === 'team') {
+            // Team mode initialization
+            if (state.team) {
+                // Team selected - load seasons for this team
+                await this.updateSeasonsForTeam(state.team);
+                await this.populateSeasonButtons(state);
+                
+                if (state.season) {
+                    // Team and season available - load weeks
+                    await this.updateWeeksForTeamSeason(state.team, state.season);
+                    await this.populateWeekButtons(state);
+                }
             }
         }
         
         // Sync UI to current state
         await this.syncFiltersToState(state);
         this.previousState = { ...state };
+        
+        // Initialize tracking map with current state values
+        this.updateTrackingMap(state);
         
         // Always trigger content rendering for initial state (even if no state changed)
         // This ensures content is rendered when entering with just database parameter
@@ -181,30 +200,70 @@ class SimpleFilterManager {
                     const teamChanged = this.previousState.team !== state.team;
                     const seasonChanged = this.previousState.season !== state.season;
                     
-                    if (teamChanged && state.team) {
-                        // Team changed - update seasons
-                        await this.updateSeasonsForTeam(state.team);
-                        await this.updateSeasonButtonsIfChanged(state);
-                    } else if (seasonChanged && state.team && state.season) {
-                        // Season changed - update weeks
-                        await this.updateWeeksForTeamSeason(state.team, state.season);
-                        await this.updateWeekButtonsIfChanged(state);
+                    if (teamChanged) {
+                        if (state.team) {
+                            // Team changed to a specific value - update seasons
+                            await this.updateSeasonsForTeam(state.team);
+                            await this.updateSeasonButtonsIfChanged(state);
+                        } else {
+                            // Team deselected - reset dependent buttons
+                            console.log('📊 Team deselected, resetting dependent buttons');
+                            await this.populateSeasonButtons(state);
+                            await this.populateWeekButtons(state);
+                        }
+                    } else if (seasonChanged) {
+                        if (state.team && state.season) {
+                            // Season changed to a specific value - update weeks
+                            await this.updateWeeksForTeamSeason(state.team, state.season);
+                            await this.updateWeekButtonsIfChanged(state);
+                        } else if (state.team && !state.season) {
+                            // Season deselected but team still selected - reset weeks for team
+                            console.log('📊 Season deselected, resetting weeks for team');
+                            await this.populateWeekButtons(state);
+                        }
                     }
                 } else {
                     // League mode logic
                     const leagueChanged = this.previousState.league !== state.league;
                     const seasonChanged = this.previousState.season !== state.season;
+                    const weekChanged = this.previousState.week !== state.week;
                     
-                    if (leagueChanged && state.league) {
-                        // League changed - update seasons for this league
-                        await this.updateSeasonsForLeague(state.league);
-                        await this.updateSeasonButtonsIfChanged(state);
-                    } else if (seasonChanged && state.league && state.season) {
-                        // Season changed - update weeks and teams
-                        await this.updateWeeksForLeagueSeason(state.league, state.season);
-                        await this.updateTeamsForLeagueSeason(state.league, state.season);
-                        await this.updateWeekButtonsIfChanged(state);
-                        await this.updateTeamButtonsIfChanged(state);
+                    if (leagueChanged) {
+                        if (state.league) {
+                            // League changed to a specific value - update seasons for this league
+                            await this.updateSeasonsForLeague(state.league);
+                            await this.updateSeasonButtonsIfChanged(state);
+                        } else {
+                            // League deselected - clear and reset dependent buttons
+                            console.log('📊 League deselected, resetting dependent buttons');
+                            await this.populateSeasonButtons(state);
+                            await this.populateWeekButtons(state);
+                            await this.populateTeamButtons(state);
+                        }
+                    } else if (seasonChanged) {
+                        if (state.league && state.season) {
+                            // Season changed to a specific value - update weeks only
+                            await this.updateWeeksForLeagueSeason(state.league, state.season);
+                            await this.updateWeekButtonsIfChanged(state);
+                            // Clear teams since no week is selected yet
+                            await this.populateTeamButtons(state);
+                        } else if (state.league && !state.season) {
+                            // Season deselected but league still selected - reset weeks and teams for league
+                            console.log('📊 Season deselected, resetting dependent buttons for league');
+                            await this.populateWeekButtons(state);
+                            await this.populateTeamButtons(state);
+                        }
+                    } else if (weekChanged) {
+                        if (state.league && state.season && state.week) {
+                            // Week changed to a specific value - load teams
+                            console.log('📊 Week selected, loading teams');
+                            await this.updateTeamsForLeagueSeason(state.league, state.season);
+                            await this.updateTeamButtonsIfChanged(state);
+                        } else {
+                            // Week deselected - clear teams
+                            console.log('📊 Week deselected, clearing teams');
+                            await this.populateTeamButtons(state);
+                        }
                     }
                 }
                 
@@ -212,6 +271,9 @@ class SimpleFilterManager {
                 await this.syncFiltersToState(state);
                 this.previousState = { ...state };
             }
+            
+            // Update tracking map to match current state
+            this.updateTrackingMap(state);
             
             // Dispatch filter change event for content rendering
             this.dispatchFilterChangeEvent(state);
@@ -479,6 +541,7 @@ class SimpleFilterManager {
     
     /**
      * Populate week buttons with available weeks
+     * Only shows weeks if league and season are both selected
      */
     async populateWeekButtons(state) {
         const container = document.getElementById('buttonsWeek');
@@ -487,13 +550,21 @@ class SimpleFilterManager {
             return;
         }
         
+        // Get current state to determine prerequisites
+        const currentState = state || this.urlStateManager.getState();
+        
+        // Only show week buttons if league and season are selected
+        if (!currentState.league || !currentState.season) {
+            container.innerHTML = '<span class="text-muted">Wählen Sie Liga und Saison aus</span>';
+            console.log('📊 SimpleFilterManager: Week buttons hidden - prerequisites not met');
+            return;
+        }
+        
         if (!this.availableData.weeks || this.availableData.weeks.length === 0) {
             container.innerHTML = '<span class="text-muted">Keine Wochen verfügbar</span>';
             return;
         }
         
-        // Get current state to determine which button should be checked
-        const currentState = this.urlStateManager.getState();
         const selectedWeek = currentState.week || '';
         
         // Create week buttons
@@ -573,6 +644,7 @@ class SimpleFilterManager {
     
     /**
      * Populate team buttons with available teams (for league mode)
+     * Only shows teams if league, season, AND week are all selected
      */
     async populateTeamButtons(state) {
         const container = document.getElementById('buttonsTeam');
@@ -581,13 +653,21 @@ class SimpleFilterManager {
             return;
         }
         
+        // Get current state to determine prerequisites
+        const currentState = state || this.urlStateManager.getState();
+        
+        // Only show team buttons if league, season, AND week are selected
+        if (!currentState.league || !currentState.season || !currentState.week) {
+            container.innerHTML = '<span class="text-muted">Wählen Sie Liga, Saison und Woche aus</span>';
+            console.log('📊 SimpleFilterManager: Team buttons hidden - prerequisites not met');
+            return;
+        }
+        
         if (!this.availableData.teams || this.availableData.teams.length === 0) {
             container.innerHTML = '<span class="text-muted">Keine Teams verfügbar</span>';
             return;
         }
         
-        // Get current state to determine which button should be checked
-        const currentState = this.urlStateManager.getState();
         const selectedTeam = currentState.team || '';
         
         // Create team buttons
@@ -646,19 +726,78 @@ class SimpleFilterManager {
             if (target.name === 'league') {
                 const league = target.value;
                 console.log('🏆 League changed:', league);
+                this.selectedButtons.set('league', league);
                 this.updateState({ league, season: '', week: '', team: '' });
             } else if (target.name === 'season') {
                 const season = target.value;
                 console.log('📅 Season changed:', season);
+                this.selectedButtons.set('season', season);
                 this.updateState({ season, week: '' });
             } else if (target.name === 'week') {
                 const week = target.value;
                 console.log('📆 Week changed:', week);
+                this.selectedButtons.set('week', week);
                 this.updateState({ week });
             } else if (target.name === 'team') {
                 const team = target.value;
                 console.log('🏢 Team changed:', team);
+                this.selectedButtons.set('team', team);
                 this.updateState({ team });
+            }
+        });
+        
+        // Add click event listeners for deselection functionality
+        document.addEventListener('click', (event) => {
+            let target = event.target;
+            let radioInput = null;
+            
+            // Check if clicked element is a label for a radio button
+            if (target.tagName === 'LABEL' && target.getAttribute('for')) {
+                radioInput = document.getElementById(target.getAttribute('for'));
+            } else if (target.type === 'radio') {
+                radioInput = target;
+            }
+            
+            // If we found a radio button filter, handle deselection
+            if (radioInput && radioInput.type === 'radio' && ['league', 'season', 'week', 'team'].includes(radioInput.name)) {
+                const buttonName = radioInput.name;
+                const buttonValue = radioInput.value;
+                const currentlySelected = this.selectedButtons.get(buttonName);
+                
+                console.log(`🔍 Click detected on ${buttonName} button: ${buttonValue}, currently selected: ${currentlySelected}, button checked: ${radioInput.checked}`);
+                
+                // Check if clicking the same button that was already selected (before the click changes its state)
+                if (currentlySelected === buttonValue) {
+                    console.log(`🎯 Deselecting ${buttonName}: ${buttonValue}`);
+                    
+                    // Prevent the default behavior and uncheck
+                    event.preventDefault();
+                    event.stopPropagation();
+                    radioInput.checked = false;
+                    
+                    // Update our tracking map
+                    this.selectedButtons.delete(buttonName);
+                    
+                    // Trigger the appropriate state update for deselection
+                    if (buttonName === 'league') {
+                        console.log('🏆 League deselected');
+                        this.updateState({ league: '', season: '', week: '', team: '' });
+                    } else if (buttonName === 'season') {
+                        console.log('📅 Season deselected');
+                        this.updateState({ season: '', week: '', team: '' });
+                    } else if (buttonName === 'week') {
+                        console.log('📆 Week deselected');
+                        this.updateState({ week: '', team: '' });
+                    } else if (buttonName === 'team') {
+                        console.log('🏢 Team deselected');
+                        this.updateState({ team: '' });
+                    }
+                    
+                    // Don't update tracking for selection since we're deselecting
+                    return;
+                }
+                
+                // If this is not a deselection, the change event will handle updating the tracking
             }
         });
         
@@ -674,7 +813,7 @@ class SimpleFilterManager {
             }
         }
         
-        console.log('✅ SimpleFilterManager: Button event listeners set up');
+        console.log('✅ SimpleFilterManager: Button event listeners set up with deselection support');
     }
     
     /**
@@ -684,6 +823,22 @@ class SimpleFilterManager {
         const currentState = this.urlStateManager.getState();
         const updatedState = { ...currentState, ...newState };
         this.urlStateManager.setState(updatedState);
+        
+        // Update the tracking map to match the new state
+        this.updateTrackingMap(updatedState);
+    }
+    
+    /**
+     * Update the tracking map to match the current state
+     */
+    updateTrackingMap(state) {
+        // Clear tracking map and repopulate with current selections
+        this.selectedButtons.clear();
+        
+        if (state.league) this.selectedButtons.set('league', state.league);
+        if (state.season) this.selectedButtons.set('season', state.season);
+        if (state.week) this.selectedButtons.set('week', state.week);
+        if (state.team) this.selectedButtons.set('team', state.team);
     }
     
     /**

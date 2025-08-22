@@ -12,6 +12,9 @@ class TeamStatsApp {
         this.contentRenderer = null;
         this.isInitialized = false;
         this.initializationPromise = null;
+        
+        // Track currently selected buttons for deselection detection
+        this.selectedButtons = new Map(); // Map of filter type to value
     }
     
     async initialize() {
@@ -67,6 +70,9 @@ class TeamStatsApp {
                 const initialState = this.urlStateManager.getState();
                 console.log('🚀 Processing initial state:', initialState);
                 
+                // Initialize tracking map with URL parameters
+                this.updateTrackingMap(initialState);
+                
                 if (Object.values(initialState).some(value => value && value !== '' && value !== 'main')) {
                     console.log('📊 Initial state from URL found, rendering content');
                     this.contentRenderer.renderContent(initialState);
@@ -118,6 +124,7 @@ class TeamStatsApp {
             if (event.target.name === 'season') {
                 const season = event.target.value;
                 console.log('📅 Season changed:', season);
+                this.selectedButtons.set('season', season);
                 
                 this.setState({
                     season: season,
@@ -131,10 +138,59 @@ class TeamStatsApp {
             if (event.target.name === 'week') {
                 const week = event.target.value;
                 console.log('📆 Week changed:', week);
+                this.selectedButtons.set('week', week);
                 
                 this.setState({
                     week: week
                 });
+            }
+        });
+        
+        // Add click event listeners for deselection functionality
+        document.addEventListener('click', (event) => {
+            let target = event.target;
+            let radioInput = null;
+            
+            // Check if clicked element is a label for a radio button
+            if (target.tagName === 'LABEL' && target.getAttribute('for')) {
+                radioInput = document.getElementById(target.getAttribute('for'));
+            } else if (target.type === 'radio') {
+                radioInput = target;
+            }
+            
+            // Check if clicked element is a radio button filter
+            if (radioInput && radioInput.type === 'radio' && ['season', 'week'].includes(radioInput.name)) {
+                const buttonName = radioInput.name;
+                const buttonValue = radioInput.value;
+                const currentlySelected = this.selectedButtons.get(buttonName);
+                
+                console.log(`🔍 TeamStats: Click detected on ${buttonName} button: ${buttonValue}, currently selected: ${currentlySelected}`);
+                
+                // Check if clicking the same button that was already selected
+                if (currentlySelected === buttonValue) {
+                    console.log(`🎯 TeamStats: Deselecting ${buttonName}: ${buttonValue}`);
+                    
+                    // Prevent the default radio button behavior by unchecking it
+                    event.preventDefault();
+                    event.stopPropagation();
+                    radioInput.checked = false;
+                    
+                    // Update our tracking map
+                    this.selectedButtons.delete(buttonName);
+                    
+                    // Trigger the appropriate state update for deselection
+                    if (buttonName === 'season') {
+                        console.log('📅 Season deselected');
+                        this.setState({ season: '', week: '' });
+                    } else if (buttonName === 'week') {
+                        console.log('📆 Week deselected');
+                        this.setState({ week: '' });
+                    }
+                    
+                    return;
+                }
+                
+                // If this is not a deselection, the change event will handle updating the tracking
             }
         });
         
@@ -156,6 +212,9 @@ class TeamStatsApp {
             console.log('📊 Current state after update:', currentState);
             
             if (this.contentRenderer) {
+                // Update tracking map to match new state
+                this.updateTrackingMap(currentState);
+                
                 // Force a re-render by clearing the last rendered state
                 this.contentRenderer.lastRenderedState = {};
                 this.contentRenderer.renderContent(currentState);
@@ -165,6 +224,17 @@ class TeamStatsApp {
     
     getState() {
         return this.urlStateManager ? this.urlStateManager.getState() : {};
+    }
+    
+    /**
+     * Update the tracking map to match the current state
+     */
+    updateTrackingMap(state) {
+        // Clear tracking map and repopulate with current selections
+        this.selectedButtons.clear();
+        
+        if (state.season) this.selectedButtons.set('season', state.season);
+        if (state.week) this.selectedButtons.set('week', state.week);
     }
     
     clearAllFilters() {

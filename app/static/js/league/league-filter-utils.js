@@ -88,7 +88,14 @@ function updateLeagueButtons() {
  * Update week buttons
  */
 function updateWeekButtons() {
-    if (!currentState.season || !currentState.league) return;
+    if (!currentState.season || !currentState.league) {
+        // Clear week buttons if prerequisites not met
+        const container = document.getElementById('buttonsWeek');
+        if (container) {
+            container.innerHTML = '<span class="text-muted">Wählen Sie Liga und Saison aus</span>';
+        }
+        return;
+    }
     
     fetchWithDatabase(`/league/get_available_weeks?season=${currentState.season}&league=${currentState.league}`)
         .then(response => response.json())
@@ -125,7 +132,14 @@ function updateWeekButtons() {
  * Update team buttons
  */
 function updateTeamButtons() {
-    if (!currentState.season || !currentState.league) return;
+    if (!currentState.season || !currentState.league || !currentState.week) {
+        // Clear team buttons if prerequisites not met
+        const container = document.getElementById('buttonsTeam');
+        if (container) {
+            container.innerHTML = '<span class="text-muted">Wählen Sie Liga, Saison und Woche aus</span>';
+        }
+        return;
+    }
     
     fetchWithDatabase(`/league/get_available_teams?season=${currentState.season}&league=${currentState.league}`)
         .then(response => response.json())
