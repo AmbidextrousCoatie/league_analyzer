@@ -662,6 +662,27 @@ def get_season_timetable():
         print(f"Error in get_season_timetable: {str(e)}")
         return jsonify({'error': str(e)}), 500
 
+@bp.route('/league/get_team_analysis')
+def get_team_analysis():
+    """Get detailed team analysis including individual player performance and win percentages"""
+    try:
+        league = request.args.get('league')
+        season = request.args.get('season')
+        team = request.args.get('team')
+        
+        if not all([league, season, team]):
+            return jsonify({'error': 'Missing required parameters: league, season, team'}), 400
+        
+        print(f"Team Analysis - Received request with: league={league}, season={season}, team={team}")
+        
+        league_service = get_league_service()
+        analysis_data = league_service.get_team_analysis(league=league, season=season, team=team)
+        return jsonify(analysis_data)
+        
+    except Exception as e:
+        print(f"Error in get_team_analysis: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
 @bp.route('/league/get_individual_averages')
 def get_individual_averages():
     """Get individual player averages for a season, optionally filtered by week and/or team"""

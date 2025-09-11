@@ -38,12 +38,13 @@ class LeagueSeasonOverviewBlock extends BaseContentBlock {
     }
 
     shouldRender(state) {
-        // Show only when league and season are selected but no week (handle string "null")
+        // Show only when league and season are selected but no week AND no team (handle string "null")
         const hasLeague = state.league && state.league !== '' && state.league !== 'null';
         const hasSeason = state.season && state.season !== '' && state.season !== 'null';
         const hasWeek = state.week && state.week !== '' && state.week !== 'null';
-        const shouldShow = hasLeague && hasSeason && !hasWeek;
-        console.log(`LeagueSeasonOverviewBlock shouldRender: league="${state.league}", season="${state.season}", week="${state.week}", result=${shouldShow}`);
+        const hasTeam = state.team && state.team !== '' && state.team !== 'null';
+        const shouldShow = hasLeague && hasSeason && !hasWeek && !hasTeam;
+        console.log(`LeagueSeasonOverviewBlock shouldRender: league="${state.league}", season="${state.season}", week="${state.week}", team="${state.team}", result=${shouldShow}`);
         return shouldShow;
     }
 

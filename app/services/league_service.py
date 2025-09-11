@@ -1297,7 +1297,7 @@ class LeagueService:
                 team_individual_data = individual_data[individual_data[Columns.team_name] == team]
                 
                 # Get team bonus data for this team (for team points only)
-                team_bonus_team_data = team_bonus_data[team_bonus_data[Columns.team_name] == team]
+                team_bonus_team_data = team_bonus_data[team_bonus_team_data[Columns.team_name] == team]
                 
                 # Calculate season totals (accumulated up to selected week)
                 if not team_individual_data.empty:
@@ -1999,11 +1999,7 @@ class LeagueService:
     def get_league_averages_history(self, league: str, debug: bool = False) -> Dict[str, Any]:
         """Get league average scores across all seasons"""
         try:
-            if debug:
-                print(f"DEBUG: get_league_averages_history called for league: {league}")
             seasons = self.get_seasons()
-            if debug:
-                print(f"DEBUG: Available seasons: {seasons}")
             
             # Get league averages for each season
             season_averages = {}
@@ -2011,16 +2007,10 @@ class LeagueService:
             
             for season in seasons:
                 try:
-                    if debug:
-                        print(f"DEBUG: Processing season {season} for averages")
                     # Use existing team averages method and calculate league average
                     team_averages = self.get_team_averages_simple(league, season)
-                    if debug:
-                        print(f"DEBUG: Team averages for {season}: has_data={team_averages and 'data' in team_averages}")
                     
                     if team_averages and 'data' in team_averages:
-                        if debug:
-                            print(f"DEBUG: Team averages data keys: {list(team_averages['data'].keys())}")
                         # Calculate overall league average for the season
                         all_averages = []
                         for team_name, team_data in team_averages['data'].items():
@@ -2028,29 +2018,15 @@ class LeagueService:
                                 # Get final average (last value in the series)
                                 final_avg = team_data[-1] if team_data[-1] is not None else 0
                                 all_averages.append(final_avg)
-                                if debug:
-                                    print(f"DEBUG: Team {team_name} final average: {final_avg}")
                         
                         if all_averages:
                             league_avg = sum(all_averages) / len(all_averages)
                             season_averages[season] = league_avg
                             valid_seasons.append(season)
-                            if debug:
-                                print(f"DEBUG: League average for {season}: {league_avg}")
-                        else:
-                            if debug:
-                                print(f"DEBUG: No valid averages found for {season}")
                             
                 except Exception as e:
                     print(f"ERROR calculating average for {league} {season}: {e}")
-                    if debug:
-                        import traceback
-                        print(f"TRACEBACK: {traceback.format_exc()}")
                     continue
-            
-            if debug:
-                print(f"DEBUG: Final season_averages: {season_averages}")
-                print(f"DEBUG: Valid seasons: {valid_seasons}")
             
             # Prepare data for line chart
             result = {
@@ -2060,33 +2036,22 @@ class LeagueService:
                 'title': f'{league} - Average Scores by Season',
                 'y_axis_title': 'Average Score'
             }
-            if debug:
-                print(f"DEBUG: Returning league averages result: {result}")
             return result
             
         except Exception as e:
             print(f"ERROR in get_league_averages_history: {e}")
-            if debug:
-                import traceback
-                print(f"TRACEBACK: {traceback.format_exc()}")
             return {'data': {}, 'seasons': [], 'labels': []}
 
     def get_points_to_win_history(self, league: str, debug: bool = False) -> Dict[str, Any]:
         """Get total league points earned by the winning team across seasons"""
         try:
-            if debug:
-                print(f"DEBUG: get_points_to_win_history called for league: {league}")
             seasons = self.get_seasons()
-            if debug:
-                print(f"DEBUG: Available seasons: {seasons}")
             
             season_points = {}
             valid_seasons = []
             
             for season in seasons:
                 try:
-                    if debug:
-                        print(f"DEBUG: Processing season {season} for winning team total league points")
                     
                     # Filter data for league + season
                     filters = {
@@ -2095,14 +2060,10 @@ class LeagueService:
                     }
                     
                     season_data = self.adapter.get_filtered_data(filters=filters)
-                    if debug:
-                        print(f"DEBUG: Found {len(season_data)} total records for {league} {season}")
                     
                     if not season_data.empty:
                         # Group by team_name and sum Columns.points
                         team_totals = season_data.groupby(Columns.team_name)[Columns.points].sum().reset_index()
-                        if debug:
-                            print(f"DEBUG: Team totals: {team_totals.to_dict('records')}")
                         
                         if not team_totals.empty:
                             # Sort by sum of points (descending) and take top entry
@@ -2110,28 +2071,12 @@ class LeagueService:
                             winning_team_points = team_totals.iloc[0][Columns.points]
                             winning_team_name = team_totals.iloc[0][Columns.team_name]
                             
-                            if debug:
-                                print(f"DEBUG: Winning team: {winning_team_name} with {winning_team_points} total points")
-                            
                             season_points[season] = winning_team_points
                             valid_seasons.append(season)
-                        else:
-                            if debug:
-                                print(f"DEBUG: No team totals found for {league} {season}")
-                    else:
-                        if debug:
-                            print(f"DEBUG: No data found for {league} {season}")
                                 
                 except Exception as e:
                     print(f"ERROR getting winning team league points for {league} {season}: {e}")
-                    if debug:
-                        import traceback
-                        print(f"TRACEBACK: {traceback.format_exc()}")
                     continue
-            
-            if debug:
-                print(f"DEBUG: Final season_points: {season_points}")
-                print(f"DEBUG: Valid seasons: {valid_seasons}")
             
             result = {
                 'data': {'League Points to Win': [season_points.get(season, 0) for season in valid_seasons]},
@@ -2140,15 +2085,10 @@ class LeagueService:
                 'title': f'{league} - League Points Needed to Win by Season',
                 'y_axis_title': 'Total League Points'
             }
-            if debug:
-                print(f"DEBUG: Returning points to win result: {result}")
             return result
             
         except Exception as e:
             print(f"ERROR in get_points_to_win_history: {e}")
-            if debug:
-                import traceback
-                print(f"TRACEBACK: {traceback.format_exc()}")
             return {'data': {}, 'seasons': [], 'labels': []}
 
     def get_top_team_performances(self, league: str) -> TableData:
@@ -2632,6 +2572,303 @@ class LeagueService:
             print(f"Error in get_record_team_games: {e}")
             return TableData(columns=[], data=[], title="Error loading team record games")
 
+    def _convert_to_simple_types(self, data):
+        """Convert numpy types to simple Python types for JSON serialization"""
+        if isinstance(data, dict):
+            return {key: self._convert_to_simple_types(value) for key, value in data.items()}
+        elif isinstance(data, list):
+            return [self._convert_to_simple_types(item) for item in data]
+        elif hasattr(data, 'item'):  # numpy scalar
+            return data.item()
+        elif isinstance(data, (int, float, str, bool)) or data is None:
+            return data
+        else:
+            return str(data)
+
+    def get_team_analysis(self, league: str, season: str, team: str) -> Dict[str, Any]:
+        """Get detailed team analysis including individual player performance and win percentages"""
+        try:
+            # Get all player data for the team in the specified season and league
+            # EXCLUDE team totals - only get individual player records
+            player_filters = {
+                Columns.league_name: {'value': league, 'operator': 'eq'},
+                Columns.season: {'value': season, 'operator': 'eq'},
+                Columns.team_name: {'value': team, 'operator': 'eq'},
+                Columns.computed_data: {'value': False, 'operator': 'eq'}  # Individual players only
+            }
+            
+            player_data = self.adapter.get_filtered_data(filters=player_filters)
+            
+            if not player_data.empty:
+                # Filter out team totals - only keep individual player records
+                # Team totals typically have "Team Total" or similar in the Player column
+                player_data = player_data[player_data[Columns.player_name] != 'Team Total']
+                player_data = player_data[player_data[Columns.player_name] != 'team_total']
+                player_data = player_data[player_data[Columns.player_name] != 'TEAM TOTAL']
+                
+                # Also filter out any records where Player ID is NaN (these are usually team totals)
+                player_data = player_data.dropna(subset=[Columns.player_id])
+            
+            if player_data.empty:
+                return {
+                    'error': f'No individual player data found for team {team} in {league} {season}',
+                    'performance_data': [],
+                    'win_percentage_data': [],
+                    'weeks': [],
+                    'players': []
+                }
+            
+            # Get unique weeks and players
+            weeks = sorted(player_data[Columns.week].unique())
+            players = sorted(player_data[Columns.player_name].unique())
+            
+            # Get individual player matches for PvP win calculation
+            individual_matches = self.get_individual_matches(team=team, season=season, league=league)
+            
+            # Get team matches for team win percentage
+            team_matches = self.adapter.get_matches(team=team, season=season, league=league)
+            
+            # Create SeriesData objects for charts
+            performance_series = SeriesData(
+                label_x_axis="Spieltag",
+                label_y_axis="Durchschnittliche Punkte",
+                name=f"Leistung {team}",
+                query_params={'league': league, 'season': season, 'team': team}
+            )
+            
+            win_percentage_series = SeriesData(
+                label_x_axis="Spieltag", 
+                label_y_axis="Siegquote (%)",
+                name=f"Siegquote {team}",
+                query_params={'league': league, 'season': season, 'team': team}
+            )
+            
+            # Add individual player data to performance series
+            for player in players:
+                player_week_scores = []
+                player_total_score = 0
+                player_total_games = 0
+                
+                for week in weeks:
+                    week_data = player_data[
+                        (player_data[Columns.player_name] == player) & 
+                        (player_data[Columns.week] == week)
+                    ]
+                    
+                    if not week_data.empty:
+                        # Calculate average score per game for this player in this week
+                        week_total_score = float(week_data[Columns.score].sum())
+                        week_games = len(week_data)
+                        week_avg_score = round(week_total_score / week_games, 2) if week_games > 0 else 0
+                        player_week_scores.append(week_avg_score)
+                        
+                        # Accumulate totals for correct calculation
+                        player_total_score += week_total_score
+                        player_total_games += week_games
+                        
+                    else:
+                        player_week_scores.append(None)  # Use None for missing data
+                
+                # Add data to series
+                performance_series.add_data(player, player_week_scores)
+                
+                # Override the incorrect totals with correct ones
+                performance_series.total[player] = round(player_total_score, 2)
+                performance_series.average[player] = round(player_total_score / player_total_games, 2) if player_total_games > 0 else 0
+                
+                # Store count of valid data points for frontend use
+                performance_series.counts[player] = player_total_games
+                
+            
+            # Add team average to performance series
+            team_week_scores = []
+            team_total_score = 0
+            team_total_games = 0
+            
+            for week in weeks:
+                week_data = player_data[player_data[Columns.week] == week]
+                if not week_data.empty:
+                    # Calculate team average per person per game for this week
+                    week_total_score = float(week_data[Columns.score].sum())
+                    week_games = len(week_data)
+                    week_avg_score = round(week_total_score / week_games, 2) if week_games > 0 else 0
+                    team_week_scores.append(week_avg_score)
+                    
+                    # Accumulate totals for correct calculation
+                    team_total_score += week_total_score
+                    team_total_games += week_games
+                else:
+                    team_week_scores.append(None)  # Use None for missing data
+            
+            # Add data to series
+            performance_series.add_data(f"{team} (Team Average)", team_week_scores)
+            
+            # Override the incorrect totals with correct ones
+            performance_series.total[f"{team} (Team Average)"] = round(team_total_score, 2)
+            performance_series.average[f"{team} (Team Average)"] = round(team_total_score / team_total_games, 2) if team_total_games > 0 else 0
+            
+            # Store count of valid data points for frontend use
+            performance_series.counts[f"{team} (Team Average)"] = team_total_games
+            
+            # Add individual player win percentage data
+            for player in players:
+                player_week_wins = []
+                player_total_wins = 0
+                player_total_matches = 0
+                
+                for week in weeks:
+                    if not individual_matches.empty:
+                        # Get individual matches for this player in this week
+                        week_matches = individual_matches[
+                            (individual_matches['player_name'] == player) & 
+                            (individual_matches['week'] == week)
+                        ]
+                        
+                        if not week_matches.empty:
+                            # Count PvP wins for this player in this week
+                            week_wins = int(week_matches['is_win'].sum())
+                            week_matches_count = len(week_matches)
+                            week_win_pct = round((week_wins / week_matches_count) * 100, 1) if week_matches_count > 0 else 0
+                            player_week_wins.append(week_win_pct)
+                            
+                            # Accumulate totals for correct calculation
+                            player_total_wins += week_wins
+                            player_total_matches += week_matches_count
+                        else:
+                            player_week_wins.append(None)  # Use None for missing data
+                    else:
+                        player_week_wins.append(None)  # Use None for missing data
+                
+                # Add data to series
+                win_percentage_series.add_data(player, player_week_wins)
+                
+                # Override the incorrect totals with correct ones
+                win_percentage_series.total[player] = player_total_wins
+                win_percentage_series.average[player] = round((player_total_wins / player_total_matches) * 100, 1) if player_total_matches > 0 else 0
+                
+                # Store count of valid data points for frontend use
+                win_percentage_series.counts[player] = player_total_matches
+            
+            # Add team win percentage
+            team_week_wins = []
+            team_total_wins = 0
+            team_total_matches = 0
+            
+            for week in weeks:
+                week_matches = team_matches[team_matches[Columns.week] == week]
+                week_wins = 0
+                week_matches_count = 0
+                
+                for _, match in week_matches.iterrows():
+                    team_score = match[Columns.score]
+                    opponent_score = match['opponent_score']
+                    
+                    if team_score > opponent_score:
+                        week_wins += 1
+                    week_matches_count += 1
+                
+                if week_matches_count > 0:
+                    week_win_pct = round((week_wins / week_matches_count) * 100, 1)
+                    team_week_wins.append(week_win_pct)
+                else:
+                    team_week_wins.append(None)  # Use None for missing data
+                
+                # Accumulate totals for correct calculation
+                team_total_wins += week_wins
+                team_total_matches += week_matches_count
+            
+            # Add data to series
+            win_percentage_series.add_data(f"{team} (Team)", team_week_wins)
+            
+            # Override the incorrect totals with correct ones
+            win_percentage_series.total[f"{team} (Team)"] = team_total_wins
+            win_percentage_series.average[f"{team} (Team)"] = round((team_total_wins / team_total_matches) * 100, 1) if team_total_matches > 0 else 0
+            
+            # Store count of valid data points for frontend use
+            win_percentage_series.counts[f"{team} (Team)"] = team_total_matches
+            
+            # Return data using existing SeriesData interface
+            return {
+                'performance_data': performance_series.to_dict(),
+                'win_percentage_data': win_percentage_series.to_dict(),
+                'weeks': [f'Week {int(w)}' for w in weeks],
+                'players': [str(p) for p in players],
+                'team': str(team),
+                'league': str(league),
+                'season': str(season)
+            }
+            
+        except Exception as e:
+            print(f"Error in get_team_analysis: {e}")
+            return {
+                'error': f'Error analyzing team data: {str(e)}',
+                'performance_data': [],
+                'win_percentage_data': [],
+                'weeks': [],
+                'players': []
+            }
+
     def get_record_games(self, league: str) -> TableData:
         """Legacy method - returns individual records for backward compatibility"""
         return self.get_record_individual_games(league)
+
+    def get_individual_matches(self, team: str, season: str, league: str) -> pd.DataFrame:
+        """Get individual player matches with opponent scores for PvP win calculation"""
+        try:
+            # Get ALL individual player data for the league/season (not just our team)
+            # We need this to find opponent matches
+            all_player_filters = {
+                Columns.league_name: {'value': league, 'operator': 'eq'},
+                Columns.season: {'value': season, 'operator': 'eq'},
+                Columns.computed_data: {'value': False, 'operator': 'eq'}  # Individual players only
+            }
+            
+            all_player_data = self.adapter.get_filtered_data(filters=all_player_filters)
+            
+            if all_player_data.empty:
+                return pd.DataFrame()
+            
+            # Filter to just our team's players
+            our_team_data = all_player_data[all_player_data[Columns.team_name] == team]
+            
+            if our_team_data.empty:
+                return pd.DataFrame()
+            
+            # For each player match, we need to find the opponent's score
+            result_data = []
+            
+            for _, player_match in our_team_data.iterrows():
+                week = player_match[Columns.week]
+                round_num = player_match[Columns.round_number]
+                opponent_team = player_match[Columns.team_name_opponent]
+                player_name = player_match[Columns.player_name]
+                player_score = player_match[Columns.score]
+                
+                # Find the opponent's score for the same match
+                # Look in ALL player data for opponent team players in same week/round
+                opponent_match = all_player_data[
+                    (all_player_data[Columns.week] == week) &
+                    (all_player_data[Columns.round_number] == round_num) &
+                    (all_player_data[Columns.team_name] == opponent_team) &  # Their team is the opponent
+                    (all_player_data[Columns.team_name_opponent] == team)  # They're playing against us
+                ]
+                
+                if not opponent_match.empty:
+                    # Find the opponent player with the same position or similar role
+                    # For simplicity, we'll take the first opponent player
+                    opponent_score = opponent_match[Columns.score].iloc[0]
+                    
+                    result_data.append({
+                        'week': week,
+                        'round_number': round_num,
+                        'player_name': player_name,
+                        'player_score': player_score,
+                        'opponent_team': opponent_team,
+                        'opponent_score': opponent_score,
+                        'is_win': player_score > opponent_score
+                    })
+            
+            return pd.DataFrame(result_data)
+            
+        except Exception as e:
+            return pd.DataFrame()

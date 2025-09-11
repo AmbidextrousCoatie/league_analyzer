@@ -98,6 +98,28 @@
             <p class="text-muted mt-2">Initializing team details...</p>
         </div>
     </div>
+
+    <!-- Team Performance Analysis Block (League + Season + Team) -->
+    <div id="team-performance">
+        <!-- Team performance analysis content will be rendered here -->
+        <div class="text-center py-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading team performance analysis...</span>
+            </div>
+            <p class="text-muted mt-2">Initializing team performance analysis...</p>
+        </div>
+    </div>
+
+    <!-- Team Win Percentage Analysis Block (League + Season + Team) -->
+    <div id="team-win-percentage">
+        <!-- Team win percentage analysis content will be rendered here -->
+        <div class="text-center py-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading team win percentage analysis...</span>
+            </div>
+            <p class="text-muted mt-2">Initializing team win percentage analysis...</p>
+        </div>
+    </div>
 </div>
 
 {% endblock %}
@@ -114,6 +136,8 @@
 <script src="{{ static_url('js/content-blocks/season-overview-block.js') }}"></script>
 <script src="{{ static_url('js/content-blocks/matchday-block.js') }}"></script>
 <script src="{{ static_url('js/content-blocks/team-details-block.js') }}"></script>
+<script src="{{ static_url('js/content-blocks/team-performance-block.js') }}"></script>
+<script src="{{ static_url('js/content-blocks/team-win-percentage-block.js') }}"></script>
 
 <!-- Main application -->
 <script src="{{ static_url('js/league-stats-app.js') }}"></script>

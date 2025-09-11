@@ -10,10 +10,11 @@ class SeriesData:
     name: str
     length: int = 0
     query_params: Dict[str, Any] = field(default_factory=dict)  # Store query parameters like season, league, etc.
-    data: Dict[str, List[float]] = field(default_factory=dict)
-    data_accumulated: Dict[str, List[float]] = field(default_factory=dict)
+    data: Dict[str, List[Union[float, None]]] = field(default_factory=dict)
+    data_accumulated: Dict[str, List[Union[float, None]]] = field(default_factory=dict)
     total: Dict[str, float] = field(default_factory=dict)
     average: Dict[str, float] = field(default_factory=dict)
+    counts: Dict[str, int] = field(default_factory=dict)  # Store generic counts for each key
     
     def to_dict(self) -> Dict[str, Any]:    
         """Convert to a dictionary suitable for JSON serialization"""
@@ -31,6 +32,7 @@ class SeriesData:
             "data_accumulated": self.data_accumulated,
             "total": self.total,
             "average": self.average,
+            "counts": self.counts,
             "length": self.length,
             "sorted_by_alphabet": sorted_by_alphabet,
             "sorted_by_total": sorted_by_total,
@@ -38,19 +40,28 @@ class SeriesData:
 
         }
     
-    def add_data(self, key: str, data: List[float]):
+    def add_data(self, key: str, data: List[Union[float, None]]):
         """Add data to the series."""
         # add / replace data
         self.data[key] = data
 
-        # add / replace data_cumulated
-        self.data_accumulated[key] = list(accumulate(data))
+        # Filter out None values for calculations
+        valid_data = [x for x in data if x is not None]
+        
+        # add / replace data_cumulated (only for valid data)
+        if valid_data:
+            self.data_accumulated[key] = list(accumulate(valid_data))
+        else:
+            self.data_accumulated[key] = []
 
-        # add average
-        self.average[key] = sum(data) / len(data) if data else 0
+        # add average (only for valid data)
+        self.average[key] = sum(valid_data) / len(valid_data) if valid_data else 0
 
-        # add total
-        self.total[key] = sum(data)
+        # add total (only for valid data)
+        self.total[key] = sum(valid_data)
+
+        # Store count of valid (non-None) data points
+        self.counts[key] = len(valid_data)
 
         self.length = len(data)
     
