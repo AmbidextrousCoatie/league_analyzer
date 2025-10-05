@@ -1262,6 +1262,10 @@ class LeagueService:
             
             team_bonus_data = self.adapter.get_filtered_data(filters=team_filters)
             
+            # Ensure team_bonus_data is a DataFrame
+            if team_bonus_data is None:
+                team_bonus_data = pd.DataFrame()
+            
             # Use individual data for the main league data (scores and averages)
             league_data = individual_data
             
@@ -1293,11 +1297,17 @@ class LeagueService:
                     'season_avg': 0
                 }
                 
+                # Initialize variables to avoid "referenced before assignment" errors
+                team_bonus_team_data = pd.DataFrame()
+                
                 # Get individual player data for this team (for scores and averages)
                 team_individual_data = individual_data[individual_data[Columns.team_name] == team]
                 
                 # Get team bonus data for this team (for team points only)
-                team_bonus_team_data = team_bonus_data[team_bonus_team_data[Columns.team_name] == team]
+                if Columns.team_name in team_bonus_data.columns:
+                    team_bonus_team_data = team_bonus_data[team_bonus_data[Columns.team_name] == team]
+                else:
+                    team_bonus_team_data = pd.DataFrame()
                 
                 # Calculate season totals (accumulated up to selected week)
                 if not team_individual_data.empty:
