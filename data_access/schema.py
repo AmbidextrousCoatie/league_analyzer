@@ -20,6 +20,12 @@ class Columns:
     points: str = 'Points'
     input_data: str = 'Input Data'
     computed_data: str = 'Computed Data'
+    
+    # New tournament-specific fields
+    event_type: str = 'Event Type'  # 'league' or 'tournament'
+    event_name: str = 'Event Name'  # Generic event name (league or tournament)
+    game_number: str = 'Game Number'  # Game within series (reuses round_number concept)
+    handicap: str = 'Handicap'  # Per-game handicap for tournaments
 
     def __str__(self):
         return str(self.get_column_names())
@@ -28,7 +34,8 @@ class Columns:
         if selection is None:
             return [self.season, self.week, self.date, self.league_name, self.players_per_team, self.location, self.round_number, 
                     self.match_number, self.team_name, self.position, self.player_name, self.player_id, self.team_name_opponent,
-                    self.score, self.points, self.input_data, self.computed_data]
+                    self.score, self.points, self.input_data, self.computed_data, self.event_type, self.event_name, 
+                    self.game_number, self.handicap]
         
 @dataclass
 class ColumnsExtra:

@@ -73,6 +73,8 @@ class LeagueStatsApp {
             const teamPerformanceBlock = new TeamPerformanceBlock();
             console.log('🔄 Creating TeamWinPercentageBlock...');
             const teamWinPercentageBlock = new TeamWinPercentageBlock();
+            console.log('🔄 Creating TeamVsTeamComparisonBlock...');
+            const teamVsTeamComparisonBlock = new TeamVsTeamComparisonBlock();
             
             // Store blocks (no filter-controls block needed anymore)
             this.contentBlocks.set('league-aggregation', leagueAggregationBlock);
@@ -82,6 +84,7 @@ class LeagueStatsApp {
             this.contentBlocks.set('team-details', teamDetailsBlock);
             this.contentBlocks.set('team-performance', teamPerformanceBlock);
             this.contentBlocks.set('team-win-percentage', teamWinPercentageBlock);
+            this.contentBlocks.set('team-vs-team-comparison', teamVsTeamComparisonBlock);
             
             console.log('✅ Content blocks initialized');
         } catch (error) {

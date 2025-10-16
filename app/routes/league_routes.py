@@ -8,6 +8,7 @@ import traceback
 import sys
 from app.services.data_dict import DataDict
 from app.config.debug_config import debug_config
+from app.models.table_data import TableData, ColumnGroup, Column
 
 bp = Blueprint('league', __name__)
 
@@ -715,4 +716,33 @@ def get_individual_averages():
         
     except Exception as e:
         print(f"Error in get_individual_averages: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
+@bp.route('/league/get_team_vs_team_comparison')
+def get_team_vs_team_comparison():
+    """Get team vs team comparison matrix with heat map data"""
+    try:
+        league = request.args.get('league')
+        season = request.args.get('season')
+        week = request.args.get('week')
+        
+        if not league or not season:
+            return jsonify({'error': 'League and season are required'}), 400
+        
+        # Convert week to int if provided
+        week_int = None
+        if week:
+            try:
+                week_int = int(week)
+            except ValueError:
+                return jsonify({'error': 'Invalid week parameter'}), 400
+        
+        # Get league service and fetch real data
+        league_service = get_league_service()
+        table_data = league_service.get_team_vs_team_comparison_table(league, season, week_int)
+        
+        return jsonify(table_data.to_dict())
+        
+    except Exception as e:
+        print(f"Error in get_team_vs_team_comparison: {str(e)}")
         return jsonify({'error': str(e)}), 500

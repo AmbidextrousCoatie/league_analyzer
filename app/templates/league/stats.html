@@ -120,6 +120,17 @@
             <p class="text-muted mt-2">Initializing team win percentage analysis...</p>
         </div>
     </div>
+
+    <!-- Team vs Team Comparison Block (League + Season + optional Week) -->
+    <div id="team-vs-team-comparison">
+        <!-- Team vs team comparison content will be rendered here -->
+        <div class="text-center py-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading team vs team comparison...</span>
+            </div>
+            <p class="text-muted mt-2">Initializing team vs team comparison...</p>
+        </div>
+    </div>
 </div>
 
 {% endblock %}
@@ -138,6 +149,7 @@
 <script src="{{ static_url('js/content-blocks/team-details-block.js') }}"></script>
 <script src="{{ static_url('js/content-blocks/team-performance-block.js') }}"></script>
 <script src="{{ static_url('js/content-blocks/team-win-percentage-block.js') }}"></script>
+<script src="{{ static_url('js/content-blocks/team-vs-team-comparison-block.js') }}"></script>
 
 <!-- Main application -->
 <script src="{{ static_url('js/league-stats-app.js') }}"></script>
