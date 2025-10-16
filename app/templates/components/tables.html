@@ -479,9 +479,9 @@ function getHeatMapColor(value, minVal, maxVal) {
         };
     }
     
-    // Define min and max colors
-    const minColor = hexToRgb('#a9e9f9'); // Light blue
-    const maxColor = hexToRgb('#06313c'); // Dark blue-green
+            // Define min and max colors
+            const minColor = hexToRgb('#d9596a'); // Light red
+            const maxColor = hexToRgb('#1b8da7'); // Blue-green
     
     // Interpolate between the two colors
     const r = Math.round(minColor.r + (maxColor.r - minColor.r) * ratio);
@@ -506,8 +506,20 @@ function createTableBootstrap3(tableId, data, options = {}) {
     
     // Initialize team colors if this is a table with team data
     if (data.data && data.data.length > 0 && data.data[0].length > 1) {
-        // Extract team names from the data (assuming team name is in the second column)
-        const teams = data.data.map(row => row[1]).filter(team => team && typeof team === 'string');
+        // Extract team names from the data
+        // For most tables, team name is in the second column (row[1])
+        // For team vs team comparison, team name is in the first column (row[0])
+        let teams = [];
+        
+        
+        // Check if this is a team vs team comparison table (has "Team vs Team Comparison" in title)
+        if (data.title && data.title.includes('Team vs Team Comparison')) {
+            teams = data.data.map(row => row[0]).filter(team => team && typeof team === 'string');
+        } else {
+            // Standard tables with team names in second column
+            teams = data.data.map(row => row[1]).filter(team => team && typeof team === 'string');
+        }
+        
         if (teams.length > 0 && typeof window.updateTeamColorMap === 'function') {
             window.updateTeamColorMap(teams);
         }
@@ -957,8 +969,33 @@ function createTableBootstrap3(tableId, data, options = {}) {
                                 const value1 = row1.rowData[flatIndex];
                                 const value2 = row2.rowData[flatIndex];
                                 
-                                // Handle position circle for first column of first group
-                                if (groupIndex === 0 && index === 0 && !disablePositionCircle) {
+                                // Special handling for team vs team comparison table (takes precedence)
+                                if (data.title && data.title.includes('Team vs Team Comparison') && groupIndex === 0 && index === 0) {
+                                    // Special handling for team vs team comparison table - first column shows team name with color
+                                    const teamName1 = value1;
+                                    const teamName2 = value2;
+                                    
+                                    let color1 = "#888"; // fallback color
+                                    let color2 = "#888"; // fallback color
+                                    
+                                    if (typeof window.getTeamColor === 'function') {
+                                        color1 = window.getTeamColor(teamName1);
+                                        color2 = window.getTeamColor(teamName2);
+                                    } else if (window.teamColorMap) {
+                                        color1 = window.teamColorMap[teamName1] || "#888";
+                                        color2 = window.teamColorMap[teamName2] || "#888";
+                                    }
+                                    
+                                    td1.innerHTML = `<div style="display: flex; align-items: center;">
+                                        <div style="width: 16px; height: 16px; border-radius: 50%; background-color: ${color1}; margin-right: 8px;"></div>
+                                        <span>${teamName1}</span>
+                                    </div>`;
+                                    td2.innerHTML = `<div style="display: flex; align-items: center;">
+                                        <div style="width: 16px; height: 16px; border-radius: 50%; background-color: ${color2}; margin-right: 8px;"></div>
+                                        <span>${teamName2}</span>
+                                    </div>`;
+                                } else if (groupIndex === 0 && index === 0 && !disablePositionCircle) {
+                                    // Handle position circle for first column of first group - regular tables
                                     const color1 = getTeamColor(row1.rowData[1]);
                                     const color2 = getTeamColor(row2.rowData[1]);
                                     td1.innerHTML = `<div style="width: 24px; height: 24px; border-radius: 50%; background-color: ${color1}; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; margin: 0 auto;">${value1}</div>`;
@@ -1089,8 +1126,24 @@ function createTableBootstrap3(tableId, data, options = {}) {
                         // Now increment colIndex
                         
                         
-                        // Special handling for position column (first column of first group)
-                        if (groupIndex === 0 && index === 0 && !disablePositionCircle) {
+                        // Special handling for team vs team comparison table (takes precedence)
+                        if (data.title && data.title.includes('Team vs Team Comparison') && groupIndex === 0 && index === 0) {
+                            // Special handling for team vs team comparison table - first column shows team name with color
+                            const teamName = value;
+                            let color = "#888"; // fallback color
+                            
+                            if (typeof window.getTeamColor === 'function') {
+                                color = window.getTeamColor(teamName);
+                            } else if (window.teamColorMap && window.teamColorMap[teamName]) {
+                                color = window.teamColorMap[teamName];
+                            }
+                            
+                            td.innerHTML = `<div style="display: flex; align-items: center;">
+                                <div style="width: 16px; height: 16px; border-radius: 50%; background-color: ${color}; margin-right: 8px;"></div>
+                                <span>${teamName}</span>
+                            </div>`;
+                        } else if (groupIndex === 0 && index === 0 && !disablePositionCircle) {
+                            // Special handling for position column (first column of first group) - regular tables
                             // Use the position value (not team name) for the circle
                             const color = getTeamColor(rowData[1]); // Still use team name for color
                             td.innerHTML = `<div style="width: 24px; height: 24px; border-radius: 50%; background-color: ${color}; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; margin: 0 auto;">${value}</div>`;

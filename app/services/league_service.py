@@ -2347,9 +2347,15 @@ class LeagueService:
             # Create table structure
             columns = [
                 ColumnGroup(
+                    title="Player",
+                    frozen='left',  # Make only the player name column sticky
+                    columns=[
+                        Column(title="Player", field="player", width="180px", align="left")
+                    ]
+                ),
+                ColumnGroup(
                     title="Individual Averages",
                     columns=[
-                        Column(title="Player", field="player", width="180px", align="left"),
                         Column(title="Team", field="team", width="130px", align="left"),
                         Column(title="Games", field="games", width="70px", align="center"),
                         Column(title="Total Points", field="total_points", width="100px", align="center"),
@@ -2981,8 +2987,9 @@ class LeagueService:
         columns = [
             ColumnGroup(
                 title='Team',
+                frozen='left',  # Make the team name column sticky
                 columns=[
-                    Column(title='Team', field='team', width='120px', align='left')
+                    Column(title='Team', field='team', width='180px', align='left')
                 ]
             )
         ]
@@ -3118,8 +3125,8 @@ class LeagueService:
             return tuple(int(hex_color[i:i+2], 16) for i in (0, 2, 4))
         
         # Define min and max colors
-        min_color = hex_to_rgb('#a9e9f9')  # Light blue
-        max_color = hex_to_rgb('#06313c')  # Dark blue-green
+        min_color = hex_to_rgb('#d9596a')  # Light blue
+        max_color = hex_to_rgb('#1b8da7')  # Dark blue-green
         
         # Interpolate between the two colors
         r = int(min_color[0] + (max_color[0] - min_color[0]) * ratio)

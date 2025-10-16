@@ -90,6 +90,9 @@ function getTeamColor(team) {
   return window.teamColorMap[team] || "#888"; // fallback color
 }
 
+// Make getTeamColor globally available
+window.getTeamColor = getTeamColor;
+
 // --- Palette Switcher UI ---
 function renderPaletteSwitcher(containerId = "paletteSwitcher") {
   const container = document.getElementById(containerId);

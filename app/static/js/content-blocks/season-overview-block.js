@@ -60,14 +60,8 @@ class SeasonOverviewBlock extends BaseContentBlock {
     }
 
     shouldRender(state) {
-        // Show only when season and league are selected but NO team and NO week selected
-        // This ensures season overview shows in league+season view, but hides when team is selected
-        const hasLeague = state.league && state.league !== '' && state.league !== 'null';
-        const hasSeason = state.season && state.season !== '' && state.season !== 'null';
-        const hasWeek = state.week && state.week !== '' && state.week !== 'null';
-        const hasTeam = state.team && state.team !== '' && state.team !== 'null';
-        const shouldShow = hasLeague && hasSeason && !hasTeam && !hasWeek;
-        return shouldShow;
+        // Season overview block is disabled - don't show in any view
+        return false;
     }
 
     generateHTML(state) {

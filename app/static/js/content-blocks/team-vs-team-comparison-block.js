@@ -5,8 +5,8 @@ class TeamVsTeamComparisonBlock {
     }
 
     shouldRender(state) {
-        // Show when league is selected, season and week are optional
-        return state.league && !state.team;
+        // Show when league and season are selected, week is optional, but no team
+        return state.league && state.season && !state.team;
     }
 
     async render(state = {}) {
@@ -60,9 +60,9 @@ class TeamVsTeamComparisonBlock {
                                                 <h6>Score Heat Map</h6>
                                                 <div class="d-flex align-items-center">
                                                     <span class="me-2">Low:</span>
-                                                    <div class="heat-map-legend me-2" style="background: #a9e9f9; width: 20px; height: 20px;"></div>
+                                                    <div class="heat-map-legend me-2" style="background: #d9596a; width: 20px; height: 20px;"></div>
                                                     <span class="me-2">High:</span>
-                                                    <div class="heat-map-legend" style="background: #06313c; width: 20px; height: 20px;"></div>
+                                                    <div class="heat-map-legend" style="background: #1b8da7; width: 20px; height: 20px;"></div>
                                                 </div>
                                                 <small class="text-muted">Range: ${data.metadata?.score_range?.min || 'N/A'} - ${data.metadata?.score_range?.max || 'N/A'}</small>
                                             </div>
@@ -70,9 +70,9 @@ class TeamVsTeamComparisonBlock {
                                                 <h6>Points Heat Map</h6>
                                                 <div class="d-flex align-items-center">
                                                     <span class="me-2">Low:</span>
-                                                    <div class="heat-map-legend me-2" style="background: #a9e9f9; width: 20px; height: 20px;"></div>
+                                                    <div class="heat-map-legend me-2" style="background: #d9596a; width: 20px; height: 20px;"></div>
                                                     <span class="me-2">High:</span>
-                                                    <div class="heat-map-legend" style="background: #06313c; width: 20px; height: 20px;"></div>
+                                                    <div class="heat-map-legend" style="background: #1b8da7; width: 20px; height: 20px;"></div>
                                                 </div>
                                                 <small class="text-muted">Range: ${data.metadata?.points_range?.min || 'N/A'} - ${data.metadata?.points_range?.max || 'N/A'}</small>
                                             </div>

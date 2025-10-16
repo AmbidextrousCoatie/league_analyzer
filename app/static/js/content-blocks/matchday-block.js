@@ -118,6 +118,13 @@ class MatchDayBlock extends BaseContentBlock {
                         </div>
                     </div>
                     
+                    <!-- Team vs Team Comparison Section (Full Width) -->
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <div id="team-vs-team-comparison-matchday"></div>
+                        </div>
+                    </div>
+                    
                     <!-- Individual Averages Section (Full Width) -->
                     <div class="row mt-4">
                         <div class="col-12">
@@ -163,11 +170,12 @@ class MatchDayBlock extends BaseContentBlock {
         const { season, league, week } = state;
         
         try {
-            // Load table, honor scores, and individual averages in parallel
+            // Load table, honor scores, individual averages, and team vs team comparison in parallel
             await Promise.all([
                 this.loadLeagueWeekTable(season, league, week),
                 this.loadHonorScores(season, league, week),
-                this.loadIndividualAverages(state)
+                this.loadIndividualAverages(state),
+                this.loadTeamVsTeamComparison(season, league, week)
             ]);
             
         } catch (error) {
@@ -380,6 +388,107 @@ class MatchDayBlock extends BaseContentBlock {
             if (container) {
                 container.innerHTML = '<div class="alert alert-danger">Error loading individual averages</div>';
             }
+        }
+    }
+
+    async loadTeamVsTeamComparison(season, league, week) {
+        try {
+            const url = new URL('/league/get_team_vs_team_comparison', window.location.origin);
+            url.searchParams.append('league', league);
+            url.searchParams.append('season', season);
+            url.searchParams.append('week', week);
+            
+            // Add database parameter
+            const database = getCurrentDatabase();
+            if (database) {
+                url.searchParams.append('database', database);
+            }
+
+            const response = await fetch(url);
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            
+            const data = await response.json();
+            
+            if (data.error) {
+                throw new Error(`API Error: ${data.error}`);
+            }
+            
+            this.createTeamVsTeamComparison(data);
+            
+        } catch (error) {
+            console.error('Error loading team vs team comparison:', error);
+            const container = document.getElementById('team-vs-team-comparison-matchday');
+            if (container) {
+                container.innerHTML = '<div class="alert alert-info">Team vs team comparison not available for this week</div>';
+            }
+        }
+    }
+
+    createTeamVsTeamComparison(data) {
+        if (!data || !data.columns || !data.data) {
+            console.warn('No team vs team comparison data available');
+            return;
+        }
+
+        const container = document.getElementById('team-vs-team-comparison-matchday');
+        if (!container) {
+            console.error('Team vs team comparison container not found');
+            return;
+        }
+
+        // Create the team vs team comparison card
+        container.innerHTML = `
+            <div class="card">
+                <div class="card-header">
+                    <h6>${data.title || 'Team vs Team Comparison Matrix'}</h6>
+                    <p class="mb-0 text-muted small">${data.description || 'Matrix showing team performance against each opponent'}</p>
+                </div>
+                <div class="card-body">
+                    <div id="team-vs-team-comparison-table-matchday"></div>
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h6>Heat Map Legend</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <h6>Score Heat Map</h6>
+                                            <div class="d-flex align-items-center">
+                                                <span class="me-2">Low:</span>
+                                                <div class="heat-map-legend me-2" style="background: #d9596a; width: 20px; height: 20px;"></div>
+                                                <span class="me-2">High:</span>
+                                                <div class="heat-map-legend" style="background: #1b8da7; width: 20px; height: 20px;"></div>
+                                            </div>
+                                            <small class="text-muted">Range: ${data.metadata?.score_range?.min || 'N/A'} - ${data.metadata?.score_range?.max || 'N/A'}</small>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <h6>Points Heat Map</h6>
+                                            <div class="d-flex align-items-center">
+                                                <span class="me-2">Low:</span>
+                                                <div class="heat-map-legend me-2" style="background: #d9596a; width: 20px; height: 20px;"></div>
+                                                <span class="me-2">High:</span>
+                                                <div class="heat-map-legend" style="background: #1b8da7; width: 20px; height: 20px;"></div>
+                                            </div>
+                                            <small class="text-muted">Range: ${data.metadata?.points_range?.min || 'N/A'} - ${data.metadata?.points_range?.max || 'N/A'}</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // Create table using createTableBootstrap3
+        if (typeof createTableBootstrap3 === 'function') {
+            createTableBootstrap3('team-vs-team-comparison-table-matchday', data);
+        } else {
+            console.error('createTableBootstrap3 function not available');
         }
     }
 }

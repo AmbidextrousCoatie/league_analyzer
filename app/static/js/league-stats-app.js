@@ -71,20 +71,17 @@ class LeagueStatsApp {
             const teamDetailsBlock = new TeamDetailsBlock();
             console.log('🔄 Creating TeamPerformanceBlock...');
             const teamPerformanceBlock = new TeamPerformanceBlock();
-            console.log('🔄 Creating TeamWinPercentageBlock...');
-            const teamWinPercentageBlock = new TeamWinPercentageBlock();
-            console.log('🔄 Creating TeamVsTeamComparisonBlock...');
-            const teamVsTeamComparisonBlock = new TeamVsTeamComparisonBlock();
+        console.log('🔄 Creating TeamWinPercentageBlock...');
+        const teamWinPercentageBlock = new TeamWinPercentageBlock();
             
-            // Store blocks (no filter-controls block needed anymore)
-            this.contentBlocks.set('league-aggregation', leagueAggregationBlock);
-            this.contentBlocks.set('league-season-overview', leagueSeasonOverviewBlock);
-            this.contentBlocks.set('season-overview', seasonOverviewBlock);
-            this.contentBlocks.set('matchday', matchDayBlock);
-            this.contentBlocks.set('team-details', teamDetailsBlock);
-            this.contentBlocks.set('team-performance', teamPerformanceBlock);
-            this.contentBlocks.set('team-win-percentage', teamWinPercentageBlock);
-            this.contentBlocks.set('team-vs-team-comparison', teamVsTeamComparisonBlock);
+        // Store blocks (no filter-controls block needed anymore)
+        this.contentBlocks.set('league-aggregation', leagueAggregationBlock);
+        this.contentBlocks.set('league-season-overview', leagueSeasonOverviewBlock);
+        this.contentBlocks.set('season-overview', seasonOverviewBlock);
+        this.contentBlocks.set('matchday', matchDayBlock);
+        this.contentBlocks.set('team-details', teamDetailsBlock);
+        this.contentBlocks.set('team-performance', teamPerformanceBlock);
+        this.contentBlocks.set('team-win-percentage', teamWinPercentageBlock);
             
             console.log('✅ Content blocks initialized');
         } catch (error) {
