@@ -545,7 +545,7 @@
         // Helper functions for database parameter handling
         function getCurrentDatabase() {
             const urlParams = new URLSearchParams(window.location.search);
-            const database = urlParams.get('database') || 'db_sim';
+            const database = urlParams.get('database') || 'db_real';
             console.log('🔄 getCurrentDatabase called, returning:', database);
             return database;
         }
