@@ -356,7 +356,7 @@ class SimpleFilterManager {
             // Get current database from URL
             const urlParams = new URLSearchParams(window.location.search);
             const database = urlParams.get('database') || 'db_sim';
-            
+            // console.info(`####################### updateSeasonsForLeague - leagueName: ${leagueName} and database: ${database}`);
             const response = await fetch(`/league/get_available_seasons?league=${encodeURIComponent(leagueName)}&database=${database}`);
             if (response.ok) {
                 this.availableData.seasons = await response.json();

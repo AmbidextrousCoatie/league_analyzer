@@ -87,7 +87,8 @@ class ClutchAnalysisBlock extends BaseContentBlock {
                     </label>
                     <input type="range" class="form-range" id="clutchThresholdRange" 
                            min="0" max="100" value="${this.clutchThreshold}" 
-                           oninput="window.teamStatsApp.updateClutchThreshold(this.value)">
+                           oninput="window.teamStatsApp.updateClutchThresholdDisplay(this.value)"
+                           onchange="window.teamStatsApp.updateClutchThreshold(this.value)">
                 </div>
                 <div class="col-md-4 text-end">
                     <button class="btn btn-sm btn-outline-primary" onclick="window.teamStatsApp.refreshClutchAnalysis()">
@@ -130,8 +131,17 @@ class ClutchAnalysisBlock extends BaseContentBlock {
         
         // Clear the last rendered state to force a refresh
         this.lastRenderedState = {};
+        this.lastData = null;
         
         console.log(`${this.id}: Clutch threshold updated to: ${this.clutchThreshold}`);
+    }
+    
+    /**
+     * Override getStateKey to include clutch threshold in state comparison
+     */
+    getStateKey(filterState) {
+        const baseKey = super.getStateKey(filterState);
+        return `${baseKey}|threshold:${this.clutchThreshold}`;
     }
     
     /**

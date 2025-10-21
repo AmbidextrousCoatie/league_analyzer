@@ -47,9 +47,10 @@ class LeagueService:
         weeks = self.get_available_weeks(season, league)
         return max(weeks) if weeks else 1
     
-    def get_seasons(self) -> List[str]:
+    def get_seasons(self, league_name: str=None, team_name: str=None) -> List[str]:
         """Get all available seasons"""
-        return self.adapter.get_seasons()
+        # print(f"####################### Getting seasons for league_name: {league_name} and team_name: {team_name}")
+        return self.adapter.get_seasons(league_name=league_name, team_name=team_name)
 
     def get_leagues(self) -> List[str]:
         """Get all available leagues for a season"""

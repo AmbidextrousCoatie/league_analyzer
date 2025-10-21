@@ -271,6 +271,17 @@ class TeamStatsApp {
     }
     
     /**
+     * Update clutch threshold display only (for slider feedback)
+     */
+    updateClutchThresholdDisplay(newThreshold) {
+        // Update the display value without triggering a full refresh
+        const valueDisplay = document.getElementById('clutchThresholdValue');
+        if (valueDisplay) {
+            valueDisplay.textContent = newThreshold;
+        }
+    }
+    
+    /**
      * Update clutch threshold and trigger refresh
      */
     updateClutchThreshold(newThreshold) {
@@ -281,6 +292,11 @@ class TeamStatsApp {
             const clutchBlock = this.contentRenderer.contentBlocks['clutch-analysis'];
             if (clutchBlock) {
                 clutchBlock.updateThreshold(newThreshold);
+                
+                // Force a re-render of the clutch analysis block with new threshold
+                const currentState = this.getState();
+                console.log('🔄 Re-rendering clutch analysis with new threshold:', newThreshold);
+                clutchBlock.renderWithData(currentState);
             }
         }
     }
@@ -300,6 +316,7 @@ class TeamStatsApp {
                 
                 // Force a re-render of the clutch analysis block
                 const currentState = this.getState();
+                console.log('🔄 Re-rendering clutch analysis with state:', currentState);
                 clutchBlock.renderWithData(currentState);
             }
         }

@@ -240,11 +240,15 @@ class DataAdapterPandas(DataAdapter):
     
     def get_seasons(self, league_name: str=None, team_name: str=None) -> List[str]:
         filters_eq = dict()
+        print(f"## DA - Pandas - get_seasons - Getting seasons for league_name: {league_name} and team_name: {team_name}")
         if league_name is not None:
             filters_eq[Columns.league_name] = league_name
         if team_name is not None:
             filters_eq[Columns.team_name] = team_name
-        return self.get_filtered_data__deprecated(columns=[Columns.season], filters_eq=filters_eq)[Columns.season].unique().tolist()
+        result = self.get_filtered_data__deprecated(columns=[Columns.season], filters_eq=filters_eq)[Columns.season].unique().tolist()
+        print(f"## DA - Pandas - get_seasons - Seasons: {result}")
+        return result
+        #return self.get_filtered_data__deprecated(columns=[Columns.season], filters_eq=filters_eq)[Columns.season].unique().tolist()
     
     def get_leagues(self, season: str=None, team_name: str=None) -> List[str]:
         filters_eq = dict()

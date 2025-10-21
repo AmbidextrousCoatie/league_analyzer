@@ -225,8 +225,11 @@ def get_available_seasons():
         params = dict(request.args)
         debug_config.log_route('league.get_available_seasons', params)
         
+        league = request.args.get('league')
+        team = request.args.get('team')
+        #print(f"####################### route get_available_seassons - league_name: {league} and team_name: {team}")
         league_service = get_league_service()
-        seasons = league_service.get_seasons()
+        seasons = league_service.get_seasons(league_name=league, team_name=team)
         
         response_size = sys.getsizeof(str(seasons))
         debug_config.log_route('league.get_available_seasons', params, response_size)
