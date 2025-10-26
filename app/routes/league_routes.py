@@ -14,7 +14,7 @@ bp = Blueprint('league', __name__)
 
 def get_league_service():
     """Helper function to get LeagueService with database parameter"""
-    database = request.args.get('database') or 'db_sim'  # Default to db_sim if no database specified
+    database = request.args.get('database') or 'db_real'  # Default to db_real if no database specified
     debug_config.log_service('LeagueService', 'create', f"database={database}")
     return LeagueService(database=database)
 
@@ -129,6 +129,33 @@ def get_league_week_table():
         return jsonify(response_data)
     except Exception as e:
         debug_config.log_route('league.get_league_week_table', dict(request.args), f"ERROR: {str(e)}")
+        if debug_config.is_debug_enabled('routes'):
+            traceback.print_exc()
+        return jsonify({"error": str(e)}), 500
+
+@bp.route('/league/get_season_league_standings')
+def get_season_league_standings():
+    try:
+        params = dict(request.args)
+        debug_config.log_route('league.get_season_league_standings', params)
+        
+        season = request.args.get('season')
+        
+        if not season:
+            return jsonify({"error": i18n_service.get_text("season_required")}), 400
+
+        league_service = get_league_service()
+        standings_data = league_service.get_season_league_standings(season=season)
+        
+        if not standings_data:
+            return jsonify({"message": "No data found for this season"}), 404
+        
+        response_size = sys.getsizeof(str(standings_data))
+        debug_config.log_route('league.get_season_league_standings', params, response_size)
+        
+        return jsonify(standings_data)
+    except Exception as e:
+        debug_config.log_route('league.get_season_league_standings', dict(request.args), f"ERROR: {str(e)}")
         if debug_config.is_debug_enabled('routes'):
             traceback.print_exc()
         return jsonify({"error": str(e)}), 500

@@ -44,6 +44,17 @@
         </div>
     </div>
 
+    <!-- Season League Standings Block (Season only) -->
+    <div id="seasonLeagueStandingsContainer">
+        <!-- Season league standings content will be rendered here -->
+        <div class="text-center py-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading season league standings...</span>
+            </div>
+            <p class="text-muted mt-2">Initializing season league standings...</p>
+        </div>
+    </div>
+
     <!-- League Aggregation Block (League only) -->
     <div id="leagueAggregationContainer">
         <!-- League aggregation content will be rendered here -->
@@ -132,6 +143,7 @@
 <script src="{{ static_url('js/content-blocks/base-content-block.js') }}"></script>
 
 <!-- Content blocks -->
+<script src="{{ static_url('js/content-blocks/season-league-standings-block.js') }}"></script>
 <script src="{{ static_url('js/content-blocks/league-aggregation-block.js') }}"></script>
 <script src="{{ static_url('js/content-blocks/league-season-overview-block.js') }}"></script>
 <script src="{{ static_url('js/content-blocks/season-overview-block.js') }}"></script>

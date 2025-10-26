@@ -1035,7 +1035,6 @@ class LeagueService:
         league_data_individual = self.adapter.get_filtered_data(query_individual.to_filter_dict())
         league_data_team = self.adapter.get_filtered_data(query_team.to_filter_dict())
         
-        
         if league_data_individual.empty:
             return {
                 "individual_scores": [],
@@ -3135,6 +3134,74 @@ class LeagueService:
         b = int(min_color[2] + (max_color[2] - min_color[2]) * ratio)
         
         return f"rgb({r}, {g}, {b})"
+
+    def get_season_league_standings(self, season: str) -> Dict[str, Any]:
+        """
+        Get latest week standings for all leagues in a season.
+        
+        Args:
+            season: The season identifier
+            
+        Returns:
+            Dictionary with leagues and their latest week standings
+        """
+        try:
+            # Get all leagues that have data for this season
+            league_filters = {
+                Columns.season: {'value': season, 'operator': 'eq'},
+                Columns.computed_data: {'value': False, 'operator': 'eq'}
+            }
+            
+            # Get all leagues for this season
+            leagues_data = self.adapter.get_filtered_data(
+                columns=[Columns.league_name], 
+                filters=league_filters
+            )
+            
+            if leagues_data.empty:
+                return {"leagues": []}
+            
+            leagues = sorted(leagues_data[Columns.league_name].unique())
+            
+            # Get standings for each league's latest week
+            league_standings = []
+            
+            for league in leagues:
+                try:
+                    # Get the latest week for this league/season
+                    latest_week = self.get_latest_week(season, league)
+                    
+                    if latest_week:
+                        # Get the standings for the latest week
+                        standings = self.get_league_week_table_simple(
+                            season=season, 
+                            league=league, 
+                            week=latest_week
+                        )
+                        
+                        # Get honor scores for the latest week
+                        honor_scores = self.get_honor_scores(league, season, latest_week)
+                        
+                        if standings:
+                            league_standings.append({
+                                'league': league,
+                                'week': latest_week,
+                                'standings': standings.to_dict(),
+                                'honor_scores': honor_scores
+                            })
+                            
+                except Exception as e:
+                    print(f"Error getting standings for league {league}: {e}")
+                    continue
+            
+            return {
+                'leagues': league_standings,
+                'season': season
+            }
+            
+        except Exception as e:
+            print(f"Error in get_season_league_standings: {e}")
+            return {"leagues": []}
 
     def get_record_games(self, league: str) -> TableData:
         """Legacy method - returns individual records for backward compatibility"""

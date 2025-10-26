@@ -10,6 +10,8 @@ class SimpleFilterManager {
         this.urlStateManager = urlStateManager;
         this.mode = mode; // 'team' or 'league'
         this.isInitializing = false;
+        this.isProcessingState = false;
+        this.hasAutoSelected = false;
         this.previousState = {};
         this.availableData = {
             teams: [],
@@ -98,21 +100,36 @@ class SimpleFilterManager {
         let stateChanged = false;
         
         if (this.mode === 'league') {
-            // For league mode, set default league to "BayL" if no league is selected
-            if (!state.league && this.availableData.leagues && this.availableData.leagues.length > 0) {
-                const defaultLeague = this.availableData.leagues.find(league => league === 'BayL') || this.availableData.leagues[0];
-                state.league = defaultLeague;
-                stateChanged = true;
-                
-                // Update URL with default league
-                this.urlStateManager.setState({ ...state, league: defaultLeague });
+            // Auto-selection logic (only run once)
+            if (!this.hasAutoSelected) {
+                // For league mode, if no league is selected, auto-select latest season to show season league standings
+                if (!state.league && !state.season && this.availableData.seasons && this.availableData.seasons.length > 0) {
+                    // Auto-select the latest season to show season league standings view
+                    const latestSeason = this.availableData.seasons[this.availableData.seasons.length - 1]; // Last season is usually the latest
+                    state.season = latestSeason;
+                    stateChanged = true;
+                    
+                    // Update URL with latest season
+                    this.urlStateManager.setState({ ...state, season: latestSeason });
+                    this.hasAutoSelected = true;
+                }
+                // For league mode, set default league to "BayL" if no league is selected but season is selected
+                else if (!state.league && this.availableData.leagues && this.availableData.leagues.length > 0) {
+                    const defaultLeague = this.availableData.leagues.find(league => league === 'BayL') || this.availableData.leagues[0];
+                    state.league = defaultLeague;
+                    stateChanged = true;
+                    
+                    // Update URL with default league
+                    this.urlStateManager.setState({ ...state, league: defaultLeague });
+                    this.hasAutoSelected = true;
+                }
             }
             
             // Load dependent data based on current state
             if (state.league) {
                 // League selected - load seasons for this league
                 await this.updateSeasonsForLeague(state.league);
-                await this.populateSeasonButtons(state);
+                await this.populateSeasonButtonsPreservingSelection(state);
                 
                 if (state.season) {
                     // League and season available - load weeks and teams
@@ -121,13 +138,21 @@ class SimpleFilterManager {
                     await this.updateTeamsForLeagueSeason(state.league, state.season);
                     await this.populateTeamButtons(state);
                 }
+            } else if (state.season) {
+                // Only season selected - load all seasons first, then populate season buttons for season league standings view
+                await this.loadAllSeasons();
+                await this.populateSeasonButtonsPreservingSelection(state);
+            } else {
+                // No league and no season - load all seasons for initial display
+                await this.loadAllSeasons();
+                await this.populateSeasonButtonsPreservingSelection(state);
             }
         } else if (this.mode === 'team') {
             // Team mode initialization
             if (state.team) {
                 // Team selected - load seasons for this team
                 await this.updateSeasonsForTeam(state.team);
-                await this.populateSeasonButtons(state);
+                await this.populateSeasonButtonsPreservingSelection(state);
                 
                 if (state.season) {
                     // Team and season available - load weeks
@@ -136,18 +161,18 @@ class SimpleFilterManager {
                 }
             }
         }
-        
-        // Sync UI to current state
-        await this.syncFiltersToState(state);
-        this.previousState = { ...state };
-        
-        // Initialize tracking map with current state values
-        this.updateTrackingMap(state);
-        
-        // Always trigger content rendering for initial state (even if no state changed)
-        // This ensures content is rendered when entering with just database parameter
-        this.dispatchFilterChangeEvent(state);
-    }
+    
+    // Sync UI to current state
+    await this.syncFiltersToState(state);
+    this.previousState = { ...state };
+    
+    // Initialize tracking map with current state values
+    this.updateTrackingMap(state);
+    
+    // Always trigger content rendering for initial state (even if no state changed)
+    // This ensures content is rendered when entering with just database parameter
+    this.dispatchFilterChangeEvent(state);
+}
     
     /**
      * Handle state changes from URL or user interaction
@@ -155,6 +180,14 @@ class SimpleFilterManager {
     async handleStateChange(state) {
         
         try {
+            // Prevent infinite loops by checking if we're already processing this state
+            if (this.isProcessingState) {
+                console.log('🔄 SimpleFilterManager: Already processing state change, skipping to prevent infinite loop');
+                return;
+            }
+            
+            this.isProcessingState = true;
+            
             // Check if database changed
             const databaseChanged = this.previousState.database && 
                                   state.database && 
@@ -194,8 +227,8 @@ class SimpleFilterManager {
                             await this.updateSeasonsForTeam(state.team);
                             await this.updateSeasonButtonsIfChanged(state);
                         } else {
-                            // Team deselected - reset dependent buttons
-                            await this.populateSeasonButtons(state);
+                            // Team deselected - preserve season if still valid, reset dependent buttons
+                            await this.populateSeasonButtonsPreservingSelection(state);
                             await this.populateWeekButtons(state);
                         }
                     } else if (seasonChanged) {
@@ -218,10 +251,11 @@ class SimpleFilterManager {
                         if (state.league) {
                             // League changed to a specific value - update seasons for this league
                             await this.updateSeasonsForLeague(state.league);
-                            await this.updateSeasonButtonsIfChanged(state);
+                            await this.populateSeasonButtonsPreservingSelection(state);
                         } else {
-                            // League deselected - clear and reset dependent buttons
-                            await this.populateSeasonButtons(state);
+                            // League deselected - load all seasons first, then preserve season if still valid
+                            await this.loadAllSeasons();
+                            await this.populateSeasonButtonsPreservingSelection(state);
                             await this.populateWeekButtons(state);
                             await this.populateTeamButtons(state);
                         }
@@ -234,6 +268,10 @@ class SimpleFilterManager {
                             await this.updateTeamButtonsIfChanged(state);
                         } else if (state.league && !state.season) {
                             // Season deselected but league still selected - reset weeks and teams for league
+                            await this.populateWeekButtons(state);
+                            await this.populateTeamButtons(state);
+                        } else if (!state.league && state.season) {
+                            // Season selected but no league - reset weeks and teams
                             await this.populateWeekButtons(state);
                             await this.populateTeamButtons(state);
                         }
@@ -255,6 +293,9 @@ class SimpleFilterManager {
             
         } catch (error) {
             console.error('❌ SimpleFilterManager: Error handling state change:', error);
+        } finally {
+            // Always reset the processing flag
+            this.isProcessingState = false;
         }
     }
     
@@ -340,6 +381,28 @@ class SimpleFilterManager {
             }
         } catch (error) {
             console.error('❌ SimpleFilterManager: Failed to load weeks:', error);
+        }
+    }
+    
+    /**
+     * Load all available seasons (when no league is selected)
+     */
+    async loadAllSeasons() {
+        try {
+            // Get current database from URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const database = urlParams.get('database') || 'db_real';
+            console.log('🔍 loadAllSeasons: Fetching seasons with database:', database);
+            const response = await fetch(`/league/get_available_seasons?database=${database}`);
+            console.log('🔍 loadAllSeasons: Response status:', response.status);
+            if (response.ok) {
+                this.availableData.seasons = await response.json();
+                console.log('📊 Loaded all seasons:', this.availableData.seasons);
+            } else {
+                console.error('❌ loadAllSeasons: Response not ok:', response.status, response.statusText);
+            }
+        } catch (error) {
+            console.error('❌ SimpleFilterManager: Failed to load all seasons:', error);
         }
     }
     
@@ -515,6 +578,59 @@ class SimpleFilterManager {
     }
     
     /**
+     * Populate season buttons while preserving current selection if still valid
+     */
+    async populateSeasonButtonsPreservingSelection(state) {
+        console.log('🎯 populateSeasonButtonsPreservingSelection called with state:', state);
+        const container = document.getElementById('buttonsSeason');
+        if (!container) {
+            console.warn('SimpleFilterManager: Season buttons container not found');
+            return;
+        }
+        
+        if (!this.availableData.seasons || this.availableData.seasons.length === 0) {
+            container.innerHTML = '<span class="text-muted">Keine Saisons verfügbar</span>';
+            return;
+        }
+        
+        // Get current state to determine which button should be checked
+        const currentState = state || this.urlStateManager.getState();
+        const selectedSeason = currentState.season || '';
+        
+        // Check if the currently selected season is still available
+        const isSeasonStillValid = !selectedSeason || this.availableData.seasons.includes(selectedSeason);
+        
+        console.log(`🔍 Season preservation check: selectedSeason="${selectedSeason}", availableSeasons=[${this.availableData.seasons.join(', ')}], isValid=${isSeasonStillValid}`);
+        
+        // If season is still valid, keep it selected; otherwise, default to "All"
+        const seasonToSelect = isSeasonStillValid ? selectedSeason : '';
+        
+        // Create season buttons with "All" option
+        const buttonsHtml = ['All', ...this.availableData.seasons].map(season => {
+            const seasonValue = season === 'All' ? '' : season;
+            const isChecked = seasonValue === seasonToSelect || (season === 'All' && !seasonToSelect);
+            
+            return `
+                <input type="radio" class="btn-check" name="season" id="season_${season}" 
+                       value="${seasonValue}" 
+                       ${isChecked ? 'checked' : ''}>
+                <label class="btn btn-outline-primary" for="season_${season}">${season}</label>
+            `;
+        }).join('');
+        
+        container.innerHTML = buttonsHtml;
+        
+        // If we changed the selection, update the URL state
+        if (seasonToSelect !== selectedSeason) {
+            const newState = { ...currentState, season: seasonToSelect };
+            this.urlStateManager.setState(newState);
+            console.log(`📊 SimpleFilterManager: Season selection changed from "${selectedSeason}" to "${seasonToSelect}"`);
+        } else {
+            console.log(`📊 SimpleFilterManager: Preserved season selection: "${selectedSeason}"`);
+        }
+    }
+    
+    /**
      * Populate week buttons with available weeks
      * Only shows weeks if league and season are both selected
      */
@@ -580,7 +696,7 @@ class SimpleFilterManager {
                            !currentButtons.every((val, index) => val === newData[index]);
         
         if (dataChanged) {
-            await this.populateSeasonButtons(state);
+            await this.populateSeasonButtonsPreservingSelection(state);
         } else {
         }
     }
@@ -809,6 +925,7 @@ class SimpleFilterManager {
         document.dispatchEvent(event);
         console.log('📢 SimpleFilterManager: Dispatched filterChange event:', state);
     }
+    
 }
 
 // Make globally available

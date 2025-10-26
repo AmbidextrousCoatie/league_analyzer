@@ -30,14 +30,14 @@ class DatabaseConfig:
                 filename='bowling_ergebnisse.csv',
                 display_name='Simulated Data',
                 description='Generated test data for development and testing',
-                is_default=True,
+                is_default=False,
                 is_enabled=True
             ),
             'db_real': DataSourceConfig(
                 filename='bowling_ergebnisse_real.csv',
                 display_name='Real Data',
                 description='Actual bowling league data',
-                is_default=False,
+                is_default=True,
                 is_enabled=True
             )
         }

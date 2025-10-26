@@ -59,6 +59,8 @@ class LeagueStatsApp {
             await this.filterManager.initialize();
             
             // Create content blocks (they initialize in their constructors)
+            console.log('🔄 Creating SeasonLeagueStandingsBlock...');
+            const seasonLeagueStandingsBlock = new SeasonLeagueStandingsBlock();
             console.log('🔄 Creating LeagueAggregationBlock...');
             const leagueAggregationBlock = new LeagueAggregationBlock();
             console.log('🔄 Creating LeagueSeasonOverviewBlock...');
@@ -75,6 +77,7 @@ class LeagueStatsApp {
         const teamWinPercentageBlock = new TeamWinPercentageBlock();
             
         // Store blocks (no filter-controls block needed anymore)
+        this.contentBlocks.set('season-league-standings', seasonLeagueStandingsBlock);
         this.contentBlocks.set('league-aggregation', leagueAggregationBlock);
         this.contentBlocks.set('league-season-overview', leagueSeasonOverviewBlock);
         this.contentBlocks.set('season-overview', seasonOverviewBlock);

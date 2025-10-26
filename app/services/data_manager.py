@@ -134,6 +134,26 @@ class DataManager:
         self._current_source = None
         # Reload from session
         self._load_data()
+    
+    def reset_to_default(self):
+        """Reset to the current default source, clearing session"""
+        self._clear_session_source()
+        self._current_source = database_config.get_default_source()
+        self._save_session_source(self._current_source)
+        self._load_data()
+        return True
+    
+    def _clear_session_source(self):
+        """Clear the database source from Flask session"""
+        try:
+            from flask import has_request_context
+            if has_request_context():
+                session.pop(self._session_key, None)
+                session.modified = True
+            else:
+                pass
+        except Exception as e:
+            print(f"Warning: Could not clear session: {e}")
 
     def get_available_sources(self) -> list:
         """Get list of available data sources"""
@@ -147,6 +167,10 @@ class DataManager:
         """Get display name for a data source"""
         return database_config.get_source_display_name(source)
 
+    def get_default_source(self) -> str:
+        """Get the default data source"""
+        return database_config.get_default_source()
+    
     def get_sources_info(self) -> dict:
         """Get detailed information about all available sources"""
         return database_config.get_sources_info()

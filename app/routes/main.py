@@ -120,10 +120,17 @@ def get_data_sources_info():
                 'sources_info': data_manager.get_sources_info()
             }
         else:
-            # Use current session-based approach
+            # Use current session-based approach, but reset to new default if needed
             data_manager = DataManager()
-            # Force reload from session to ensure consistency across workers
-            data_manager.force_reload_from_session()
+            # Check if session has old default and reset to new default
+            session_source = data_manager._get_session_source()
+            current_default = data_manager.get_default_source()
+            if session_source != current_default:
+                # Reset to new default
+                data_manager.reset_to_default()
+            else:
+                # Force reload from session to ensure consistency across workers
+                data_manager.force_reload_from_session()
             return {
                 'success': True,
                 'current_source': data_manager.current_source,
