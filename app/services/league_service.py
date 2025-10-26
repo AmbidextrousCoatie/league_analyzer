@@ -187,7 +187,7 @@ class LeagueService:
             return TableData(
                 columns=[],
                 data=[],
-                title=f"No data available for {league} - {season}"
+                title=f"{i18n_service.get_text('no_data_available_for')} {league} - {season}"
             )
         
         # Sort by total points (descending) and assign positions
@@ -198,12 +198,12 @@ class LeagueService:
         # Create column groups
         columns = [
             ColumnGroup(
-                title="Ranking",
+                title=i18n_service.get_text("ranking"),
                 frozen="left",  # Freeze this group to the left
                 style={"backgroundColor": "#f8f9fa"},  # Light gray background
                 columns=[
                     Column(title="#", field="pos", width="50px", align="center"),
-                    Column(title="Team", field="team", width="200px", align="left")
+                    Column(title=i18n_service.get_text("team"), field="team", width="200px", align="left")
                 ]
             )
         ]
@@ -213,11 +213,11 @@ class LeagueService:
         for w in range(start_week, week + 1):
             columns.append(
                 ColumnGroup(
-                    title=f"Week {w}",
+                    title=f"{i18n_service.get_text('week')} {w}",
                     columns=[
-                        Column(title="Pins", field=f"week{w}_score", format="{:,}"),
-                        Column(title="Pts.", field=f"week{w}_points", format="{:.1f}"),
-                        Column(title="Avg.", field=f"week{w}_avg", format="{:.1f}")
+                        Column(title=i18n_service.get_text("pins"), field=f"week{w}_score", format="{:,}"),
+                        Column(title=i18n_service.get_text("points"), field=f"week{w}_points", format="{:.1f}"),
+                        Column(title=i18n_service.get_text("avg"), field=f"week{w}_avg", format="{:.1f}")
                     ]
                 )
             )
@@ -225,13 +225,13 @@ class LeagueService:
         # Add totals column group
         columns.append(
             ColumnGroup(
-                title="Total",
+                title=i18n_service.get_text("total"),
                 style={"backgroundColor": "#e9ecef"},
                 header_style={"fontWeight": "bold"},
                 columns=[
-                    Column(title="Points", field="total_points", width="80px", align="center"),
-                    Column(title="Score", field="total_score", width="80px", align="center"),
-                    Column(title="Avg", field="average", width="80px", align="center")
+                    Column(title=i18n_service.get_text("points"), field="total_points", width="80px", align="center"),
+                    Column(title=i18n_service.get_text("score"), field="total_score", width="80px", align="center"),
+                    Column(title=i18n_service.get_text("avg"), field="average", width="80px", align="center")
                 ]
             )
         )
@@ -270,7 +270,7 @@ class LeagueService:
             columns=columns,
             data=data,
             title=f"{league} Standings - {season}",
-            description=f"Through Week {week}",
+            description=f"{i18n_service.get_text('through_week')} {week}",
             config={
                 "stickyHeader": True,  # Make header sticky
                 "striped": True,       # Use striped rows
@@ -297,7 +297,7 @@ class LeagueService:
         
         if not standings.teams:
             return PlotData(
-                title=f"No data available for {league} - {season}",
+                title=f"{i18n_service.get_text('no_data_available_for')} {league} - {season}",
                 series=[]
             )
         
@@ -332,11 +332,11 @@ class LeagueService:
         
         # Create and return the PlotData
         return PlotData(
-            title=f"{league} Team Performance - {season}",
+            title=f"{league} {i18n_service.get_text('team_performance')} - {season}",
             series=series,
             x_axis=weeks,
-            y_axis_label="Cumulative Points",
-            x_axis_label="Week",
+            y_axis_label=i18n_service.get_text("cumulative_points"),
+            x_axis_label=i18n_service.get_text("week"),
             plot_type="line"
         )
     
@@ -357,8 +357,8 @@ class LeagueService:
         if not standings.teams:
             return [
                 TileData(
-                    title="No Data",
-                    value="No league data available",
+                    title=i18n_service.get_text("no_data"),
+                    value=i18n_service.get_text("no_league_data_available"),
                     type="info"
                 )
             ]
@@ -371,9 +371,9 @@ class LeagueService:
             leader = standings.teams[0]  # First team (highest points)
             tiles.append(
                 TileData(
-                    title="League Leader",
+                    title=i18n_service.get_text("league_leader"),
                     value=leader.team_name,
-                    subtitle=f"{leader.total_points} points",
+                    subtitle=f"{leader.total_points} {i18n_service.get_text('points')}",
                     type="stat",
                     color="#28a745"  # Green
                 )
@@ -385,9 +385,9 @@ class LeagueService:
             league_avg = sum(all_averages) / len(all_averages) if all_averages else 0
             tiles.append(
                 TileData(
-                    title="League Average",
+                    title=i18n_service.get_text("league_average"),
                     value=f"{league_avg:.1f}",
-                    subtitle="Pins per game",
+                    subtitle=i18n_service.get_text("pins_per_game"),
                     type="stat"
                 )
             )
@@ -397,7 +397,7 @@ class LeagueService:
             completed_weeks = len(set(p.week for p in standings.teams[0].weekly_performances))
             tiles.append(
                 TileData(
-                    title="Weeks Completed",
+                    title=i18n_service.get_text("weeks_completed"),
                     value=str(completed_weeks),
                     subtitle=f"of {completed_weeks + 2}",  # Assuming 2 more weeks to go
                     type="progress",
@@ -445,10 +445,10 @@ class LeagueService:
         events = []
         for _, row in unique_events_df.iterrows():
             event = {
-                "Season": row[Columns.season],
-                "League": row[Columns.league_name],
-                "Week": row[Columns.week],
-                "Date": row[Columns.date]
+                i18n_service.get_text("season"): row[Columns.season],
+                i18n_service.get_text("league"): row[Columns.league_name],
+                i18n_service.get_text("week"): row[Columns.week],
+                i18n_service.get_text("date"): row[Columns.date]
             }
             events.append(event)
         
@@ -540,7 +540,7 @@ class LeagueService:
                 return TableData(
                     columns=[],
                     data=[],
-                    title=f"No data available for {team} - Week {week}"
+                    title=f"{i18n_service.get_text('no_data_available_for_team_week')} {team} - {i18n_service.get_text('week')} {week}"
                 )
             
             # Get team totals (computed data)
@@ -590,25 +590,25 @@ class LeagueService:
             # Create column groups
             columns = [
                 ColumnGroup(
-                    title="Player",
+                    title=i18n_service.get_text("player"),
                     frozen="left",
                     style={"backgroundColor": "#f8f9fa"},
                     columns=[
-                        Column(title="Pos", field="position", width="50px", align="center"),
-                        Column(title="Name", field="name", width="200px", align="left")
+                        Column(title=i18n_service.get_text("position"), field="position", width="50px", align="center"),
+                        Column(title=i18n_service.get_text("name"), field="name", width="200px", align="left")
                     ]
                 )
             ]
             
             # Add game column groups with opponent team names
             for game in games:
-                opponent_name = game_to_opponent.get(game, f"Game {game}")
+                opponent_name = game_to_opponent.get(game, f"{i18n_service.get_text('game')} {game}")
                 columns.append(
                     ColumnGroup(
                         title=opponent_name,
                         columns=[
-                            Column(title="Score", field=f"game{game}_score", width="80px", align="center"),
-                            Column(title="Pts", field=f"game{game}_points", width="60px", align="center")
+                            Column(title=i18n_service.get_text("pins"), field=f"game{game}_score", width="80px", align="center"),
+                            Column(title=i18n_service.get_text("points"), field=f"game{game}_points", width="60px", align="center")
                         ]
                     )
                 )
@@ -616,13 +616,13 @@ class LeagueService:
             # Add totals column group
             columns.append(
                 ColumnGroup(
-                    title="Total",
+                    title=i18n_service.get_text("total"),
                     style={"backgroundColor": "#e9ecef"},
                     header_style={"fontWeight": "bold"},
                     columns=[
-                        Column(title="Points", field="total_points", width="80px", align="center"),
-                        Column(title="Score", field="total_score", width="80px", align="center"),
-                        Column(title="Avg", field="average", width="80px", align="center")
+                        Column(title=i18n_service.get_text("points"), field="total_points", width="80px", align="center"),
+                        Column(title=i18n_service.get_text("score"), field="total_score", width="80px", align="center"),
+                        Column(title=i18n_service.get_text("avg"), field="average", width="80px", align="center")
                     ]
                 )
             )
@@ -859,8 +859,8 @@ class LeagueService:
                 columns=columns,
                 data=data,
                 row_metadata=row_metadata,
-                title=f"{team} - Match Day {week}",
-                description=f"Score sheet for {team} in {league} - {season}",
+            title=f"{team} - {i18n_service.get_text('match_day')} {week}",
+            description=f"{i18n_service.get_text('score_sheet_for')} {team} in {league} - {season}",
                 config={
                     "stickyHeader": True,
                     "striped": True,
@@ -875,7 +875,7 @@ class LeagueService:
             return TableData(
                 columns=[],
                 data=[],
-                title=f"Error loading data for {team} - Week {week}"
+                title=f"{i18n_service.get_text('error_loading_data_for')} {team} - {i18n_service.get_text('week')} {week}"
             )
 
     def get_team_points_during_season(self, league_name: str, season: str) -> Dict[str, Any]:
@@ -1273,7 +1273,7 @@ class LeagueService:
                 return TableData(
                     columns=[],
                     data=[],
-                    title=f"No data available for {league} - {season}"
+                    title=f"{i18n_service.get_text('no_data_available_for')} {league} - {season}"
                 )
             
             # Get als and weeks
@@ -1340,14 +1340,14 @@ class LeagueService:
                             week_points += float(team_week_bonus[Columns.points].sum())
                         
                         team_data[team]['weekly_data'][w] = {
-                            'score': week_score,
                             'points': week_points,
+                            'score': week_score,
                             'avg': round(week_avg, 1)
                         }
                     else:
                         team_data[team]['weekly_data'][w] = {
-                            'score': 0,
                             'points': 0,
+                            'score': 0,
                             'avg': 0
                         }
             
@@ -1392,8 +1392,8 @@ class LeagueService:
                     ColumnGroup(
                         title=f"{i18n_service.get_text('week')} {w}",
                         columns=[
-                            Column(title=i18n_service.get_text("score"), field=f"week{w}_score", format="{:,}"),
                             Column(title=i18n_service.get_text("points"), field=f"week{w}_points", format="{:.1f}"),
+                            Column(title=i18n_service.get_text("score"), field=f"week{w}_score", format="{:,}"),
                             Column(title=i18n_service.get_text("average"), field=f"week{w}_avg", format="{:.1f}")
                         ]
                     )
@@ -1406,9 +1406,9 @@ class LeagueService:
                     style={"backgroundColor": "#e9ecef"},
                     header_style={"fontWeight": "bold"},
                     columns=[
-                        Column(title="Points", field="season_points", format="{:,}"),
-                        Column(title="Score", field="season_score", format="{:,}"),
-                        Column(title="Avg", field="season_avg", format="{:.1f}")
+                        Column(title=i18n_service.get_text("points"), field="season_points", format="{:,}"),
+                        Column(title=i18n_service.get_text("pins"), field="season_score", format="{:,}"),
+                        Column(title=i18n_service.get_text("average"), field="season_avg", format="{:.1f}")
                     ]
                 )
             )
@@ -1425,15 +1425,15 @@ class LeagueService:
                 for w in weeks_to_show:
                     week_info = team_info['weekly_data'][w]
                     row.extend([
-                        week_info['score'],
                         week_info['points'],
+                        week_info['score'],
                         week_info['avg']
                     ])
                 
                 # Add season totals
                 row.extend([
-                    team_info['season_score'],
                     team_info['season_points'],
+                    team_info['season_score'],
                     team_info['season_avg']
                 ])
                 
@@ -1612,7 +1612,7 @@ class LeagueService:
                 return TableData(
                     columns=[],
                     data=[],
-                    title=f"No data available for {team} - Week {week}"
+                    title=f"{i18n_service.get_text('no_data_available_for_team_week')} {team} - {i18n_service.get_text('week')} {week}"
                 )
             
             # Get all matches for the opponent teams in this week
@@ -1651,11 +1651,11 @@ class LeagueService:
             # --- Build columns ---
             columns = [
                 ColumnGroup(
-                    title="Match Info",
+                    title=i18n_service.get_text("match_info"),
                     style={"backgroundColor": "#f8f9fa"},
                     columns=[
-                        Column(title="Round", field="round_number", width="60px", align="center"),
-                        Column(title="Opponent", field="opponent_name", width="120px", align="left"),
+                        Column(title=i18n_service.get_text("round"), field="round_number", width="60px", align="center"),
+                        Column(title=i18n_service.get_text("opponent"), field="opponent_name", width="120px", align="left"),
                     ]
                 )
             ]
@@ -1665,9 +1665,9 @@ class LeagueService:
                 return ColumnGroup(
                     title=player,
                         columns=[
-                        Column(title="Pos", field=f"{prefix}{player}_pos", width="50px", align="center"),
-                        Column(title="Score", field=f"{prefix}{player}_score", width="80px", align="center"),
-                        Column(title="Pts", field=f"{prefix}{player}_points", width="60px", align="center"),
+                        Column(title=i18n_service.get_text("position"), field=f"{prefix}{player}_pos", width="50px", align="center"),
+                        Column(title=i18n_service.get_text("score"), field=f"{prefix}{player}_score", width="80px", align="center"),
+                        Column(title=i18n_service.get_text("points"), field=f"{prefix}{player}_points", width="60px", align="center"),
                     ]
                 )
 
@@ -1681,12 +1681,12 @@ class LeagueService:
             # Add team column group
             columns.append(
                 ColumnGroup(
-                    title="Team",
+                    title=i18n_service.get_text("team"),
                     style={"backgroundColor": "#e9ecef"},
                     header_style={"fontWeight": "bold"},
                     columns=[
-                        Column(title="Score", field="team_score", width="80px", align="center"),
-                        Column(title="Points", field="team_points", width="80px", align="center")
+                        Column(title=i18n_service.get_text("score"), field="team_score", width="80px", align="center"),
+                        Column(title=i18n_service.get_text("points"), field="team_points", width="80px", align="center")
                     ]
                 )
             )
@@ -1828,7 +1828,7 @@ class LeagueService:
             return TableData(
                 columns=[],
                 data=[],
-                title=f"Error loading data for {team} - Week {week}"
+                title=f"{i18n_service.get_text('error_loading_data_for')} {team} - {i18n_service.get_text('week')} {week}"
             )
 
     def get_team_individual_scores_table(self, league: str, season: str, team: str, week: int) -> TableData:
@@ -1890,10 +1890,10 @@ class LeagueService:
         # Build columns
         columns = [
             ColumnGroup(
-                title="Match",
+                title=i18n_service.get_text("match"),
                 columns=[
-                    Column(title="Opponent", field="opponent", width="120px", align="left", sortable=False),
-                    Column(title="Total Points", field="team_total_points", width="100px", align="center", sortable=False,
+                    Column(title=i18n_service.get_text("opponent"), field="opponent", width="120px", align="left", sortable=False),
+                    Column(title=i18n_service.get_text("total_points"), field="team_total_points", width="100px", align="center", sortable=False,
                            style={"fontWeight": "bold"}),
                 ]
                 #style={"borderRight": "2px solid #264653"}  # Vertical bar after Opponents group (same color as other borders)
@@ -1901,8 +1901,8 @@ class LeagueService:
             ColumnGroup(
                 title=team,
                 columns=[
-                    Column(title="Score", field="team_score", width="80px", align="center", sortable=False),
-                    Column(title="Pts.", field="team_points", width="80px", align="center", sortable=False),
+                    Column(title=i18n_service.get_text("pins"), field="team_score", width="80px", align="center", sortable=False),
+                    Column(title=i18n_service.get_text("points"), field="team_points", width="80px", align="center", sortable=False),
                       # Make Total Points column bold
                 ]
             )
@@ -1913,9 +1913,9 @@ class LeagueService:
                 ColumnGroup(
                     title=player_name,
                     columns=[
-                        Column(title="Score", field=f"{player_info['identifier']}_score", width="80px", align="center", sortable=False),
-                        Column(title="Pts.", field=f"{player_info['identifier']}_points", width="50px", align="center", sortable=False),
-                        Column(title="Pos", field=f"{player_info['identifier']}_pos", width="50px", align="center", sortable=False),
+                        Column(title=i18n_service.get_text("pins"), field=f"{player_info['identifier']}_score", width="80px", align="center", sortable=False),
+                        Column(title=i18n_service.get_text("points"), field=f"{player_info['identifier']}_points", width="50px", align="center", sortable=False),
+                        Column(title=i18n_service.get_text("position"), field=f"{player_info['identifier']}_pos", width="50px", align="center", sortable=False),
                         
                     ]
                 )
@@ -2135,11 +2135,11 @@ class LeagueService:
             # Create table structure
             columns = [
                 ColumnGroup(
-                    title="Team Performance",
+                    title=i18n_service.get_text("team_performance"),
                     columns=[
-                        Column(title="Season", field="season", width="120px", align="center"),
-                        Column(title="Team", field="team", width="250px", align="left"),
-                        Column(title="Average", field="average", width="130px", align="center")
+                        Column(title=i18n_service.get_text("season"), field="season", width="120px", align="center"),
+                        Column(title=i18n_service.get_text("team"), field="team", width="250px", align="left"),
+                        Column(title=i18n_service.get_text("average"), field="average", width="130px", align="center")
                     ]
                 )
             ]
@@ -2153,7 +2153,7 @@ class LeagueService:
             
         except Exception as e:
             print(f"Error in get_top_team_performances: {e}")
-            return TableData(columns=[], data=[], title="Error loading data")
+            return TableData(columns=[], data=[], title=i18n_service.get_text("error_loading_data"))
 
     def get_season_timetable(self, league: str, season: str) -> TableData:
         """Get season timetable with match day schedule as structured table data"""
@@ -2222,12 +2222,12 @@ class LeagueService:
             # Create table structure
             columns = [
                 ColumnGroup(
-                    title="Season Timetable",
+                    title=i18n_service.get_text("season_timetable"),
                     columns=[
-                        Column(title="Week", field="week", width="100px", align="center"),
-                        Column(title="Date", field="date", width="120px", align="center"),
-                        Column(title="Location", field="location", width="200px", align="left"),
-                        Column(title="Status", field="status", width="150px", align="center")
+                        Column(title=i18n_service.get_text("week"), field="week", width="100px", align="center"),
+                        Column(title=i18n_service.get_text("date"), field="date", width="120px", align="center"),
+                        Column(title=i18n_service.get_text("location"), field="location", width="200px", align="left"),
+                        Column(title=i18n_service.get_text("status"), field="status", width="150px", align="center")
                     ]
                 )
             ]
@@ -2241,7 +2241,7 @@ class LeagueService:
             
         except Exception as e:
             print(f"Error in get_season_timetable: {e}")
-            return TableData(columns=[], data=[], title="Error loading timetable")
+            return TableData(columns=[], data=[], title=i18n_service.get_text("error_loading_timetable"))
 
     def get_individual_averages(self, league: str, season: str, week: int = None, team: str = None) -> TableData:
         """Get individual player averages for a season, optionally filtered by week and/or team, sorted by performance"""
@@ -2347,20 +2347,20 @@ class LeagueService:
             # Create table structure
             columns = [
                 ColumnGroup(
-                    title="Player",
+                    title=i18n_service.get_text("player"),
                     frozen='left',  # Make only the player name column sticky
                     columns=[
-                        Column(title="Player", field="player", width="180px", align="left")
+                        Column(title=i18n_service.get_text("player"), field="player", width="180px", align="left")
                     ]
                 ),
                 ColumnGroup(
-                    title="Individual Averages",
+                    title=i18n_service.get_text("individual_averages"),
                     columns=[
-                        Column(title="Team", field="team", width="130px", align="left"),
-                        Column(title="Games", field="games", width="70px", align="center"),
-                        Column(title="Total Points", field="total_points", width="100px", align="center"),
-                        Column(title="Average", field="average", width="90px", align="center"),
-                        Column(title="High Game", field="high_game", width="90px", align="center")
+                        Column(title=i18n_service.get_text("team"), field="team", width="130px", align="left"),
+                        Column(title=i18n_service.get_text("games"), field="games", width="70px", align="center"),
+                        Column(title=i18n_service.get_text("total_points"), field="total_points", width="100px", align="center"),
+                        Column(title=i18n_service.get_text("average"), field="average", width="90px", align="center"),
+                        Column(title=i18n_service.get_text("high_game"), field="high_game", width="90px", align="center")
                     ]
                 )
             ]
@@ -2381,7 +2381,7 @@ class LeagueService:
             print(f"ERROR in get_individual_averages: {e}")
             import traceback
             print(f"TRACEBACK: {traceback.format_exc()}")
-            return TableData(columns=[], data=[], title="Error loading individual averages")
+            return TableData(columns=[], data=[], title=i18n_service.get_text("error_loading_individual_averages"))
 
     def get_top_individual_performances(self, league: str) -> TableData:
         """Get top individual performances across all seasons"""
@@ -2440,12 +2440,12 @@ class LeagueService:
             # Create table structure (removed Games column as requested)
             columns = [
                 ColumnGroup(
-                    title="Individual Performance",
+                    title=i18n_service.get_text("individual_performance"),
                     columns=[
-                        Column(title="Season", field="season", width="100px", align="center"),
-                        Column(title="Player", field="player", width="200px", align="left"),
-                        Column(title="Team", field="team", width="150px", align="left"),
-                        Column(title="Average", field="average", width="100px", align="center")
+                        Column(title=i18n_service.get_text("season"), field="season", width="100px", align="center"),
+                        Column(title=i18n_service.get_text("player"), field="player", width="200px", align="left"),
+                        Column(title=i18n_service.get_text("team"), field="team", width="150px", align="left"),
+                        Column(title=i18n_service.get_text("average"), field="average", width="100px", align="center")
                     ]
                 )
             ]
@@ -2464,7 +2464,7 @@ class LeagueService:
             print(f"ERROR in get_top_individual_performances: {e}")
             import traceback
             print(f"TRACEBACK: {traceback.format_exc()}")
-            return TableData(columns=[], data=[], title="Error loading data")
+            return TableData(columns=[], data=[], title=i18n_service.get_text("error_loading_data"))
 
     def get_record_individual_games(self, league: str) -> TableData:
         """Get record individual games (highest scoring individual performances)"""
@@ -2506,13 +2506,13 @@ class LeagueService:
             # Create table structure
             columns = [
                 ColumnGroup(
-                    title="Record Individual Games",
+                    title=i18n_service.get_text("record_individual_games"),
                     columns=[
-                        Column(title="Season", field="season", width="100px", align="center"),
-                        Column(title="Player", field="player", width="200px", align="left"),
-                        Column(title="Team", field="team", width="150px", align="left"),
-                        Column(title="Week", field="week", width="80px", align="center"),
-                        Column(title="Score", field="score", width="100px", align="center")
+                        Column(title=i18n_service.get_text("season"), field="season", width="100px", align="center"),
+                        Column(title=i18n_service.get_text("player"), field="player", width="200px", align="left"),
+                        Column(title=i18n_service.get_text("team"), field="team", width="150px", align="left"),
+                        Column(title=i18n_service.get_text("week"), field="week", width="80px", align="center"),
+                        Column(title=i18n_service.get_text("score"), field="score", width="100px", align="center")
                     ]
                 )
             ]
@@ -2526,7 +2526,7 @@ class LeagueService:
             
         except Exception as e:
             print(f"Error in get_record_individual_games: {e}")
-            return TableData(columns=[], data=[], title="Error loading individual record games")
+            return TableData(columns=[], data=[], title=i18n_service.get_text("error_loading_individual_record_games"))
 
     def get_record_team_games(self, league: str) -> TableData:
         """Get record team games (highest scoring team performances)"""
@@ -2567,12 +2567,12 @@ class LeagueService:
             # Create table structure
             columns = [
                 ColumnGroup(
-                    title="Record Team Games",
+                    title=i18n_service.get_text("record_team_games"),
                     columns=[
-                        Column(title="Season", field="season", width="100px", align="center"),
-                        Column(title="Team", field="team", width="200px", align="left"),
-                        Column(title="Week", field="week", width="80px", align="center"),
-                        Column(title="Score", field="score", width="100px", align="center")
+                        Column(title=i18n_service.get_text("season"), field="season", width="100px", align="center"),
+                        Column(title=i18n_service.get_text("team"), field="team", width="200px", align="left"),
+                        Column(title=i18n_service.get_text("week"), field="week", width="80px", align="center"),
+                        Column(title=i18n_service.get_text("score"), field="score", width="100px", align="center")
                     ]
                 )
             ]
@@ -2586,7 +2586,7 @@ class LeagueService:
             
         except Exception as e:
             print(f"Error in get_record_team_games: {e}")
-            return TableData(columns=[], data=[], title="Error loading team record games")
+            return TableData(columns=[], data=[], title=i18n_service.get_text("error_loading_team_record_games"))
 
     def _convert_to_simple_types(self, data):
         """Convert numpy types to simple Python types for JSON serialization"""
@@ -2975,7 +2975,7 @@ class LeagueService:
             return TableData(
                 columns=[],
                 data=[],
-                title="Team vs Team Comparison Matrix",
+                title=i18n_service.get_text("team_vs_team_comparison_matrix"),
                 description="No data available",
                 config={"striped": True, "hover": True, "compact": True, "stickyHeader": True}
             )
@@ -2986,10 +2986,11 @@ class LeagueService:
         # Create table structure
         columns = [
             ColumnGroup(
-                title='Team',
+                title=i18n_service.get_text("team"),
                 frozen='left',  # Make the team name column sticky
+                style={"backgroundColor": "#f8f9fa"},  # Light gray background
                 columns=[
-                    Column(title='Team', field='team', width='180px', align='left')
+                    Column(title=i18n_service.get_text("team"), field='team', width='180px', align='left')
                 ]
             )
         ]
@@ -2999,17 +3000,17 @@ class LeagueService:
             columns.append(ColumnGroup(
                 title=team,
                 columns=[
-                    Column(title='Score', field=f'{team}_score', width='80px', align='center'),
-                    Column(title='Points', field=f'{team}_points', width='80px', align='center')
+                    Column(title=i18n_service.get_text("score"), field=f'{team}_score', width='80px', align='center'),
+                    Column(title=i18n_service.get_text("points"), field=f'{team}_points', width='80px', align='center')
                 ]
             ))
         
         # Add average columns
         columns.append(ColumnGroup(
-            title='Average',
+            title=i18n_service.get_text("average"),
             columns=[
-                Column(title='Score', field='avg_score', width='80px', align='center'),
-                Column(title='Points', field='avg_points', width='80px', align='center')
+                Column(title=i18n_service.get_text("score"), field='avg_score', width='80px', align='center'),
+                Column(title=i18n_service.get_text("points"), field='avg_points', width='80px', align='center')
             ]
         ))
         
@@ -3032,7 +3033,7 @@ class LeagueService:
             return TableData(
                 columns=columns,
                 data=[],
-                title="Team vs Team Comparison Matrix",
+                title=i18n_service.get_text("team_vs_team_comparison_matrix"),
                 description="No match data available",
                 config={"striped": True, "hover": True, "compact": True, "stickyHeader": True}
             )
@@ -3095,8 +3096,8 @@ class LeagueService:
         return TableData(
             columns=columns,
             data=table_data,
-            title="Team vs Team Comparison Matrix",
-            description=f"Average scores and match points between teams{f' (Week {week})' if week else ' (Season)'}",
+            title=i18n_service.get_text("team_vs_team_comparison_matrix"),
+            description=f"{i18n_service.get_text('average_scores_and_match_points_between_teams')}{f' ({i18n_service.get_text('week')} {week})' if week else f' ({i18n_service.get_text('season')})'}",
             config={
                 "striped": True,
                 "hover": True,

@@ -305,39 +305,73 @@
                     
                     // Refresh current data to update table headers and chart labels
                     refreshCurrentData();
+                    
+                    // Dispatch language change event for apps to listen to
+                    window.dispatchEvent(new CustomEvent('languageChanged', { 
+                        detail: { language: language } 
+                    }));
                 }
             } catch (error) {
                 console.error('Error switching language:', error);
             }
         }
         
+        // Make switchLanguage globally available
+        window.switchLanguage = switchLanguage;
+        
         // Refresh current data to update table headers and chart labels
         function refreshCurrentData() {
+            console.log('🔄 Refreshing current data for language change');
+            
             // Check if we're on the league stats page
             if (window.location.pathname.includes('/league/stats')) {
-                // Trigger a refresh of the current data
-                const selectedSeason = document.querySelector('input[name="season"]:checked')?.value;
-                const selectedLeague = document.querySelector('input[name="league"]:checked')?.value;
-                const selectedWeek = document.querySelector('input[name="week"]:checked')?.value;
-                const selectedTeam = document.querySelector('input[name="team"]:checked')?.value;
-                
-                if (selectedSeason && selectedLeague) {
-                    // Refresh league table
-                    if (selectedWeek) {
-                        updateTableLeagueWeek();
-                    } else {
-                        updateTableLeagueHistory();
-                    }
+                // Trigger content refresh for league stats
+                if (typeof window.leagueStatsApp !== 'undefined' && window.leagueStatsApp.renderContent) {
+                    console.log('🔄 Refreshing league stats content');
+                    window.leagueStatsApp.renderContent();
+                } else {
+                    // Fallback to legacy refresh
+                    const selectedSeason = document.querySelector('input[name="season"]:checked')?.value;
+                    const selectedLeague = document.querySelector('input[name="league"]:checked')?.value;
+                    const selectedWeek = document.querySelector('input[name="week"]:checked')?.value;
+                    const selectedTeam = document.querySelector('input[name="team"]:checked')?.value;
                     
-                    // Refresh team details if team is selected
-                    if (selectedTeam && selectedWeek) {
-                        updateTableTeamDetails();
+                    if (selectedSeason && selectedLeague) {
+                        // Refresh league table
+                        if (selectedWeek) {
+                            updateTableLeagueWeek();
+                        } else {
+                            updateTableLeagueHistory();
+                        }
+                        
+                        // Refresh team details if team is selected
+                        if (selectedTeam && selectedWeek) {
+                            updateTableTeamDetails();
+                        }
+                        
+                        // Refresh charts
+                        if (typeof updateChartsLeague === 'function') {
+                            updateChartsLeague();
+                        }
                     }
-                    
-                    // Refresh charts
-                    if (typeof updateChartsLeague === 'function') {
-                        updateChartsLeague();
-                    }
+                }
+            }
+            
+            // Check if we're on the team stats page
+            if (window.location.pathname.includes('/team/stats')) {
+                // Trigger content refresh for team stats
+                if (typeof window.teamStatsApp !== 'undefined' && window.teamStatsApp.renderContent) {
+                    console.log('🔄 Refreshing team stats content');
+                    window.teamStatsApp.renderContent();
+                }
+            }
+            
+            // Check if we're on the API test page
+            if (window.location.pathname.includes('/test')) {
+                // Trigger content refresh for API test
+                if (typeof window.apiTestApp !== 'undefined' && window.apiTestApp.renderContent) {
+                    console.log('🔄 Refreshing API test content');
+                    window.apiTestApp.renderContent();
                 }
             }
         }

@@ -29,10 +29,10 @@
                         <span id="currentLanguageText">Deutsch</span>
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="languageDropdown">
-                        <li><a class="dropdown-item" href="#" data-language="de">
+                        <li><a class="dropdown-item language-option" href="#" data-language="de">
                             <span>🇩🇪</span> Deutsch
                         </a></li>
-                        <li><a class="dropdown-item" href="#" data-language="en">
+                        <li><a class="dropdown-item language-option" href="#" data-language="en">
                             <span>🇺🇸</span> English
                         </a></li>
                     </ul>
@@ -90,6 +90,36 @@
                                 // Trigger palette change event if handler exists
                                 if (typeof window.handlePaletteChange === 'function') {
                                     window.handlePaletteChange();
+                                }
+                            });
+                        });
+                        
+                        // Language selector handler
+                        document.querySelectorAll('.language-option').forEach(function(el) {
+                            el.addEventListener('click', function(e) {
+                                e.preventDefault();
+                                const language = el.getAttribute('data-language');
+                                
+                                // Update navbar display immediately
+                                const flagElement = document.getElementById('currentLanguageFlag');
+                                const textElement = document.getElementById('currentLanguageText');
+                                
+                                if (language === 'de') {
+                                    if (flagElement) flagElement.textContent = '🇩🇪';
+                                    if (textElement) textElement.textContent = 'Deutsch';
+                                } else if (language === 'en') {
+                                    if (flagElement) flagElement.textContent = '🇺🇸';
+                                    if (textElement) textElement.textContent = 'English';
+                                }
+                                
+                                // Trigger language change event
+                                if (typeof window.switchLanguage === 'function') {
+                                    window.switchLanguage(language);
+                                } else {
+                                    // Fallback: reload page with language parameter
+                                    const url = new URL(window.location);
+                                    url.searchParams.set('lang', language);
+                                    window.location.href = url.toString();
                                 }
                             });
                         });

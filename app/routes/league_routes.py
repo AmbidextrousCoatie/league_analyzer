@@ -481,22 +481,53 @@ def get_translations():
             "translations": {
                 key: i18n_service.get_text(key) 
                 for key in [
+                    # Common table headers
                     "points", "score", "average", "position", "team", "name", "week", "total",
-                    "ranking", "opponent", "round", "league_standings", "league_history",
-                    "team_week_details", "head_to_head", "match_day", "through_week",
-                    "week_results", "total_until_week", "select_match_day", "loading_data",
-                    "no_data_found", "error_loading_data", "missing_parameters",
+                    "ranking", "opponent", "round", "pins", "avg", "games", "high_game",
+                    "location", "status", "date", "player", "season", "league",
+                    
+                    # Table titles and descriptions
+                    "league_standings", "league_history", "team_week_details", "head_to_head", 
+                    "match_day", "through_week", "week_results", "total_until_week",
+                    "match_info", "match", "total_points", "team_performance", "season_timetable",
+                    "individual_averages", "individual_performance", "record_individual_games", 
+                    "record_team_games", "team_vs_team_comparison_matrix",
+                    
+                    # Navigation and UI
+                    "select_match_day", "loading_data", "no_data_found", "error_loading_data", 
+                    "missing_parameters", "no_data", "no_league_data_available",
+                    "no_data_available_for", "no_timetable_available", "no_individual_data_available",
+                    "no_data_available_for_team_week",
+                    
+                    # Chart labels
                     "match_day_label", "position_label", "points_label", "average_label",
                     "position_progression", "points_progression", "average_progression",
-                    "season_league_required", "no_data_available",
-                    "league_statistics", "season", "league", "season_overview",
-                    "position_in_season_progress", "points_in_season_progress",
-                    "points_per_match_day", "position_per_match_day", "average_per_match_day",
-                    "points_vs_average", "league_results_match_day", "honor_scores",
-                    "top_individual_scores", "top_team_scores", "best_individual_averages",
-                    "best_team_averages", "score_sheet_selected_team", "details",
-                    "refresh_data", "please_select_combination", "please_select_match_day",
-                    "please_select_team", "match_day_label", "match_day_format"
+                    "cumulative_points",
+                    
+                    # Error messages
+                    "season_league_required", "no_data_available", "error_loading_timetable",
+                    "error_loading_individual_averages", "error_loading_individual_record_games",
+                    "error_loading_team_record_games", "error_loading_data_for",
+                    
+                    # Language names
+                    "english", "german",
+                    
+                    # Card headers and UI elements
+                    "league_statistics", "season_overview", "position_in_season_progress", 
+                    "points_in_season_progress", "points_per_match_day", "position_per_match_day", 
+                    "average_per_match_day", "points_vs_average", "league_results_match_day", 
+                    "honor_scores", "top_individual_scores", "top_team_scores", 
+                    "best_individual_averages", "best_team_averages", "score_sheet_selected_team", 
+                    "details", "refresh_data", "please_select_combination", "please_select_match_day",
+                    "please_select_team", "match_day_format",
+                    
+                    # Additional UI elements
+                    "league_leader", "league_average", "pins_per_game", "weeks_completed",
+                    "through_week", "game", "score_sheet_for", "history", "top_team_performances",
+                    "venue", "match_schedule", "top_individual_performances", "individual_scores",
+                    "all_individual_scores_for", "view", "own_team", "standings", 
+                    "win_percentage", "performance", "average_scores_and_match_points_between_teams",
+                    "week", "season"
                 ]
             }
         })

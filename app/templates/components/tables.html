@@ -971,8 +971,8 @@ function createTableBootstrap3(tableId, data, options = {}) {
                                 const value1 = row1.rowData[flatIndex];
                                 const value2 = row2.rowData[flatIndex];
                                 
-                                // Special handling for team vs team comparison table (takes precedence)
-                                if (data.title && data.title.includes('Team vs Team Comparison') && groupIndex === 0 && index === 0) {
+                        // Special handling for team vs team comparison table (takes precedence)
+                        if (data.title && (data.title.includes('Team vs Team Comparison') || data.title.includes('Team vs Team Vergleichsmatrix')) && groupIndex === 0 && index === 0) {
                                     // Special handling for team vs team comparison table - first column shows team name with color
                                     const teamName1 = value1;
                                     const teamName2 = value2;
@@ -1129,7 +1129,7 @@ function createTableBootstrap3(tableId, data, options = {}) {
                         
                         
                         // Special handling for team vs team comparison table (takes precedence)
-                        if (data.title && data.title.includes('Team vs Team Comparison') && groupIndex === 0 && index === 0) {
+                        if (data.title && (data.title.includes('Team vs Team Comparison') || data.title.includes('Team vs Team Vergleichsmatrix')) && groupIndex === 0 && index === 0) {
                             // Special handling for team vs team comparison table - first column shows team name with color
                             const teamName = value;
                             let color = "#888"; // fallback color

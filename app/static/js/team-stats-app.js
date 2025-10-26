@@ -78,6 +78,12 @@ class TeamStatsApp {
                 this.handleDatabaseChange(event.detail.database);
             });
             
+            // Listen for language changes
+            window.addEventListener('languageChanged', (event) => {
+                console.log('🔄 Language changed event received:', event.detail);
+                this.handleLanguageChange(event.detail.language);
+            });
+            
             console.log('✅ TeamStatsApp initialized successfully');
             
             // Process initial URL state with delay for complete DOM setup
@@ -198,6 +204,26 @@ class TeamStatsApp {
             
         } catch (error) {
             console.error('❌ Error handling database change:', error);
+        }
+    }
+    
+    /**
+     * Handle language changes
+     */
+    async handleLanguageChange(newLanguage) {
+        console.log('🔄 Handling language change to:', newLanguage);
+        
+        try {
+            // Re-render all content to update translations
+            if (this.contentRenderer) {
+                const currentState = this.urlStateManager.getState();
+                this.contentRenderer.renderContent(currentState);
+            }
+            
+            console.log('✅ Language change handled successfully');
+            
+        } catch (error) {
+            console.error('❌ Error handling language change:', error);
         }
     }
 

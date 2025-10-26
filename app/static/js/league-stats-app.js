@@ -115,6 +115,12 @@ class LeagueStatsApp {
             console.log('🔄 Database changed event received:', event.detail);
             this.handleDatabaseChange(event.detail.database);
         });
+        
+        // Listen for language changes
+        window.addEventListener('languageChanged', (event) => {
+            console.log('🔄 Language changed event received:', event.detail);
+            this.handleLanguageChange(event.detail.language);
+        });
 
         window.handlePaletteChange = () => {
             console.log('🎨 Palette changed - refreshing content');
@@ -190,6 +196,23 @@ class LeagueStatsApp {
             
         } catch (error) {
             console.error('❌ Error handling database change:', error);
+        }
+    }
+    
+    /**
+     * Handle language changes
+     */
+    async handleLanguageChange(newLanguage) {
+        console.log('🔄 Handling language change to:', newLanguage);
+        
+        try {
+            // Re-render all content to update translations
+            this.renderContent();
+            
+            console.log('✅ Language change handled successfully');
+            
+        } catch (error) {
+            console.error('❌ Error handling language change:', error);
         }
     }
 
