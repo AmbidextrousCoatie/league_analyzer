@@ -66,8 +66,17 @@ class TeamStatsApp {
             });
             await this.buttonManager.initialize();
             
+            // Populate team dropdown
+            await this.populateTeamDropdown();
+            
             // Set up our own event listeners that properly trigger state changes
             this.setupEventListeners();
+            
+            // Listen for database changes
+            window.addEventListener('databaseChanged', (event) => {
+                console.log('🔄 Database changed event received:', event.detail);
+                this.handleDatabaseChange(event.detail.database);
+            });
             
             console.log('✅ TeamStatsApp initialized successfully');
             
@@ -95,6 +104,103 @@ class TeamStatsApp {
         }
     }
     
+    /**
+     * Populate team dropdown with all available teams
+     */
+    async populateTeamDropdown() {
+        try {
+            console.log('🏢 Populating team dropdown...');
+            
+            // Get current database from URL or default
+            const urlParams = new URLSearchParams(window.location.search);
+            const database = urlParams.get('database') || 'db_real';
+            
+            const response = await fetch(`/team/get_teams?database=${database}`);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            console.log('📊 Received teams data:', data);
+            
+            const teamSelect = document.getElementById('teamSelect');
+            if (!teamSelect) {
+                console.warn('Team select element not found');
+                return;
+            }
+            
+            // Clear existing options except the first one (placeholder)
+            while (teamSelect.options.length > 1) {
+                teamSelect.remove(1);
+            }
+            
+            // Add team options
+            if (data && Array.isArray(data)) {
+                data.forEach(team => {
+                    const option = document.createElement('option');
+                    option.value = team;
+                    option.textContent = team;
+                    teamSelect.appendChild(option);
+                });
+                
+                console.log(`✅ Populated team dropdown with ${data.length} teams`);
+            } else {
+                console.warn('No teams data received or invalid format:', data);
+            }
+            
+        } catch (error) {
+            console.error('❌ Error populating team dropdown:', error);
+            
+            // Show error in dropdown
+            const teamSelect = document.getElementById('teamSelect');
+            if (teamSelect) {
+                teamSelect.innerHTML = `
+                    <option value="">Fehler beim Laden der Teams</option>
+                `;
+            }
+        }
+    }
+
+    /**
+     * Handle database changes
+     */
+    async handleDatabaseChange(newDatabase) {
+        console.log('🔄 Handling database change to:', newDatabase);
+        
+        try {
+            // Update URL state with new database
+            const currentState = this.urlStateManager.getState();
+            const newState = {
+                ...currentState,
+                database: newDatabase,
+                team: '', // Reset team selection
+                season: '', // Reset season selection
+                week: '' // Reset week selection
+            };
+            
+            // Update URL state
+            this.urlStateManager.setState(newState);
+            
+            // Repopulate team dropdown with new database
+            await this.populateTeamDropdown();
+            
+            // Reinitialize button manager with new state
+            if (this.buttonManager) {
+                await this.buttonManager.handleStateChange(newState);
+            }
+            
+            // Render content with new state
+            if (this.contentRenderer) {
+                this.contentRenderer.renderContent(newState);
+            }
+            
+            console.log('✅ Database change handled successfully');
+            
+        } catch (error) {
+            console.error('❌ Error handling database change:', error);
+        }
+    }
+
     /**
      * Set up event listeners that ensure content blocks update properly
      */

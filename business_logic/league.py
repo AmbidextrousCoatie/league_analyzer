@@ -9,7 +9,10 @@ levels = {
     "BZOL 2 Nord": 5,
     "BZL 2 Nord": 6,
     "KL 1 Nord": 7,
-
+    "BZOL N1": 8,
+    "BZL N2": 9,
+    "BZOL N2": 10,
+    "BZL N1": 11,
 }
 
 class League:

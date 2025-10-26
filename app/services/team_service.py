@@ -99,7 +99,7 @@ class TeamService:
             history[season] = {
                 "league_name": league_name,
                 "final_position": final_position,
-                "league_level": levels[league_name],
+                "league_level": levels.get(league_name, 99),  # Default to 99 if league not found
                 "statistics": {
                     "total_score": float(team_stats.season_summary.total_score),
                     "total_points": float(team_stats.season_summary.total_points),

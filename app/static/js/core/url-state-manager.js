@@ -29,7 +29,7 @@ class URLStateManager {
             season: params.get('season') || '',
             week: params.get('week') || '',
             league: params.get('league') || '',
-            database: params.get('database') || 'db_sim'
+            database: params.get('database') || 'db_real'
         };
     }
     

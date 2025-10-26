@@ -109,6 +109,12 @@ class LeagueStatsApp {
             console.log('📊 Data source changed - refreshing content');
             this.renderContent();
         };
+        
+        // Listen for database changes
+        window.addEventListener('databaseChanged', (event) => {
+            console.log('🔄 Database changed event received:', event.detail);
+            this.handleDatabaseChange(event.detail.database);
+        });
 
         window.handlePaletteChange = () => {
             console.log('🎨 Palette changed - refreshing content');
@@ -149,6 +155,42 @@ class LeagueStatsApp {
         this.contentUpdateTimeout = setTimeout(() => {
             this.renderContent();
         }, 200); // 200ms debounce for content updates
+    }
+    
+    /**
+     * Handle database changes
+     */
+    async handleDatabaseChange(newDatabase) {
+        console.log('🔄 Handling database change to:', newDatabase);
+        
+        try {
+            // Update URL state with new database
+            const currentState = this.urlStateManager.getState();
+            const newState = {
+                ...currentState,
+                database: newDatabase,
+                team: '', // Reset team selection
+                season: '', // Reset season selection
+                week: '', // Reset week selection
+                league: '' // Reset league selection
+            };
+            
+            // Update URL state
+            this.urlStateManager.setState(newState);
+            
+            // Reinitialize button manager with new state
+            if (this.buttonManager) {
+                await this.buttonManager.handleStateChange(newState);
+            }
+            
+            // Render content with new state
+            this.renderContent();
+            
+            console.log('✅ Database change handled successfully');
+            
+        } catch (error) {
+            console.error('❌ Error handling database change:', error);
+        }
     }
 
     async renderContent() {
