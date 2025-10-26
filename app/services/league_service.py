@@ -445,10 +445,10 @@ class LeagueService:
         events = []
         for _, row in unique_events_df.iterrows():
             event = {
-                i18n_service.get_text("season"): row[Columns.season],
-                i18n_service.get_text("league"): row[Columns.league_name],
-                i18n_service.get_text("week"): row[Columns.week],
-                i18n_service.get_text("date"): row[Columns.date]
+                "Season": row[Columns.season],
+                "League": row[Columns.league_name],
+                "Week": row[Columns.week],
+                "Date": row[Columns.date]
             }
             events.append(event)
         
