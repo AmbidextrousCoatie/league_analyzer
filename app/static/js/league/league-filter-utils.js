@@ -1,8 +1,15 @@
 /**
  * League Filter Utilities
  * 
+ * @deprecated This file is deprecated. Use CentralizedButtonManager instead.
+ * 
  * UI update functions for league filter controls
  * Extracted from monolithic league stats template
+ * 
+ * MIGRATION GUIDE:
+ * - Replace SimpleFilterManager with CentralizedButtonManager
+ * - Remove manual button update calls
+ * - The centralized system handles all button management automatically
  */
 
 /**

@@ -54,11 +54,7 @@ class LeagueStatsApp {
         console.log('🧱 Initializing content blocks...');
         
         try {
-            // Initialize unified filter manager for league mode
-            this.filterManager = new SimpleFilterManager(this.urlStateManager, 'league');
-            await this.filterManager.initialize();
-            
-            // Create content blocks (they initialize in their constructors)
+            // Create content blocks FIRST (they initialize in their constructors)
             console.log('🔄 Creating SeasonLeagueStandingsBlock...');
             const seasonLeagueStandingsBlock = new SeasonLeagueStandingsBlock();
             console.log('🔄 Creating LeagueAggregationBlock...');
@@ -73,20 +69,29 @@ class LeagueStatsApp {
             const teamDetailsBlock = new TeamDetailsBlock();
             console.log('🔄 Creating TeamPerformanceBlock...');
             const teamPerformanceBlock = new TeamPerformanceBlock();
-        console.log('🔄 Creating TeamWinPercentageBlock...');
-        const teamWinPercentageBlock = new TeamWinPercentageBlock();
+            console.log('🔄 Creating TeamWinPercentageBlock...');
+            const teamWinPercentageBlock = new TeamWinPercentageBlock();
             
-        // Store blocks (no filter-controls block needed anymore)
-        this.contentBlocks.set('season-league-standings', seasonLeagueStandingsBlock);
-        this.contentBlocks.set('league-aggregation', leagueAggregationBlock);
-        this.contentBlocks.set('league-season-overview', leagueSeasonOverviewBlock);
-        this.contentBlocks.set('season-overview', seasonOverviewBlock);
-        this.contentBlocks.set('matchday', matchDayBlock);
-        this.contentBlocks.set('team-details', teamDetailsBlock);
-        this.contentBlocks.set('team-performance', teamPerformanceBlock);
-        this.contentBlocks.set('team-win-percentage', teamWinPercentageBlock);
+            // Store blocks (no filter-controls block needed anymore)
+            this.contentBlocks.set('season-league-standings', seasonLeagueStandingsBlock);
+            this.contentBlocks.set('league-aggregation', leagueAggregationBlock);
+            this.contentBlocks.set('league-season-overview', leagueSeasonOverviewBlock);
+            this.contentBlocks.set('season-overview', seasonOverviewBlock);
+            this.contentBlocks.set('matchday', matchDayBlock);
+            this.contentBlocks.set('team-details', teamDetailsBlock);
+            this.contentBlocks.set('team-performance', teamPerformanceBlock);
+            this.contentBlocks.set('team-win-percentage', teamWinPercentageBlock);
             
             console.log('✅ Content blocks initialized');
+            
+            // Initialize centralized button manager for league mode with content rendering callback
+            this.buttonManager = new CentralizedButtonManager(this.urlStateManager, 'league', (state) => {
+                console.log('🔄 LeagueStatsApp: Button state changed, rendering content:', state);
+                this.currentState = { ...state };
+                this.renderContent();
+            });
+            await this.buttonManager.initialize();
+            
         } catch (error) {
             console.error('❌ Error initializing content blocks:', error);
             throw error;
@@ -155,10 +160,18 @@ class LeagueStatsApp {
         try {
             this.isRenderingContent = true;
             console.log('🎨 Rendering content for state:', this.currentState);
+            console.log('🎨 Available content blocks:', Array.from(this.contentBlocks.keys()));
+            
+            // Check if we have any content blocks
+            if (this.contentBlocks.size === 0) {
+                console.warn('⚠️ LeagueStatsApp: No content blocks available for rendering');
+                return;
+            }
             
             // Render all content blocks in parallel for better performance
             const renderPromises = Array.from(this.contentBlocks.entries()).map(async ([blockName, block]) => {
                 try {
+                    console.log(`🔄 Rendering block: ${blockName}`);
                     await block.render(this.currentState);
                     console.log(`✅ Rendered block: ${blockName}`);
                 } catch (error) {

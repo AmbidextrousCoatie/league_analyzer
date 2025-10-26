@@ -127,67 +127,41 @@
   </div>
 </div>
 
+<!-- Core dependencies -->
+<script src="{{ static_url('js/core/url-state-manager.js') }}"></script>
+<script src="{{ static_url('js/core/centralized-button-manager.js') }}"></script>
+
 <!-- Common Test Functions -->
 <script>
-    // Initialize the page
-function initializePage() {
-    // Get any URL parameters or set defaults
-    const urlParams = new URLSearchParams(window.location.search);
-    const selectedSeason = urlParams.get('season') || null;
-    const selectedLeague = urlParams.get('league') || null;
-    const selectedWeek = urlParams.get('week') || null;
-    const selectedTeam = urlParams.get('team') || null;
+    // Initialize the page with centralized button manager
+    let urlStateManager;
+    let buttonManager;
     
-    // Load available seasons
-    fetch('/league/get_available_seasons')
-        .then(response => response.json())
-        .then(seasons => {
-            // Add "All" option at the beginning
-            const allSeasons = ['All', ...seasons];
-            const buttonsSeason = allSeasons.map(season => `
-                <input type="radio" class="btn-check" name="season" id="season_${season}" 
-                       value="${season === 'All' ? '' : season}" ${season === 'All' ? 'checked' : ''}>
-                <label class="btn btn-outline-primary" for="season_${season}">${season}</label>
-            `).join('');
-            document.getElementById('buttonsSeason').innerHTML = buttonsSeason;
+    async function initializePage() {
+        try {
+            // Initialize URL state manager
+            urlStateManager = new URLStateManager();
             
-            // Always load leagues, regardless of whether a season is selected
-            loadLeagues();
+            // Initialize centralized button manager
+            buttonManager = new CentralizedButtonManager(urlStateManager, 'league');
+            await buttonManager.initialize();
             
-            // If we have a selected season, select it
-            if (selectedSeason && seasons.includes(selectedSeason)) {
-                const seasonInput = document.querySelector(`input[name="season"][value="${selectedSeason}"]`);
-                if (seasonInput) {
-                    seasonInput.checked = true;
+            console.log('✅ Test page initialized with centralized button manager');
+            
+            // Set up event listeners for content updates
+            document.addEventListener('change', event => {
+                if (event.target.name === 'season' || event.target.name === 'league') {
+                    handleSelectionChange();
                 }
-            } else if (!selectedSeason) {
-                // If no season is selected, select "All"
-                const allInput = document.querySelector(`input[name="season"][value=""]`);
-                if (allInput) {
-                    allInput.checked = true;
+                if (event.target.name === 'week' || event.target.name === 'team') {
+                    handleWeekTeamSelection();
                 }
-            }
-        })
-        .catch(error => {
-            console.error('Error loading seasons:', error);
-            document.getElementById('buttonsSeason').innerHTML = `
-                <div class="alert alert-danger">
-                    <strong>Error loading seasons:</strong> ${error.message || 'Unknown error'}
-                </div>
-            `;
-        });
-    
-    // Add event listeners for future changes
-    document.addEventListener('change', event => {
-        if (event.target.name === 'season' || event.target.name === 'league') {
-            updateAvailableOptions();
-            handleSelectionChange();
+            });
+            
+        } catch (error) {
+            console.error('❌ Error initializing test page:', error);
         }
-        if (event.target.name === 'week' || event.target.name === 'team') {
-            handleWeekTeamSelection();
-        }
-    });
-}
+    }
 
 // Function to load leagues
 function loadLeagues() {

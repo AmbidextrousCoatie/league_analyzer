@@ -56,9 +56,15 @@ class TeamStatsApp {
             // Initialize filter manager with a short delay to ensure DOM is ready
             await new Promise(resolve => setTimeout(resolve, 100));
             
-            // Simplified filter manager without event bus (team mode)
-            this.filterManager = new SimpleFilterManager(this.urlStateManager, 'team');
-            await this.filterManager.initialize();
+            // Centralized button manager for team mode with content rendering callback
+            this.buttonManager = new CentralizedButtonManager(this.urlStateManager, 'team', (state) => {
+                console.log('🔄 TeamStatsApp: Button state changed, rendering content:', state);
+                this.currentState = { ...state };
+                if (this.contentRenderer) {
+                    this.contentRenderer.renderContent(state);
+                }
+            });
+            await this.buttonManager.initialize();
             
             // Set up our own event listeners that properly trigger state changes
             this.setupEventListeners();
