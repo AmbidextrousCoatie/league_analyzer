@@ -1,0 +1,11 @@
+id,league_season_id,event_type,league_week,tournament_stage,date,venue_id,oil_pattern_id,status,notes
+1,1,league,1,,2025-10-12,WestBowling,,completed,
+2,2,league,1,,2025-10-05,Dettelbach,,completed,
+3,3,league,1,,2024-10-12,Dreambowl,,completed,
+4,3,league,2,,2024-11-02,WestBowling,,completed,
+5,3,league,3,,2025-02-01,Dreambowl,,completed,
+6,3,league,4,,2025-02-15,SuperBowl,,completed,
+7,3,league,5,,2025-03-15,MaxMunich,,completed,
+8,3,league,6,,2025-04-05,Dettelbach,,completed,
+9,4,league,1,,2025-10-04,SuperBowl,,completed,
+10,4,league,2,,2025-10-18,Dreambowl,,completed,

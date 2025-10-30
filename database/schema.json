@@ -132,12 +132,25 @@
       "columns": [
         { "name": "id", "type": "string", "nullable": false, "pk": true },
         { "name": "name", "type": "string", "nullable": false },
+        { "name": "full_name", "type": "string", "nullable": true },
         { "name": "city", "type": "string", "nullable": true },
         { "name": "country", "type": "string", "nullable": true },
         { "name": "pinsetter", "type": "string", "nullable": true }
       ],
       "unique": [],
       "indexes": []
+    },
+
+    {
+      "name": "venue_name",
+      "columns": [
+        { "name": "id", "type": "integer", "nullable": false, "pk": true },
+        { "name": "venue_id", "type": "string", "nullable": false, "fk": { "table": "venue", "column": "id" } },
+        { "name": "name", "type": "string", "nullable": false },
+        { "name": "is_primary", "type": "boolean", "nullable": true }
+      ],
+      "unique": [ ["name"] ],
+      "indexes": [ ["venue_id"] ]
     },
 
     {
@@ -158,14 +171,16 @@
       "columns": [
         { "name": "id", "type": "integer", "nullable": false, "pk": true },
         { "name": "league_season_id", "type": "integer", "nullable": true, "fk": { "table": "league_season", "column": "id" } },
-        { "name": "week_or_round", "type": "string", "nullable": false },
+        { "name": "event_type", "type": "string", "nullable": false },
+        { "name": "league_week", "type": "integer", "nullable": true },
+        { "name": "tournament_stage", "type": "string", "nullable": true },
         { "name": "date", "type": "date", "nullable": false },
-        { "name": "venue_id", "type": "integer", "nullable": false, "fk": { "table": "venue", "column": "id" } },
+        { "name": "venue_id", "type": "string", "nullable": false, "fk": { "table": "venue", "column": "id" } },
         { "name": "oil_pattern_id", "type": "integer", "nullable": true, "fk": { "table": "oil_pattern", "column": "id" } },
-        { "name": "scoring_mode", "type": "string", "nullable": true },
+        { "name": "status", "type": "string", "nullable": true },
         { "name": "notes", "type": "string", "nullable": true }
       ],
-      "indexes": [ ["league_season_id", "week_or_round"], ["date"] ]
+      "indexes": [ ["league_season_id", "league_week"], ["date"] ]
     },
 
     {

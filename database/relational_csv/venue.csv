@@ -1,7 +1,7 @@
-id,name,city,country,pinsetter
-MaxMunich,Max Munich,Brunnthal,Deutschland,strings
-Dettelbach,Extreme Bowlingarena,Dettelbach,Deutschland,freefall
-Dreambowl,Dreambowl Palace,Unterföhrung,Deutschland,freefall
-WestBowling,West Bowling,Nürnberg,Deutschland,strings
-SuperBowl,Super Bowl,Regensburg,Deutschland, strings
+id,name,full_name,city,country,pinsetter
+MaxMunich,Max Munich,Max Munich Brunnthal,Brunnthal,Deutschland,strings
+Dettelbach,Extreme Bowlingarena,Extreme Bowlingarena Dettelbach,Dettelbach,Deutschland,freefall
+Dreambowl,Dreambowl Palace,Dreambowl Palace Unterföhring,Unterföhring,Deutschland,freefall
+WestBowling,West Bowling,Nürnberg West Bowling,Nürnberg,Deutschland,strings
+SuperBowl,Super Bowl,Super Bowl Regensburg,Regensburg,Deutschland, strings
 

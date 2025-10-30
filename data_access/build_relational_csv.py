@@ -27,7 +27,7 @@ ROOT = Path(__file__).resolve().parents[1]
 REAL_DATA = ROOT / "database" / "data" / "bowling_ergebnisse_real.csv"
 SCHEMA_JSON = ROOT / "database" / "schema.json"
 OUT_DIR = ROOT / "database" / "relational_csv"
-TARGET_TABLE = "league_season"  # options: "venue", "league", "scoring_system", "league_season"
+TARGET_TABLE = "event"  # options: "venue", "league", "scoring_system", "league_season", "event"
 
 
 def ensure_out_dir() -> None:
@@ -161,6 +161,96 @@ def build_league_season() -> pd.DataFrame:
 	if errors:
 		raise ValueError("League season validation failed: " + "; ".join(errors))
 	return merged[get_ordered_column_names(table_spec)]
+
+
+def build_event() -> pd.DataFrame:
+
+	df = pd.read_csv(REAL_DATA, sep=";", dtype=str)
+	for col in ("League", "Season", "Date"):
+		if col not in df.columns:
+			raise KeyError(f"Expected column '{col}' in real dataset")
+	# Always use league Week from the dataset (ignore any 'Round Number' columns)
+	week_col = "Week"
+	if week_col not in df.columns:
+		raise KeyError("Expected 'Week' column in real dataset")
+	if "Location" not in df.columns:
+		raise KeyError("Expected column 'Location' in real dataset")
+
+	events_raw = (
+		df[["League", "Season", week_col, "Date", "Location"]]
+		.rename(columns={"League": "league_id", "Season": "season", week_col: "league_week", "Date": "date"})
+		.dropna()
+		.drop_duplicates()
+		.sort_values(by=["league_id", "season", "league_week", "date", "Location"]) 
+		.reset_index(drop=True)
+	)
+    
+	league_season_csv = OUT_DIR / "league_season.csv"
+	venue_csv = OUT_DIR / "venue.csv"
+	if not league_season_csv.exists():
+		raise FileNotFoundError("league_season.csv not found. Generate league_season first.")
+	if not venue_csv.exists():
+		raise FileNotFoundError("venue.csv not found. Generate or curate venues first.")
+	league_season_df = pd.read_csv(league_season_csv, dtype={"id": "Int64", "league_id": str, "season": str})
+	venue_df = pd.read_csv(venue_csv, dtype=str)
+
+	events = events_raw.merge(
+		league_season_df[["id", "league_id", "season"]].rename(columns={"id": "league_season_id"}),
+		on=["league_id", "season"],
+		how="left",
+		validate="many_to_one",
+	)
+	missing_ls = events[events["league_season_id"].isna()]
+	if not missing_ls.empty:
+		missing_keys = missing_ls[["league_id", "season"]].drop_duplicates().astype(str).values.tolist()
+		raise ValueError(f"Missing league_season rows for: {missing_keys}")
+
+	# Deterministic mapping from Location → venue_id using exact matches on 'name' or 'full_name'
+	name_map = venue_df[["name", "id"]].rename(columns={"name": "Location", "id": "venue_id"})
+	full_map = venue_df[["full_name", "id"]].dropna().rename(columns={"full_name": "Location", "id": "venue_id"})
+	mapping = pd.concat([name_map, full_map], ignore_index=True).drop_duplicates(subset=["Location"])
+	events = events.merge(mapping, on="Location", how="left", validate="many_to_one")
+	missing_v = events[events["venue_id"].isna()]
+	if not missing_v.empty:
+		missing_names_df = missing_v[["Location"]].drop_duplicates().rename(columns={"Location": "unmatched_location"})
+		out_path = OUT_DIR / "unmatched_event_locations.csv"
+		missing_names_df.to_csv(out_path, index=False)
+		raise ValueError(f"Unmapped venue names written to {out_path}. Add these as venue.name or venue.full_name and rerun.")
+
+	events["status"] = "completed"
+	events["event_type"] = "league"
+	events["tournament_stage"] = pd.NA
+	events["oil_pattern_id"] = pd.NA
+	events["notes"] = pd.NA
+
+	events.insert(0, "id", range(1, len(events) + 1))
+	schema = load_schema(str(SCHEMA_JSON))
+	table_spec = get_table_spec(schema, "event")
+	events = events[[
+		"id",
+		"league_season_id",
+		"event_type",
+		"league_week",
+		"tournament_stage",
+		"date",
+		"venue_id",
+		"oil_pattern_id",
+		"status",
+		"notes",
+	]]
+	events = ensure_schema_columns(events, table_spec)
+	events = coerce_dtypes(events, table_spec)
+	# Final safeguard: if any venue_id are still NULL, recompute unmatched from events_raw before column reduction
+	if events["venue_id"].isna().any():
+		unmatched_merge = events_raw.merge(mapping, on="Location", how="left")
+		unmatched = unmatched_merge[unmatched_merge["venue_id"].isna()][["Location"]].drop_duplicates().rename(columns={"Location": "unmatched_location"})
+		out_path = OUT_DIR / "unmatched_event_locations.csv"
+		unmatched.to_csv(out_path, index=False)
+		raise ValueError(f"Unmapped venue names written to {out_path}. Add these as venue.name or venue.full_name and rerun.")
+	errors = validate_dataframe_against_schema(events, table_spec)
+	if errors:
+		raise ValueError("Event validation failed: " + "; ".join(errors))
+	return events[get_ordered_column_names(table_spec)]
 def main() -> None:
 
 	ensure_out_dir()
@@ -209,6 +299,8 @@ def main() -> None:
 			ss_df = build_scoring_system()
 			ss_df.to_csv(ss_path, index=False)
 		out_df = build_league_season()
+	elif TARGET_TABLE == "event":
+		out_df = build_event()
 	else:
 		raise ValueError(f"Unsupported TARGET_TABLE: {TARGET_TABLE}")
 
