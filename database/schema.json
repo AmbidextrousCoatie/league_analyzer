@@ -1,0 +1,167 @@
+{
+  "version": "1.0.0",
+  "description": "Relational schema for league analyzer (pandas-emulated or SQL)",
+  "tables": [
+    {
+      "name": "league",
+      "columns": [
+        { "name": "id", "type": "string", "nullable": false, "pk": true, "description": "short id, e.g., BayL" },
+        { "name": "long_name", "type": "string", "nullable": false },
+        { "name": "level", "type": "integer", "nullable": false },
+        { "name": "division", "type": "string", "nullable": false }
+      ],
+      "unique": [ ["id"] ],
+      "indexes": [ ["level", "division"] ]
+    },
+
+    {
+      "name": "club",
+      "columns": [
+        { "name": "id", "type": "integer", "nullable": false, "pk": true },
+        { "name": "name", "type": "string", "nullable": false }
+      ],
+      "unique": [ ["name"] ],
+      "indexes": []
+    },
+
+    {
+      "name": "club_town_history",
+      "columns": [
+        { "name": "id", "type": "integer", "nullable": false, "pk": true },
+        { "name": "club_id", "type": "integer", "nullable": false, "fk": { "table": "club", "column": "id" } },
+        { "name": "town", "type": "string", "nullable": false },
+        { "name": "start_date", "type": "date", "nullable": false },
+        { "name": "end_date", "type": "date", "nullable": true }
+      ],
+      "indexes": [ ["club_id", "end_date"] ]
+    },
+
+    {
+      "name": "club_home_alley_history",
+      "columns": [
+        { "name": "id", "type": "integer", "nullable": false, "pk": true },
+        { "name": "club_id", "type": "integer", "nullable": false, "fk": { "table": "club", "column": "id" } },
+        { "name": "alley_name", "type": "string", "nullable": false },
+        { "name": "alley_address", "type": "string", "nullable": true },
+        { "name": "start_date", "type": "date", "nullable": false },
+        { "name": "end_date", "type": "date", "nullable": true }
+      ],
+      "indexes": [ ["club_id", "end_date"] ]
+    },
+
+    {
+      "name": "player",
+      "columns": [
+        { "name": "id", "type": "integer", "nullable": false, "pk": true },
+        { "name": "given_name", "type": "string", "nullable": false },
+        { "name": "family_name", "type": "string", "nullable": false },
+        { "name": "full_name", "type": "string", "nullable": true },
+        { "name": "date_of_birth", "type": "date", "nullable": true },
+        { "name": "dominant_hand", "type": "string", "nullable": true }
+      ],
+      "indexes": []
+    },
+
+    {
+      "name": "player_club_membership",
+      "columns": [
+        { "name": "id", "type": "integer", "nullable": false, "pk": true },
+        { "name": "player_id", "type": "integer", "nullable": false, "fk": { "table": "player", "column": "id" } },
+        { "name": "club_id", "type": "integer", "nullable": false, "fk": { "table": "club", "column": "id" } },
+        { "name": "start_date", "type": "date", "nullable": false },
+        { "name": "end_date", "type": "date", "nullable": true }
+      ],
+      "indexes": [ ["player_id", "end_date"], ["club_id", "end_date"] ]
+    },
+
+    {
+      "name": "team",
+      "columns": [
+        { "name": "id", "type": "integer", "nullable": false, "pk": true },
+        { "name": "club_id", "type": "integer", "nullable": false, "fk": { "table": "club", "column": "id" } },
+        { "name": "team_number", "type": "integer", "nullable": false }
+      ],
+      "unique": [ ["club_id", "team_number"] ],
+      "indexes": [ ["club_id"] ]
+    },
+
+    {
+      "name": "team_season",
+      "columns": [
+        { "name": "id", "type": "integer", "nullable": false, "pk": true },
+        { "name": "team_id", "type": "integer", "nullable": false, "fk": { "table": "team", "column": "id" } },
+        { "name": "league_id", "type": "string", "nullable": false, "fk": { "table": "league", "column": "id" } },
+        { "name": "season", "type": "string", "nullable": false }
+      ],
+      "unique": [ ["team_id", "league_id", "season"] ],
+      "indexes": [ ["league_id", "season"], ["team_id"] ]
+    },
+
+    {
+      "name": "venue",
+      "columns": [
+        { "name": "id", "type": "string", "nullable": false, "pk": true },
+        { "name": "name", "type": "string", "nullable": false },
+        { "name": "city", "type": "string", "nullable": true },
+        { "name": "country", "type": "string", "nullable": true },
+        { "name": "pinsetter", "type": "string", "nullable": true }
+      ],
+      "unique": [],
+      "indexes": []
+    },
+
+    {
+      "name": "oil_pattern",
+      "columns": [
+        { "name": "id", "type": "integer", "nullable": false, "pk": true },
+        { "name": "name", "type": "string", "nullable": false },
+        { "name": "length_ft", "type": "integer", "nullable": true },
+        { "name": "source_url", "type": "string", "nullable": true },
+        { "name": "json_spec", "type": "string", "nullable": true }
+      ],
+      "unique": [],
+      "indexes": []
+    },
+
+    {
+      "name": "event",
+      "columns": [
+        { "name": "id", "type": "integer", "nullable": false, "pk": true },
+        { "name": "league_id", "type": "string", "nullable": true, "fk": { "table": "league", "column": "id" } },
+        { "name": "season", "type": "string", "nullable": true },
+        { "name": "week_or_round", "type": "string", "nullable": false },
+        { "name": "date", "type": "date", "nullable": false },
+        { "name": "venue_id", "type": "integer", "nullable": false, "fk": { "table": "venue", "column": "id" } },
+        { "name": "oil_pattern_id", "type": "integer", "nullable": true, "fk": { "table": "oil_pattern", "column": "id" } },
+        { "name": "scoring_mode", "type": "string", "nullable": false },
+        { "name": "notes", "type": "string", "nullable": true }
+      ],
+      "indexes": [ ["league_id", "season", "week_or_round"], ["date"] ]
+    },
+
+    {
+      "name": "game_result",
+      "columns": [
+        { "name": "id", "type": "integer", "nullable": false, "pk": true },
+        { "name": "event_id", "type": "integer", "nullable": false, "fk": { "table": "event", "column": "id" } },
+        { "name": "player_id", "type": "integer", "nullable": false, "fk": { "table": "player", "column": "id" } },
+        { "name": "team_season_id", "type": "integer", "nullable": true, "fk": { "table": "team_season", "column": "id" } },
+        { "name": "line_no", "type": "integer", "nullable": false },
+        { "name": "score", "type": "integer", "nullable": false },
+        { "name": "strike_count", "type": "integer", "nullable": true },
+        { "name": "spare_count", "type": "integer", "nullable": true },
+        { "name": "split_count", "type": "integer", "nullable": true },
+        { "name": "fouls", "type": "integer", "nullable": true },
+        { "name": "handicap", "type": "number", "nullable": true },
+        { "name": "is_paceline", "type": "boolean", "nullable": true }
+      ],
+      "unique": [ ["event_id", "player_id", "line_no"] ],
+      "indexes": [ ["event_id"], ["player_id"], ["team_season_id"], ["event_id", "team_season_id"], ["event_id", "player_id"] ]
+    }
+  ],
+  "notes": [
+    "Ensure team_season.league_id/season matches event.league_id/season when inserting game_result.",
+    "For current club town/home alley, filter histories where end_date is NULL.",
+    "If you later add matches, introduce match and match_result tables keyed to event and team_season."
+  ]
+}
