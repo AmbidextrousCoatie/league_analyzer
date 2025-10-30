@@ -1,0 +1,5 @@
+id,league_id,season,scoring_system_id,number_of_teams,players_per_team
+1,BZL N2,25/26,liga_bayern_3pt,6,4
+2,BZOL N1,25/26,liga_bayern_3pt,6,4
+3,BayL,24/25,liga_bayern_2pt,10,4
+4,BayL,25/26,liga_bayern_3pt,10,4

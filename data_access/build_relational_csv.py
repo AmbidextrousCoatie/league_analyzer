@@ -27,7 +27,7 @@ ROOT = Path(__file__).resolve().parents[1]
 REAL_DATA = ROOT / "database" / "data" / "bowling_ergebnisse_real.csv"
 SCHEMA_JSON = ROOT / "database" / "schema.json"
 OUT_DIR = ROOT / "database" / "relational_csv"
-TARGET_TABLE = "league"
+TARGET_TABLE = "league_season"  # options: "venue", "league", "scoring_system", "league_season"
 
 
 def ensure_out_dir() -> None:
@@ -70,6 +70,97 @@ def build_venue() -> pd.DataFrame:
 	return venues[get_ordered_column_names(table_spec)]
 
 
+def build_scoring_system() -> pd.DataFrame:
+
+	data = [
+		{
+			"id": "liga_bayern_2pt",
+			"name": "Liga Bayern 2pt",
+			"points_per_individual_match_win": 1,
+			"points_per_individual_match_tie": 0.5,
+			"points_per_individual_match_loss": 0,
+			"points_per_team_match_win": 2,
+			"points_per_team_match_tie": 1,
+			"points_per_team_match_loss": 0,
+			"allow_ties": True,
+		},
+		{
+			"id": "liga_bayern_3pt",
+			"name": "Liga Bayern 3pt",
+			"points_per_individual_match_win": 1,
+			"points_per_individual_match_tie": 0.5,
+			"points_per_individual_match_loss": 0,
+			"points_per_team_match_win": 3,
+			"points_per_team_match_tie": 1.5,
+			"points_per_team_match_loss": 0,
+			"allow_ties": True,
+		},
+	]
+
+	df = pd.DataFrame(data)
+	schema = load_schema(str(SCHEMA_JSON))
+	table_spec = get_table_spec(schema, "scoring_system")
+	df = ensure_schema_columns(df, table_spec)
+	df = coerce_dtypes(df, table_spec)
+	errors = validate_dataframe_against_schema(df, table_spec)
+	if errors:
+		raise ValueError("Scoring system validation failed: " + "; ".join(errors))
+	return df[get_ordered_column_names(table_spec)]
+
+
+def _season_prefix_int(season: str) -> int:
+
+	try:
+		return int(str(season).split("/")[0])
+	except Exception:
+		return -1
+
+
+def build_league_season() -> pd.DataFrame:
+
+	df = pd.read_csv(REAL_DATA, sep=";", dtype=str)
+	for col in ("League", "Season"):
+		if col not in df.columns:
+			raise KeyError(f"Expected column '{col}' in real dataset")
+	base = (
+		df[["League", "Season"]]
+		.rename(columns={"League": "league_id", "Season": "season"})
+		.dropna()
+		.drop_duplicates()
+		.sort_values(by=["league_id", "season"]) 
+		.reset_index(drop=True)
+	)
+
+	base["_season_num"] = base["season"].map(_season_prefix_int)
+	base["scoring_system_id"] = base["_season_num"].apply(
+		lambda n: "liga_bayern_3pt" if n >= 25 else "liga_bayern_2pt"
+	)
+	base = base.drop(columns=["_season_num"]) 
+
+	players_per_team = (
+		df.groupby(["League", "Season"]).agg({"Players per Team": "max"}).reset_index()
+		.rename(columns={"League": "league_id", "Season": "season", "Players per Team": "players_per_team"})
+	)
+
+	teams_counts = (
+		df[df["Team"].notna() & (df["Team"] != "Team Total")]
+		.groupby(["League", "Season"])["Team"].nunique()
+		.reset_index()
+		.rename(columns={"League": "league_id", "Season": "season", "Team": "number_of_teams"})
+	)
+
+	merged = base.merge(players_per_team, on=["league_id", "season"], how="left", validate="one_to_one")
+	merged = merged.merge(teams_counts, on=["league_id", "season"], how="left", validate="one_to_one")
+
+	merged.insert(0, "id", range(1, len(merged) + 1))
+	schema = load_schema(str(SCHEMA_JSON))
+	table_spec = get_table_spec(schema, "league_season")
+	merged = ensure_schema_columns(merged, table_spec)
+	merged = coerce_dtypes(merged, table_spec)
+	errors = validate_dataframe_against_schema(merged, table_spec)
+	if errors:
+		raise ValueError("League season validation failed: " + "; ".join(errors))
+	return merged[get_ordered_column_names(table_spec)]
 def main() -> None:
 
 	ensure_out_dir()
@@ -110,6 +201,14 @@ def main() -> None:
 		if errors:
 			raise ValueError("League validation failed: " + "; ".join(errors))
 		out_df = leagues[get_ordered_column_names(table_spec)]
+	elif TARGET_TABLE == "scoring_system":
+		out_df = build_scoring_system()
+	elif TARGET_TABLE == "league_season":
+		ss_path = OUT_DIR / "scoring_system.csv"
+		if not ss_path.exists():
+			ss_df = build_scoring_system()
+			ss_df.to_csv(ss_path, index=False)
+		out_df = build_league_season()
 	else:
 		raise ValueError(f"Unsupported TARGET_TABLE: {TARGET_TABLE}")
 

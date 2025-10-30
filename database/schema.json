@@ -15,6 +15,37 @@
     },
 
     {
+      "name": "scoring_system",
+      "columns": [
+        { "name": "id", "type": "string", "nullable": false, "pk": true },
+        { "name": "name", "type": "string", "nullable": false },
+        { "name": "points_per_individual_match_win", "type": "number", "nullable": false },
+        { "name": "points_per_individual_match_tie", "type": "number", "nullable": false },
+        { "name": "points_per_individual_match_loss", "type": "number", "nullable": false },
+        { "name": "points_per_team_match_win", "type": "number", "nullable": false },
+        { "name": "points_per_team_match_tie", "type": "number", "nullable": false },
+        { "name": "points_per_team_match_loss", "type": "number", "nullable": false },
+        { "name": "allow_ties", "type": "boolean", "nullable": true }
+      ],
+      "unique": [ ["id"] ],
+      "indexes": []
+    },
+
+    {
+      "name": "league_season",
+      "columns": [
+        { "name": "id", "type": "integer", "nullable": false, "pk": true },
+        { "name": "league_id", "type": "string", "nullable": false, "fk": { "table": "league", "column": "id" } },
+        { "name": "season", "type": "string", "nullable": false },
+        { "name": "scoring_system_id", "type": "string", "nullable": false, "fk": { "table": "scoring_system", "column": "id" } },
+        { "name": "number_of_teams", "type": "integer", "nullable": true },
+        { "name": "players_per_team", "type": "integer", "nullable": true }
+      ],
+      "unique": [ ["league_id", "season"] ],
+      "indexes": [ ["league_id", "season"] ]
+    },
+
+    {
       "name": "club",
       "columns": [
         { "name": "id", "type": "integer", "nullable": false, "pk": true },
@@ -90,11 +121,10 @@
       "columns": [
         { "name": "id", "type": "integer", "nullable": false, "pk": true },
         { "name": "team_id", "type": "integer", "nullable": false, "fk": { "table": "team", "column": "id" } },
-        { "name": "league_id", "type": "string", "nullable": false, "fk": { "table": "league", "column": "id" } },
-        { "name": "season", "type": "string", "nullable": false }
+        { "name": "league_season_id", "type": "integer", "nullable": false, "fk": { "table": "league_season", "column": "id" } }
       ],
-      "unique": [ ["team_id", "league_id", "season"] ],
-      "indexes": [ ["league_id", "season"], ["team_id"] ]
+      "unique": [ ["team_id", "league_season_id"] ],
+      "indexes": [ ["league_season_id"], ["team_id"] ]
     },
 
     {
@@ -127,16 +157,15 @@
       "name": "event",
       "columns": [
         { "name": "id", "type": "integer", "nullable": false, "pk": true },
-        { "name": "league_id", "type": "string", "nullable": true, "fk": { "table": "league", "column": "id" } },
-        { "name": "season", "type": "string", "nullable": true },
+        { "name": "league_season_id", "type": "integer", "nullable": true, "fk": { "table": "league_season", "column": "id" } },
         { "name": "week_or_round", "type": "string", "nullable": false },
         { "name": "date", "type": "date", "nullable": false },
         { "name": "venue_id", "type": "integer", "nullable": false, "fk": { "table": "venue", "column": "id" } },
         { "name": "oil_pattern_id", "type": "integer", "nullable": true, "fk": { "table": "oil_pattern", "column": "id" } },
-        { "name": "scoring_mode", "type": "string", "nullable": false },
+        { "name": "scoring_mode", "type": "string", "nullable": true },
         { "name": "notes", "type": "string", "nullable": true }
       ],
-      "indexes": [ ["league_id", "season", "week_or_round"], ["date"] ]
+      "indexes": [ ["league_season_id", "week_or_round"], ["date"] ]
     },
 
     {
@@ -160,8 +189,9 @@
     }
   ],
   "notes": [
-    "Ensure team_season.league_id/season matches event.league_id/season when inserting game_result.",
+    "Ensure team_season.league_season_id matches event.league_season_id when inserting game_result.",
     "For current club town/home alley, filter histories where end_date is NULL.",
-    "If you later add matches, introduce match and match_result tables keyed to event and team_season."
+    "If you later add matches, introduce match and match_result tables keyed to event and team_season.",
+    "Use league_season to centralize season rules; events and team participation reference it."
   ]
 }
