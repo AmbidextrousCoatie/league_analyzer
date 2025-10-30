@@ -26,6 +26,16 @@ class LeagueStatsApp {
             
             // Get initial state from URL (URLStateManager initializes in constructor)
             this.currentState = { ...this.currentState, ...this.urlStateManager.getState() };
+
+            // Resolve "latest" placeholders for season/week if requested
+            const resolvedInitial = await this.resolveLatestSelections(this.currentState);
+            // If anything changed, update URL state (replaceHistory to avoid extra entry)
+            if (JSON.stringify(resolvedInitial) !== JSON.stringify(this.currentState)) {
+                this.currentState = resolvedInitial;
+                this.urlStateManager.setState(this.currentState, /*replaceHistory*/ true);
+            } else {
+                this.currentState = resolvedInitial;
+            }
             
             // Initialize content blocks
             await this.initializeContentBlocks();
@@ -39,6 +49,14 @@ class LeagueStatsApp {
             
             // Get the final state after filter manager processing
             this.currentState = { ...this.currentState, ...this.urlStateManager.getState() };
+            // Re-resolve latest in case filter manager didn't set concrete values yet
+            const resolvedPostButtons = await this.resolveLatestSelections(this.currentState);
+            if (JSON.stringify(resolvedPostButtons) !== JSON.stringify(this.currentState)) {
+                this.currentState = resolvedPostButtons;
+                this.urlStateManager.setState(this.currentState, /*replaceHistory*/ true);
+            } else {
+                this.currentState = resolvedPostButtons;
+            }
             
             // Initial render with final state
             await this.renderContent();
@@ -140,7 +158,7 @@ class LeagueStatsApp {
         const stateChanged = JSON.stringify(this.currentState) !== JSON.stringify(newState);
         
         // Update current state
-        this.currentState = { ...newState };
+        this.currentState = await this.resolveLatestSelections({ ...newState });
         
         // Always render content on initial load or if state changed
         if (!stateChanged && Object.values(this.currentState).some(val => val && val !== '')) {
@@ -161,6 +179,38 @@ class LeagueStatsApp {
         this.contentUpdateTimeout = setTimeout(() => {
             this.renderContent();
         }, 200); // 200ms debounce for content updates
+    }
+
+    /**
+     * Resolve "latest" for season/week by querying backend for available values.
+     * Does NOT assign defaults when parameters are empty; only when explicitly set to 'latest'.
+     */
+    async resolveLatestSelections(state) {
+        const resolved = { ...state };
+        try {
+            // Resolve latest season
+            if (resolved.season === 'latest') {
+                const resp = await fetchWithDatabase('/league/get_available_seasons');
+                const seasons = await resp.json();
+                if (Array.isArray(seasons) && seasons.length > 0) {
+                    // numeric or sortable strings; pick max
+                    const latestSeason = seasons.reduce((a,b) => (String(a) > String(b) ? a : b));
+                    resolved.season = latestSeason;
+                }
+            }
+            // Resolve latest week (requires season and league to be known)
+            if (resolved.week === 'latest' && resolved.season && resolved.league) {
+                const resp = await fetchWithDatabase(`/league/get_available_weeks?season=${encodeURIComponent(resolved.season)}&league=${encodeURIComponent(resolved.league)}`);
+                const weeks = await resp.json();
+                if (Array.isArray(weeks) && weeks.length > 0) {
+                    const latestWeek = Math.max(...weeks.map(Number).filter(n => !Number.isNaN(n)));
+                    resolved.week = latestWeek;
+                }
+            }
+        } catch (e) {
+            console.warn('resolveLatestSelections: failed to resolve latest values', e);
+        }
+        return resolved;
     }
     
     /**

@@ -24,7 +24,7 @@ class CentralizedButtonManager {
             },
             league: {
                 order: 2,
-                dependencies: ['season'],
+                dependencies: [], // allow league selection without season
                 endpoint: '/league/get_available_leagues',
                 containerId: 'buttonsLeague',
                 name: 'league'
@@ -219,7 +219,13 @@ class CentralizedButtonManager {
         try {
             // Check if prerequisites are met
             if (!this.arePrerequisitesMet(group)) {
-                console.log(`⚠️ CentralizedButtonManager: Prerequisites not met for ${group.name}, clearing buttons`);
+                console.log(`⚠️ CentralizedButtonManager: Prerequisites not met for ${group.name}`);
+                // Do NOT clear league selection when season is deselected
+                if (group.name === 'league') {
+                    console.log('ℹ️ Keeping existing league selection despite missing prerequisites');
+                    return;
+                }
+                console.log(`⚠️ CentralizedButtonManager: Clearing buttons for ${group.name}`);
                 this.clearButtonGroup(group);
                 return;
             }
@@ -322,29 +328,22 @@ class CentralizedButtonManager {
         
         console.log(`🎨 CentralizedButtonManager: Populating ${group.name} - current selection: "${selectedValue}", candidates:`, candidates);
         
-        // Auto-select logic for season group
-        if (group.name === 'season' && !selectedValue && candidates.length > 0) {
+        // Auto-select logic for season group ONLY when explicitly set to 'latest'
+        if (group.name === 'season' && selectedValue === 'latest' && candidates.length > 0) {
             // Sort seasons and select the latest one
             const sortedCandidates = [...candidates].sort((a, b) => {
-                // Handle both string and numeric seasons
                 const aNum = parseInt(a);
                 const bNum = parseInt(b);
-                if (!isNaN(aNum) && !isNaN(bNum)) {
-                    return bNum - aNum; // Latest first
-                }
+                if (!isNaN(aNum) && !isNaN(bNum)) return bNum - aNum; // Latest first
                 return b.localeCompare(a); // String comparison, latest first
             });
-            
-            selectedValue = sortedCandidates[0];
-            this.selectedValues[group.name] = selectedValue;
-            this.currentState[group.name] = selectedValue;
-            this.constraints[group.name] = selectedValue;
-            
-            console.log(`🎯 CentralizedButtonManager: Auto-selected latest season: ${selectedValue}`);
-            console.log(`🎯 CentralizedButtonManager: Updated constraints:`, this.constraints);
-            
-            // Update URL state to reflect the auto-selection
-            this.urlStateManager.setState({ [group.name]: selectedValue });
+            const latest = sortedCandidates[0];
+            this.selectedValues[group.name] = latest;
+            this.currentState[group.name] = latest;
+            this.constraints[group.name] = latest;
+            console.log(`🎯 CentralizedButtonManager: Resolved season 'latest' -> ${latest}`);
+            this.urlStateManager.setState({ [group.name]: latest });
+            selectedValue = latest;
         }
         
         // Auto-select logic for league group (if season is available but no league selected)
