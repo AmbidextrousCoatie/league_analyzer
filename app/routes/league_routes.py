@@ -478,6 +478,7 @@ def get_translations():
             "success": True,
             "current_language": i18n_service.get_current_language().value,
             "available_languages": i18n_service.get_available_languages(),
+            "translations_version": i18n_service.get_translations_version(),
             "translations": {
                 key: i18n_service.get_text(key) 
                 for key in [
@@ -527,7 +528,70 @@ def get_translations():
                     "venue", "match_schedule", "top_individual_performances", "individual_scores",
                     "all_individual_scores_for", "view", "own_team", "standings", 
                     "win_percentage", "performance", "average_scores_and_match_points_between_teams",
-                    "week", "season"
+                    "week", "season",
+
+                    # Namespaced: UI languages
+                    "ui.language.english", "ui.language.german",
+
+                    # Namespaced: actions and status
+                    "action.refresh", "action.update", "action.dismiss",
+                    "status.loading", "status.loading_data", "status.no_data",
+                    "status.initialization_error.title", "status.initialization_error.message",
+                    # Initialization placeholders on league page
+                    "status.initializing.season_league_standings", "status.initializing.league_aggregation",
+                    "status.initializing.league_season_overview", "status.initializing.season_overview",
+                    "status.initializing.matchday", "status.initializing.team_details",
+                    "status.initializing.team_performance", "status.initializing.team_win_percentage",
+
+                    # Namespaced: table headers
+                    "table.header.points", "table.header.score", "table.header.average",
+                    "table.header.position", "table.header.team", "table.header.name",
+                    "table.header.week", "table.header.total", "table.header.ranking",
+                    "table.header.opponent", "table.header.round",
+
+                    # Namespaced: blocks
+                    "block.matchday.title", "block.team_performance.title", "block.team_details.title",
+                    "block.team_details.view.classic", "block.team_details.view.new",
+                    "block.clutch_analysis.title", "block.clutch_analysis.description",
+                    "block.consistency_metrics.title", "block.consistency_metrics.description",
+                    "block.special_matches.title", "block.special_matches.description",
+
+                    # Namespaced: messages
+                    "msg.please_select.match_day", "msg.please_select.season_league", "msg.please_select.team",
+
+                    # Namespaced: Clutch Analysis UI
+                    "ui.clutch.threshold", "ui.clutch.points", "ui.clutch.title", "ui.clutch.total_games",
+                    "ui.clutch.clutch_games", "ui.clutch.clutch_wins", "ui.clutch.win_percentage",
+                    "ui.clutch.try_different", "ui.clutch.stats_placeholder", "ui.clutch.margin",
+
+                    # Namespaced: Consistency Metrics UI
+                    "ui.consistency.basic_stats", "ui.consistency.score_range", "ui.consistency.description",
+
+                    # Namespaced: Win Percentage UI
+                    "ui.win_percentage.title", "ui.win_percentage.description", "ui.win_percentage.individual",
+                    "ui.win_percentage.individual_desc", "ui.win_percentage.trends", "ui.win_percentage.trends_desc",
+                    "ui.win_percentage.player", "ui.win_percentage.weekly", "ui.win_percentage.totals",
+                    "ui.win_percentage.total_wins", "ui.win_percentage.total_matches", "ui.win_percentage.win_percentage",
+
+                    # Namespaced: League Aggregation/Overview UI
+                    "ui.league.aggregation.title", "ui.league.all_time", "ui.league.performance_all_seasons",
+                    "ui.league.averages_over_time", "ui.league.points_to_win", "ui.league.season_overview.title",
+
+                    # Namespaced: League Comparison / Heatmap / Team-vs-Team
+                    "ui.league_comparison.title", "ui.league_comparison.description", "ui.league_comparison.chart_title",
+                    "ui.league_comparison.loading", "ui.league_comparison.loading_table", "ui.league_comparison.table_placeholder",
+                    "ui.comparison.difference", "ui.team_vs_team.description", "ui.heatmap.legend",
+                    "ui.heatmap.score", "ui.heatmap.points", "ui.heatmap.low", "ui.heatmap.high", "ui.range_label",
+
+                    # Namespaced: Team Performance UI
+                    "ui.team_performance.title", "ui.team_performance.description", "ui.team_performance.individual",
+                    "ui.team_performance.individual_desc", "ui.team_performance.trends", "ui.team_performance.trends_desc",
+                    "ui.team_performance.player_performance", "ui.team_performance.player_perf_desc",
+                    "ui.team_performance.weekly_avg_game", "ui.team_performance.total_score", "ui.team_performance.avg_per_game",
+
+                    # Namespaced: Team History UI
+                    "ui.team_history.title", "ui.team_history.description", "ui.team_history.chart_title",
+                    "ui.team_history.loading", "ui.team_history.tooltip.league", "ui.team_history.tooltip.final_position"
                 ]
             }
         })

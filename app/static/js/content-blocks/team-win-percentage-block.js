@@ -24,7 +24,7 @@ class TeamWinPercentageBlock {
             
             
             if (!data || !data.win_percentage_data || !data.win_percentage_data.data || Object.keys(data.win_percentage_data.data).length === 0) {
-                this.renderError('No win percentage data available for the selected team.');
+                this.renderError(typeof t === 'function' ? t('no_data', 'No win percentage data available for the selected team.') : 'No win percentage data available for the selected team.');
                 return;
             }
 
@@ -37,8 +37,8 @@ class TeamWinPercentageBlock {
             this.container.innerHTML = `
                 <div class="card mb-4">
                     <div class="card-header">
-                        <h5>${data.team} - Win Percentage Analysis</h5>
-                        <p class="mb-0 text-muted">Individual player win percentages and team performance</p>
+                        <h5>${data.team} - ${typeof t === 'function' ? t('ui.win_percentage.title', 'Win Percentage Analysis') : 'Win Percentage Analysis'}</h5>
+                        <p class="mb-0 text-muted">${typeof t === 'function' ? t('ui.win_percentage.description', 'Individual player win percentages and team performance') : 'Individual player win percentages and team performance'}</p>
                     </div>
                     <div class="card-body">
                         <!-- Win Percentage Table -->
@@ -46,8 +46,8 @@ class TeamWinPercentageBlock {
                             <div class="col-12">
                                 <div class="card">
                                     <div class="card-header">
-                                        <h6>Individual Player Win Percentages</h6>
-                                        <p class="mb-0 text-muted small">Player win percentages per week with totals</p>
+                                        <h6>${typeof t === 'function' ? t('ui.win_percentage.individual', 'Individual Player Win Percentages') : 'Individual Player Win Percentages'}</h6>
+                                        <p class="mb-0 text-muted small">${typeof t === 'function' ? t('ui.win_percentage.individual_desc', 'Player win percentages per week with totals') : 'Player win percentages per week with totals'}</p>
                                     </div>
                                     <div class="card-body">
                                         <div id="team-win-percentage-table"></div>
@@ -61,8 +61,8 @@ class TeamWinPercentageBlock {
                             <div class="col-12">
                                 <div class="card">
                                     <div class="card-header">
-                                        <h6>Win Percentage Trends</h6>
-                                        <p class="mb-0 text-muted small">Individual player win percentages over time</p>
+                                        <h6>${typeof t === 'function' ? t('ui.win_percentage.trends', 'Win Percentage Trends') : 'Win Percentage Trends'}</h6>
+                                        <p class="mb-0 text-muted small">${typeof t === 'function' ? t('ui.win_percentage.trends_desc', 'Individual player win percentages over time') : 'Individual player win percentages over time'}</p>
                                     </div>
                                     <div class="card-body">
                                         <div id="${this.chartContainerId}" style="height: 400px;"></div>
@@ -82,7 +82,7 @@ class TeamWinPercentageBlock {
             
         } catch (error) {
             console.error('Error rendering team win percentage analysis:', error);
-            this.renderError('Failed to load team win percentage analysis data');
+            this.renderError(typeof t === 'function' ? t('error_loading_data', 'Failed to load team win percentage analysis data') : 'Failed to load team win percentage analysis data');
         }
     }
 
@@ -211,17 +211,17 @@ class TeamWinPercentageBlock {
 
         // Prepare table data for createTableBootstrap3 (array format)
         const tableData = {
-            title: `${data.team} - Win Percentages`,
-            description: `Individual player win percentages per week with totals`,
+            title: `${data.team} - ${typeof t === 'function' ? t('ui.win_percentage.title', 'Win Percentages') : 'Win Percentages'}`,
+            description: typeof t === 'function' ? t('ui.win_percentage.individual_desc', 'Individual player win percentages per week with totals') : 'Individual player win percentages per week with totals',
             columns: [
                 {
                     title: 'Player',
                     columns: [
-                        { title: 'Player', width: '150px', align: 'left' }
+                        { title: typeof t === 'function' ? t('ui.win_percentage.player', 'Player') : 'Player', width: '150px', align: 'left' }
                     ]
                 },
                 {
-                    title: 'Weekly Win %',
+                    title: typeof t === 'function' ? t('ui.win_percentage.weekly', 'Weekly Win %') : 'Weekly Win %',
                     columns: weeks.map((week, index) => ({
                         title: `Week ${index + 1}`,
                         width: '80px',
@@ -229,11 +229,11 @@ class TeamWinPercentageBlock {
                     }))
                 },
                 {
-                    title: 'Totals',
+                    title: typeof t === 'function' ? t('ui.win_percentage.totals', 'Totals') : 'Totals',
                     columns: [
-                        { title: 'Total Wins', width: '100px', align: 'center' },
-                        { title: 'Total Matches', width: '100px', align: 'center' },
-                        { title: 'Win %', width: '80px', align: 'center' }
+                        { title: typeof t === 'function' ? t('ui.win_percentage.total_wins', 'Total Wins') : 'Total Wins', width: '100px', align: 'center' },
+                        { title: typeof t === 'function' ? t('ui.win_percentage.total_matches', 'Total Matches') : 'Total Matches', width: '100px', align: 'center' },
+                        { title: typeof t === 'function' ? t('ui.win_percentage.win_percentage', 'Win %') : 'Win %', width: '80px', align: 'center' }
                     ]
                 }
             ],
@@ -286,7 +286,7 @@ class TeamWinPercentageBlock {
             chartData,
             Object.keys(chartData),
             this.chartContainerId,
-            'Player Win Percentage Trends',
+            typeof t === 'function' ? t('ui.win_percentage.trends', 'Player Win Percentage Trends') : 'Player Win Percentage Trends',
             labels,
             false, // don't invert Y axis
             'exact' // use exact Y-axis range for percentages (0-100)
@@ -298,7 +298,7 @@ class TeamWinPercentageBlock {
             this.container.innerHTML = `
                 <div class="card mb-4">
                     <div class="card-header">
-                        <h5>Team Win Percentage Analysis</h5>
+                        <h5>${typeof t === 'function' ? t('ui.win_percentage.title', 'Team Win Percentage Analysis') : 'Team Win Percentage Analysis'}</h5>
                     </div>
                     <div class="card-body">
                         <div class="alert alert-warning" role="alert">

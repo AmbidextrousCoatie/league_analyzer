@@ -85,9 +85,9 @@ class TeamDetailsBlock extends BaseContentBlock {
                             </div>
                             <div class="btn-group" role="group" aria-label="View options">
                                 <input type="radio" class="btn-check" name="teamView" id="teamViewClassic" value="classic" checked>
-                                <label class="btn btn-outline-primary btn-sm" for="teamViewClassic">Classic</label>
+                                <label class="btn btn-outline-primary btn-sm" for="teamViewClassic">${typeof t === 'function' ? t('block.team_details.view.classic', 'Classic') : 'Classic'}</label>
                                 <input type="radio" class="btn-check" name="teamView" id="teamViewNew" value="new">
-                                <label class="btn btn-outline-primary btn-sm" for="teamViewNew">New</label>
+                                <label class="btn btn-outline-primary btn-sm" for="teamViewNew">${typeof t === 'function' ? t('block.team_details.view.new', 'New') : 'New'}</label>
                             </div>
                         </div>
                         <div class="card-body">
@@ -126,11 +126,11 @@ class TeamDetailsBlock extends BaseContentBlock {
         let message = '';
         
         if (!state.season || !state.league) {
-            message = 'Please select a season and league first.';
+            message = typeof t === 'function' ? t('msg.please_select.season_league', 'Please select a season and league first.') : 'Please select a season and league first.';
         } else if (!state.week) {
-            message = 'Please select a match day to view team details.';
+            message = typeof t === 'function' ? t('msg.please_select.match_day', 'Please select a match day to view team details.') : 'Please select a match day to view team details.';
         } else if (!state.team) {
-            message = 'Please select a team to display the score sheet.';
+            message = typeof t === 'function' ? t('msg.please_select.team', 'Please select a team to display the score sheet.') : 'Please select a team to display the score sheet.';
         }
 
         return `
@@ -139,7 +139,7 @@ class TeamDetailsBlock extends BaseContentBlock {
                     <div class="card">
                         <div class="card-header d-flex justify-content-between align-items-center">
                             <div>
-                                <h5 data-i18n="score_sheet_selected_team">Score Sheet for Selected Team</h5>
+                                <h5>${typeof t === 'function' ? t('block.team_details.title', 'Score Sheet for Selected Team') : 'Score Sheet for Selected Team'}</h5>
                                 <div id="teamDetailsMetadata" class="text-muted small"></div>
                             </div>
                             <div class="btn-group" role="group" aria-label="View options">

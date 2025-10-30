@@ -89,40 +89,28 @@ document.addEventListener('DOMContentLoaded', function() {
     // Define sample queries with labels and parameters
     const examples = [
         {
-            label: 'Liga Historie (simuliert): LL 1 Nord',
-            params: {
-                league: 'LL 1 Nord',
-                database: 'db_sim'
-            }
+            label: 'Aktueller Tabellenstand: alle Ligen',
+            params: { database: 'db_real' }
         },
         {
-            label: 'Liga Saison (simuliert): BZOL 2 Nord - 21/22',
-            params: {
-                season: '21/22',
-                league: 'BZOL 2 Nord',
-                database: 'db_sim'
-            }
-        },
-        {
-            label: 'Liga Spieltag (simuliert): BayL - 23/24 - Week 3',
-            params: {
-                season: '23/24',
-                league: 'BayL',
-                week: '3',
-                database: 'db_sim'
-            }
-        },
-        {
-            label: 'Liga Spieltag (reale Daten): BayL - 24/25 - week 1',
+            label: 'Liga Saisonübersicht: Bayernliga 24/25',
             params: {
                 season: '24/25',
+                league: 'BayL',
+                database: 'db_real'
+            }
+        },
+        {
+            label: 'Liga Spieltag: Bayernliga - 25/26 - Spieltag 1',
+            params: {
+                season: '25/26',
                 league: 'BayL',
                 week: '1',
                 database: 'db_real'
             }
         },
         {
-            label: 'Liga Spielzettel (reale Daten): BayL - 24/25 - week 1 - BK München 3',
+            label: 'Liga Spielzettel: Bayernliga - 24/25 - Spieltag 1 - BK München 3',
             params: {
                 season: '24/25',
                 league: 'BayL',
@@ -132,39 +120,24 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         },
         {
-            label: 'Team Historie (simuliert): Aschaffenburg 3',
-            params: {
-                team: 'Aschaffenburg 3',
-                database: 'db_sim'
-            }
-        },
-        {
-            label: 'Team Saison (simuliert): Aschaffenburg 3 - 23/24',
-            params: {
-                team: 'Aschaffenburg 3',
-                season: '23/24',
-                database: 'db_sim'
-            }
-        },
-        {
-            label: 'Team Historie (real): Bowlinghaus Bamberg 1',
+            label: 'Team Historie: Bowlinghaus Bamberg 1',
             params: {
                 team: 'Bowlinghaus Bamberg 1',
                 database: 'db_real'
             }
         },
         {
-            label: 'Spieler Statistiken (simuliert): Matthew Davis',
+            label: 'Spieler Statistiken: Hinterwimmer, Sebastian',
             params: {
-                player_name: 'Matthew Davis',
-                database: 'db_sim'
+                player_name: 'Hinterwimmer, Sebastian',
+                database: 'db_real'
             }
         },
         {
-            label: 'Spieler Statistiken (real): Altenfeld, Marco',
+            label: 'Liga Historie (simuliert): LL 1 Nord',
             params: {
-                player_name: 'Altenfeld, Marco',
-                database: 'db_real'
+                league: 'LL 1 Nord',
+                database: 'db_sim'
             }
         }
     ];

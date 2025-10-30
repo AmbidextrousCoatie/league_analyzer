@@ -23,7 +23,7 @@ class TeamVsTeamComparisonBlock {
             const data = await this.fetchData(state);
             
             if (!data || !data.columns || !data.data) {
-                this.renderError('No team vs team comparison data available.');
+                this.renderError(typeof t === 'function' ? t('no_data', 'No team vs team comparison data available.') : 'No team vs team comparison data available.');
                 return;
             }
 
@@ -36,8 +36,8 @@ class TeamVsTeamComparisonBlock {
             this.container.innerHTML = `
                 <div class="card mb-4">
                     <div class="card-header">
-                        <h5>${data.title || 'Team vs Team Comparison'}</h5>
-                        <p class="mb-0 text-muted">${data.description || 'Matrix showing team performance against each opponent'}</p>
+                        <h5>${data.title || (typeof t === 'function' ? t('team_vs_team_comparison_matrix', 'Team vs Team Comparison Matrix') : 'Team vs Team Comparison Matrix')}</h5>
+                        <p class="mb-0 text-muted">${data.description || (typeof t === 'function' ? t('ui.team_vs_team.description', 'Matrix showing team performance against each opponent') : 'Matrix showing team performance against each opponent')}</p>
                     </div>
                     <div class="card-body">
                         <!-- Team vs Team Comparison Table -->
@@ -52,29 +52,29 @@ class TeamVsTeamComparisonBlock {
                             <div class="col-12">
                                 <div class="card">
                                     <div class="card-header">
-                                        <h6>Heat Map Legend</h6>
+                                        <h6>${typeof t === 'function' ? t('ui.heatmap.legend', 'Heat Map Legend') : 'Heat Map Legend'}</h6>
                                     </div>
                                     <div class="card-body">
                                         <div class="row">
                                             <div class="col-md-6">
-                                                <h6>Score Heat Map</h6>
+                                                <h6>${typeof t === 'function' ? t('ui.heatmap.score', 'Score Heat Map') : 'Score Heat Map'}</h6>
                                                 <div class="d-flex align-items-center">
-                                                    <span class="me-2">Low:</span>
+                                                    <span class="me-2">${typeof t === 'function' ? t('ui.heatmap.low', 'Low:') : 'Low:'}</span>
                                                     <div class="heat-map-legend me-2" style="background: #d9596a; width: 20px; height: 20px;"></div>
-                                                    <span class="me-2">High:</span>
+                                                    <span class="me-2">${typeof t === 'function' ? t('ui.heatmap.high', 'High:') : 'High:'}</span>
                                                     <div class="heat-map-legend" style="background: #1b8da7; width: 20px; height: 20px;"></div>
                                                 </div>
-                                                <small class="text-muted">Range: ${data.metadata?.score_range?.min || 'N/A'} - ${data.metadata?.score_range?.max || 'N/A'}</small>
+                                                <small class="text-muted">${typeof t === 'function' ? t('ui.range_label', 'Range:') : 'Range:'} ${data.metadata?.score_range?.min || 'N/A'} - ${data.metadata?.score_range?.max || 'N/A'}</small>
                                             </div>
                                             <div class="col-md-6">
-                                                <h6>Points Heat Map</h6>
+                                                <h6>${typeof t === 'function' ? t('ui.heatmap.points', 'Points Heat Map') : 'Points Heat Map'}</h6>
                                                 <div class="d-flex align-items-center">
-                                                    <span class="me-2">Low:</span>
+                                                    <span class="me-2">${typeof t === 'function' ? t('ui.heatmap.low', 'Low:') : 'Low:'}</span>
                                                     <div class="heat-map-legend me-2" style="background: #d9596a; width: 20px; height: 20px;"></div>
-                                                    <span class="me-2">High:</span>
+                                                    <span class="me-2">${typeof t === 'function' ? t('ui.heatmap.high', 'High:') : 'High:'}</span>
                                                     <div class="heat-map-legend" style="background: #1b8da7; width: 20px; height: 20px;"></div>
                                                 </div>
-                                                <small class="text-muted">Range: ${data.metadata?.points_range?.min || 'N/A'} - ${data.metadata?.points_range?.max || 'N/A'}</small>
+                                                <small class="text-muted">${typeof t === 'function' ? t('ui.range_label', 'Range:') : 'Range:'} ${data.metadata?.points_range?.min || 'N/A'} - ${data.metadata?.points_range?.max || 'N/A'}</small>
                                             </div>
                                         </div>
                                     </div>
@@ -90,7 +90,7 @@ class TeamVsTeamComparisonBlock {
             
         } catch (error) {
             console.error('Error rendering team vs team comparison:', error);
-            this.renderError('Failed to load team vs team comparison data');
+            this.renderError(typeof t === 'function' ? t('error_loading_data', 'Failed to load team vs team comparison data') : 'Failed to load team vs team comparison data');
         }
     }
 
@@ -164,7 +164,7 @@ class TeamVsTeamComparisonBlock {
             this.container.innerHTML = `
                 <div class="card mb-4">
                     <div class="card-header">
-                        <h5>Team vs Team Comparison</h5>
+                        <h5>${typeof t === 'function' ? t('team_vs_team_comparison_matrix', 'Team vs Team Comparison Matrix') : 'Team vs Team Comparison Matrix'}</h5>
                     </div>
                     <div class="card-body">
                         <div class="alert alert-warning" role="alert">

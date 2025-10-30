@@ -9,7 +9,7 @@ class SeasonLeagueStandingsBlock extends BaseContentBlock {
             containerId: 'seasonLeagueStandingsContainer',
             dataEndpoint: '/league/get_season_league_standings',
             requiredFilters: ['season'],
-            title: 'Season League Standings'
+            title: typeof t === 'function' ? t('league_standings', 'Season League Standings') : 'Season League Standings'
         });
         this.dependencies = ['season'];
         this.container = document.getElementById(this.containerId);
@@ -50,16 +50,16 @@ class SeasonLeagueStandingsBlock extends BaseContentBlock {
         return `
             <div class="card mb-4">
                 <div class="card-header">
-                    <h5>Season ${state.season} - Latest Week Standings</h5>
-                    <p class="mb-0 text-muted">Current standings across all leagues for the latest week</p>
+                    <h5>${typeof t === 'function' ? t('league_standings', 'League Standings') : 'League Standings'} – ${typeof t === 'function' ? t('through_week', 'Through Week') : 'Through Week'} (${state.season})</h5>
+                    <p class="mb-0 text-muted">${typeof t === 'function' ? t('week_results', 'Week Results & Season Totals') : 'Week Results & Season Totals'}</p>
                 </div>
                 <div class="card-body">
                     <div id="seasonLeagueStandingsContent">
                         <div class="text-center py-4">
                             <div class="spinner-border text-primary" role="status">
-                                <span class="visually-hidden">Loading league standings...</span>
+                                <span class="visually-hidden">${typeof t === 'function' ? t('status.loading', 'Loading...') : 'Loading...'}</span>
                             </div>
-                            <p class="text-muted mt-2">Loading league standings...</p>
+                            <p class="text-muted mt-2">${typeof t === 'function' ? t('loading_data', 'Loading data...') : 'Loading data...'}</p>
                         </div>
                     </div>
                 </div>
@@ -96,8 +96,8 @@ class SeasonLeagueStandingsBlock extends BaseContentBlock {
         if (!data || !data.leagues || data.leagues.length === 0) {
             contentContainer.innerHTML = `
                 <div class="alert alert-info">
-                    <h6>No League Data Available</h6>
-                    <p class="mb-0">No league standings found for season ${season}.</p>
+                    <h6>${typeof t === 'function' ? t('no_league_data_available', 'No league data available') : 'No league data available'}</h6>
+                    <p class="mb-0">${typeof t === 'function' ? t('no_data_available_for', 'No data available for') : 'No data available for'} ${season}.</p>
                 </div>
             `;
             return;
@@ -112,38 +112,38 @@ class SeasonLeagueStandingsBlock extends BaseContentBlock {
             html += `
                 <div class="card mb-3">
                     <div class="card-header">
-                        <h6 class="mb-0">${league} - Week ${week}</h6>
+                        <h6 class="mb-0">${league} - ${typeof t === 'function' ? (t('match_day_label', 'Match Day')) : 'Match Day'} ${week}</h6>
                     </div>
                     <div class="card-body">
                         <div class="row">
                             <div class="col-md-8">
-                                <h6>League Standings</h6>
+                                <h6>${typeof t === 'function' ? t('league_standings', 'League Standings') : 'League Standings'}</h6>
                                 <div id="tableSeasonLeagueStandings_${league.replace(/\s+/g, '_')}"></div>
                             </div>
                             <div class="col-md-4">
                                 <div class="card">
                                     <div class="card-header">
-                                        <h6>Honor Scores</h6>
+                                        <h6>${typeof t === 'function' ? t('honor_scores', 'Honor Scores') : 'Honor Scores'}</h6>
                                     </div>
                                     <div class="card-body">
                                         <!-- Individual Scores -->
                                         <div class="mb-3" id="individualScoresSection_${league.replace(/\s+/g, '_')}" style="display: none;">
-                                            <h6>Top Individual Scores</h6>
+                                            <h6>${typeof t === 'function' ? t('top_individual_scores', 'Top Individual Scores') : 'Top Individual Scores'}</h6>
                                             <div id="individualScores_${league.replace(/\s+/g, '_')}"></div>
                                         </div>
                                         <!-- Team Scores -->
                                         <div class="mb-3" id="teamScoresSection_${league.replace(/\s+/g, '_')}" style="display: none;">
-                                            <h6>Top Team Scores</h6>
+                                            <h6>${typeof t === 'function' ? t('top_team_scores', 'Top Team Scores') : 'Top Team Scores'}</h6>
                                             <div id="teamScores_${league.replace(/\s+/g, '_')}"></div>
                                         </div>
                                         <!-- Individual Averages -->
                                         <div class="mb-3" id="individualAveragesSection_${league.replace(/\s+/g, '_')}" style="display: none;">
-                                            <h6>Best Individual Averages</h6>
+                                            <h6>${typeof t === 'function' ? t('best_individual_averages', 'Best Individual Averages') : 'Best Individual Averages'}</h6>
                                             <div id="individualAverages_${league.replace(/\s+/g, '_')}"></div>
                                         </div>
                                         <!-- Team Averages -->
                                         <div class="mb-3" id="teamAveragesSection_${league.replace(/\s+/g, '_')}" style="display: none;">
-                                            <h6>Best Team Averages</h6>
+                                            <h6>${typeof t === 'function' ? t('best_team_averages', 'Best Team Averages') : 'Best Team Averages'}</h6>
                                             <div id="teamAverages_${league.replace(/\s+/g, '_')}"></div>
                                         </div>
                                     </div>
@@ -174,7 +174,7 @@ class SeasonLeagueStandingsBlock extends BaseContentBlock {
             } else {
                 document.getElementById(tableId).innerHTML = `
                     <div class="alert alert-warning">
-                        <p class="mb-0">No standings data available for ${league}.</p>
+                        <p class="mb-0">${typeof t === 'function' ? t('no_data_available_for', 'No data available for') : 'No data available for'} ${league}.</p>
                     </div>
                 `;
             }

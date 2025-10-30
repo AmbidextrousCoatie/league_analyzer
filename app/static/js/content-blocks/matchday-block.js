@@ -78,7 +78,7 @@ class MatchDayBlock extends BaseContentBlock {
                             <div id="tableLeagueWeek">
                                 <div class="text-center py-3">
                                     <div class="spinner-border text-primary" role="status">
-                                        <span class="visually-hidden">Loading results...</span>
+                                        <span class="visually-hidden">${typeof t === 'function' ? t('status.loading_data', 'Loading results...') : 'Loading results...'}</span>
                                     </div>
                                 </div>
                             </div>
@@ -92,7 +92,7 @@ class MatchDayBlock extends BaseContentBlock {
                                     <!-- Loading state -->
                                     <div class="text-center py-3">
                                         <div class="spinner-border spinner-border-sm text-primary" role="status">
-                                            <span class="visually-hidden">Loading honor scores...</span>
+                                            <span class="visually-hidden">${typeof t === 'function' ? t('status.loading', 'Loading honor scores...') : 'Loading honor scores...'}</span>
                                         </div>
                                     </div>
                                     
@@ -137,7 +137,7 @@ class MatchDayBlock extends BaseContentBlock {
                                     <div id="weekIndividualAveragesTable">
                                         <div class="text-center py-3">
                                             <div class="spinner-border text-primary" role="status">
-                                                <span class="visually-hidden">Loading individual averages...</span>
+                                                <span class="visually-hidden">${typeof t === 'function' ? t('status.loading', 'Loading individual averages...') : 'Loading individual averages...'}</span>
                                             </div>
                                         </div>
                                     </div>
@@ -154,12 +154,12 @@ class MatchDayBlock extends BaseContentBlock {
         return `
             <div class="card mb-4">
                 <div class="card-header">
-                    <h5 data-i18n="league_results_match_day">League Results - Match Day</h5>
+                    <h5>${typeof t === 'function' ? t('block.matchday.title', 'League Results - Match Day') : 'League Results - Match Day'}</h5>
                 </div>
                 <div class="card-body">
                     <!-- Message Area -->
-                    <div id="weekMessage" class="alert alert-info" data-i18n="please_select_match_day">
-                        Please select a match day.
+                    <div id="weekMessage" class="alert alert-info">
+                        ${typeof t === 'function' ? t('msg.please_select.match_day', 'Please select a match day.') : 'Please select a match day.'}
                     </div>
                 </div>
             </div>
@@ -205,14 +205,14 @@ class MatchDayBlock extends BaseContentBlock {
                     container.innerHTML = tableHTML;
                 } else {
                     console.error('No table creation function available');
-                    container.innerHTML = '<div class="alert alert-warning">Table creation function not available</div>';
+                    container.innerHTML = `<div class="alert alert-warning">${typeof t === 'function' ? t('no_data', 'Table creation function not available') : 'Table creation function not available'}</div>`;
                 }
             }
         } catch (error) {
             console.error('Error loading league week table:', error);
             const container = document.getElementById('tableLeagueWeek');
             if (container) {
-                container.innerHTML = '<div class="alert alert-danger">Error loading week results</div>';
+                container.innerHTML = `<div class="alert alert-danger">${typeof t === 'function' ? t('error_loading_data', 'Error loading week results') : 'Error loading week results'}</div>`;
             }
         }
     }
@@ -344,7 +344,7 @@ class MatchDayBlock extends BaseContentBlock {
         if (honorScoresCard) {
             const loadingSpinner = honorScoresCard.querySelector('.spinner-border');
             if (loadingSpinner) {
-                loadingSpinner.parentElement.innerHTML = '<div class="alert alert-danger alert-sm">Error loading honor scores</div>';
+                loadingSpinner.parentElement.innerHTML = `<div class="alert alert-danger alert-sm">${typeof t === 'function' ? t('error_loading_data', 'Error loading honor scores') : 'Error loading honor scores'}</div>`;
             }
         }
     }
@@ -378,7 +378,7 @@ class MatchDayBlock extends BaseContentBlock {
                 console.warn('createTableBootstrap3 not available or no data received');
                 const container = document.getElementById('weekIndividualAveragesTable');
                 if (container) {
-                    container.innerHTML = '<div class="alert alert-info">Individual averages data not available</div>';
+                    container.innerHTML = `<div class="alert alert-info">${typeof t === 'function' ? t('no_data', 'Individual averages data not available') : 'Individual averages data not available'}</div>`;
                 }
             }
             
@@ -386,7 +386,7 @@ class MatchDayBlock extends BaseContentBlock {
             console.error('Error loading individual averages:', error);
             const container = document.getElementById('weekIndividualAveragesTable');
             if (container) {
-                container.innerHTML = '<div class="alert alert-danger">Error loading individual averages</div>';
+                container.innerHTML = `<div class="alert alert-danger">${typeof t === 'function' ? t('error_loading_individual_averages', 'Error loading individual averages') : 'Error loading individual averages'}</div>`;
             }
         }
     }
@@ -421,7 +421,7 @@ class MatchDayBlock extends BaseContentBlock {
             console.error('Error loading team vs team comparison:', error);
             const container = document.getElementById('team-vs-team-comparison-matchday');
             if (container) {
-                container.innerHTML = '<div class="alert alert-info">Team vs team comparison not available for this week</div>';
+                container.innerHTML = `<div class="alert alert-info">${typeof t === 'function' ? t('no_data', 'Team vs team comparison not available for this week') : 'Team vs team comparison not available for this week'}</div>`;
             }
         }
     }

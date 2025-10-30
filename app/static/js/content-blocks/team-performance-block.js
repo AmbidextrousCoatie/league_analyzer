@@ -24,7 +24,7 @@ class TeamPerformanceBlock {
             
             
             if (!data || !data.performance_data || !data.performance_data.data || Object.keys(data.performance_data.data).length === 0) {
-                this.renderError('No performance data available for the selected team.');
+                this.renderError(typeof t === 'function' ? t('no_data', 'No performance data available for the selected team.') : 'No performance data available for the selected team.');
                 return;
             }
 
@@ -37,8 +37,8 @@ class TeamPerformanceBlock {
             this.container.innerHTML = `
                 <div class="card mb-4">
                     <div class="card-header">
-                        <h5>${data.team} - Performance Analysis</h5>
-                        <p class="mb-0 text-muted">Individual player scores and team performance over time</p>
+                        <h5>${data.team} - ${typeof t === 'function' ? t('ui.team_performance.title', 'Performance Analysis') : 'Performance Analysis'}</h5>
+                        <p class="mb-0 text-muted">${typeof t === 'function' ? t('ui.team_performance.description', 'Individual player scores and team performance over time') : 'Individual player scores and team performance over time'}</p>
                     </div>
                     <div class="card-body">
                         <!-- Performance Table -->
@@ -46,8 +46,8 @@ class TeamPerformanceBlock {
                             <div class="col-12">
                                 <div class="card">
                                     <div class="card-header">
-                                        <h6>Individual Player Performance</h6>
-                                        <p class="mb-0 text-muted small">Player scores per week with totals and averages per game</p>
+                                        <h6>${typeof t === 'function' ? t('ui.team_performance.individual', 'Individual Player Performance') : 'Individual Player Performance'}</h6>
+                                        <p class="mb-0 text-muted small">${typeof t === 'function' ? t('ui.team_performance.individual_desc', 'Player scores per week with totals and averages per game') : 'Player scores per week with totals and averages per game'}</p>
                                     </div>
                                     <div class="card-body">
                                         <div id="team-performance-table"></div>
@@ -61,8 +61,8 @@ class TeamPerformanceBlock {
                             <div class="col-12">
                                 <div class="card">
                                     <div class="card-header">
-                                        <h6>Performance Trends</h6>
-                                        <p class="mb-0 text-muted small">Individual player performance over time</p>
+                                        <h6>${typeof t === 'function' ? t('ui.team_performance.trends', 'Performance Trends') : 'Performance Trends'}</h6>
+                                        <p class="mb-0 text-muted small">${typeof t === 'function' ? t('ui.team_performance.trends_desc', 'Individual player performance over time') : 'Individual player performance over time'}</p>
                                     </div>
                                     <div class="card-body">
                                         <div id="${this.chartContainerId}" style="height: 400px;"></div>
@@ -82,7 +82,7 @@ class TeamPerformanceBlock {
             
         } catch (error) {
             console.error('Error rendering team performance analysis:', error);
-            this.renderError('Failed to load team performance analysis data');
+            this.renderError(typeof t === 'function' ? t('error_loading_data', 'Failed to load team performance analysis data') : 'Failed to load team performance analysis data');
         }
     }
 
@@ -210,29 +210,29 @@ class TeamPerformanceBlock {
 
         // Prepare table data for createTableBootstrap3 (array format)
         const tableData = {
-            title: `${data.team} - Player Performance`,
-            description: `Individual player average scores per game with totals and averages`,
+            title: `${data.team} - ${typeof t === 'function' ? t('ui.team_performance.player_performance', 'Player Performance') : 'Player Performance'}`,
+            description: typeof t === 'function' ? t('ui.team_performance.player_perf_desc', 'Individual player average scores per game with totals and averages') : 'Individual player average scores per game with totals and averages',
             columns: [
                 {
-                    title: 'Player',
+                    title: typeof t === 'function' ? t('player', 'Player') : 'Player',
                     columns: [
-                        { title: 'Player', width: '150px', align: 'left' }
+                        { title: typeof t === 'function' ? t('player', 'Player') : 'Player', width: '150px', align: 'left' }
                     ]
                 },
                 {
-                    title: 'Weekly Avg/Game',
+                    title: typeof t === 'function' ? t('ui.team_performance.weekly_avg_game', 'Weekly Avg/Game') : 'Weekly Avg/Game',
                     columns: weeks.map((week, index) => ({
-                        title: `Week ${index + 1}`,
+                        title: `${typeof t === 'function' ? t('match_day_label', 'Week') : 'Week'} ${index + 1}`,
                         width: '80px',
                         align: 'center'
                     }))
                 },
                 {
-                    title: 'Totals',
+                    title: typeof t === 'function' ? t('ui.win_percentage.totals', 'Totals') : 'Totals',
                     columns: [
-                        { title: 'Total Score', width: '100px', align: 'center' },
-                        { title: 'Games', width: '80px', align: 'center' },
-                        { title: 'Avg/Game', width: '100px', align: 'center' }
+                        { title: typeof t === 'function' ? t('ui.team_performance.total_score', 'Total Score') : 'Total Score', width: '100px', align: 'center' },
+                        { title: typeof t === 'function' ? t('games', 'Games') : 'Games', width: '80px', align: 'center' },
+                        { title: typeof t === 'function' ? t('ui.team_performance.avg_per_game', 'Avg/Game') : 'Avg/Game', width: '100px', align: 'center' }
                     ]
                 }
             ],
@@ -292,7 +292,7 @@ class TeamPerformanceBlock {
             chartData,
             Object.keys(chartData),
             this.chartContainerId,
-            'Player Performance Trends',
+            (typeof t === 'function' ? t('ui.team_performance.trends', 'Player Performance Trends') : 'Player Performance Trends'),
             labels,
             false, // don't invert Y axis
             'auto' // auto Y-axis range
@@ -304,7 +304,7 @@ class TeamPerformanceBlock {
             this.container.innerHTML = `
                 <div class="card mb-4">
                     <div class="card-header">
-                        <h5>Team Performance Analysis</h5>
+                        <h5>${typeof t === 'function' ? t('block.team_performance.title', 'Team Performance Analysis') : 'Team Performance Analysis'}</h5>
                     </div>
                     <div class="card-body">
                         <div class="alert alert-warning" role="alert">

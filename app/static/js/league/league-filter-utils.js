@@ -47,7 +47,7 @@ function updateSeasonButtons() {
             console.error('Error loading seasons:', error);
             document.getElementById('buttonsSeason').innerHTML = `
                 <div class="alert alert-danger">
-                    <strong>Error loading seasons:</strong> ${error.message || 'Unknown error'}
+                    <strong>${typeof t === 'function' ? t('error_loading_data', 'Error loading data') : 'Error loading data'}:</strong> ${error.message || 'Unknown error'}
                 </div>
             `;
         });
@@ -85,7 +85,7 @@ function updateLeagueButtons() {
             console.error('Error loading leagues:', error);
             document.getElementById('buttonsLeague').innerHTML = `
                 <div class="alert alert-danger">
-                    <strong>Error loading leagues:</strong> ${error.message || 'Unknown error'}
+                    <strong>${typeof t === 'function' ? t('error_loading_data', 'Error loading data') : 'Error loading data'}:</strong> ${error.message || 'Unknown error'}
                 </div>
             `;
         });
@@ -99,7 +99,7 @@ function updateWeekButtons() {
         // Clear week buttons if prerequisites not met
         const container = document.getElementById('buttonsWeek');
         if (container) {
-            container.innerHTML = '<span class="text-muted">Wählen Sie Liga und Saison aus</span>';
+            container.innerHTML = `<span class="text-muted">${typeof t === 'function' ? t('msg.please_select.season_league', 'Please select a season and league first.') : 'Please select a season and league first.'}</span>`;
         }
         return;
     }
@@ -129,7 +129,7 @@ function updateWeekButtons() {
             console.error('Error loading weeks:', error);
             document.getElementById('buttonsWeek').innerHTML = `
                 <div class="alert alert-danger">
-                    <strong>Error loading weeks:</strong> ${error.message || 'Unknown error'}
+                    <strong>${typeof t === 'function' ? t('error_loading_data', 'Error loading data') : 'Error loading data'}:</strong> ${error.message || 'Unknown error'}
                 </div>
             `;
         });
@@ -143,7 +143,7 @@ function updateTeamButtons() {
         // Clear team buttons if prerequisites not met
         const container = document.getElementById('buttonsTeam');
         if (container) {
-            container.innerHTML = '<span class="text-muted">Wählen Sie Liga, Saison und Woche aus</span>';
+            container.innerHTML = `<span class="text-muted">${typeof t === 'function' ? t('msg.please_select.match_day', 'Please select a match day.') : 'Please select a match day.'}</span>`;
         }
         return;
     }
@@ -172,7 +172,7 @@ function updateTeamButtons() {
             console.error('Error loading teams:', error);
             document.getElementById('buttonsTeam').innerHTML = `
                 <div class="alert alert-danger">
-                    <strong>Error loading teams:</strong> ${error.message || 'Unknown error'}
+                    <strong>${typeof t === 'function' ? t('error_loading_data', 'Error loading data') : 'Error loading data'}:</strong> ${error.message || 'Unknown error'}
                 </div>
             `;
         });
@@ -211,7 +211,12 @@ function updateMessageVisibility() {
     if (!currentState.season || !currentState.league || !currentState.week) {
         if (messageArea) {
             messageArea.style.display = 'block';
-            messageArea.innerHTML = '<div class="alert alert-info">Please select season, league, and week to view standings.</div>';
+            const msg = typeof t === 'function'
+                ? (!currentState.season || !currentState.league
+                    ? t('msg.please_select.season_league', 'Please select a season and league first.')
+                    : t('msg.please_select.match_day', 'Please select a match day.'))
+                : 'Please select season, league, and week to view standings.';
+            messageArea.innerHTML = `<div class="alert alert-info">${msg}</div>`;
         }
         if (standingsTable) standingsTable.style.display = 'none';
     } else {

@@ -171,7 +171,7 @@ function updatePositionChart() {
                                     },
                                     title: { 
                                         display: true, 
-                                        text: 'Position',
+                                        text: (typeof t === 'function' ? t('position_label', 'Position') : 'Position'),
                                         font: { weight: 'bold' },
                                         padding: { top: 10, bottom: 10 }
                                     }
@@ -197,7 +197,9 @@ function updatePositionChart() {
                                             const points = data.data.find(d => 
                                                 d.team === team && d.week === context.parsed.x
                                             )?.points || 'N/A';
-                                            return `${team}: Position ${position} (${points} pts)`;
+                                            const posLabel = typeof t === 'function' ? t('position_label', 'Position') : 'Position';
+                                            const ptsLabel = typeof t === 'function' ? t('points_label', 'Points') : 'Points';
+                                            return `${team}: ${posLabel} ${position} (${points} ${ptsLabel})`;
                                         }
                                     }
                                 },
@@ -228,7 +230,7 @@ function updatePositionChart() {
                 if (canvas && canvas.parentNode) {
                     canvas.parentNode.innerHTML = `
                         <div class="alert alert-danger">
-                            <strong>Error loading position chart:</strong> ${error.message || 'Unknown error'}
+                            <strong>${typeof t === 'function' ? t('error_loading_data', 'Error loading data') : 'Error loading data'}:</strong> ${error.message || 'Unknown error'}
                         </div>
                     `;
                 }

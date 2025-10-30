@@ -314,8 +314,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (container) {
             container.innerHTML = `
                 <div class="alert alert-danger" role="alert">
-                    <h4 class="alert-heading">Initialization Error</h4>
-                    <p>Failed to initialize the league statistics application. Please refresh the page.</p>
+                    <h4 class="alert-heading">${typeof t === 'function' ? t('status.initialization_error.title', 'Initialization Error') : 'Initialization Error'}</h4>
+                    <p>${typeof t === 'function' ? t('status.initialization_error.message', 'Failed to initialize the league statistics application. Please refresh the page.') : 'Failed to initialize the league statistics application. Please refresh the page.'}</p>
                     <hr>
                     <p class="mb-0">Error: ${error.message}</p>
                 </div>

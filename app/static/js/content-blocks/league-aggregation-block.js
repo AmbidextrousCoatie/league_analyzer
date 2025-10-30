@@ -9,7 +9,7 @@ class LeagueAggregationBlock extends BaseContentBlock {
             containerId: 'leagueAggregationContainer',
             dataEndpoint: null, // Multiple endpoints used
             requiredFilters: ['league'],
-            title: 'League Aggregation'
+            title: typeof t === 'function' ? t('ui.league.aggregation.title', 'League Aggregation') : 'League Aggregation'
         });
         this.dependencies = ['league'];
         this.container = document.getElementById(this.containerId);
@@ -50,8 +50,8 @@ class LeagueAggregationBlock extends BaseContentBlock {
         return `
             <div class="card mb-4">
                 <div class="card-header">
-                    <h5>${state.league} - All-Time Statistics</h5>
-                    <p class="mb-0 text-muted">League performance across all seasons</p>
+                    <h5>${state.league} - ${typeof t === 'function' ? t('ui.league.all_time', 'All-Time Statistics') : 'All-Time Statistics'}</h5>
+                    <p class="mb-0 text-muted">${typeof t === 'function' ? t('ui.league.performance_all_seasons', 'League performance across all seasons') : 'League performance across all seasons'}</p>
                 </div>
                 <div class="card-body">
                     <!-- League Averages Section -->
@@ -59,7 +59,7 @@ class LeagueAggregationBlock extends BaseContentBlock {
                         <div class="col-md-6">
                             <div class="card">
                                 <div class="card-header">
-                                    <h6>League Averages Over Time</h6>
+                                    <h6>${typeof t === 'function' ? t('ui.league.averages_over_time', 'League Averages Over Time') : 'League Averages Over Time'}</h6>
                                 </div>
                                 <div class="card-body">
                                     <div id="chartLeagueAverages" style="height: 300px;"></div>
@@ -69,7 +69,7 @@ class LeagueAggregationBlock extends BaseContentBlock {
                         <div class="col-md-6">
                             <div class="card">
                                 <div class="card-header">
-                                    <h6>League Points to Win</h6>
+                                    <h6>${typeof t === 'function' ? t('ui.league.points_to_win', 'League Points to Win') : 'League Points to Win'}</h6>
                                 </div>
                                 <div class="card-body">
                                     <div id="chartPointsToWin" style="height: 300px;"></div>
@@ -83,7 +83,7 @@ class LeagueAggregationBlock extends BaseContentBlock {
                         <div class="col-md-6">
                             <div class="card">
                                 <div class="card-header">
-                                    <h6>Top Team Performances</h6>
+                                    <h6>${typeof t === 'function' ? t('top_team_performances', 'Top Team Performances') : 'Top Team Performances'}</h6>
                                 </div>
                                 <div class="card-body">
                                     <div id="tableTopTeams"></div>
@@ -93,7 +93,7 @@ class LeagueAggregationBlock extends BaseContentBlock {
                         <div class="col-md-6">
                             <div class="card">
                                 <div class="card-header">
-                                    <h6>Top Individual Performances</h6>
+                                    <h6>${typeof t === 'function' ? t('top_individual_performances', 'Top Individual Performances') : 'Top Individual Performances'}</h6>
                                 </div>
                                 <div class="card-body">
                                     <div id="tableTopIndividuals"></div>
@@ -107,7 +107,7 @@ class LeagueAggregationBlock extends BaseContentBlock {
                         <div class="col-md-6">
                             <div class="card">
                                 <div class="card-header">
-                                    <h6>Record Individual Games</h6>
+                                    <h6>${typeof t === 'function' ? t('record_individual_games', 'Record Individual Games') : 'Record Individual Games'}</h6>
                                 </div>
                                 <div class="card-body">
                                     <div id="tableRecordIndividualGames"></div>
@@ -117,7 +117,7 @@ class LeagueAggregationBlock extends BaseContentBlock {
                         <div class="col-md-6">
                             <div class="card">
                                 <div class="card-header">
-                                    <h6>Record Team Games</h6>
+                                    <h6>${typeof t === 'function' ? t('record_team_games', 'Record Team Games') : 'Record Team Games'}</h6>
                                 </div>
                                 <div class="card-body">
                                     <div id="tableRecordTeamGames"></div>

@@ -17,6 +17,13 @@ class SpecialMatchesBlock extends BaseContentBlock {
             description: 'Team record performances and notable results'
         });
         
+        // Store translation keys for dynamic updates
+        this.titleKey = 'block.special_matches.title';
+        this.descriptionKey = 'block.special_matches.description';
+        
+        // Update with current translations
+        this.updateTranslations();
+        
         // Table container IDs
         this.tableContainers = {
             highestScores: 'highestScoresBody',
@@ -63,7 +70,7 @@ class SpecialMatchesBlock extends BaseContentBlock {
         }
         
         if (!matches || matches.length === 0) {
-            container.innerHTML = '<tr><td colspan="3" class="text-center text-muted">No data available</td></tr>';
+            container.innerHTML = `<tr><td colspan="3" class="text-center text-muted">${typeof t === 'function' ? t('no_data', 'No data available') : 'No data available'}</td></tr>`;
             return;
         }
         
@@ -89,7 +96,7 @@ class SpecialMatchesBlock extends BaseContentBlock {
         }
         
         if (!matches || matches.length === 0) {
-            container.innerHTML = '<tr><td colspan="3" class="text-center text-muted">No data available</td></tr>';
+            container.innerHTML = `<tr><td colspan="3" class="text-center text-muted">${typeof t === 'function' ? t('no_data', 'No data available') : 'No data available'}</td></tr>`;
             return;
         }
         
@@ -115,7 +122,7 @@ class SpecialMatchesBlock extends BaseContentBlock {
         }
         
         if (!matches || matches.length === 0) {
-            container.innerHTML = '<tr><td colspan="4" class="text-center text-muted">No data available</td></tr>';
+            container.innerHTML = `<tr><td colspan="4" class="text-center text-muted">${typeof t === 'function' ? t('no_data', 'No data available') : 'No data available'}</td></tr>`;
             return;
         }
         
@@ -142,7 +149,7 @@ class SpecialMatchesBlock extends BaseContentBlock {
         }
         
         if (!matches || matches.length === 0) {
-            container.innerHTML = '<tr><td colspan="4" class="text-center text-muted">No data available</td></tr>';
+            container.innerHTML = `<tr><td colspan="4" class="text-center text-muted">${typeof t === 'function' ? t('no_data', 'No data available') : 'No data available'}</td></tr>`;
             return;
         }
         
@@ -162,8 +169,8 @@ class SpecialMatchesBlock extends BaseContentBlock {
      * Show loading state in all tables
      */
     showLoading() {
-        const loadingHtml = '<tr><td colspan="4" class="text-center"><div class="spinner-border spinner-border-sm text-primary" role="status"><span class="visually-hidden">Loading...</span></div></td></tr>';
-        const loadingHtml3Col = '<tr><td colspan="3" class="text-center"><div class="spinner-border spinner-border-sm text-primary" role="status"><span class="visually-hidden">Loading...</span></div></td></tr>';
+        const loadingHtml = `<tr><td colspan="4" class="text-center"><div class="spinner-border spinner-border-sm text-primary" role="status"><span class="visually-hidden">${typeof t === 'function' ? t('status.loading', 'Loading...') : 'Loading...'}</span></div></td></tr>`;
+        const loadingHtml3Col = `<tr><td colspan="3" class="text-center"><div class="spinner-border spinner-border-sm text-primary" role="status"><span class="visually-hidden">${typeof t === 'function' ? t('status.loading', 'Loading...') : 'Loading...'}</span></div></td></tr>`;
         
         Object.entries(this.tableContainers).forEach(([key, containerId]) => {
             const container = document.getElementById(containerId);
@@ -179,8 +186,8 @@ class SpecialMatchesBlock extends BaseContentBlock {
      * Show placeholder when cannot render
      */
     showPlaceholder() {
-        const placeholderHtml = '<tr><td colspan="4" class="text-center text-muted">Select a team to view special moments</td></tr>';
-        const placeholderHtml3Col = '<tr><td colspan="3" class="text-center text-muted">Select a team to view special moments</td></tr>';
+        const placeholderHtml = `<tr><td colspan="4" class="text-center text-muted">${typeof t === 'function' ? t('msg.please_select.team', 'Select a team to view special moments') : 'Select a team to view special moments'}</td></tr>`;
+        const placeholderHtml3Col = `<tr><td colspan="3" class="text-center text-muted">${typeof t === 'function' ? t('msg.please_select.team', 'Select a team to view special moments') : 'Select a team to view special moments'}</td></tr>`;
         
         Object.entries(this.tableContainers).forEach(([key, containerId]) => {
             const container = document.getElementById(containerId);
@@ -196,8 +203,8 @@ class SpecialMatchesBlock extends BaseContentBlock {
      * Show error state in all tables
      */
     showError(error) {
-        const errorHtml = `<tr><td colspan="4" class="text-center text-warning">Error loading data: ${error.message}</td></tr>`;
-        const errorHtml3Col = `<tr><td colspan="3" class="text-center text-warning">Error loading data: ${error.message}</td></tr>`;
+        const errorHtml = `<tr><td colspan="4" class="text-center text-warning">${typeof t === 'function' ? t('error_loading_data', 'Error loading data') : 'Error loading data'}: ${error.message}</td></tr>`;
+        const errorHtml3Col = `<tr><td colspan="3" class="text-center text-warning">${typeof t === 'function' ? t('error_loading_data', 'Error loading data') : 'Error loading data'}: ${error.message}</td></tr>`;
         
         Object.entries(this.tableContainers).forEach(([key, containerId]) => {
             const container = document.getElementById(containerId);

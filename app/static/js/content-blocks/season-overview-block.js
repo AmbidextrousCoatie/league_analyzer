@@ -159,10 +159,10 @@ class SeasonOverviewBlock extends BaseContentBlock {
         return `
             <div class="card mb-4">
                 <div class="card-header">
-                    <h5 data-i18n="season_overview">Season Overview</h5>
+                    <h5>${typeof t === 'function' ? t('season_overview', 'Season Overview') : 'Season Overview'}</h5>
                 </div>
-                <div id="selectionMessage" class="alert alert-danger" style="font-size: 1.5rem; font-weight: bold;" data-i18n="please_select_combination">
-                    Please select a combination of Season and League.
+                <div id="selectionMessage" class="alert alert-danger" style="font-size: 1.5rem; font-weight: bold;">
+                    ${typeof t === 'function' ? t('msg.please_select.season_league', 'Please select a combination of Season and League.') : 'Please select a combination of Season and League.'}
                 </div>
             </div>
         `;

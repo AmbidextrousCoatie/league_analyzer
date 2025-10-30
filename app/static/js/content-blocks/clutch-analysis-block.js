@@ -17,6 +17,13 @@ class ClutchAnalysisBlock extends BaseContentBlock {
             description: 'Performance in close games (<10 point margin)'
         });
         
+        // Store translation keys for dynamic updates
+        this.titleKey = 'block.clutch_analysis.title';
+        this.descriptionKey = 'block.clutch_analysis.description';
+        
+        // Update with current translations
+        this.updateTranslations();
+        
         // Chart instance reference
         this.chartInstance = null;
         
@@ -83,7 +90,7 @@ class ClutchAnalysisBlock extends BaseContentBlock {
             <div class="row align-items-center">
                 <div class="col-md-8">
                     <label for="clutchThresholdRange" class="form-label mb-1">
-                        <small>Clutch Threshold: <span id="clutchThresholdValue">${this.clutchThreshold}</span> points</small>
+                        <small>${typeof t === 'function' ? t('ui.clutch.threshold', 'Clutch Threshold') : 'Clutch Threshold'}: <span id="clutchThresholdValue">${this.clutchThreshold}</span> ${typeof t === 'function' ? t('ui.clutch.points', 'points') : 'points'}</small>
                     </label>
                     <input type="range" class="form-range" id="clutchThresholdRange" 
                            min="0" max="100" value="${this.clutchThreshold}" 
@@ -92,7 +99,7 @@ class ClutchAnalysisBlock extends BaseContentBlock {
                 </div>
                 <div class="col-md-4 text-end">
                     <button class="btn btn-sm btn-outline-primary" onclick="window.teamStatsApp.refreshClutchAnalysis()">
-                        <i class="fas fa-sync-alt"></i> Update
+                        <i class="fas fa-sync-alt"></i> ${typeof t === 'function' ? t('action.update', 'Update') : 'Update'}
                     </button>
                 </div>
             </div>
@@ -224,7 +231,7 @@ class ClutchAnalysisBlock extends BaseContentBlock {
                 createClutchPerformanceChart(
                     opponentClutch,
                     this.containerId,
-                    `Clutch Games Performance per Opponent (<${this.clutchThreshold} point margin)`
+                    `${typeof t === 'function' ? t('ui.clutch.title', 'Clutch Games Performance per Opponent') : 'Clutch Games Performance per Opponent'} (<${this.clutchThreshold} ${typeof t === 'function' ? t('ui.clutch.points', 'point') : 'point'} ${typeof t === 'function' ? t('ui.clutch.margin', 'margin') : 'margin'})`
                 );
                 
                 // Store reference to the chart instance created by the legacy function
@@ -255,7 +262,7 @@ class ClutchAnalysisBlock extends BaseContentBlock {
                 <div class="col-md-3">
                     <div class="card bg-light">
                         <div class="card-body">
-                            <h6>Total Games</h6>
+                            <h6>${typeof t === 'function' ? t('ui.clutch.total_games', 'Total Games') : 'Total Games'}</h6>
                             <h4>${data.total_games || 0}</h4>
                         </div>
                     </div>
@@ -263,7 +270,7 @@ class ClutchAnalysisBlock extends BaseContentBlock {
                 <div class="col-md-3">
                     <div class="card bg-light">
                         <div class="card-body">
-                            <h6>Clutch Games</h6>
+                            <h6>${typeof t === 'function' ? t('ui.clutch.clutch_games', 'Clutch Games') : 'Clutch Games'}</h6>
                             <h4>${data.total_clutch_games || 0}</h4>
                         </div>
                     </div>
@@ -271,7 +278,7 @@ class ClutchAnalysisBlock extends BaseContentBlock {
                 <div class="col-md-3">
                     <div class="card bg-light">
                         <div class="card-body">
-                            <h6>Clutch Wins</h6>
+                            <h6>${typeof t === 'function' ? t('ui.clutch.clutch_wins', 'Clutch Wins') : 'Clutch Wins'}</h6>
                             <h4 class="text-success">${data.total_clutch_wins || 0}</h4>
                         </div>
                     </div>
@@ -279,7 +286,7 @@ class ClutchAnalysisBlock extends BaseContentBlock {
                 <div class="col-md-3">
                     <div class="card bg-light">
                         <div class="card-body">
-                            <h6>Win %</h6>
+                            <h6>${typeof t === 'function' ? t('ui.clutch.win_percentage', 'Win %') : 'Win %'}</h6>
                             <h4 class="text-primary">${data.clutch_percentage || 0}%</h4>
                         </div>
                     </div>
@@ -300,8 +307,8 @@ class ClutchAnalysisBlock extends BaseContentBlock {
             container.innerHTML = `
                 <div class="text-center text-muted p-4" style="height: 300px; display: flex; flex-direction: column; justify-content: center;">
                     <i class="fas fa-chart-bar fa-2x mb-2"></i>
-                    <p>No clutch games data available for the selected filters</p>
-                    <small>Try selecting a different team or season</small>
+                    <p>${typeof t === 'function' ? t('no_data', 'No clutch games data available for the selected filters') : 'No clutch games data available for the selected filters'}</p>
+                    <small>${typeof t === 'function' ? t('ui.clutch.try_different', 'Try selecting a different team or season') : 'Try selecting a different team or season'}</small>
                 </div>
             `;
         }
@@ -356,9 +363,9 @@ class ClutchAnalysisBlock extends BaseContentBlock {
             container.innerHTML = `
                 <div class="d-flex justify-content-center align-items-center" style="height: 300px;">
                     <div class="spinner-border text-primary" role="status">
-                        <span class="visually-hidden">Loading...</span>
+                        <span class="visually-hidden">${typeof t === 'function' ? t('status.loading', 'Loading...') : 'Loading...'}</span>
                     </div>
-                    <span class="ms-2">Loading clutch analysis...</span>
+                    <span class="ms-2">${typeof t === 'function' ? t('status.loading', 'Loading clutch analysis...') : 'Loading clutch analysis...'}</span>
                 </div>
             `;
         }
@@ -369,9 +376,9 @@ class ClutchAnalysisBlock extends BaseContentBlock {
             statsContainer.innerHTML = `
                 <div class="text-center p-3">
                     <div class="spinner-border spinner-border-sm text-primary" role="status">
-                        <span class="visually-hidden">Loading...</span>
+                        <span class="visually-hidden">${typeof t === 'function' ? t('status.loading', 'Loading...') : 'Loading...'}</span>
                     </div>
-                    <span class="ms-2">Loading clutch statistics...</span>
+                    <span class="ms-2">${typeof t === 'function' ? t('status.loading', 'Loading clutch statistics...') : 'Loading clutch statistics...'}</span>
                 </div>
             `;
         }
@@ -386,7 +393,7 @@ class ClutchAnalysisBlock extends BaseContentBlock {
             container.innerHTML = `
                 <div class="text-center text-muted p-4" style="height: 300px; display: flex; flex-direction: column; justify-content: center;">
                     <i class="fas fa-chart-bar fa-2x mb-2"></i>
-                    <p>Select a team to view clutch performance</p>
+                    <p>${typeof t === 'function' ? t('msg.please_select.team', 'Select a team to view clutch performance') : 'Select a team to view clutch performance'}</p>
                 </div>
             `;
         }
@@ -397,7 +404,7 @@ class ClutchAnalysisBlock extends BaseContentBlock {
             statsContainer.innerHTML = `
                 <div class="text-center text-muted p-3">
                     <i class="fas fa-table fa-lg mb-2"></i>
-                    <p class="mb-0">Clutch statistics will appear here</p>
+                    <p class="mb-0">${typeof t === 'function' ? t('ui.clutch.stats_placeholder', 'Clutch statistics will appear here') : 'Clutch statistics will appear here'}</p>
                 </div>
             `;
         }
@@ -414,7 +421,7 @@ class ClutchAnalysisBlock extends BaseContentBlock {
         if (statsContainer) {
             statsContainer.innerHTML = `
                 <div class="alert alert-warning" role="alert">
-                    <small>Unable to load clutch statistics: ${error.message}</small>
+                    <small>${typeof t === 'function' ? t('error_loading_data', 'Unable to load clutch statistics') : 'Unable to load clutch statistics'}: ${error.message}</small>
                 </div>
             `;
         }

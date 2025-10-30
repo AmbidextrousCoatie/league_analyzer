@@ -3,7 +3,7 @@
     <div class="card-header d-flex justify-content-between align-items-center">
         <h5 class="mb-0">
             <button class="btn btn-link text-decoration-none p-0" type="button" data-bs-toggle="collapse" data-bs-target="#clutchAnalysisCollapse" aria-expanded="true" aria-controls="clutchAnalysisCollapse">
-                <i class="bi bi-chevron-down me-1"></i> Clutch Performance Analysis
+                <i class="bi bi-chevron-down me-1"></i> <span data-i18n="block.clutch_analysis.title">Clutch Performance Analysis</span>
             </button>
         </h5>
         <button class="btn btn-primary btn-sm" onclick="ClutchAnalysisModule.test()">Test Analysis</button>
@@ -54,7 +54,7 @@ const ClutchAnalysisModule = {
         container.innerHTML = `
             <div class="card mb-4">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">Clutch Performance Analysis</h5>
+                    <h5 class="mb-0" data-i18n="block.clutch_analysis.title">Clutch Performance Analysis</h5>
                     <button class="btn btn-primary btn-sm" onclick="ClutchAnalysisModule.test()">Test Analysis</button>
                 </div>
                 <div class="card-body">
@@ -129,7 +129,7 @@ const ClutchAnalysisModule = {
                 <div class="col-md-6">
                     <div class="card">
                         <div class="card-header">
-                            <h6>Clutch Performance Chart</h6>
+                            <h6 data-i18n="ui.clutch.title">Clutch Performance Chart</h6>
                         </div>
                         <div class="card-body">
                             <div id="clutchChart" style="height: 300px;"></div>

@@ -163,9 +163,14 @@
             setupLanguageToggle();
         });
         
-        // Load translations
+        // Load translations with sessionStorage caching
         async function loadTranslations() {
             try {
+                // Try cache first: use last-known language if set
+                const lastKnown = sessionStorage.getItem('i18n:last_language');
+                const cachedKeyPrefix = lastKnown ? `i18n:${lastKnown}:` : null;
+
+                // We need version info to compose the cache key; fetch lightweight first
                 const response = await fetch('/league/get_translations');
                 
                 if (!response.ok) {
@@ -176,8 +181,32 @@
                 const data = await response.json();
                 
                 if (data.success) {
-                    translations = data.translations;
-                    currentLanguage = data.current_language;
+                    const version = data.translations_version || 'v1';
+                    currentLanguage = data.current_language || 'en';
+
+                    const cacheKey = `i18n:${currentLanguage}:${version}`;
+
+                    // Check cache for this language+version
+                    const cached = sessionStorage.getItem(cacheKey);
+                    if (cached) {
+                        try {
+                            translations = JSON.parse(cached);
+                        } catch {
+                            translations = data.translations || {};
+                        }
+                    } else {
+                        translations = data.translations || {};
+                        // Store to cache
+                        try {
+                            sessionStorage.setItem(cacheKey, JSON.stringify(translations));
+                        } catch {}
+                    }
+                    
+                    // Update global translations object
+                    window.translations = translations;
+
+                    // Store last language to speed next boot
+                    try { sessionStorage.setItem('i18n:last_language', currentLanguage); } catch {}
                     updateLanguageDisplay(currentLanguage);
                     
                     // Update page content with new translations
@@ -201,8 +230,23 @@
                 }
             });
             
+            // Update content block titles and descriptions
+            updateContentBlockTranslations();
+            
             // Update chart labels if charts exist
             updateChartLabels();
+        }
+        
+        // Update content block translations
+        function updateContentBlockTranslations() {
+            // Find all content block instances and update their translations
+            if (window.teamStatsApp && window.teamStatsApp.contentBlocks) {
+                window.teamStatsApp.contentBlocks.forEach(block => {
+                    if (block.updateTranslations && typeof block.updateTranslations === 'function') {
+                        block.updateTranslations();
+                    }
+                });
+            }
         }
         
         // Update chart labels
@@ -267,7 +311,7 @@
         
         // Helper function to get translated text
         function t(key) {
-            return translations[key] || key;
+            return window.translations[key] || key;
         }
         
         // Setup language toggle functionality
@@ -298,6 +342,8 @@
                 
                 if (data.success) {
                     currentLanguage = language;
+                    // Clear any previous cached last language
+                    try { sessionStorage.setItem('i18n:last_language', currentLanguage); } catch {}
                     await loadTranslations();
                     
                     // Update all content immediately without page reload

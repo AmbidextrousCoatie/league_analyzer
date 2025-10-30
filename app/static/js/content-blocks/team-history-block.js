@@ -12,8 +12,8 @@ class TeamHistoryBlock extends BaseContentBlock {
             containerId: 'chartTeamHistory',
             dataEndpoint: '/team/get_team_history',
             requiredFilters: ['team'],
-            title: 'Team Position History',
-            description: 'Team position across seasons and league levels'
+            title: (typeof t === 'function' ? t('ui.team_history.title', 'Team Position History') : 'Team Position History'),
+            description: (typeof t === 'function' ? t('ui.team_history.description', 'Team position across seasons and league levels') : 'Team position across seasons and league levels')
         });
         
         // Chart.js instance reference
@@ -131,7 +131,7 @@ class TeamHistoryBlock extends BaseContentBlock {
                 plugins: {
                     title: {
                         display: true,
-                        text: 'Platzierungsverlauf'
+                        text: (typeof t === 'function' ? t('ui.team_history.chart_title', 'Position Progression') : 'Position Progression')
                     },
                     tooltip: {
                         enabled: true,
@@ -139,8 +139,8 @@ class TeamHistoryBlock extends BaseContentBlock {
                             afterLabel: function(context) {
                                 const seasonData = data[seasons[context.dataIndex]];
                                 return [
-                                    `Liga: ${seasonData.league_name}`,
-                                    `Endplatz: ${seasonData.final_position}`
+                                    `${typeof t === 'function' ? t('ui.team_history.tooltip.league', 'League:') : 'League:'} ${seasonData.league_name}`,
+                                    `${typeof t === 'function' ? t('ui.team_history.tooltip.final_position', 'Final Position:') : 'Final Position:'} ${seasonData.final_position}`
                                 ];
                             }
                         }
@@ -271,9 +271,9 @@ class TeamHistoryBlock extends BaseContentBlock {
                 loadingDiv.innerHTML = `
                     <div class="d-flex justify-content-center align-items-center" style="height: 300px;">
                         <div class="spinner-border text-primary" role="status">
-                            <span class="visually-hidden">Loading...</span>
+                            <span class="visually-hidden">${typeof t === 'function' ? t('status.loading', 'Loading...') : 'Loading...'}</span>
                         </div>
-                        <span class="ms-2">Loading team history...</span>
+                        <span class="ms-2">${typeof t === 'function' ? t('ui.team_history.loading', 'Loading team history...') : 'Loading team history...'}</span>
                     </div>
                 `;
                 
@@ -367,7 +367,7 @@ class TeamHistoryBlock extends BaseContentBlock {
                 placeholderDiv.innerHTML = `
                     <div class="text-center text-muted p-4" style="height: 300px; display: flex; flex-direction: column; justify-content: center;">
                         <i class="fas fa-chart-line fa-2x mb-2"></i>
-                        <p>Select a team to view position history</p>
+                        <p>${typeof t === 'function' ? t('msg.please_select.team', 'Select a team to view position history') : 'Select a team to view position history'}</p>
                     </div>
                 `;
                 

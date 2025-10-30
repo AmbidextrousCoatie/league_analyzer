@@ -16,6 +16,13 @@ class ConsistencyMetricsBlock extends BaseContentBlock {
             title: 'Consistency Metrics',
             description: 'Team performance consistency and statistical analysis'
         });
+        
+        // Store translation keys for dynamic updates
+        this.titleKey = 'block.consistency_metrics.title';
+        this.descriptionKey = 'block.consistency_metrics.description';
+        
+        // Update with current translations
+        this.updateTranslations();
     }
     
     /**
@@ -46,7 +53,7 @@ class ConsistencyMetricsBlock extends BaseContentBlock {
         const metricsHtml = `
             <div class="row">
                 <div class="col-md-6">
-                    <h6>Basic Statistics</h6>
+                    <h6>${typeof t === 'function' ? t('ui.consistency.basic_stats', 'Basic Statistics') : 'Basic Statistics'}</h6>
                     <table class="table table-sm">
                         <tr><td>Average Score:</td><td><strong>${data.mean_score || 'N/A'}</strong></td></tr>
                         <tr><td>Standard Deviation:</td><td><strong>${data.std_deviation || 'N/A'}</strong></td></tr>
@@ -55,7 +62,7 @@ class ConsistencyMetricsBlock extends BaseContentBlock {
                     </table>
                 </div>
                 <div class="col-md-6">
-                    <h6>Score Range</h6>
+                    <h6>${typeof t === 'function' ? t('ui.consistency.score_range', 'Score Range') : 'Score Range'}</h6>
                     <table class="table table-sm">
                         <tr><td>Highest Score:</td><td><strong class="text-success">${data.max_score || 'N/A'}</strong></td></tr>
                         <tr><td>Lowest Score:</td><td><strong class="text-danger">${data.min_score || 'N/A'}</strong></td></tr>
@@ -81,7 +88,7 @@ class ConsistencyMetricsBlock extends BaseContentBlock {
                     <div class="spinner-border text-primary" role="status">
                         <span class="visually-hidden">Loading...</span>
                     </div>
-                    <span class="ms-2">Loading consistency metrics...</span>
+                    <span class="ms-2">${typeof t === 'function' ? t('status.loading', 'Loading consistency metrics...') : 'Loading consistency metrics...'}</span>
                 </div>
             `;
         }
@@ -96,8 +103,8 @@ class ConsistencyMetricsBlock extends BaseContentBlock {
             container.innerHTML = `
                 <div class="text-center text-muted p-4">
                     <i class="fas fa-chart-line fa-2x mb-2"></i>
-                    <p>Select a team to view consistency metrics</p>
-                    <small>Statistical analysis of team performance consistency</small>
+                    <p>${typeof t === 'function' ? t('msg.please_select.team', 'Select a team to view consistency metrics') : 'Select a team to view consistency metrics'}</p>
+                    <small>${typeof t === 'function' ? t('ui.consistency.description', 'Statistical analysis of team performance consistency') : 'Statistical analysis of team performance consistency'}</small>
                 </div>
             `;
         }
@@ -111,10 +118,10 @@ class ConsistencyMetricsBlock extends BaseContentBlock {
         if (container) {
             container.innerHTML = `
                 <div class="alert alert-warning" role="alert">
-                    <h6 class="alert-heading">Unable to load consistency metrics</h6>
+                    <h6 class="alert-heading">${typeof t === 'function' ? t('error_loading_data', 'Unable to load consistency metrics') : 'Unable to load consistency metrics'}</h6>
                     <p class="mb-0">${error.message}</p>
                     <button class="btn btn-sm btn-outline-primary mt-2" onclick="this.closest('.alert').parentElement.innerHTML=''">
-                        Dismiss
+                        ${typeof t === 'function' ? t('action.dismiss', 'Dismiss') : 'Dismiss'}
                     </button>
                 </div>
             `;

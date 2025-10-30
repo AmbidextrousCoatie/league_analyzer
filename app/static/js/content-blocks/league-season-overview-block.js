@@ -9,7 +9,7 @@ class LeagueSeasonOverviewBlock extends BaseContentBlock {
             containerId: 'leagueSeasonOverviewContainer',
             dataEndpoint: null, // Multiple endpoints used
             requiredFilters: ['league', 'season'],
-            title: 'League Season Overview'
+            title: typeof t === 'function' ? t('ui.league.season_overview.title', 'League Season Overview') : 'League Season Overview'
         });
         this.dependencies = ['league', 'season'];
         this.container = document.getElementById(this.containerId);
@@ -52,8 +52,8 @@ class LeagueSeasonOverviewBlock extends BaseContentBlock {
         return `
             <div class="card mb-4">
                 <div class="card-header">
-                    <h5>${state.league} - Season ${state.season}</h5>
-                    <p class="mb-0 text-muted">Season overview and analysis</p>
+                    <h5>${state.league} - ${typeof t === 'function' ? t('season', 'Season') : 'Season'} ${state.season}</h5>
+                    <p class="mb-0 text-muted">${typeof t === 'function' ? t('season_overview', 'Season Overview') : 'Season Overview'}</p>
                 </div>
                 <div class="card-body">
                     <!-- 1st Row: League Standings (Full Width) -->
@@ -61,8 +61,8 @@ class LeagueSeasonOverviewBlock extends BaseContentBlock {
                         <div class="col-12">
                             <div class="card">
                                 <div class="card-header">
-                                    <h6>League Standings</h6>
-                                    <p class="mb-0 text-muted small">Current league table and team positions</p>
+                                    <h6>${typeof t === 'function' ? t('league_standings', 'League Standings') : 'League Standings'}</h6>
+                                    <p class="mb-0 text-muted small">${typeof t === 'function' ? t('standings', 'Standings') : 'Standings'}</p>
                                 </div>
                                 <div class="card-body">
                                     <div id="leagueStandingsTable"></div>
@@ -76,8 +76,8 @@ class LeagueSeasonOverviewBlock extends BaseContentBlock {
                         <div class="col-md-6">
                             <div class="card">
                                 <div class="card-header">
-                                    <h6>Season Timetable</h6>
-                                    <p class="mb-0 text-muted small">Match schedule and completion status</p>
+                                    <h6>${typeof t === 'function' ? t('season_timetable', 'Season Timetable') : 'Season Timetable'}</h6>
+                                    <p class="mb-0 text-muted small">${typeof t === 'function' ? t('match_schedule', 'Match Schedule') : 'Match Schedule'}</p>
                                 </div>
                                 <div class="card-body">
                                     <div id="seasonTimetable"></div>
@@ -87,7 +87,7 @@ class LeagueSeasonOverviewBlock extends BaseContentBlock {
                         <div class="col-md-6">
                             <div class="card">
                                 <div class="card-header">
-                                    <h6>Position in Season Progress</h6>
+                                    <h6>${typeof t === 'function' ? t('position_in_season_progress', 'Position in Season Progress') : 'Position in Season Progress'}</h6>
                                 </div>
                                 <div class="card-body">
                                     <div id="chartTeamPositionCumulated" style="height: 300px;"></div>
@@ -101,7 +101,7 @@ class LeagueSeasonOverviewBlock extends BaseContentBlock {
                         <div class="col-md-6">
                             <div class="card">
                                 <div class="card-header">
-                                    <h6>Points per Match Day</h6>
+                                    <h6>${typeof t === 'function' ? t('points_per_match_day', 'Points per Match Day') : 'Points per Match Day'}</h6>
                                 </div>
                                 <div class="card-body">
                                     <div id="chartTeamPointsWeekly" style="height: 300px;"></div>
@@ -111,7 +111,7 @@ class LeagueSeasonOverviewBlock extends BaseContentBlock {
                         <div class="col-md-6">
                             <div class="card">
                                 <div class="card-header">
-                                    <h6>Points in Season Progress</h6>
+                                    <h6>${typeof t === 'function' ? t('points_in_season_progress', 'Points in Season Progress') : 'Points in Season Progress'}</h6>
                                 </div>
                                 <div class="card-body">
                                     <div id="chartTeamPointsCumulated" style="height: 300px;"></div>
@@ -132,8 +132,8 @@ class LeagueSeasonOverviewBlock extends BaseContentBlock {
                         <div class="col-12">
                             <div class="card">
                                 <div class="card-header">
-                                    <h6>Individual Averages</h6>
-                                    <p class="mb-0 text-muted small">Player performance statistics with total points and high games</p>
+                                    <h6>${typeof t === 'function' ? t('individual_averages', 'Individual Averages') : 'Individual Averages'}</h6>
+                                    <p class="mb-0 text-muted small">${typeof t === 'function' ? t('individual_performance', 'Individual Performance') : 'Individual Performance'}</p>
                                 </div>
                                 <div class="card-body">
                                     <div id="individualAveragesTable"></div>

@@ -12,8 +12,8 @@ class LeagueComparisonBlock extends BaseContentBlock {
             containerId: 'chartLeagueComparison',
             dataEndpoint: '/team/get_league_comparison',
             requiredFilters: ['team'],
-            title: 'League Comparison',
-            description: 'Team performance vs league average'
+            title: (typeof t === 'function' ? t('ui.league_comparison.title', 'League Comparison') : 'League Comparison'),
+            description: (typeof t === 'function' ? t('ui.league_comparison.description', 'Team performance vs league average') : 'Team performance vs league average')
         });
         
         // Chart.js instance reference
@@ -25,7 +25,7 @@ class LeagueComparisonBlock extends BaseContentBlock {
      */
     async render(data, filterState) {
         if (!data || Object.keys(data).length === 0) {
-            throw new Error('No league comparison data available');
+            throw new Error(typeof t === 'function' ? t('no_data', 'No league comparison data available') : 'No league comparison data available');
         }
         
         // Render chart
@@ -72,7 +72,7 @@ class LeagueComparisonBlock extends BaseContentBlock {
                 leagueScores,  // Reference data (league averages)
                 teamScores,    // Actual data (team averages)
                 canvas,        // Canvas element (not ID)
-                'Team vs League Performance by Season',
+                (typeof t === 'function' ? t('ui.league_comparison.chart_title', 'Team vs League Performance by Season') : 'Team vs League Performance by Season'),
                 seasons        // Labels (seasons)
             );
             
@@ -118,12 +118,12 @@ class LeagueComparisonBlock extends BaseContentBlock {
         const tableConfig = {
             data: tableData,
             columns: [
-                { title: 'Saison' },
-                { title: 'Liga' },
-                { title: 'Platz' },
-                { title: 'Team Ø' },
-                { title: 'Liga Ø' },
-                { title: 'Differenz' }
+                { title: (typeof t === 'function' ? t('season', 'Season') : 'Season') },
+                { title: (typeof t === 'function' ? t('league', 'League') : 'League') },
+                { title: (typeof t === 'function' ? t('ranking', 'Ranking') : 'Ranking') },
+                { title: (typeof t === 'function' ? t('average', 'Avg') : 'Avg') + ' - ' + (typeof t === 'function' ? t('team', 'Team') : 'Team') },
+                { title: (typeof t === 'function' ? t('average', 'Avg') : 'Avg') + ' - ' + (typeof t === 'function' ? t('league', 'League') : 'League') },
+                { title: (typeof t === 'function' ? t('ui.comparison.difference', 'Difference') : 'Difference') }
             ],
             headerGroups: []
         };
@@ -241,9 +241,9 @@ class LeagueComparisonBlock extends BaseContentBlock {
                 loadingDiv.innerHTML = `
                     <div class="d-flex justify-content-center align-items-center" style="height: 300px;">
                         <div class="spinner-border text-primary" role="status">
-                            <span class="visually-hidden">Loading...</span>
+                            <span class="visually-hidden">${typeof t === 'function' ? t('status.loading', 'Loading...') : 'Loading...'}</span>
                         </div>
-                        <span class="ms-2">Loading league comparison...</span>
+                        <span class="ms-2">${typeof t === 'function' ? t('ui.league_comparison.loading', 'Loading league comparison...') : 'Loading league comparison...'}</span>
                     </div>
                 `;
                 
@@ -258,9 +258,9 @@ class LeagueComparisonBlock extends BaseContentBlock {
             tableContainer.innerHTML = `
                 <div class="text-center p-3">
                     <div class="spinner-border spinner-border-sm text-primary" role="status">
-                        <span class="visually-hidden">Loading...</span>
+                        <span class="visually-hidden">${typeof t === 'function' ? t('status.loading', 'Loading...') : 'Loading...'}</span>
                     </div>
-                    <span class="ms-2">Loading comparison data...</span>
+                    <span class="ms-2">${typeof t === 'function' ? t('ui.league_comparison.loading_table', 'Loading comparison data...') : 'Loading comparison data...'}</span>
                 </div>
             `;
         }
@@ -341,7 +341,7 @@ class LeagueComparisonBlock extends BaseContentBlock {
                 placeholderDiv.innerHTML = `
                     <div class="text-center text-muted p-4" style="height: 300px; display: flex; flex-direction: column; justify-content: center;">
                         <i class="fas fa-chart-area fa-2x mb-2"></i>
-                        <p>Select a team to view league comparison</p>
+                        <p>${typeof t === 'function' ? t('msg.please_select.team', 'Select a team to view league comparison') : 'Select a team to view league comparison'}</p>
                     </div>
                 `;
                 
@@ -355,7 +355,7 @@ class LeagueComparisonBlock extends BaseContentBlock {
             tableContainer.innerHTML = `
                 <div class="text-center text-muted p-3">
                     <i class="fas fa-table fa-lg mb-2"></i>
-                    <p class="mb-0">Comparison data will appear here</p>
+                    <p class="mb-0">${typeof t === 'function' ? t('ui.league_comparison.table_placeholder', 'Comparison data will appear here') : 'Comparison data will appear here'}</p>
                 </div>
             `;
         }

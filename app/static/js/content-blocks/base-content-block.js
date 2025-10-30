@@ -250,10 +250,10 @@ class BaseContentBlock {
         if (container) {
             container.innerHTML = `
                 <div class="alert alert-warning" role="alert">
-                    <h6 class="alert-heading">Unable to load ${this.title}</h6>
+                    <h6 class="alert-heading">${typeof t === 'function' ? t('error_loading_data', 'Unable to load') : 'Unable to load'} ${this.title}</h6>
                     <p class="mb-0">${error.message}</p>
                     <button class="btn btn-sm btn-outline-primary mt-2" onclick="this.closest('.alert').parentElement.innerHTML=''">
-                        Dismiss
+                        ${typeof t === 'function' ? t('action.dismiss', 'Dismiss') : 'Dismiss'}
                     </button>
                 </div>
             `;
@@ -326,6 +326,22 @@ class BaseContentBlock {
         this.cleanup();
     }
     
+    /**
+     * Update title and description with current translations
+     */
+    updateTranslations() {
+        if (typeof t === 'function') {
+            // Update title if it has a translation key pattern
+            if (this.titleKey) {
+                this.title = t(this.titleKey, this.title);
+            }
+            // Update description if it has a translation key pattern
+            if (this.descriptionKey) {
+                this.description = t(this.descriptionKey, this.description);
+            }
+        }
+    }
+
     /**
      * Cleanup method for subclasses to override
      */
