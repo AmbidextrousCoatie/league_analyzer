@@ -26,8 +26,8 @@ except ImportError:
 ROOT = Path(__file__).resolve().parents[1]
 REAL_DATA = ROOT / "database" / "data" / "bowling_ergebnisse_real.csv"
 SCHEMA_JSON = ROOT / "database" / "schema.json"
-OUT_DIR = ROOT / "database" / "relational_csv"
-TARGET_TABLE = "event"  # options: "venue", "league", "scoring_system", "league_season", "event"
+OUT_DIR = ROOT / "database" / "relational_csv" / "new"
+TARGET_TABLE = "team_season"  # options: "venue", "league", "scoring_system", "league_season", "event", "player", "club", "team"
 
 
 def ensure_out_dir() -> None:
@@ -184,7 +184,7 @@ def build_event() -> pd.DataFrame:
 		.sort_values(by=["league_id", "season", "league_week", "date", "Location"]) 
 		.reset_index(drop=True)
 	)
-    
+	
 	league_season_csv = OUT_DIR / "league_season.csv"
 	venue_csv = OUT_DIR / "venue.csv"
 	if not league_season_csv.exists():
@@ -251,6 +251,237 @@ def build_event() -> pd.DataFrame:
 	if errors:
 		raise ValueError("Event validation failed: " + "; ".join(errors))
 	return events[get_ordered_column_names(table_spec)]
+
+
+def _split_player_name(raw: str) -> tuple[str, str]:
+
+	if pd.isna(raw) or not str(raw).strip():
+		return ("", "")
+	text = str(raw).strip()
+	# Expected format: "Family, Given"
+	if "," in text:
+		parts = [p.strip() for p in text.split(",", 1)]
+		family = parts[0]
+		given = parts[1]
+		return (given, family)
+	# Fallback: last token as family name
+	parts = text.split()
+	if len(parts) >= 2:
+		family = parts[-1]
+		given = " ".join(parts[:-1])
+		return (given, family)
+	return (text, "")
+
+
+def build_player() -> pd.DataFrame:
+
+	df_all = pd.read_csv(REAL_DATA, sep=";", dtype=str)
+
+	# Build skipped entries report (Team Total and invalid/missing IDs)
+	skipped_lines: list[str] = []
+	# Team Total occurrences
+	if "Player" in df_all.columns:
+		team_total_count = df_all[df_all["Player"] == "Team Total"].shape[0]
+		if team_total_count > 0:
+			skipped_lines.append(f"- Team Total, {team_total_count} times")
+
+	# Missing or invalid Player IDs (<=0, NaN, non-numeric) among player rows (excluding Team Total)
+	player_mask = df_all["Player"].notna() & (df_all["Player"] != "Team Total")
+	ids_all = pd.to_numeric(df_all.loc[player_mask, "Player ID"], errors="coerce")
+	invalid_id_mask = ids_all.isna() | (ids_all.astype("Int64").fillna(0) <= 0)
+	if invalid_id_mask.any():
+		invalid_players = (
+			df_all.loc[player_mask, ["Player"]]
+			.assign(_invalid=invalid_id_mask.values)
+			.query("_invalid == True")["Player"]
+		)
+		counts = invalid_players.value_counts().sort_index()
+		for name, cnt in counts.items():
+			skipped_lines.append(f"- {name}, {int(cnt)} times")
+
+	# Continue with valid players only
+	df = df_all[player_mask].copy()
+	ids = pd.to_numeric(df["Player ID"], errors="coerce")
+	df = df[ids.notna() & (ids.astype(int) > 0)].copy()
+	df["player_id_int"] = ids.astype(int)
+
+	# Build base unique by (Player ID)
+	base = df[["player_id_int", "Player"]].drop_duplicates().copy()
+	base["given_name"], base["family_name"] = zip(*base["Player"].map(_split_player_name))
+	base["full_name"] = (base["given_name"].fillna("").str.strip() + " " + base["family_name"].fillna("").str.strip()).str.strip()
+	base = base.rename(columns={"player_id_int": "id"})
+
+	# Conform to schema and validate
+	schema = load_schema(str(SCHEMA_JSON))
+	table_spec = get_table_spec(schema, "player")
+	players = base[["id", "given_name", "family_name", "full_name"]].copy()
+	players = ensure_schema_columns(players, table_spec)
+	players = coerce_dtypes(players, table_spec)
+	errors = validate_dataframe_against_schema(players, table_spec)
+	if errors:
+		raise ValueError("Player validation failed: " + "; ".join(errors))
+
+	# Consistency report: ID→multiple names, Name→multiple IDs
+	problems: list[str] = []
+	# ID to full_name uniqueness
+	id_name = df[["Player ID", "Player"]].dropna().drop_duplicates()
+	id_name["Player ID"] = pd.to_numeric(id_name["Player ID"], errors="coerce").astype("Int64")
+	# Normalize full name
+	id_name["full_name"] = id_name["Player"].map(lambda s: (lambda g,f: f"{g} {f}".strip())(*_split_player_name(s)))
+	conflict_ids = (
+		id_name.groupby("Player ID")["full_name"].nunique().reset_index(name="name_count")
+	)
+	conflict_ids = conflict_ids[conflict_ids["name_count"] > 1]
+	if not conflict_ids.empty:
+		problems.append("IDs with multiple full_names:")
+		merged = id_name.merge(conflict_ids[["Player ID"]], on="Player ID", how="inner")
+		lines = merged.sort_values(["Player ID", "full_name"]).apply(lambda r: f"  ID={r['Player ID']}: {r['full_name']}", axis=1).unique()
+		problems.extend(lines.tolist())
+
+	# full_name to ID uniqueness
+	name_ids = id_name.groupby("full_name")["Player ID"].nunique().reset_index(name="id_count")
+	name_ids = name_ids[name_ids["id_count"] > 1]
+	if not name_ids.empty:
+		problems.append("Full names mapped to multiple IDs:")
+		merged2 = id_name.merge(name_ids[["full_name"]], on="full_name", how="inner")
+		lines2 = merged2.sort_values(["full_name", "Player ID"]).apply(lambda r: f"  full_name={r['full_name']}: ID={r['Player ID']}", axis=1).unique()
+		problems.extend(lines2.tolist())
+
+	# Write report if any
+	report_path = OUT_DIR / "player_consistency_report.txt"
+	if problems:
+		with open(report_path, "w", encoding="utf-8") as f:
+			f.write("\n".join(problems) + "\n")
+		print(f"Wrote consistency report to {report_path}")
+	else:
+		# Ensure any previous report is cleared
+		try:
+			os.remove(report_path)
+		except OSError:
+			pass
+
+	# Write skipped entries report
+	skipped_path = OUT_DIR / "player_skipped_report.txt"
+	if skipped_lines:
+		with open(skipped_path, "w", encoding="utf-8") as f:
+			f.write("\n".join(skipped_lines) + "\n")
+		print(f"Wrote skipped entries report to {skipped_path}")
+	else:
+		try:
+			os.remove(skipped_path)
+		except OSError:
+			pass
+
+	return players[get_ordered_column_names(table_spec)]
+
+
+def _extract_team_parts(team_name: str) -> tuple[str, int]:
+
+	if pd.isna(team_name):
+		return ("", 0)
+	name = str(team_name).strip()
+	if not name or name == "Team Total":
+		return ("", 0)
+	# Trailing integer indicates team number
+	import re
+	m = re.match(r"^(.*?)[\s]+(\d+)$", name)
+	if m:
+		club_name = m.group(1).strip()
+		team_number = int(m.group(2))
+		return (club_name, team_number)
+	# No explicit number → default to 1
+	return (name, 1)
+
+
+def build_club() -> pd.DataFrame:
+
+	df = pd.read_csv(REAL_DATA, sep=";", dtype=str)
+	print("--- input data:", REAL_DATA)
+	team_col = "Team"
+	opp_col = "Opponent"
+	if team_col not in df.columns or opp_col not in df.columns:
+		raise KeyError("Expected 'Team' and 'Opponent' columns in real dataset")
+
+	all_names = pd.concat([df[team_col], df[opp_col]], ignore_index=True)
+	parts = all_names.dropna().unique()
+	print("--- parts:", parts)
+	clubs: list[str] = []
+	for raw in parts:
+		club, num = _extract_team_parts(raw)
+		if club:
+			clubs.append(club)
+
+	clubs_df = pd.DataFrame({"name": sorted(set(clubs))})
+	clubs_df.insert(0, "id", range(1, len(clubs_df) + 1))
+
+	schema = load_schema(str(SCHEMA_JSON))
+	table_spec = get_table_spec(schema, "club")
+	clubs_df = ensure_schema_columns(clubs_df, table_spec)
+	clubs_df = coerce_dtypes(clubs_df, table_spec)
+	errors = validate_dataframe_against_schema(clubs_df, table_spec)
+	print(clubs_df.sort_values(by="name").to_string())
+	if errors:
+		raise ValueError("Club validation failed: " + "; ".join(errors))
+	return clubs_df[get_ordered_column_names(table_spec)]
+
+
+def build_team_season() -> pd.DataFrame:
+
+	df = pd.read_csv(REAL_DATA, sep=";", dtype=str)
+	team_col = "Team"
+	opp_col = "Opponent"
+	if team_col not in df.columns or opp_col not in df.columns:
+		raise KeyError("Expected 'Team' and 'Opponent' columns in real dataset")
+
+	# Determine season key
+	if "League" not in df.columns or "Season" not in df.columns:
+		raise KeyError("Expected 'League' and 'Season' columns in real dataset")
+
+	# Prepare unique season teams: (league_id, season, club_name, team_number)
+	def iter_team_rows(series: pd.Series) -> list[tuple[str, str, str, int]]:
+		rows: list[tuple[str, str, str, int]] = []
+		for league, season, team in zip(df["League"], df["Season"], series):
+			if pd.isna(team):
+				continue
+			club, num = _extract_team_parts(team)
+			if club and num > 0:
+				rows.append((league, season, club, num))
+		return rows
+
+	rows_all = iter_team_rows(df[team_col]) + iter_team_rows(df[opp_col])
+	season_teams = pd.DataFrame(rows_all, columns=["league_id", "season", "club_name", "team_number"]).drop_duplicates()
+
+	# Map to league_season_id and club_id
+	league_season_csv = OUT_DIR / "league_season.csv"
+	club_csv = OUT_DIR / "club.csv"
+	if not league_season_csv.exists():
+		raise FileNotFoundError("league_season.csv not found. Generate league_season first.")
+	if not club_csv.exists():
+		raise FileNotFoundError("club.csv not found. Generate clubs first.")
+
+	ls_df = pd.read_csv(league_season_csv, dtype={"id": "Int64", "league_id": str, "season": str})
+	clubs = pd.read_csv(club_csv, dtype={"id": "Int64", "name": str, "short_name": str})
+
+	season_teams = season_teams.merge(ls_df[["id", "league_id", "season"]].rename(columns={"id": "league_season_id"}), on=["league_id", "season"], how="left", validate="many_to_one")
+	if season_teams["league_season_id"].isna().any():
+		missing = season_teams[season_teams["league_season_id"].isna()][["league_id", "season"]].drop_duplicates().values.tolist()
+		raise ValueError(f"Missing league_season rows for: {missing}")
+	season_teams = season_teams.merge(clubs, left_on="club_name", right_on="name", how="left", validate="many_to_one")
+	if season_teams["id"].isna().any():
+		missing_clubs = season_teams[season_teams["id"].isna()]["club_name"].drop_duplicates().tolist()
+		raise ValueError(f"Missing clubs for team_season: {missing_clubs}")
+
+	team_season = season_teams.rename(columns={"id": "club_id"})[["league_season_id", "club_id", "team_number"]].copy()
+	team_season.insert(0, "id", range(1, len(team_season) + 1))
+
+	schema = load_schema(str(SCHEMA_JSON))
+	table_spec = get_table_spec(schema, "team_season")
+	team_season = ensure_schema_columns(team_season, table_spec)
+	team_season = coerce_dtypes(team_season, table_spec)
+	errors = validate_dataframe_against_schema(team_season, table_spec)
+	if errors:
+		raise ValueError("Team season validation failed: " + "; ".join(errors))
+	return team_season[get_ordered_column_names(table_spec)]
 def main() -> None:
 
 	ensure_out_dir()
@@ -301,6 +532,12 @@ def main() -> None:
 		out_df = build_league_season()
 	elif TARGET_TABLE == "event":
 		out_df = build_event()
+	elif TARGET_TABLE == "player":
+		out_df = build_player()
+	elif TARGET_TABLE == "club":
+		out_df = build_club()
+	elif TARGET_TABLE == "team_season":
+		out_df = build_team_season()
 	else:
 		raise ValueError(f"Unsupported TARGET_TABLE: {TARGET_TABLE}")
 

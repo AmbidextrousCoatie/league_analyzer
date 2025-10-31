@@ -49,7 +49,8 @@
       "name": "club",
       "columns": [
         { "name": "id", "type": "integer", "nullable": false, "pk": true },
-        { "name": "name", "type": "string", "nullable": false }
+        { "name": "name", "type": "string", "nullable": false },
+        { "name": "short_name", "type": "string", "nullable": true }
       ],
       "unique": [ ["name"] ],
       "indexes": []
@@ -106,25 +107,15 @@
     },
 
     {
-      "name": "team",
-      "columns": [
-        { "name": "id", "type": "integer", "nullable": false, "pk": true },
-        { "name": "club_id", "type": "integer", "nullable": false, "fk": { "table": "club", "column": "id" } },
-        { "name": "team_number", "type": "integer", "nullable": false }
-      ],
-      "unique": [ ["club_id", "team_number"] ],
-      "indexes": [ ["club_id"] ]
-    },
-
-    {
       "name": "team_season",
       "columns": [
         { "name": "id", "type": "integer", "nullable": false, "pk": true },
-        { "name": "team_id", "type": "integer", "nullable": false, "fk": { "table": "team", "column": "id" } },
-        { "name": "league_season_id", "type": "integer", "nullable": false, "fk": { "table": "league_season", "column": "id" } }
+        { "name": "league_season_id", "type": "integer", "nullable": false, "fk": { "table": "league_season", "column": "id" } },
+        { "name": "club_id", "type": "integer", "nullable": false, "fk": { "table": "club", "column": "id" } },
+        { "name": "team_number", "type": "integer", "nullable": false }
       ],
-      "unique": [ ["team_id", "league_season_id"] ],
-      "indexes": [ ["league_season_id"], ["team_id"] ]
+      "unique": [ ["league_season_id", "club_id", "team_number"] ],
+      "indexes": [ ["league_season_id"], ["club_id"] ]
     },
 
     {
