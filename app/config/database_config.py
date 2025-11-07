@@ -39,6 +39,13 @@ class DatabaseConfig:
                 description='Actual bowling league data',
                 is_default=True,
                 is_enabled=True
+            ),
+            'db_real_recon': DataSourceConfig(
+                filename='bowling_ergebnisse_reconstructed.csv',
+                display_name='Real Data (Reconstructed)',
+                description='Reconstructed from relational tables',
+                is_default=False,
+                is_enabled=True
             )
         }
         

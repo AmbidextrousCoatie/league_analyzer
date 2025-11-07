@@ -181,16 +181,14 @@
         { "name": "event_id", "type": "integer", "nullable": false, "fk": { "table": "event", "column": "id" } },
         { "name": "player_id", "type": "integer", "nullable": false, "fk": { "table": "player", "column": "id" } },
         { "name": "team_season_id", "type": "integer", "nullable": true, "fk": { "table": "team_season", "column": "id" } },
-        { "name": "line_no", "type": "integer", "nullable": false },
-        { "name": "score", "type": "integer", "nullable": false },
-        { "name": "strike_count", "type": "integer", "nullable": true },
-        { "name": "spare_count", "type": "integer", "nullable": true },
-        { "name": "split_count", "type": "integer", "nullable": true },
-        { "name": "fouls", "type": "integer", "nullable": true },
-        { "name": "handicap", "type": "number", "nullable": true },
-        { "name": "is_paceline", "type": "boolean", "nullable": true }
+        { "name": "lineup_position", "type": "integer", "nullable": false },
+        { "name": "score", "type": "integer", "nullable": true },
+        { "name": "is_disqualified", "type": "boolean", "nullable": true },
+        { "name": "round_number", "type": "integer", "nullable": true },
+        { "name": "match_number", "type": "integer", "nullable": true },
+        { "name": "handicap", "type": "number", "nullable": true }
       ],
-      "unique": [ ["event_id", "player_id", "line_no"] ],
+      "unique": [ ["event_id", "player_id", "lineup_position", "match_number", "round_number", "team_season_id"] ],
       "indexes": [ ["event_id"], ["player_id"], ["team_season_id"], ["event_id", "team_season_id"], ["event_id", "player_id"] ]
     }
   ],
