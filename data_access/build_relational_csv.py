@@ -27,7 +27,7 @@ ROOT = Path(__file__).resolve().parents[1]
 REAL_DATA = ROOT / "database" / "data" / "bowling_ergebnisse_real.csv"
 SCHEMA_JSON = ROOT / "database" / "schema.json"
 OUT_DIR = ROOT / "database" / "relational_csv" / "new"
-TARGET_TABLE = "team_season"  # options: "venue", "league", "scoring_system", "league_season", "event", "player", "club", "team"
+TARGET_TABLE = "game_result"  # options: "venue", "league", "scoring_system", "league_season", "event", "player", "club", "team_season", "game_result"
 
 
 def ensure_out_dir() -> None:
@@ -308,7 +308,7 @@ def build_player() -> pd.DataFrame:
 	# Build base unique by (Player ID)
 	base = df[["player_id_int", "Player"]].drop_duplicates().copy()
 	base["given_name"], base["family_name"] = zip(*base["Player"].map(_split_player_name))
-	base["full_name"] = (base["given_name"].fillna("").str.strip() + " " + base["family_name"].fillna("").str.strip()).str.strip()
+	base["full_name"] = (base["family_name"].fillna("").str.strip() + ", " + base["given_name"].fillna("").str.strip()).str.strip()
 	base = base.rename(columns={"player_id_int": "id"})
 
 	# Conform to schema and validate
@@ -482,6 +482,163 @@ def build_team_season() -> pd.DataFrame:
 	if errors:
 		raise ValueError("Team season validation failed: " + "; ".join(errors))
 	return team_season[get_ordered_column_names(table_spec)]
+
+
+def build_game_result() -> pd.DataFrame:
+
+	df = pd.read_csv(REAL_DATA, sep=";", dtype=str)
+	print(f"Loaded {len(df)} rows from raw CSV")
+	
+	# Filter valid player rows (exclude Team Total, invalid IDs)
+	player_mask = df["Player"].notna() & (df["Player"] != "Team Total")
+	print(f"After filtering Team Total: {player_mask.sum()} rows")
+	ids = pd.to_numeric(df.loc[player_mask, "Player ID"], errors="coerce")
+	valid_mask = ids.notna() & (ids.astype(int) > 0)
+	print(f"After filtering invalid IDs: {valid_mask.sum()} rows")
+	df = df.loc[player_mask][valid_mask].copy()
+	df["player_id_int"] = ids[valid_mask].astype(int)
+	
+	# Load reference tables (from parent directory, not "new" subdirectory)
+	ref_dir = OUT_DIR.parent
+	event_csv = ref_dir / "event.csv"
+	player_csv = ref_dir / "player.csv"
+	team_season_csv = ref_dir / "team_season.csv"
+	league_season_csv = ref_dir / "league_season.csv"
+	club_csv = ref_dir / "club.csv"
+	
+	for path, name in [(event_csv, "event"), (player_csv, "player"), (team_season_csv, "team_season"), (league_season_csv, "league_season"), (club_csv, "club")]:
+		if not path.exists():
+			raise FileNotFoundError(f"{name}.csv not found. Generate {name} first.")
+	
+	events_df = pd.read_csv(event_csv, dtype={"id": "Int64", "league_season_id": "Int64", "league_week": "Int64", "date": str})
+	players_df = pd.read_csv(player_csv, dtype={"id": "Int64"})
+	team_seasons_df = pd.read_csv(team_season_csv, dtype={"id": "Int64", "league_season_id": "Int64", "club_id": "Int64", "team_number": "Int64"})
+	league_seasons_df = pd.read_csv(league_season_csv, dtype={"id": "Int64", "league_id": str, "season": str})
+	clubs_df = pd.read_csv(club_csv, dtype={"id": "Int64", "name": str})
+	
+	# Map to event_id: join via league_season, then match (League, Season, Week, Date, Location)
+	events_with_ls = events_df.merge(league_seasons_df[["id", "league_id", "season"]].rename(columns={"id": "league_season_id"}), on="league_season_id", how="left")
+	events_with_ls["league_week"] = events_with_ls["league_week"].astype("Int64")
+	events_with_ls["date_parsed"] = pd.to_datetime(events_with_ls["date"], errors="coerce").dt.date
+	
+	df["date_parsed"] = pd.to_datetime(df["Date"], errors="coerce").dt.date
+	df["Week_num"] = pd.to_numeric(df["Week"], errors="coerce").astype("Int64")
+	
+	df = df.merge(
+		events_with_ls[["id", "league_id", "season", "league_week", "date_parsed"]].rename(columns={"id": "event_id"}),
+		left_on=["League", "Season", "Week_num", "date_parsed"],
+		right_on=["league_id", "season", "league_week", "date_parsed"],
+		how="left",
+		validate="many_to_one",
+	)
+	
+	missing_events = df[df["event_id"].isna()]
+	if not missing_events.empty:
+		missing = missing_events[["League", "Season", "Week", "Date"]].drop_duplicates().head(5)
+		print(f"Warning: {len(missing_events)} rows have missing events. Sample: {missing.to_dict('records')}")
+		# Drop rows with missing events for now
+		df = df[df["event_id"].notna()].copy()
+		print(f"After dropping missing events: {len(df)} rows")
+	
+	# Map to player_id: merge df.player_id_int to players_df.id
+	players_lookup = players_df[["id"]].rename(columns={"id": "player_id"})
+	players_lookup["player_id_int"] = players_lookup["player_id"]  # Add join key
+	df = df.merge(players_lookup[["player_id", "player_id_int"]], on="player_id_int", how="left", validate="many_to_one")
+	missing_players = df[df["player_id"].isna()]
+	if not missing_players.empty:
+		raise ValueError(f"Missing players for IDs: {missing_players['player_id_int'].drop_duplicates().tolist()}")
+	
+	# Map to team_season_id: extract club/team_number, join via league_season
+	df["club_name"], df["team_number_raw"] = zip(*df["Team"].map(_extract_team_parts))
+	df["team_number_raw"] = pd.to_numeric(df["team_number_raw"], errors="coerce").astype("Int64")
+	
+	# Build team_season lookup with club names
+	team_seasons_with_club = team_seasons_df.merge(
+		league_seasons_df[["id", "league_id", "season"]].rename(columns={"id": "league_season_id"}),
+		on="league_season_id",
+		how="left"
+	).merge(
+		clubs_df[["id", "name"]].rename(columns={"id": "club_id_check", "name": "club_name"}),
+		left_on="club_id",
+		right_on="club_id_check",
+		how="left"
+	)
+	
+	df = df.merge(
+		team_seasons_with_club[["id", "league_id", "season", "club_name", "team_number"]].rename(columns={"id": "team_season_id"}),
+		left_on=["League", "Season", "club_name", "team_number_raw"],
+		right_on=["league_id", "season", "club_name", "team_number"],
+		how="left",
+		validate="many_to_one",
+	)
+	missing_team_seasons = df[df["team_season_id"].isna()]
+	if not missing_team_seasons.empty:
+		print(f"Warning: {len(missing_team_seasons)} rows have missing team_season_id. Sample teams: {missing_team_seasons[['Team', 'League', 'Season']].drop_duplicates().head(5).to_dict('records')}")
+	
+	# Extract fields
+	df["lineup_position"] = pd.to_numeric(df["Position"], errors="coerce").astype("Int64")
+	df["score"] = pd.to_numeric(df["Score"], errors="coerce").astype("Int64")
+	df["round_number"] = pd.to_numeric(df["Round Number"], errors="coerce").astype("Int64")
+	df["match_number"] = pd.to_numeric(df["Match Number"], errors="coerce").astype("Int64")
+	
+	# Determine disqualification: score is NULL (not 0, as 0 might be valid)
+	df["is_disqualified"] = df["score"].isna()
+	df["handicap"] = pd.NA  # Not in source data
+	
+	# Prepare final result
+	result = df[[
+		"event_id",
+		"player_id",
+		"team_season_id",
+		"lineup_position",
+		"score",
+		"is_disqualified",
+		"round_number",
+		"match_number",
+		"handicap",
+	]].copy()
+	
+	# Check for duplicates on unique constraint columns before assigning IDs
+	# Include match_number, round_number, and team_season_id in uniqueness check
+	unique_cols = ["event_id", "player_id", "lineup_position", "match_number", "round_number", "team_season_id"]
+	duplicate_mask = result.duplicated(subset=unique_cols, keep=False)
+	if duplicate_mask.any():
+		duplicates = result[duplicate_mask].copy()
+		duplicate_groups = duplicates.groupby(unique_cols).size()
+		print(f"Warning: Found {len(duplicate_groups)} duplicate groups violating unique constraint:")
+		# Show first 10 examples with details
+		for idx, (key, count) in enumerate(list(duplicate_groups.items())[:10]):
+			eid, pid, pos, match, round_num, team = key
+			print(f"  event_id={eid}, player_id={pid}, lineup_position={pos}, match_number={match}, round_number={round_num}, team_season_id={team}: {count} rows")
+		if len(duplicate_groups) > 10:
+			print(f"  ... and {len(duplicate_groups) - 10} more groups")
+		
+		# Show sample duplicate rows to understand what's different
+		sample_dups = duplicates.head(6)
+		print(f"\nSample duplicate rows (showing first 6):")
+		print(sample_dups[["event_id", "player_id", "team_season_id", "lineup_position", "round_number", "match_number", "score"]].to_string())
+		
+		# Keep first occurrence, drop rest
+		result = result.drop_duplicates(subset=unique_cols, keep="first")
+		print(f"\nDropped {duplicate_mask.sum() - len(duplicate_groups)} duplicate rows, keeping first occurrence.")
+	else:
+		print("No duplicates found - all rows are unique.")
+	
+	result.insert(0, "id", range(1, len(result) + 1))
+	
+	print(f"Final result rows before validation: {len(result)}")
+	
+	schema = load_schema(str(SCHEMA_JSON))
+	table_spec = get_table_spec(schema, "game_result")
+	result = ensure_schema_columns(result, table_spec)
+	result = coerce_dtypes(result, table_spec)
+	errors = validate_dataframe_against_schema(result, table_spec)
+	if errors:
+		raise ValueError("Game result validation failed: " + "; ".join(errors))
+	print(f"Final result rows: {len(result)}")
+	return result[get_ordered_column_names(table_spec)]
+
+
 def main() -> None:
 
 	ensure_out_dir()
@@ -538,6 +695,8 @@ def main() -> None:
 		out_df = build_club()
 	elif TARGET_TABLE == "team_season":
 		out_df = build_team_season()
+	elif TARGET_TABLE == "game_result":
+		out_df = build_game_result()
 	else:
 		raise ValueError(f"Unsupported TARGET_TABLE: {TARGET_TABLE}")
 

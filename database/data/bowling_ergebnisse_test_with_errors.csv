@@ -1,0 +1,222 @@
+Season;Week;Date;League;Players per Team;Location;Round Number;Match Number;Team;Position;Player;Player ID;Opponent;Score;Points;Input Data;Computed Data
+25/26;1;2025-01-15;BZL N2;4;Test Location;1;0;Albrecht Dürer 71 Stein 1;0;Test Player 1;99901;RW Lichtenhof 69 Stein 4;180;1.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;1;0;Albrecht Dürer 71 Stein 1;1;Test Player 2;99902;RW Lichtenhof 69 Stein 4;190;1.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;1;0;Albrecht Dürer 71 Stein 1;2;Test Player 3;99903;RW Lichtenhof 69 Stein 4;200;1.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;1;0;Albrecht Dürer 71 Stein 1;3;Test Player 4;99904;RW Lichtenhof 69 Stein 4;210;1.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;1;0;Albrecht Dürer 71 Stein 1;0;Team Total;0;RW Lichtenhof 69 Stein 4;780;3.0;False;True
+25/26;1;2025-01-15;BZL N2;4;Test Location;1;0;RW Lichtenhof 69 Stein 4;0;Test Player 5;99905;Albrecht Dürer 71 Stein 1;170;0.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;1;0;RW Lichtenhof 69 Stein 4;1;Test Player 6;99906;Albrecht Dürer 71 Stein 1;180;0.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;1;0;RW Lichtenhof 69 Stein 4;2;Test Player 7;99907;Albrecht Dürer 71 Stein 1;190;0.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;1;0;RW Lichtenhof 69 Stein 4;3;Test Player 8;99908;Albrecht Dürer 71 Stein 1;200;0.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;1;0;RW Lichtenhof 69 Stein 4;0;Team Total;0;Albrecht Dürer 71 Stein 1;740;0.0;False;True
+25/26;1;2025-01-15;BZL N2;4;Test Location;1;0;Donaubowler Regensburg 3;0;Test Player 9;99909;Kings Club Bayreuth Land 2;185;1.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;1;0;Donaubowler Regensburg 3;1;Test Player 10;99910;Kings Club Bayreuth Land 2;195;1.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;1;0;Donaubowler Regensburg 3;2;Test Player 11;99911;Kings Club Bayreuth Land 2;205;1.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;1;0;Donaubowler Regensburg 3;3;Test Player 12;99912;Kings Club Bayreuth Land 2;215;1.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;1;0;Donaubowler Regensburg 3;0;Team Total;0;Kings Club Bayreuth Land 2;800;3.0;False;True
+25/26;1;2025-01-15;BZL N2;4;Test Location;1;0;Kings Club Bayreuth Land 2;0;Test Player 13;99913;Donaubowler Regensburg 3;175;0.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;1;0;Kings Club Bayreuth Land 2;1;Test Player 14;99914;Donaubowler Regensburg 3;185;0.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;1;0;Kings Club Bayreuth Land 2;2;Test Player 15;99915;Donaubowler Regensburg 3;195;0.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;1;0;Kings Club Bayreuth Land 2;3;Test Player 16;99916;Donaubowler Regensburg 3;205;0.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;1;0;Kings Club Bayreuth Land 2;0;Team Total;0;Donaubowler Regensburg 3;760;0.0;False;True
+25/26;1;2025-01-15;BZL N2;4;Test Location;1;0;Eintracht Lauf 3;0;Test Player 17;99917;Gute Laune Lauf 2;190;1.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;1;0;Eintracht Lauf 3;1;Test Player 18;99918;Gute Laune Lauf 2;200;1.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;1;0;Eintracht Lauf 3;2;Test Player 19;99919;Gute Laune Lauf 2;210;1.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;1;0;Eintracht Lauf 3;3;Test Player 20;99920;Gute Laune Lauf 2;220;1.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;1;0;Eintracht Lauf 3;0;Team Total;0;Gute Laune Lauf 2;820;3.0;False;True
+25/26;1;2025-01-15;BZL N2;4;Test Location;1;0;Gute Laune Lauf 2;0;Test Player 21;99921;Eintracht Lauf 3;180;0.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;1;0;Gute Laune Lauf 2;1;Test Player 22;99922;Eintracht Lauf 3;190;0.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;1;0;Gute Laune Lauf 2;2;Test Player 23;99923;Eintracht Lauf 3;200;0.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;1;0;Gute Laune Lauf 2;3;Test Player 24;99924;Eintracht Lauf 3;210;0.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;1;0;Gute Laune Lauf 2;0;Team Total;0;Eintracht Lauf 3;780;0.0;False;True
+25/26;1;2025-01-15;BZL N2;4;Test Location;2;0;Albrecht Dürer 71 Stein 1;0;Test Player 1;99901;Donaubowler Regensburg 3;185;1.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;2;0;Albrecht Dürer 71 Stein 1;1;Test Player 2;99902;Donaubowler Regensburg 3;195;1.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;2;0;Albrecht Dürer 71 Stein 1;2;Test Player 3;99903;Donaubowler Regensburg 3;205;1.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;2;0;Albrecht Dürer 71 Stein 1;3;Test Player 4;99904;Donaubowler Regensburg 3;215;1.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;2;0;Albrecht Dürer 71 Stein 1;0;Team Total;0;Donaubowler Regensburg 3;800;3.0;False;True
+25/26;1;2025-01-15;BZL N2;4;Test Location;2;0;Donaubowler Regensburg 3;0;Test Player 9;99909;Albrecht Dürer 71 Stein 1;175;0.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;2;0;Donaubowler Regensburg 3;1;Test Player 10;99910;Albrecht Dürer 71 Stein 1;185;0.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;2;0;Donaubowler Regensburg 3;2;Test Player 11;99911;Albrecht Dürer 71 Stein 1;195;0.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;2;0;Donaubowler Regensburg 3;3;Test Player 12;99912;Albrecht Dürer 71 Stein 1;205;0.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;2;0;Donaubowler Regensburg 3;0;Team Total;0;Albrecht Dürer 71 Stein 1;760;0.0;False;True
+25/26;1;2025-01-15;BZL N2;4;Test Location;2;0;RW Lichtenhof 69 Stein 4;0;Test Player 5;99905;Kings Club Bayreuth Land 2;180;1.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;2;0;RW Lichtenhof 69 Stein 4;1;Test Player 6;99906;Kings Club Bayreuth Land 2;190;1.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;2;0;RW Lichtenhof 69 Stein 4;2;Test Player 7;99907;Kings Club Bayreuth Land 2;200;1.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;2;0;RW Lichtenhof 69 Stein 4;3;Test Player 8;99908;Kings Club Bayreuth Land 2;210;1.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;2;0;RW Lichtenhof 69 Stein 4;0;Team Total;0;Kings Club Bayreuth Land 2;780;3.0;False;True
+25/26;1;2025-01-15;BZL N2;4;Test Location;2;0;Kings Club Bayreuth Land 2;0;Test Player 13;99913;RW Lichtenhof 69 Stein 4;170;0.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;2;0;Kings Club Bayreuth Land 2;1;Test Player 14;99914;RW Lichtenhof 69 Stein 4;180;0.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;2;0;Kings Club Bayreuth Land 2;2;Test Player 15;99915;RW Lichtenhof 69 Stein 4;190;0.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;2;0;Kings Club Bayreuth Land 2;3;Test Player 16;99916;RW Lichtenhof 69 Stein 4;200;0.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;2;0;Kings Club Bayreuth Land 2;0;Team Total;0;RW Lichtenhof 69 Stein 4;720;0.0;False;True
+25/26;1;2025-01-15;BZL N2;4;Test Location;2;0;Eintracht Lauf 3;0;Test Player 17;99917;Gute Laune Lauf 2;195;1.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;2;0;Eintracht Lauf 3;1;Test Player 18;99918;Gute Laune Lauf 2;205;1.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;2;0;Eintracht Lauf 3;2;Test Player 19;99919;Gute Laune Lauf 2;215;1.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;2;0;Eintracht Lauf 3;3;Test Player 20;99920;Gute Laune Lauf 2;225;1.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;2;0;Eintracht Lauf 3;0;Team Total;0;Gute Laune Lauf 2;840;3.0;False;True
+25/26;1;2025-01-15;BZL N2;4;Test Location;2;0;Gute Laune Lauf 2;0;Test Player 21;99921;Eintracht Lauf 3;185;0.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;2;0;Gute Laune Lauf 2;1;Test Player 22;99922;Eintracht Lauf 3;195;0.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;2;0;Gute Laune Lauf 2;2;Test Player 23;99923;Eintracht Lauf 3;205;0.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;2;0;Gute Laune Lauf 2;3;Test Player 24;99924;Eintracht Lauf 3;215;0.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;2;0;Gute Laune Lauf 2;0;Team Total;0;Eintracht Lauf 3;800;0.0;False;True
+25/26;1;2025-01-15;BZL N2;4;Test Location;3;0;Albrecht Dürer 71 Stein 1;0;Test Player 1;99901;Eintracht Lauf 3;190;1.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;3;0;Albrecht Dürer 71 Stein 1;1;Test Player 2;99902;Eintracht Lauf 3;200;1.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;3;0;Albrecht Dürer 71 Stein 1;2;Test Player 3;99903;Eintracht Lauf 3;210;1.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;3;0;Albrecht Dürer 71 Stein 1;3;Test Player 3;99903;Eintracht Lauf 3;220;1.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;3;0;Albrecht Dürer 71 Stein 1;0;Team Total;0;Eintracht Lauf 3;820;3.0;False;True
+25/26;1;2025-01-15;BZL N2;4;Test Location;3;0;Eintracht Lauf 3;0;Test Player 17;99917;Albrecht Dürer 71 Stein 1;180;0.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;3;0;Eintracht Lauf 3;1;Test Player 18;99918;Albrecht Dürer 71 Stein 1;190;0.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;3;0;Eintracht Lauf 3;2;Test Player 19;99919;Albrecht Dürer 71 Stein 1;200;0.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;3;0;Eintracht Lauf 3;3;Test Player 20;99920;Albrecht Dürer 71 Stein 1;210;0.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;3;0;Eintracht Lauf 3;0;Team Total;0;Albrecht Dürer 71 Stein 1;780;0.0;False;True
+25/26;1;2025-01-15;BZL N2;4;Test Location;3;0;Donaubowler Regensburg 3;0;Test Player 9;99909;RW Lichtenhof 69 Stein 4;185;1.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;3;0;Donaubowler Regensburg 3;1;Test Player 10;99910;RW Lichtenhof 69 Stein 4;195;1.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;3;0;Donaubowler Regensburg 3;2;Test Player 11;99911;RW Lichtenhof 69 Stein 4;205;1.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;3;0;Donaubowler Regensburg 3;3;Test Player 12;99912;RW Lichtenhof 69 Stein 4;215;1.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;3;0;Donaubowler Regensburg 3;0;Team Total;0;RW Lichtenhof 69 Stein 4;800;10.0;False;True
+25/26;1;2025-01-15;BZL N2;4;Test Location;3;0;RW Lichtenhof 69 Stein 4;0;Test Player 5;99905;Donaubowler Regensburg 3;175;0.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;3;0;RW Lichtenhof 69 Stein 4;1;Test Player 6;99906;Donaubowler Regensburg 3;185;0.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;3;0;RW Lichtenhof 69 Stein 4;2;Test Player 7;99907;Donaubowler Regensburg 3;195;0.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;3;0;RW Lichtenhof 69 Stein 4;3;Test Player 8;99908;Donaubowler Regensburg 3;205;0.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;3;0;RW Lichtenhof 69 Stein 4;0;Team Total;0;Donaubowler Regensburg 3;760;0.0;False;True
+25/26;1;2025-01-15;BZL N2;4;Test Location;3;0;Kings Club Bayreuth Land 2;0;Test Player 13;99913;Gute Laune Lauf 2;180;1.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;3;0;Kings Club Bayreuth Land 2;1;Test Player 14;99914;Gute Laune Lauf 2;190;1.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;3;0;Kings Club Bayreuth Land 2;2;Test Player 15;99915;Gute Laune Lauf 2;200;1.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;3;0;Kings Club Bayreuth Land 2;3;Test Player 16;99916;Gute Laune Lauf 2;210;1.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;3;0;Kings Club Bayreuth Land 2;0;Team Total;0;Gute Laune Lauf 2;780;3.0;False;True
+25/26;1;2025-01-15;BZL N2;4;Test Location;3;0;Gute Laune Lauf 2;0;Test Player 21;99921;Kings Club Bayreuth Land 2;170;0.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;3;0;Gute Laune Lauf 2;1;Test Player 22;99922;Kings Club Bayreuth Land 2;180;0.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;3;0;Gute Laune Lauf 2;2;Test Player 23;99923;Kings Club Bayreuth Land 2;190;0.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;3;0;Gute Laune Lauf 2;3;Test Player 24;99924;Kings Club Bayreuth Land 2;200;0.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;3;0;Gute Laune Lauf 2;0;Team Total;0;Kings Club Bayreuth Land 2;740;0.0;False;True
+25/26;1;2025-01-15;BZL N2;4;Test Location;4;0;Albrecht Dürer 71 Stein 1;0;Test Player 1;99901;Gute Laune Lauf 2;195;1.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;4;0;Albrecht Dürer 71 Stein 1;1;Test Player 2;99902;Gute Laune Lauf 2;205;1.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;4;0;Albrecht Dürer 71 Stein 1;2;Test Player 3;99903;Gute Laune Lauf 2;215;1.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;4;0;Albrecht Dürer 71 Stein 1;3;Test Player 4;99904;Gute Laune Lauf 2;225;1.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;4;0;Albrecht Dürer 71 Stein 1;0;Team Total;0;Gute Laune Lauf 2;840;3.0;False;True
+25/26;1;2025-01-15;BZL N2;4;Test Location;4;0;Gute Laune Lauf 2;0;Test Player 21;99921;Albrecht Dürer 71 Stein 1;185;0.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;4;0;Gute Laune Lauf 2;1;Test Player 22;99922;Albrecht Dürer 71 Stein 1;195;0.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;4;0;Gute Laune Lauf 2;2;Test Player 23;99923;Albrecht Dürer 71 Stein 1;205;0.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;4;0;Gute Laune Lauf 2;3;Test Player 24;99924;Albrecht Dürer 71 Stein 1;215;0.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;4;0;Gute Laune Lauf 2;0;Team Total;0;Albrecht Dürer 71 Stein 1;800;0.0;False;True
+25/26;1;2025-01-15;BZL N2;4;Test Location;4;0;Donaubowler Regensburg 3;0;Test Player 9;99909;Eintracht Lauf 3;190;1.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;4;0;Donaubowler Regensburg 3;1;Test Player 10;99910;Eintracht Lauf 3;200;1.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;4;0;Donaubowler Regensburg 3;2;Test Player 11;99911;Eintracht Lauf 3;210;1.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;4;0;Donaubowler Regensburg 3;3;Test Player 12;99912;Eintracht Lauf 3;220;1.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;4;0;Donaubowler Regensburg 3;0;Team Total;0;Eintracht Lauf 3;820;3.0;False;True
+25/26;1;2025-01-15;BZL N2;4;Test Location;4;0;Eintracht Lauf 3;0;Test Player 17;99917;Donaubowler Regensburg 3;180;0.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;4;0;Eintracht Lauf 3;1;Test Player 18;99918;Donaubowler Regensburg 3;190;0.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;4;0;Eintracht Lauf 3;2;Test Player 19;99919;Donaubowler Regensburg 3;200;0.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;4;0;Eintracht Lauf 3;3;Test Player 20;99920;Donaubowler Regensburg 3;210;0.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;4;0;Eintracht Lauf 3;0;Team Total;0;Donaubowler Regensburg 3;780;0.0;False;True
+25/26;1;2025-01-15;BZL N2;4;Test Location;4;0;RW Lichtenhof 69 Stein 4;0;Test Player 5;99905;Kings Club Bayreuth Land 2;185;1.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;4;0;RW Lichtenhof 69 Stein 4;1;Test Player 6;99906;Kings Club Bayreuth Land 2;195;1.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;4;0;RW Lichtenhof 69 Stein 4;2;Test Player 7;99907;Kings Club Bayreuth Land 2;205;1.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;4;0;RW Lichtenhof 69 Stein 4;3;Test Player 8;99908;Kings Club Bayreuth Land 2;215;1.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;4;0;RW Lichtenhof 69 Stein 4;0;Team Total;0;Kings Club Bayreuth Land 2;800;3.0;False;True
+25/26;1;2025-01-15;BZL N2;4;Test Location;4;0;Kings Club Bayreuth Land 2;0;Test Player 13;99913;RW Lichtenhof 69 Stein 4;175;0.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;4;0;Kings Club Bayreuth Land 2;1;Test Player 14;99914;RW Lichtenhof 69 Stein 4;185;0.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;4;0;Kings Club Bayreuth Land 2;2;Test Player 15;99915;RW Lichtenhof 69 Stein 4;195;0.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;4;0;Kings Club Bayreuth Land 2;3;Test Player 16;99916;RW Lichtenhof 69 Stein 4;205;0.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;4;0;Kings Club Bayreuth Land 2;0;Team Total;0;RW Lichtenhof 69 Stein 4;760;0.0;False;True
+25/26;1;2025-01-15;BZL N2;4;Test Location;5;0;Albrecht Dürer 71 Stein 1;0;Test Player 1;99901;Kings Club Bayreuth Land 2;200;1.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;5;0;Albrecht Dürer 71 Stein 1;1;Test Player 2;99902;Kings Club Bayreuth Land 2;210;1.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;5;0;Albrecht Dürer 71 Stein 1;2;Test Player 3;99903;Kings Club Bayreuth Land 2;220;1.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;5;0;Albrecht Dürer 71 Stein 1;3;Test Player 4;99904;Kings Club Bayreuth Land 2;230;1.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;5;0;Albrecht Dürer 71 Stein 1;0;Team Total;0;Kings Club Bayreuth Land 2;860;3.0;False;True
+25/26;1;2025-01-15;BZL N2;4;Test Location;5;0;Kings Club Bayreuth Land 2;0;Test Player 13;99913;Albrecht Dürer 71 Stein 1;190;0.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;5;0;Kings Club Bayreuth Land 2;1;Test Player 14;99914;Albrecht Dürer 71 Stein 1;200;0.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;5;0;Kings Club Bayreuth Land 2;2;Test Player 15;99915;Albrecht Dürer 71 Stein 1;210;0.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;5;0;Kings Club Bayreuth Land 2;3;Test Player 16;99916;Albrecht Dürer 71 Stein 1;220;0.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;5;0;Kings Club Bayreuth Land 2;0;Team Total;0;Albrecht Dürer 71 Stein 1;820;0.0;False;True
+25/26;1;2025-01-15;BZL N2;4;Test Location;5;0;Donaubowler Regensburg 3;0;Test Player 9;99909;RW Lichtenhof 69 Stein 4;195;1.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;5;0;Donaubowler Regensburg 3;1;Test Player 10;99910;RW Lichtenhof 69 Stein 4;205;1.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;5;0;Donaubowler Regensburg 3;2;Test Player 11;99911;RW Lichtenhof 69 Stein 4;215;1.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;5;0;Donaubowler Regensburg 3;3;Test Player 12;99912;RW Lichtenhof 69 Stein 4;225;1.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;5;0;Donaubowler Regensburg 3;0;Team Total;0;RW Lichtenhof 69 Stein 4;840;3.0;False;True
+25/26;1;2025-01-15;BZL N2;4;Test Location;5;0;RW Lichtenhof 69 Stein 4;0;Test Player 5;99905;Donaubowler Regensburg 3;185;0.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;5;0;RW Lichtenhof 69 Stein 4;1;Test Player 6;99906;Donaubowler Regensburg 3;195;0.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;5;0;RW Lichtenhof 69 Stein 4;2;Test Player 7;99907;Donaubowler Regensburg 3;205;0.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;5;0;RW Lichtenhof 69 Stein 4;3;Test Player 8;99908;Donaubowler Regensburg 3;215;0.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;5;0;RW Lichtenhof 69 Stein 4;0;Team Total;0;Donaubowler Regensburg 3;800;0.0;False;True
+25/26;1;2025-01-15;BZL N2;4;Test Location;5;0;Eintracht Lauf 3;0;Test Player 17;99917;Gute Laune Lauf 2;200;1.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;5;0;Eintracht Lauf 3;1;Test Player 18;99918;Gute Laune Lauf 2;210;1.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;5;0;Eintracht Lauf 3;2;Test Player 19;99919;Gute Laune Lauf 2;220;1.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;5;0;Eintracht Lauf 3;3;Test Player 20;99920;Gute Laune Lauf 2;230;1.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;5;0;Eintracht Lauf 3;0;Team Total;0;Gute Laune Lauf 2;860;3.0;False;True
+25/26;1;2025-01-15;BZL N2;4;Test Location;5;0;Gute Laune Lauf 2;0;Test Player 21;99921;Eintracht Lauf 3;190;0.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;5;0;Gute Laune Lauf 2;1;Test Player 22;99922;Eintracht Lauf 3;200;0.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;5;0;Gute Laune Lauf 2;2;Test Player 23;99923;Eintracht Lauf 3;210;0.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;5;0;Gute Laune Lauf 2;3;Test Player 24;99924;Eintracht Lauf 3;220;0.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;5;0;Gute Laune Lauf 2;0;Team Total;0;Eintracht Lauf 3;820;0.0;False;True
+25/26;1;2025-01-15;BZL N2;4;Test Location;6;0;Albrecht Dürer 71 Stein 1;0;Test Player 1;99901;RW Lichtenhof 69 Stein 4;205;1.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;6;0;Albrecht Dürer 71 Stein 1;1;Test Player 2;99902;RW Lichtenhof 69 Stein 4;215;1.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;6;0;Albrecht Dürer 71 Stein 1;2;Test Player 3;99903;RW Lichtenhof 69 Stein 4;225;1.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;6;0;Albrecht Dürer 71 Stein 1;3;Test Player 1;99901;RW Lichtenhof 69 Stein 4;235;1.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;6;0;Albrecht Dürer 71 Stein 1;0;Team Total;0;RW Lichtenhof 69 Stein 4;880;3.0;False;True
+25/26;1;2025-01-15;BZL N2;4;Test Location;6;0;RW Lichtenhof 69 Stein 4;0;Test Player 5;99905;Albrecht Dürer 71 Stein 1;195;0.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;6;0;RW Lichtenhof 69 Stein 4;1;Test Player 6;99906;Albrecht Dürer 71 Stein 1;205;0.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;6;0;RW Lichtenhof 69 Stein 4;2;Test Player 7;99907;Albrecht Dürer 71 Stein 1;215;0.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;6;0;RW Lichtenhof 69 Stein 4;3;Test Player 8;99908;Albrecht Dürer 71 Stein 1;225;0.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;6;0;RW Lichtenhof 69 Stein 4;0;Team Total;0;Albrecht Dürer 71 Stein 1;840;0.0;False;True
+25/26;1;2025-01-15;BZL N2;4;Test Location;6;0;Donaubowler Regensburg 3;0;Test Player 9;99909;Eintracht Lauf 3;205;1.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;6;0;Donaubowler Regensburg 3;1;Test Player 10;99910;Eintracht Lauf 3;215;1.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;6;0;Donaubowler Regensburg 3;2;Test Player 11;99911;Eintracht Lauf 3;225;1.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;6;0;Donaubowler Regensburg 3;3;Test Player 12;99912;Eintracht Lauf 3;235;1.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;6;0;Donaubowler Regensburg 3;0;Team Total;0;Eintracht Lauf 3;880;3.0;False;True
+25/26;1;2025-01-15;BZL N2;4;Test Location;6;0;Eintracht Lauf 3;0;Test Player 17;99917;Donaubowler Regensburg 3;195;0.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;6;0;Eintracht Lauf 3;1;Test Player 18;99918;Donaubowler Regensburg 3;205;0.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;6;0;Eintracht Lauf 3;2;Test Player 19;99919;Donaubowler Regensburg 3;215;0.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;6;0;Eintracht Lauf 3;3;Test Player 20;99920;Donaubowler Regensburg 3;225;0.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;6;0;Eintracht Lauf 3;0;Team Total;0;Donaubowler Regensburg 3;840;0.0;False;True
+25/26;1;2025-01-15;BZL N2;4;Test Location;6;0;Kings Club Bayreuth Land 2;0;Test Player 13;99913;Gute Laune Lauf 2;210;1.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;6;0;Kings Club Bayreuth Land 2;1;Test Player 14;99914;Gute Laune Lauf 2;220;1.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;6;0;Kings Club Bayreuth Land 2;2;Test Player 15;99915;Gute Laune Lauf 2;230;1.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;6;0;Kings Club Bayreuth Land 2;3;Test Player 16;99916;Gute Laune Lauf 2;240;1.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;6;0;Kings Club Bayreuth Land 2;0;Team Total;0;Gute Laune Lauf 2;900;3.0;False;True
+25/26;1;2025-01-15;BZL N2;4;Test Location;6;0;Gute Laune Lauf 2;0;Test Player 21;99921;Kings Club Bayreuth Land 2;200;0.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;6;0;Gute Laune Lauf 2;1;Test Player 22;99922;Kings Club Bayreuth Land 2;210;0.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;6;0;Gute Laune Lauf 2;2;Test Player 23;99923;Kings Club Bayreuth Land 2;220;0.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;6;0;Gute Laune Lauf 2;3;Test Player 24;99924;Kings Club Bayreuth Land 2;230;0.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;6;0;Gute Laune Lauf 2;0;Team Total;0;Kings Club Bayreuth Land 2;860;0.0;False;True
+25/26;1;2025-01-15;BZL N2;4;Test Location;6;0;RW Lichtenhof 69 Stein 4;0;Test Player 5;99905;Donaubowler Regensburg 3;215;1.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;6;0;RW Lichtenhof 69 Stein 4;1;Test Player 6;99906;Donaubowler Regensburg 3;225;1.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;6;0;RW Lichtenhof 69 Stein 4;2;Test Player 7;99907;Donaubowler Regensburg 3;235;1.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;6;0;RW Lichtenhof 69 Stein 4;3;Test Player 8;99908;Donaubowler Regensburg 3;245;1.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;6;0;RW Lichtenhof 69 Stein 4;0;Team Total;0;Donaubowler Regensburg 3;920;3.0;False;True
+25/26;1;2025-01-15;BZL N2;4;Test Location;6;0;Donaubowler Regensburg 3;0;Test Player 9;99909;RW Lichtenhof 69 Stein 4;205;0.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;6;0;Donaubowler Regensburg 3;1;Test Player 10;99910;RW Lichtenhof 69 Stein 4;215;0.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;6;0;Donaubowler Regensburg 3;2;Test Player 11;99911;RW Lichtenhof 69 Stein 4;225;0.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;6;0;Donaubowler Regensburg 3;3;Test Player 12;99912;RW Lichtenhof 69 Stein 4;235;0.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;6;0;Donaubowler Regensburg 3;0;Team Total;0;RW Lichtenhof 69 Stein 4;880;0.0;False;True
+25/26;1;2025-01-15;BZL N2;4;Test Location;7;0;Albrecht Dürer 71 Stein 1;0;Test Player 1;99901;Eintracht Lauf 3;210;1.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;7;0;Albrecht Dürer 71 Stein 1;1;Test Player 2;99902;Eintracht Lauf 3;220;1.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;7;0;Albrecht Dürer 71 Stein 1;2;Test Player 3;99903;Eintracht Lauf 3;230;1.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;7;0;Albrecht Dürer 71 Stein 1;3;Test Player 4;99904;Eintracht Lauf 3;240;1.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;7;0;Albrecht Dürer 71 Stein 1;0;Team Total;0;Eintracht Lauf 3;900;3.0;False;True
+25/26;1;2025-01-15;BZL N2;4;Test Location;7;0;Eintracht Lauf 3;0;Test Player 17;99917;Albrecht Dürer 71 Stein 1;200;0.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;7;0;Eintracht Lauf 3;1;Test Player 18;99918;Albrecht Dürer 71 Stein 1;210;0.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;7;0;Eintracht Lauf 3;2;Test Player 19;99919;Albrecht Dürer 71 Stein 1;220;0.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;7;0;Eintracht Lauf 3;3;Test Player 20;99920;Albrecht Dürer 71 Stein 1;230;0.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;7;0;Eintracht Lauf 3;0;Team Total;0;Albrecht Dürer 71 Stein 1;860;0.0;False;True
+25/26;1;2025-01-15;BZL N2;4;Test Location;7;0;Donaubowler Regensburg 3;0;Test Player 9;99909;Gute Laune Lauf 2;215;1.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;7;0;Donaubowler Regensburg 3;1;Test Player 10;99910;Gute Laune Lauf 2;225;1.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;7;0;Donaubowler Regensburg 3;2;Test Player 11;99911;Gute Laune Lauf 2;235;1.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;7;0;Donaubowler Regensburg 3;3;Test Player 12;99912;Gute Laune Lauf 2;245;1.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;7;0;Donaubowler Regensburg 3;0;Team Total;0;Gute Laune Lauf 2;920;3.0;False;True
+25/26;1;2025-01-15;BZL N2;4;Test Location;7;0;Gute Laune Lauf 2;0;Test Player 21;99921;Donaubowler Regensburg 3;205;0.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;7;0;Gute Laune Lauf 2;1;Test Player 22;99922;Donaubowler Regensburg 3;215;0.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;7;0;Gute Laune Lauf 2;2;Test Player 23;99923;Donaubowler Regensburg 3;225;0.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;7;0;Gute Laune Lauf 2;3;Test Player 24;99924;Donaubowler Regensburg 3;235;0.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;7;0;Gute Laune Lauf 2;0;Team Total;0;Donaubowler Regensburg 3;880;0.0;False;True
+25/26;1;2025-01-15;BZL N2;4;Test Location;7;0;RW Lichtenhof 69 Stein 4;0;Test Player 5;99905;Kings Club Bayreuth Land 2;225;1.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;7;0;RW Lichtenhof 69 Stein 4;1;Test Player 6;99906;Kings Club Bayreuth Land 2;235;1.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;7;0;RW Lichtenhof 69 Stein 4;2;Test Player 7;99907;Kings Club Bayreuth Land 2;245;1.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;7;0;RW Lichtenhof 69 Stein 4;3;Test Player 8;99908;Kings Club Bayreuth Land 2;255;1.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;7;0;RW Lichtenhof 69 Stein 4;0;Team Total;0;Kings Club Bayreuth Land 2;960;3.0;False;True
+25/26;1;2025-01-15;BZL N2;4;Test Location;7;0;Kings Club Bayreuth Land 2;0;Test Player 13;99913;RW Lichtenhof 69 Stein 4;215;0.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;7;0;Kings Club Bayreuth Land 2;1;Test Player 14;99914;RW Lichtenhof 69 Stein 4;225;0.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;7;0;Kings Club Bayreuth Land 2;2;Test Player 15;99915;RW Lichtenhof 69 Stein 4;235;0.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;7;0;Kings Club Bayreuth Land 2;3;Test Player 16;99916;RW Lichtenhof 69 Stein 4;245;0.0;True;False
+25/26;1;2025-01-15;BZL N2;4;Test Location;7;0;Kings Club Bayreuth Land 2;0;Team Total;0;RW Lichtenhof 69 Stein 4;920;0.0;False;True
+
