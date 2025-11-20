@@ -28,6 +28,7 @@ class URLStateManager {
             team: params.get('team') || '',
             season: params.get('season') || '',
             week: params.get('week') || '',
+            round: params.get('round') || '',
             league: params.get('league') || '',
             database: params.get('database') || 'db_real'
         };
@@ -108,6 +109,7 @@ class URLStateManager {
         if (this.state.team) depth++;
         if (this.state.season) depth++;
         if (this.state.week) depth++;
+        if (this.state.round) depth++;
         if (this.state.league) depth++;
         return depth;
     }
@@ -127,9 +129,10 @@ class URLStateManager {
         
         // Define filter dependencies (clearing a filter clears dependent ones)
         const dependencies = {
-            team: ['season', 'week'],
-            season: ['week'],
-            league: ['season', 'week']
+            team: ['season', 'week', 'round'],
+            season: ['week', 'round'],
+            league: ['season', 'week', 'round'],
+            week: ['round']
         };
         
         // Clear the filter

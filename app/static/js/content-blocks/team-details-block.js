@@ -64,7 +64,10 @@ class TeamDetailsBlock extends BaseContentBlock {
     }
 
     shouldRender(state) {
-        return state.season && state.league && state.week && state.team;
+        // Show only when season, league, week, and team are selected but NO round is selected
+        // (when round is selected, game-team-details-block should show instead)
+        const hasRound = state.round && state.round !== '' && state.round !== 'null';
+        return state.season && state.league && state.week && state.team && !hasRound;
     }
 
     generateHTML(state) {

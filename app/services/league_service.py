@@ -55,6 +55,416 @@ class LeagueService:
     def get_leagues(self) -> List[str]:
         """Get all available leagues for a season"""
         return self.adapter.get_leagues()
+    
+    def get_available_rounds(self, season: str, league: str, week: int) -> List[int]:
+        """Get available rounds (games) for a season, league, and week"""
+        filters = {
+            Columns.season: {'value': season, 'operator': 'eq'},
+            Columns.league_name: {'value': league, 'operator': 'eq'},
+            Columns.week: {'value': week, 'operator': 'eq'}
+        }
+        
+        data = self.adapter.get_filtered_data(filters=filters)
+        
+        if data.empty or Columns.round_number not in data.columns:
+            return []
+        
+        # Get unique round numbers, filter out empty/NaN values, and sort
+        rounds_series = data[Columns.round_number].dropna()
+        # Filter out empty strings and convert to int
+        rounds = []
+        for r in rounds_series.unique():
+            try:
+                r_str = str(r).strip()
+                if r_str != '' and r_str.lower() != 'nan':
+                    rounds.append(int(float(r_str)))  # Use float first to handle "1.0" strings
+            except (ValueError, TypeError):
+                continue
+        
+        return sorted(set(rounds))  # Remove duplicates and sort
+
+    def get_game_overview_data(self, season: str, league: str, week: int, round_number: int) -> TableData:
+        """
+        Get game overview data for a specific round.
+        Shows all matches with team vs opponent: team name, team pins, team points | opponent points, opponent pins, opponent name
+        
+        Args:
+            season: Season identifier
+            league: League name
+            week: Week number
+            round_number: Round/Game number
+            
+        Returns:
+            TableData with column groups for Team and Opponent
+        """
+        try:
+            # Get team totals for this round
+            filters = {
+                Columns.season: {'value': season, 'operator': 'eq'},
+                Columns.league_name: {'value': league, 'operator': 'eq'},
+                Columns.week: {'value': week, 'operator': 'eq'},
+                Columns.round_number: {'value': round_number, 'operator': 'eq'},
+                Columns.computed_data: {'value': True, 'operator': 'eq'}  # Team totals
+            }
+            
+            team_totals = self.adapter.get_filtered_data(filters=filters)
+            
+            if team_totals.empty:
+                return TableData(
+                    columns=[],
+                    data=[],
+                    title=f"{i18n_service.get_text('no_data_available')} - {i18n_service.get_text('game')} {round_number}"
+                )
+            
+            # Create column groups
+            columns = [
+                ColumnGroup(
+                    title=i18n_service.get_text("team"),
+                    frozen="left",
+                    style={"backgroundColor": "#f8f9fa"},
+                    columns=[
+                        Column(title=i18n_service.get_text("team"), field="team_name", width="200px", align="left"),
+                        Column(title=i18n_service.get_text("pins"), field="team_pins", width="80px", align="center"),
+                        Column(title=i18n_service.get_text("points"), field="team_points", width="80px", align="center")
+                    ]
+                ),
+                ColumnGroup(
+                    title=i18n_service.get_text("opponent"),
+                    style={"backgroundColor": "#f0f0f0"},
+                    columns=[
+                        Column(title=i18n_service.get_text("points"), field="opponent_points", width="80px", align="center"),
+                        Column(title=i18n_service.get_text("pins"), field="opponent_pins", width="80px", align="center"),
+                        Column(title=i18n_service.get_text("opponent"), field="opponent_name", width="200px", align="left")
+                    ]
+                )
+            ]
+            
+            # Get individual player points for this round to add to team points
+            individual_filters = {
+                Columns.season: {'value': season, 'operator': 'eq'},
+                Columns.league_name: {'value': league, 'operator': 'eq'},
+                Columns.week: {'value': week, 'operator': 'eq'},
+                Columns.round_number: {'value': round_number, 'operator': 'eq'},
+                Columns.computed_data: {'value': False, 'operator': 'eq'}  # Individual player data
+            }
+            
+            individual_data = self.adapter.get_filtered_data(filters=individual_filters)
+            
+            # Calculate individual points per team
+            individual_points_by_team = {}
+            if not individual_data.empty:
+                for team in individual_data[Columns.team_name].unique():
+                    team_individual = individual_data[individual_data[Columns.team_name] == team]
+                    individual_points_by_team[team] = float(team_individual[Columns.points].sum()) if pd.notna(team_individual[Columns.points].sum()) else 0.0
+            
+            # Build data rows - group by team to find their opponent
+            data = []
+            processed_teams = set()
+            
+            for _, row in team_totals.iterrows():
+                team_name = row[Columns.team_name]
+                if team_name in processed_teams:
+                    continue
+                    
+                opponent_name = row[Columns.team_name_opponent]
+                team_pins = int(row[Columns.score]) if pd.notna(row[Columns.score]) else 0
+                team_points = float(row[Columns.points]) if pd.notna(row[Columns.points]) else 0.0
+                
+                # Add individual points to team points
+                individual_points = individual_points_by_team.get(team_name, 0.0)
+                total_team_points = team_points + individual_points
+                
+                # Find opponent's totals
+                opponent_row = team_totals[
+                    (team_totals[Columns.team_name] == opponent_name) &
+                    (team_totals[Columns.team_name_opponent] == team_name)
+                ]
+                
+                if not opponent_row.empty:
+                    opponent_pins = int(opponent_row[Columns.score].iloc[0]) if pd.notna(opponent_row[Columns.score].iloc[0]) else 0
+                    opponent_team_points = float(opponent_row[Columns.points].iloc[0]) if pd.notna(opponent_row[Columns.points].iloc[0]) else 0.0
+                    # Add opponent individual points
+                    opponent_individual_points = individual_points_by_team.get(opponent_name, 0.0)
+                    total_opponent_points = opponent_team_points + opponent_individual_points
+                else:
+                    opponent_pins = 0
+                    total_opponent_points = 0.0
+                
+                data.append([
+                    team_name,
+                    team_pins,
+                    total_team_points,
+                    total_opponent_points,
+                    opponent_pins,
+                    opponent_name
+                ])
+                
+                processed_teams.add(team_name)
+                processed_teams.add(opponent_name)
+            
+            return TableData(
+                columns=columns,
+                data=data,
+                title=f"{league} - {i18n_service.get_text('week')} {week}, {i18n_service.get_text('game')} {round_number}",
+                description=f"{i18n_service.get_text('match_results')} {season}",
+                config={
+                    "stickyHeader": True,
+                    "striped": True,
+                    "hover": True,
+                    "responsive": True,
+                    "compact": False
+                }
+            )
+            
+        except Exception as e:
+            print(f"Error in get_game_overview_data: {e}")
+            import traceback
+            traceback.print_exc()
+            return TableData(
+                columns=[],
+                data=[],
+                title=f"Error loading game overview data"
+            )
+
+    def get_game_team_details_data(self, season: str, league: str, week: int, team: str, round_number: int) -> TableData:
+        """
+        Get game team details data for a specific team in a specific round.
+        Shows individual player scores: Points, Player Name, Player Pins, Opponent Pins, Opponent Name
+        Last row contains accumulated totals.
+        
+        Args:
+            season: Season identifier
+            league: League name
+            week: Week number
+            team: Team name
+            round_number: Round/Game number
+            
+        Returns:
+            TableData with player rows and totals row
+        """
+        try:
+            print(f"get_game_team_details_data: season={season}, league={league}, week={week}, team={team}, round={round_number}")
+            # Get individual player data for this team and round
+            player_filters = {
+                Columns.season: {'value': season, 'operator': 'eq'},
+                Columns.league_name: {'value': league, 'operator': 'eq'},
+                Columns.week: {'value': week, 'operator': 'eq'},
+                Columns.team_name: {'value': team, 'operator': 'eq'},
+                Columns.round_number: {'value': round_number, 'operator': 'eq'},
+                Columns.computed_data: {'value': False, 'operator': 'eq'}  # Individual player data
+            }
+            
+            player_data = self.adapter.get_filtered_data(filters=player_filters)
+            print(f"get_game_team_details_data: Found {len(player_data)} player rows")
+            
+            if player_data.empty:
+                print(f"get_game_team_details_data: No player data found")
+                return TableData(
+                    columns=[],
+                    data=[],
+                    title=f"{i18n_service.get_text('no_data_available')} - {team}, {i18n_service.get_text('game')} {round_number}"
+                )
+            
+            # Get opponent team name from first row
+            if Columns.team_name_opponent not in player_data.columns:
+                print(f"get_game_team_details_data: Column {Columns.team_name_opponent} not found in player_data")
+                return TableData(
+                    columns=[],
+                    data=[],
+                    title=f"{i18n_service.get_text('no_data_available')} - {team}, {i18n_service.get_text('game')} {round_number} (missing opponent column)"
+                )
+            
+            # Extract opponent name and handle various edge cases
+            opponent_name_raw = player_data[Columns.team_name_opponent].iloc[0] if not player_data.empty else ""
+            # Convert to string and handle NaN/None values
+            if pd.isna(opponent_name_raw) or opponent_name_raw is None:
+                opponent_name = ""
+            else:
+                opponent_name = str(opponent_name_raw).strip()
+            
+            print(f"get_game_team_details_data: Opponent name = '{opponent_name}' (raw: {opponent_name_raw}, type: {type(opponent_name_raw)})")
+            
+            if not opponent_name or opponent_name == '' or opponent_name.lower() == 'nan':
+                print(f"get_game_team_details_data: No opponent name found")
+                return TableData(
+                    columns=[],
+                    data=[],
+                    title=f"{i18n_service.get_text('no_data_available')} - {team}, {i18n_service.get_text('game')} {round_number} (no opponent found)"
+                )
+            
+            # Get opponent player data
+            opponent_filters = {
+                Columns.season: {'value': season, 'operator': 'eq'},
+                Columns.league_name: {'value': league, 'operator': 'eq'},
+                Columns.week: {'value': week, 'operator': 'eq'},
+                Columns.team_name: {'value': opponent_name, 'operator': 'eq'},
+                Columns.round_number: {'value': round_number, 'operator': 'eq'},
+                Columns.computed_data: {'value': False, 'operator': 'eq'}
+            }
+            
+            print(f"get_game_team_details_data: Fetching opponent data for '{opponent_name}'")
+            opponent_data = self.adapter.get_filtered_data(filters=opponent_filters)
+            print(f"get_game_team_details_data: Found {len(opponent_data)} opponent rows")
+            
+            # Get team match points (Team Total row)
+            team_total_filters = {
+                Columns.season: {'value': season, 'operator': 'eq'},
+                Columns.league_name: {'value': league, 'operator': 'eq'},
+                Columns.week: {'value': week, 'operator': 'eq'},
+                Columns.team_name: {'value': team, 'operator': 'eq'},
+                Columns.round_number: {'value': round_number, 'operator': 'eq'},
+                Columns.computed_data: {'value': True, 'operator': 'eq'}  # Team totals
+            }
+            team_total_data = self.adapter.get_filtered_data(filters=team_total_filters)
+            team_match_points = 0.0
+            if not team_total_data.empty and Columns.points in team_total_data.columns:
+                team_match_points = float(team_total_data[Columns.points].iloc[0]) if pd.notna(team_total_data[Columns.points].iloc[0]) else 0.0
+            
+            # Get opponent team match points
+            opponent_total_filters = {
+                Columns.season: {'value': season, 'operator': 'eq'},
+                Columns.league_name: {'value': league, 'operator': 'eq'},
+                Columns.week: {'value': week, 'operator': 'eq'},
+                Columns.team_name: {'value': opponent_name, 'operator': 'eq'},
+                Columns.round_number: {'value': round_number, 'operator': 'eq'},
+                Columns.computed_data: {'value': True, 'operator': 'eq'}  # Team totals
+            }
+            opponent_total_data = self.adapter.get_filtered_data(filters=opponent_total_filters)
+            opponent_match_points = 0.0
+            if not opponent_total_data.empty and Columns.points in opponent_total_data.columns:
+                opponent_match_points = float(opponent_total_data[Columns.points].iloc[0]) if pd.notna(opponent_total_data[Columns.points].iloc[0]) else 0.0
+            
+            # Create columns - two column groups: selected team and opposing team
+            # Order: Player name, Pins, Points | Points, Pins, Player name
+            columns = [
+                ColumnGroup(
+                    title=team,  # Selected team name
+                    frozen="left",
+                    style={"backgroundColor": "#f8f9fa"},
+                    columns=[
+                        Column(title=i18n_service.get_text("player"), field="player_name", width="200px", align="left"),
+                        Column(title=i18n_service.get_text("pins"), field="player_pins", width="80px", align="center"),
+                        Column(title=i18n_service.get_text("points"), field="points", width="80px", align="center")
+                    ]
+                ),
+                ColumnGroup(
+                    title=opponent_name,  # Opposing team name
+                    style={"backgroundColor": "#f0f0f0"},
+                    columns=[
+                        Column(title=i18n_service.get_text("points"), field="opponent_points", width="80px", align="center"),
+                        Column(title=i18n_service.get_text("pins"), field="opponent_pins", width="80px", align="center"),
+                        Column(title=i18n_service.get_text("player"), field="opponent_player_name", width="200px", align="left")
+                    ]
+                )
+            ]
+            
+            # Build data rows - sort by position
+            data = []
+            if Columns.position not in player_data.columns:
+                print(f"get_game_team_details_data: Column {Columns.position} not found in player_data")
+                return TableData(
+                    columns=[],
+                    data=[],
+                    title=f"{i18n_service.get_text('no_data_available')} - {team}, {i18n_service.get_text('game')} {round_number} (missing position column)"
+                )
+            
+            player_data_sorted = player_data.sort_values(by=Columns.position)
+            
+            total_points = 0.0
+            total_player_pins = 0
+            total_opponent_pins = 0
+            
+            total_opponent_points = 0.0
+            
+            for _, row in player_data_sorted.iterrows():
+                try:
+                    player_name = str(row[Columns.player_name]) if pd.notna(row[Columns.player_name]) else ""
+                    player_pins = int(row[Columns.score]) if pd.notna(row[Columns.score]) else 0
+                    points = float(row[Columns.points]) if pd.notna(row[Columns.points]) else 0.0
+                    position = int(row[Columns.position]) if pd.notna(row[Columns.position]) else 0
+                    
+                    # Find opponent player at same position
+                    opponent_pins = 0
+                    opponent_player_name = ""
+                    opponent_points = 0.0
+                    if not opponent_data.empty and Columns.position in opponent_data.columns:
+                        opponent_player = opponent_data[opponent_data[Columns.position] == position]
+                        if not opponent_player.empty:
+                            try:
+                                if Columns.score in opponent_player.columns:
+                                    opponent_pins = int(opponent_player[Columns.score].iloc[0]) if pd.notna(opponent_player[Columns.score].iloc[0]) else 0
+                                if Columns.player_name in opponent_player.columns:
+                                    opponent_player_name = str(opponent_player[Columns.player_name].iloc[0]) if pd.notna(opponent_player[Columns.player_name].iloc[0]) else ""
+                                if Columns.points in opponent_player.columns:
+                                    opponent_points = float(opponent_player[Columns.points].iloc[0]) if pd.notna(opponent_player[Columns.points].iloc[0]) else 0.0
+                            except (IndexError, KeyError, ValueError) as e:
+                                print(f"get_game_team_details_data: Error getting opponent data for position {position}: {e}")
+                    
+                    data.append([
+                        player_name,
+                        player_pins,
+                        points,
+                        opponent_points,
+                        opponent_pins,
+                        opponent_player_name
+                    ])
+                    
+                    total_points += points
+                    total_player_pins += player_pins
+                    total_opponent_pins += opponent_pins
+                    total_opponent_points += opponent_points
+                except Exception as e:
+                    print(f"get_game_team_details_data: Error processing player row: {e}")
+                    import traceback
+                    traceback.print_exc()
+                    continue
+            
+            # Add team totals row (shows team name and team match points)
+            data.append([
+                team,  # Team name instead of "Total"
+                total_player_pins,
+                team_match_points,  # Team match points (0/3)
+                opponent_match_points,  # Opponent team match points
+                total_opponent_pins,
+                opponent_name  # Opponent team name
+            ])
+            
+            # Add final row with sum of all points (individual + team) for both teams
+            total_all_points_team = total_points + team_match_points
+            total_all_points_opponent = total_opponent_points + opponent_match_points
+            data.append([
+                "",  # Empty (player name column)
+                "",  # Empty (pins column)
+                total_all_points_team,  # Sum of individual + team points for team
+                total_all_points_opponent,  # Sum of individual + team points for opponent
+                "",  # Empty (pins column)
+                ""  # Empty (player name column)
+            ])
+            
+            return TableData(
+                columns=columns,
+                data=data,
+                title=f"{team} - {i18n_service.get_text('week')} {week}, {i18n_service.get_text('game')} {round_number}",
+                description=f"{i18n_service.get_text('individual_scores')} vs {opponent_name}",
+                config={
+                    "stickyHeader": True,
+                    "striped": True,
+                    "hover": True,
+                    "responsive": True,
+                    "compact": False,
+                    "highlightLastRow": True
+                }
+            )
+            
+        except Exception as e:
+            print(f"Error in get_game_team_details_data: {e}")
+            import traceback
+            traceback.print_exc()
+            return TableData(
+                columns=[],
+                data=[],
+                title=f"Error loading game team details data"
+            )
 
     def get_league_standings(self, season: str, league: str, week: Optional[int] = None) -> LeagueStandings:
         """

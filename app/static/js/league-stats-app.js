@@ -9,6 +9,7 @@ class LeagueStatsApp {
             season: null,
             league: null,
             week: null,
+            round: null,
             team: null
         };
         this.urlStateManager = new URLStateManager();
@@ -89,6 +90,10 @@ class LeagueStatsApp {
             const teamPerformanceBlock = new TeamPerformanceBlock();
             console.log('🔄 Creating TeamWinPercentageBlock...');
             const teamWinPercentageBlock = new TeamWinPercentageBlock();
+            console.log('🔄 Creating GameOverviewBlock...');
+            const gameOverviewBlock = new GameOverviewBlock();
+            console.log('🔄 Creating GameTeamDetailsBlock...');
+            const gameTeamDetailsBlock = new GameTeamDetailsBlock();
             
             // Store blocks (no filter-controls block needed anymore)
             this.contentBlocks.set('season-league-standings', seasonLeagueStandingsBlock);
@@ -99,12 +104,16 @@ class LeagueStatsApp {
             this.contentBlocks.set('team-details', teamDetailsBlock);
             this.contentBlocks.set('team-performance', teamPerformanceBlock);
             this.contentBlocks.set('team-win-percentage', teamWinPercentageBlock);
+            this.contentBlocks.set('game-overview', gameOverviewBlock);
+            this.contentBlocks.set('game-team-details', gameTeamDetailsBlock);
             
             console.log('✅ Content blocks initialized');
             
             // Initialize centralized button manager for league mode with content rendering callback
             this.buttonManager = new CentralizedButtonManager(this.urlStateManager, 'league', (state) => {
                 console.log('🔄 LeagueStatsApp: Button state changed, rendering content:', state);
+                console.log('🔄 LeagueStatsApp: State keys:', Object.keys(state));
+                console.log('🔄 LeagueStatsApp: Round value:', state.round, 'Type:', typeof state.round);
                 this.currentState = { ...state };
                 this.renderContent();
             });
@@ -286,7 +295,13 @@ class LeagueStatsApp {
             // Render all content blocks in parallel for better performance
             const renderPromises = Array.from(this.contentBlocks.entries()).map(async ([blockName, block]) => {
                 try {
-                    console.log(`🔄 Rendering block: ${blockName}`);
+                    console.log(`🔄 Rendering block: ${blockName} with state:`, {
+                        season: this.currentState.season,
+                        league: this.currentState.league,
+                        week: this.currentState.week,
+                        round: this.currentState.round,
+                        team: this.currentState.team
+                    });
                     await block.render(this.currentState);
                     console.log(`✅ Rendered block: ${blockName}`);
                 } catch (error) {

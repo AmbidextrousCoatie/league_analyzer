@@ -60,9 +60,10 @@ class MatchDayBlock extends BaseContentBlock {
     }
 
     shouldRender(state) {
-        // Show only when season, league, and week are selected but NO team is selected
+        // Show only when season, league, and week are selected but NO team and NO round is selected
         const hasTeam = state.team && state.team !== '' && state.team !== 'null';
-        return state.season && state.league && state.week && !hasTeam;
+        const hasRound = state.round && state.round !== '' && state.round !== 'null';
+        return state.season && state.league && state.week && !hasTeam && !hasRound;
     }
 
     generateHTML(state) {

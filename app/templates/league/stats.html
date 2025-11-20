@@ -34,7 +34,13 @@
                 </div>
             </div>
             <div class="row mt-3">
-                <div class="col-md-12">
+                <div class="col-md-4">
+                    <h5 data-i18n="game">Game / Spiel</h5>
+                    <div id="buttonsRound" class="btn-group-horizontal w-100">
+                        <!-- Rounds/Games will be inserted here -->
+                    </div>
+                </div>
+                <div class="col-md-8">
                     <h5 data-i18n="team">Team</h5>
                     <div id="buttonsTeam" class="btn-group-horizontal w-100">
                         <!-- Teams will be inserted here -->
@@ -132,6 +138,28 @@
         </div>
     </div>
 
+    <!-- Game Overview Block (League + Season + Week + Round, no team) -->
+    <div id="gameOverviewContainer">
+        <!-- Game overview content will be rendered here -->
+        <div class="text-center py-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden" data-i18n="status.loading">Loading...</span>
+            </div>
+            <p class="text-muted mt-2" data-i18n="status.initializing.game_overview">Initializing game overview...</p>
+        </div>
+    </div>
+
+    <!-- Game Team Details Block (League + Season + Week + Team + Round) -->
+    <div id="gameTeamDetailsContainer">
+        <!-- Game team details content will be rendered here -->
+        <div class="text-center py-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden" data-i18n="status.loading">Loading...</span>
+            </div>
+            <p class="text-muted mt-2" data-i18n="status.initializing.game_team_details">Initializing game team details...</p>
+        </div>
+    </div>
+
 </div>
 
 {% endblock %}
@@ -152,6 +180,8 @@
 <script src="{{ static_url('js/content-blocks/team-performance-block.js') }}"></script>
 <script src="{{ static_url('js/content-blocks/team-win-percentage-block.js') }}"></script>
 <script src="{{ static_url('js/content-blocks/team-vs-team-comparison-block.js') }}"></script>
+<script src="{{ static_url('js/content-blocks/game-overview-block.js') }}"></script>
+<script src="{{ static_url('js/content-blocks/game-team-details-block.js') }}"></script>
 
 <!-- Main application -->
 <script src="{{ static_url('js/league-stats-app.js') }}"></script>

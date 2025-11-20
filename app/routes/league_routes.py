@@ -59,6 +59,115 @@ def get_available_weeks():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+@bp.route('/league/get_available_rounds')
+def get_available_rounds():
+    try:
+        params = dict(request.args)
+        debug_config.log_route('league.get_available_rounds', params)
+        
+        season = request.args.get('season')
+        league = request.args.get('league')
+        week = request.args.get('week')
+        
+        if not all([season, league, week]):
+            return jsonify({"error": "Season, league, and week are required"}), 400
+        
+        try:
+            week = int(week)
+        except ValueError:
+            return jsonify({"error": "Week must be a valid integer"}), 400
+        
+        league_service = get_league_service()
+        rounds = league_service.get_available_rounds(season=season, league=league, week=week)
+        
+        response_size = sys.getsizeof(str(rounds))
+        debug_config.log_route('league.get_available_rounds', params, response_size)
+        
+        return jsonify(rounds)
+    except Exception as e:
+        debug_config.log_route('league.get_available_rounds', dict(request.args), f"ERROR: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+
+@bp.route('/league/get_game_overview')
+def get_game_overview():
+    try:
+        params = dict(request.args)
+        debug_config.log_route('league.get_game_overview', params)
+        
+        season = request.args.get('season')
+        league = request.args.get('league')
+        week = request.args.get('week')
+        round_number = request.args.get('round')
+        
+        if not all([season, league, week, round_number]):
+            return jsonify({"error": "Season, league, week, and round are required"}), 400
+        
+        try:
+            week = int(week)
+            round_number = int(round_number)
+        except ValueError:
+            return jsonify({"error": "Week and round must be valid integers"}), 400
+        
+        league_service = get_league_service()
+        table_data = league_service.get_game_overview_data(
+            season=season,
+            league=league,
+            week=week,
+            round_number=round_number
+        )
+        
+        response_data = table_data.to_dict()
+        response_size = sys.getsizeof(str(response_data))
+        debug_config.log_route('league.get_game_overview', params, response_size)
+        
+        return jsonify(response_data)
+    except Exception as e:
+        debug_config.log_route('league.get_game_overview', dict(request.args), f"ERROR: {str(e)}")
+        if debug_config.is_debug_enabled('routes'):
+            traceback.print_exc()
+        return jsonify({"error": str(e)}), 500
+
+@bp.route('/league/get_game_team_details')
+def get_game_team_details():
+    try:
+        params = dict(request.args)
+        debug_config.log_route('league.get_game_team_details', params)
+        
+        season = request.args.get('season')
+        league = request.args.get('league')
+        week = request.args.get('week')
+        team = request.args.get('team')
+        round_number = request.args.get('round')
+        
+        if not all([season, league, week, team, round_number]):
+            return jsonify({"error": "Season, league, week, team, and round are required"}), 400
+        
+        try:
+            week = int(week)
+            round_number = int(round_number)
+        except ValueError:
+            return jsonify({"error": "Week and round must be valid integers"}), 400
+        
+        league_service = get_league_service()
+        table_data = league_service.get_game_team_details_data(
+            season=season,
+            league=league,
+            week=week,
+            team=team,
+            round_number=round_number
+        )
+        
+        response_data = table_data.to_dict()
+        response_size = sys.getsizeof(str(response_data))
+        debug_config.log_route('league.get_game_team_details', params, response_size)
+        
+        return jsonify(response_data)
+    except Exception as e:
+        debug_config.log_route('league.get_game_team_details', dict(request.args), f"ERROR: {str(e)}")
+        if debug_config.is_debug_enabled('routes'):
+            traceback.print_exc()
+        return jsonify({"error": str(e)}), 500
+
 @bp.route('/league/get_available_teams')
 def get_available_teams():
     try:

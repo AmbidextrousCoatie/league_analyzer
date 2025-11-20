@@ -36,8 +36,15 @@ class CentralizedButtonManager {
                 containerId: 'buttonsWeek',
                 name: 'week'
             },
-            team: {
+            round: {
                 order: 4,
+                dependencies: ['season', 'league', 'week'],
+                endpoint: '/league/get_available_rounds',
+                containerId: 'buttonsRound',
+                name: 'round'
+            },
+            team: {
+                order: 5,
                 dependencies: ['season', 'league'],
                 endpoint: '/league/get_available_teams',
                 containerId: 'buttonsTeam',
