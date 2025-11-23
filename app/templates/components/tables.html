@@ -262,6 +262,11 @@ function createTableTabulator(tableId, data, options = {}) {
     const columnOrder = flattenColumnMetadata(data.columns);
     if (!columnOrder.length) {
         console.warn('No column definitions available for Tabulator table');
+        const container = document.getElementById(tableId);
+        if (container) {
+            const errorMsg = data.title && data.title.includes('Fehler') ? data.title : 'No column definitions available';
+            container.innerHTML = `<div class="alert alert-warning">${errorMsg}</div>`;
+        }
         return;
     }
     const columnLookup = columnOrder.reduce((acc, info) => {
@@ -353,6 +358,8 @@ function createTableTabulator(tableId, data, options = {}) {
 
                 const sampleValue = transformedData.length ? transformedData[0][field] : null;
                 const isNumberColumn = typeof sampleValue === 'number';
+                // Check if it's a string that represents a number (e.g., "100.0", "99.5")
+                const isStringNumber = typeof sampleValue === 'string' && !isNaN(parseFloat(sampleValue)) && isFinite(sampleValue);
 
                 const columnDefinition = {
                     title: column.title || '',
@@ -360,7 +367,8 @@ function createTableTabulator(tableId, data, options = {}) {
                     hozAlign: headerAlign,
                     headerHozAlign: headerAlign,
                     headerSort: column.sortable !== false,
-                    sorter: column.sortable === false ? undefined : (isNumberColumn ? 'number' : 'string'),
+                    // Use numeric sorter for both numbers and string numbers
+                    sorter: column.sortable === false ? undefined : (isNumberColumn || isStringNumber ? 'number' : 'string'),
                     formatter,
                     tooltip: settings.tooltips ? true : false
                 };
@@ -448,6 +456,14 @@ function createTableTabulator(tableId, data, options = {}) {
         }
         : false;
 
+    // Set up initial sort if specified
+    const initialSort = data.default_sort ? [
+        {
+            column: data.default_sort.field,
+            dir: data.default_sort.dir || "desc"  // Default to descending
+        }
+    ] : undefined;
+
     window[tableId + 'Instance'] = new Tabulator(`#${tableId}`, {
         data: transformedData,
         columns: tabulatorColumns,
@@ -461,6 +477,7 @@ function createTableTabulator(tableId, data, options = {}) {
         theme: "semanticui",
         cssClass: "custom-tabulator",
         columnHeaderVertAlign: "middle",
+        ...(initialSort ? { initialSort: initialSort } : {}),
         tableBuilt: function() {
             // Apply highlighting and fix header separator
             // Use requestAnimationFrame for better timing

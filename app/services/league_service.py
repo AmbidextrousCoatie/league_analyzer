@@ -1,6 +1,20 @@
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Optional, Union
 import datetime
 import pandas as pd
+
+
+def format_float_one_decimal(value: Union[int, float]) -> str:
+    """
+    Format a number to always show one decimal place, even if it's a whole number.
+    Example: 100 -> "100.0", 100.5 -> "100.5"
+    
+    Args:
+        value: The number to format
+        
+    Returns:
+        String representation with exactly one decimal place
+    """
+    return f"{float(value):.1f}"
 
 
 from data_access.adapters.data_adapter_factory import DataAdapterFactory, DataAdapterSelector
@@ -2531,26 +2545,28 @@ class LeagueService:
                                 final_average = avg_series[-1] if avg_series[-1] is not None else 0
                                 
                                 all_performances.append([
-                                    season,
                                     team_name,
-                                    round(final_average, 1)
+                                    format_float_one_decimal(final_average),
+                                    season,
+                                    league  # Add league as second-to-last
                                 ])
                                 
                 except Exception as e:
                     print(f"Error processing season {season}: {e}")
                     continue
             
-            # Sort by average descending
-            all_performances.sort(key=lambda x: x[2] if isinstance(x[2], (int, float)) else 0, reverse=True)
+            # Sort by average descending (now index 3)
+            all_performances.sort(key=lambda x: x[3] if isinstance(x[3], (int, float)) else 0, reverse=True)
             
-            # Create table structure
+            # Create table structure - remove ColumnGroup title (use empty string)
             columns = [
                 ColumnGroup(
-                    title=i18n_service.get_text("team_performance"),
+                    title="",  # Empty title since it's shown in card header
                     columns=[
-                        Column(title=i18n_service.get_text("season"), field="season", width="120px", align="center"),
-                        Column(title=i18n_service.get_text("team"), field="team", width="250px", align="left"),
-                        Column(title=i18n_service.get_text("average"), field="average", width="130px", align="center")
+                        Column(title=i18n_service.get_text("team"), field="team", width="180px", align="left"),
+                        Column(title=i18n_service.get_text("average"), field="average", width="90px", align="center"),
+                        Column(title=i18n_service.get_text("season"), field="season", width="90px", align="center"),
+                        Column(title=i18n_service.get_text("league"), field="league", width="90px", align="left")
                     ]
                 )
             ]
@@ -2559,7 +2575,8 @@ class LeagueService:
                 columns=columns,
                 data=all_performances[:20],  # Top 20 performances by average
                 title=f"{league} - Top Team Performances",
-                description="Best team season averages across all years"
+                description="Best team season averages across all years",
+                default_sort={"field": "average", "dir": "desc"}  # Sort by average descending
             )
             
         except Exception as e:
@@ -2830,10 +2847,11 @@ class LeagueService:
                             # New individual_averages structure: [player_name, team_name, games, total_points, average, high_game]
                             if len(row) >= 6:
                                 performance_entry = [
-                                    season,
                                     row[0],  # player_name
-                                    row[1],  # team_name
-                                    row[4]   # average (index 4 in the new structure)
+                                    format_float_one_decimal(row[4]),  # average (index 4 in the new structure)
+                                    season,
+                                    league,   # Add league as second-to-last
+                                    row[1]   # team_name
                                 ]
                                 all_performances.append(performance_entry)
                                 
@@ -2845,18 +2863,19 @@ class LeagueService:
             
 
             
-            # Sort by average descending (now index 3 since we removed games column)
-            all_performances.sort(key=lambda x: x[3] if isinstance(x[3], (int, float)) else 0, reverse=True)
+            # Sort by average descending (now index 4 since we added league)
+            all_performances.sort(key=lambda x: x[4] if isinstance(x[4], (int, float)) else 0, reverse=True)
             
-            # Create table structure (removed Games column as requested)
+            # Create table structure - remove ColumnGroup title (use empty string)
             columns = [
                 ColumnGroup(
-                    title=i18n_service.get_text("individual_performance"),
+                    title="",  # Empty title since it's shown in card header
                     columns=[
-                        Column(title=i18n_service.get_text("season"), field="season", width="100px", align="center"),
-                        Column(title=i18n_service.get_text("player"), field="player", width="200px", align="left"),
-                        Column(title=i18n_service.get_text("team"), field="team", width="150px", align="left"),
-                        Column(title=i18n_service.get_text("average"), field="average", width="100px", align="center")
+                        Column(title=i18n_service.get_text("player"), field="player", width="180px", align="left"),
+                        Column(title=i18n_service.get_text("average"), field="average", width="90px", align="center"),
+                        Column(title=i18n_service.get_text("season"), field="season", width="90px", align="center"),
+                        Column(title=i18n_service.get_text("league"), field="league", width="90px", align="left"),
+                        Column(title=i18n_service.get_text("team"), field="team", width="180px", align="left")                        
                     ]
                 )
             ]
@@ -2868,7 +2887,8 @@ class LeagueService:
                 columns=columns,
                 data=result_data,
                 title=f"{league} - Top Individual Performances",
-                description="Best individual averages across all seasons"
+                description="Best individual averages across all seasons",
+                default_sort={"field": "average", "dir": "desc"}  # Sort by average descending
             )
             
         except Exception as e:
@@ -2900,30 +2920,32 @@ class LeagueService:
                         
                         for _, row in highest_individual.iterrows():
                             record_games.append([
-                                season,
                                 row[Columns.player_name],
+                                row[Columns.score],
+                                season,
+                                league,   # Add league as second-to-last
                                 row[Columns.team_name],
-                                row[Columns.week] if Columns.week in row else '',
-                                row[Columns.score]
+                                row[Columns.week] if Columns.week in row else ''
                             ])
                             
                 except Exception as e:
                     print(f"Error processing individual record games for season {season}: {e}")
                     continue
             
-            # Sort by score descending
-            record_games.sort(key=lambda x: x[4] if isinstance(x[4], (int, float)) else 0, reverse=True)
+            # Sort by score descending (now index 5)
+            record_games.sort(key=lambda x: x[5] if isinstance(x[5], (int, float)) else 0, reverse=True)
             
-            # Create table structure
+            # Create table structure - remove ColumnGroup title (use empty string)
             columns = [
                 ColumnGroup(
-                    title=i18n_service.get_text("record_individual_games"),
+                    title="",  # Empty title since it's shown in card header
                     columns=[
-                        Column(title=i18n_service.get_text("season"), field="season", width="100px", align="center"),
-                        Column(title=i18n_service.get_text("player"), field="player", width="200px", align="left"),
-                        Column(title=i18n_service.get_text("team"), field="team", width="150px", align="left"),
-                        Column(title=i18n_service.get_text("week"), field="week", width="80px", align="center"),
-                        Column(title=i18n_service.get_text("score"), field="score", width="100px", align="center")
+                        Column(title=i18n_service.get_text("player"), field="player", width="180px", align="left"),
+                        Column(title=i18n_service.get_text("score"), field="score", width="90px", align="center"),
+                        Column(title=i18n_service.get_text("season"), field="season", width="90px", align="center"),
+                        Column(title=i18n_service.get_text("league"), field="league", width="90px", align="left"),
+                        Column(title=i18n_service.get_text("team"), field="team", width="180px", align="left"),
+                        Column(title=i18n_service.get_text("week"), field="week", width="90px", align="center")
                     ]
                 )
             ]
@@ -2932,7 +2954,8 @@ class LeagueService:
                 columns=columns,
                 data=record_games[:15],  # Top 15 individual record games
                 title=f"{league} - Record Individual Games",
-                description="Highest scoring individual performances across all seasons"
+                description="Highest scoring individual performances across all seasons",
+                default_sort={"field": "score", "dir": "desc"}  # Sort by score descending
             )
             
         except Exception as e:
@@ -2962,29 +2985,32 @@ class LeagueService:
                         
                         for _, row in highest_team.iterrows():
                             record_games.append([
-                                season,
                                 row[Columns.team_name],
-                                row[Columns.week] if Columns.week in row else '',
-                                row[Columns.score]
+                                row[Columns.score],
+                                season,
+                                league,  # Add league as second-to-last
+                                row[Columns.week] if Columns.week in row else ''
                             ])
                             
                 except Exception as e:
                     print(f"Error processing team record games for season {season}: {e}")
                     continue
             
-            # Sort by score descending
-            record_games.sort(key=lambda x: x[3] if isinstance(x[3], (int, float)) else 0, reverse=True)
+            # Sort by score descending (now index 4)
+            record_games.sort(key=lambda x: x[4] if isinstance(x[4], (int, float)) else 0, reverse=True)
             
-            # Create table structure
+            # Create table structure - remove ColumnGroup title (use empty string)
             columns = [
                 ColumnGroup(
-                    title=i18n_service.get_text("record_team_games"),
+                    title="",  # Empty title since it's shown in card header
                     columns=[
-                        Column(title=i18n_service.get_text("season"), field="season", width="100px", align="center"),
-                        Column(title=i18n_service.get_text("team"), field="team", width="200px", align="left"),
-                        Column(title=i18n_service.get_text("week"), field="week", width="80px", align="center"),
-                        Column(title=i18n_service.get_text("score"), field="score", width="100px", align="center")
+                        Column(title=i18n_service.get_text("team"), field="team", width="180px", align="left"),
+                        Column(title=i18n_service.get_text("score"), field="score", width="90px", align="center"),
+                        Column(title=i18n_service.get_text("season"), field="season", width="90px", align="center"),
+                        Column(title=i18n_service.get_text("league"), field="league", width="90px", align="left"),
+                        Column(title=i18n_service.get_text("week"), field="week", width="90px", align="center"),
                     ]
+                        
                 )
             ]
             
@@ -2992,7 +3018,9 @@ class LeagueService:
                 columns=columns,
                 data=record_games[:15],  # Top 15 team record games
                 title=f"{league} - Record Team Games",
-                description="Highest scoring team performances across all seasons"
+                description="Highest scoring team performances across all seasons",
+                default_sort={"field": "score", "dir": "desc"}  # Sort by score descending
+
             )
             
         except Exception as e:

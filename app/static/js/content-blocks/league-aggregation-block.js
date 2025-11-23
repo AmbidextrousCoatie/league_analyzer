@@ -328,10 +328,11 @@ class LeagueAggregationBlock extends BaseContentBlock {
 
     createTopTeamsTable(data) {
         // Create table for top team performances
-        if (typeof createTableBootstrap3 === 'function' && data) {
-            createTableBootstrap3('tableTopTeams', data, {
+        if (typeof createTableTabulator === 'function' && data) {
+            createTableTabulator('tableTopTeams', data, {
                 disablePositionCircle: true, // No color circles for top performances ranking
-                enableSpecialRowStyling: true
+                enableSpecialRowStyling: true,
+                tooltips: true
             });
         }
     }
@@ -339,48 +340,51 @@ class LeagueAggregationBlock extends BaseContentBlock {
     createTopIndividualsTable(data) {
         // Create table for top individual performances
         console.log(`DEBUG: createTopIndividualsTable called with data:`, data);
-        console.log(`DEBUG: createTableBootstrap3 function available: ${typeof createTableBootstrap3 === 'function'}`);
+        console.log(`DEBUG: createTableTabulator function available: ${typeof createTableTabulator === 'function'}`);
         console.log(`DEBUG: Data is truthy: ${!!data}`);
         
-        if (typeof createTableBootstrap3 === 'function' && data) {
+        if (typeof createTableTabulator === 'function' && data) {
             console.log(`DEBUG: Creating top individuals table with ${data.data ? data.data.length : 'unknown'} rows`);
-            createTableBootstrap3('tableTopIndividuals', data, {
+            createTableTabulator('tableTopIndividuals', data, {
                 disablePositionCircle: true, // Individual players don't need color circles
-                enableSpecialRowStyling: true
+                enableSpecialRowStyling: true,
+                tooltips: true
             });
             console.log(`DEBUG: Top individuals table creation completed`);
         } else {
-            console.warn(`DEBUG: Cannot create top individuals table - function available: ${typeof createTableBootstrap3 === 'function'}, data: ${!!data}`);
+            console.warn(`DEBUG: Cannot create top individuals table - function available: ${typeof createTableTabulator === 'function'}, data: ${!!data}`);
         }
     }
 
     createRecordIndividualGamesTable(data) {
         // Create table for record individual games
         console.log(`DEBUG: createRecordIndividualGamesTable called with data:`, data);
-        if (typeof createTableBootstrap3 === 'function' && data) {
+        if (typeof createTableTabulator === 'function' && data) {
             console.log(`DEBUG: Creating record individual games table with ${data.data ? data.data.length : 'unknown'} rows`);
-            createTableBootstrap3('tableRecordIndividualGames', data, {
+            createTableTabulator('tableRecordIndividualGames', data, {
                 disablePositionCircle: true, // Record games don't need position circles
-                enableSpecialRowStyling: true
+                enableSpecialRowStyling: true,
+                tooltips: true
             });
             console.log(`DEBUG: Record individual games table creation completed`);
         } else {
-            console.warn(`DEBUG: Cannot create record individual games table - function available: ${typeof createTableBootstrap3 === 'function'}, data: ${!!data}`);
+            console.warn(`DEBUG: Cannot create record individual games table - function available: ${typeof createTableTabulator === 'function'}, data: ${!!data}`);
         }
     }
 
     createRecordTeamGamesTable(data) {
         // Create table for record team games
         console.log(`DEBUG: createRecordTeamGamesTable called with data:`, data);
-        if (typeof createTableBootstrap3 === 'function' && data) {
+        if (typeof createTableTabulator === 'function' && data) {
             console.log(`DEBUG: Creating record team games table with ${data.data ? data.data.length : 'unknown'} rows`);
-            createTableBootstrap3('tableRecordTeamGames', data, {
+            createTableTabulator('tableRecordTeamGames', data, {
                 disablePositionCircle: true, // Record games don't need position circles
-                enableSpecialRowStyling: true
+                enableSpecialRowStyling: true,
+                tooltips: true
             });
             console.log(`DEBUG: Record team games table creation completed`);
         } else {
-            console.warn(`DEBUG: Cannot create record team games table - function available: ${typeof createTableBootstrap3 === 'function'}, data: ${!!data}`);
+            console.warn(`DEBUG: Cannot create record team games table - function available: ${typeof createTableTabulator === 'function'}, data: ${!!data}`);
         }
     }
 
