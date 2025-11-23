@@ -1815,6 +1815,7 @@ class LeagueService:
                     title="Total",
                     style={"backgroundColor": "#e9ecef"},
                     header_style={"fontWeight": "bold"},
+                    highlighted=True,  # Highlight the Total group
                     columns=[
                         Column(title=i18n_service.get_text("points"), field="season_points", format="{:,}"),
                         Column(title=i18n_service.get_text("pins"), field="season_score", format="{:,}"),

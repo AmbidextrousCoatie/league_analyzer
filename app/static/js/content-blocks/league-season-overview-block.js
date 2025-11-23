@@ -281,15 +281,16 @@ class LeagueSeasonOverviewBlock extends BaseContentBlock {
             return;
         }
 
-        // Use createTableBootstrap3 for structured table data
-        if (typeof createTableBootstrap3 === 'function' && data.columns && data.data) {
-            console.log('Creating timetable using createTableBootstrap3');
-            createTableBootstrap3('seasonTimetable', data, { 
+        // Use Tabulator renderer for structured table data
+        if (typeof createTableTabulator === 'function' && data.columns && data.data) {
+            console.log('Creating timetable using Tabulator');
+            createTableTabulator('seasonTimetable', data, { 
                 disablePositionCircle: true,
-                enableSpecialRowStyling: true 
+                enableSpecialRowStyling: true,
+                tooltips: true
             });
         } else {
-            console.warn('createTableBootstrap3 not available or invalid data format, falling back');
+            console.warn('createTableTabulator not available or invalid data format, falling back');
             // Fallback for legacy format
             let html = '<div class="alert alert-info">Timetable data not available in expected format</div>';
             container.innerHTML = html;
@@ -297,19 +298,21 @@ class LeagueSeasonOverviewBlock extends BaseContentBlock {
     }
 
     createStandingsTable(data) {
-        if (typeof createTableBootstrap3 === 'function' && data) {
-            createTableBootstrap3('leagueStandingsTable', data, {
-                disablePositionCircle: false, // League standings should show team colors
-                enableSpecialRowStyling: true
+        if (typeof createTableTabulator === 'function' && data?.columns) {
+            createTableTabulator('leagueStandingsTable', data, {
+                disablePositionCircle: false,
+                enableSpecialRowStyling: true,
+                tooltips: true
             });
         }
     }
 
     createAveragesTable(data) {
-        if (typeof createTableBootstrap3 === 'function' && data) {
-            createTableBootstrap3('individualAveragesTable', data, {
-                disablePositionCircle: true, // Individual averages don't need team colors
-                enableSpecialRowStyling: true
+        if (typeof createTableTabulator === 'function' && data?.columns) {
+            createTableTabulator('individualAveragesTable', data, {
+                disablePositionCircle: true,
+                enableSpecialRowStyling: true,
+                tooltips: true
             });
         }
     }
@@ -485,11 +488,15 @@ class LeagueSeasonOverviewBlock extends BaseContentBlock {
             </div>
         `;
 
-        // Create table using createTableBootstrap3
-        if (typeof createTableBootstrap3 === 'function') {
-            createTableBootstrap3('team-vs-team-comparison-table-inline', data);
+        // Create table using Tabulator
+        if (typeof createTableTabulator === 'function') {
+            createTableTabulator('team-vs-team-comparison-table-inline', data, {
+                disablePositionCircle: true,
+                enableSpecialRowStyling: true,
+                tooltips: true
+            });
         } else {
-            console.error('createTableBootstrap3 function not available');
+            console.error('createTableTabulator function not available');
         }
     }
 
