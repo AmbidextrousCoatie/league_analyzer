@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block title %}Tabulator Highlighting Test{% endblock %}
+
+{% block content %}
+{% include "components/tables.html" %}
+
+<div class="container-fluid mt-4">
+    <div class="card">
+        <div class="card-header">
+            <h4>Tabulator Highlighting Test</h4>
+            <p class="mb-0 text-muted">Second group (Col 2 + Col 3) should be highlighted</p>
+        </div>
+        <div class="card-body">
+            <div id="testTableHighlight"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Wait for Tabulator to be available
+    function createTestTable() {
+        if (typeof createTableTabulator === 'function') {
+            // Create test table data
+            const testTableData = {
+                columns: [
+                    {
+                        title: "First Group",
+                        columns: [
+                            { title: "Col 1", field: "col1", width: "100px" }
+                        ]
+                    },
+                    {
+                        title: "Second Group (Highlighted)",
+                        highlighted: true,  // This group should be highlighted
+                        columns: [
+                            { title: "Col 2", field: "col2", width: "100px" },
+                            { title: "Col 3", field: "col3", width: "100px" }
+                        ]
+                    }
+                ],
+                data: [
+                    ["Row 1 Col 1", "Row 1 Col 2", "Row 1 Col 3"],
+                    ["Row 2 Col 1", "Row 2 Col 2", "Row 2 Col 3"],
+                    ["Row 3 Col 1", "Row 3 Col 2", "Row 3 Col 3"]
+                ],
+                title: "Test Table - Highlighting Verification",
+                description: "Second group (Col 2 + Col 3) should be highlighted with gray background and bold text"
+            };
+            
+            createTableTabulator('testTableHighlight', testTableData, {
+                disablePositionCircle: true,
+                tooltips: true
+            });
+            console.log('✅ Test table created with highlighting');
+        } else {
+            console.error('❌ createTableTabulator not available');
+            document.getElementById('testTableHighlight').innerHTML = 
+                '<div class="alert alert-warning">Tabulator not loaded yet. Please refresh the page.</div>';
+        }
+    }
+    
+    // Try immediately, then retry after a short delay
+    createTestTable();
+    setTimeout(createTestTable, 500);
+    setTimeout(createTestTable, 1000);
+});
+</script>
+
+{% endblock %}
+

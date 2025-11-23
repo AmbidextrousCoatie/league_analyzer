@@ -23,6 +23,7 @@ class ColumnGroup:
     style: Optional[Dict[str, str]] = None  # Custom CSS styles for the group
     header_style: Optional[Dict[str, str]] = None  # Custom CSS for header
     width: Optional[str] = None  # Width for the entire group
+    highlighted: bool = False  # Whether this group should be visually highlighted
 
 @dataclass
 class TableData:
@@ -58,7 +59,8 @@ class TableData:
                     **({"frozen": group.frozen} if group.frozen else {}),
                     **({"style": group.style} if group.style else {}),
                     **({"headerStyle": group.header_style} if group.header_style else {}),
-                    **({"width": group.width} if group.width else {})
+                    **({"width": group.width} if group.width else {}),
+                    **({"highlighted": group.highlighted} if group.highlighted else {})
                 }
                 for group in self.columns
             ],

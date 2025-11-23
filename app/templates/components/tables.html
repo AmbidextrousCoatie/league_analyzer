@@ -1,5 +1,5 @@
-<link href="https://unpkg.com/tabulator-tables@6.3.0/dist/css/tabulator.min.css" rel="stylesheet">
-<script type="text/javascript" src="https://unpkg.com/tabulator-tables@6.3.0/dist/js/tabulator.min.js"></script>
+<link href="{{ static_url('vendor/tabulator/css/tabulator_semanticui.min.css') }}" rel="stylesheet">
+<script type="text/javascript" src="{{ static_url('vendor/tabulator/js/tabulator.min.js') }}"></script>
 
 <script>
 function createTable(config) {
@@ -150,88 +150,511 @@ const getGroupColors = (headerGroups) => {
     });
 };
 
-function createTableTabulator(tableId, data) {
-    // Check if the data has columns and data
+function flattenColumnMetadata(columnGroups = []) {
+    const flatColumns = [];
+    columnGroups.forEach((group, groupIndex) => {
+        if (Array.isArray(group.columns)) {
+            group.columns.forEach((column, columnIndex) => {
+                const field = column.field || `col_${groupIndex}_${columnIndex}`;
+                flatColumns.push({
+                    group,
+                    column,
+                    groupIndex,
+                    columnIndex,
+                    field
+                });
+            });
+        }
+    });
+    return flatColumns;
+}
+
+function mapCellMetadata(cellMetadata = {}, columnOrder = []) {
+    const mapped = {};
+    Object.entries(cellMetadata).forEach(([key, styles]) => {
+        const [rowIndexStr, colIndexStr] = key.split(':');
+        const rowIndex = parseInt(rowIndexStr, 10);
+        const colIndex = parseInt(colIndexStr, 10);
+        const columnInfo = columnOrder[colIndex];
+        if (!columnInfo || Number.isNaN(rowIndex)) {
+            return;
+        }
+        const field = columnInfo.field;
+        if (!mapped[rowIndex]) {
+            mapped[rowIndex] = {};
+        }
+        mapped[rowIndex][field] = styles;
+    });
+    return mapped;
+}
+
+function applyElementStyles(element, styles = {}) {
+    if (!element || !styles) {
+        return;
+    }
+    Object.entries(styles).forEach(([property, value]) => {
+        if (value !== undefined && value !== null) {
+            element.style[property] = value;
+        }
+    });
+}
+
+function parseColumnWidth(width) {
+    if (!width) {
+        return undefined;
+    }
+    if (typeof width === 'number') {
+        return width;
+    }
+    const parsed = parseInt(width, 10);
+    return Number.isNaN(parsed) ? undefined : parsed;
+}
+
+function toRgba(color, alpha = 0.15) {
+    if (!color) {
+        return null;
+    }
+    if (color.startsWith('#')) {
+        const [r, g, b] = hexToRgb(color);
+        return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+    }
+    const rgbMatch = color.match(/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/i);
+    if (rgbMatch) {
+        const [, r, g, b] = rgbMatch;
+        return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+    }
+    const rgbaMatch = color.match(/^rgba\((\d+),\s*(\d+),\s*(\d+),\s*([\d.]+)\)$/i);
+    if (rgbaMatch) {
+        const [, r, g, b] = rgbaMatch;
+        return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+    }
+    return color;
+}
+
+function createTableTabulator(tableId, data, options = {}) {
+    const settings = {
+        disablePositionCircle: false,
+        enableSpecialRowStyling: false,
+        tooltips: true,
+        teamField: null,
+        ...options
+    };
+
+    // Highlighting style constants
+    const HIGHLIGHT_STYLES = {
+        headerBackgroundColor: 'rgba(0, 0, 0, 0.05)',
+        cellBackgroundColor: 'rgba(0, 0, 0, 0.03)',
+        headerFontWeight: '900',
+        cellFontWeight: '700'
+    };
+
     if (!data || !data.columns || !data.data) {
-        console.error('Invalid data format');
+        console.error('Invalid data format for Tabulator table');
         return;
     }
 
-    // Transform the data from array format to object format
-    const transformedData = data.data.map(row => {
-        const obj = {};
-        let index = 0; // Initialize index to track the position in the row array
+    const container = document.getElementById(tableId);
+    if (!container) {
+        console.error(`Container "${tableId}" not found for Tabulator table`);
+        return;
+    }
 
-        // Loop through each column group
-        data.columns.forEach(colGroup => {
-            if (colGroup.columns) {
-                // Loop through each column in the group
-                colGroup.columns.forEach(col => {
-                    obj[col.field] = row[index]; // Assign the value from the row to the object
-                    index++; // Increment index for the next field
-                });
-            }
+    const columnOrder = flattenColumnMetadata(data.columns);
+    if (!columnOrder.length) {
+        console.warn('No column definitions available for Tabulator table');
+        return;
+    }
+    const columnLookup = columnOrder.reduce((acc, info) => {
+        acc[`${info.groupIndex}-${info.columnIndex}`] = info;
+        return acc;
+    }, {});
+
+    const teamFieldGuess = data.columns?.[0]?.columns?.[1]?.field || null;
+    const teamField = settings.teamField || teamFieldGuess;
+
+    const cellMetadataMap = mapCellMetadata(data.cell_metadata || {}, columnOrder);
+    const rowMetadataMap = (data.row_metadata || []).reduce((acc, meta, index) => {
+        acc[index] = meta || {};
+        return acc;
+    }, {});
+
+    const transformedData = data.data.map((row, rowIndex) => {
+        const rowObject = { __rowIndex: rowIndex };
+        columnOrder.forEach((columnInfo, columnIndex) => {
+            rowObject[columnInfo.field] = row[columnIndex];
         });
-        return obj; // Return the transformed object
-    });
-
-    // Process columns to ensure frozen properties are set and add group indices
-    const processedColumns = data.columns.map((colGroup, groupIndex) => {
-        const newColGroup = { ...colGroup };
-        
-        if (newColGroup.columns) {
-            newColGroup.columns = newColGroup.columns.map((subCol, subIndex) => {
-                const newSubCol = { ...subCol };
-
-                // Add subtle vertical lines between column groups
-                if (subIndex < newColGroup.columns.length - 1) {
-                    newSubCol.cssClass = 'border-right'; // Add a class for right border
-                }
-
-                // Set the formatter for the first column to apply color
-                if (subIndex === 0 && groupIndex === 0) { // Assuming the first column is the position
-                    newSubCol.formatter = function(cell) {
-                        const team = cell.getRow().getData().team; // Assuming 'team' is the field for the second column
-                        const color = getTeamColor(team); // Get the color for the team
-                        const value = cell.getValue(); // Get the cell value
-
-                        // Create a colored circle with the content inside
-                        return `<div style="display: flex; align-items: center;">
-                                    <div style="width: 20px; height: 20px; border-radius: 50%; background-color: ${color}; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">
-                                        ${value}
-                                    </div>
-                                </div>`;
-                    };
-                }
-
-                return newSubCol;
-            });
+        if (rowMetadataMap[rowIndex]) {
+            rowObject.__rowMeta = rowMetadataMap[rowIndex];
         }
-        return newColGroup;
+        return rowObject;
     });
 
-    // Destroy existing instance if it exists
+    const tabulatorColumns = (data.columns || []).map((group, groupIndex) => {
+        if (!Array.isArray(group.columns)) {
+            return null;
+        }
+
+        const groupFrozenDirection = group.frozen === 'left' || group.frozen === 'right' ? group.frozen : null;
+        
+        // Use backend flag for highlighting
+        const isHighlighted = group.highlighted === true;
+
+        const groupDefinition = {
+            title: group.title || '',
+            headerHozAlign: 'center',
+            // Add cssClass for highlighting
+            cssClass: isHighlighted ? 'tab-group-highlighted' : '',
+            // Add data attribute via titleFormatter for reliable DOM selection
+            titleFormatter: function(column) {
+                const title = group.title || '';
+                const dataAttr = isHighlighted ? ' data-highlighted="true"' : '';
+                return `<span class="tab-group-title"${dataAttr}>${title}</span>`;
+            },
+            columns: group.columns.map((column, columnIndex) => {
+                const columnInfo = columnLookup[`${groupIndex}-${columnIndex}`];
+                if (!columnInfo) {
+                    return null;
+                }
+                const field = columnInfo.field;
+                const headerAlign = column.align || 'center';
+                const columnStyles = column.style || {};
+                const formatter = function(cell) {
+                    const value = cell.getValue();
+                    const element = cell.getElement();
+                    const rowData = cell.getRow().getData();
+                    const rowIdx = rowData.__rowIndex;
+
+                    // Add highlighting class and style to cell element if group is highlighted
+                    if (isHighlighted) {
+                        element.classList.add('tab-col-highlighted');
+                        element.style.setProperty('background-color', HIGHLIGHT_STYLES.cellBackgroundColor, 'important');
+                        element.style.setProperty('font-weight', HIGHLIGHT_STYLES.cellFontWeight, 'important');
+                        element.style.setProperty('color', 'inherit', 'important');
+                    }
+
+                    // Column-level inline styles
+                    applyElementStyles(element, columnStyles);
+
+                    // Cell metadata styles
+                    const cellMeta = cellMetadataMap[rowIdx]?.[field];
+                    if (cellMeta) {
+                        applyElementStyles(element, cellMeta);
+                    }
+
+                    // Special handling for position column (first column of first group)
+                    if (!settings.disablePositionCircle && columnInfo.groupIndex === 0 && columnInfo.columnIndex === 0) {
+                        const teamName = teamField ? rowData[teamField] : null;
+                        const color = getTeamColor(teamName);
+                        return `<div class="tab-position-circle" style="background-color: ${color};">${value ?? ''}</div>`;
+                    }
+
+                    return value ?? '';
+                };
+
+                const sampleValue = transformedData.length ? transformedData[0][field] : null;
+                const isNumberColumn = typeof sampleValue === 'number';
+
+                const columnDefinition = {
+                    title: column.title || '',
+                    field,
+                    hozAlign: headerAlign,
+                    headerHozAlign: headerAlign,
+                    headerSort: column.sortable !== false,
+                    sorter: column.sortable === false ? undefined : (isNumberColumn ? 'number' : 'string'),
+                    formatter,
+                    tooltip: settings.tooltips ? true : false
+                };
+
+                // Adjust column widths based on group
+                // First group (Rang/Position) should be wider, week/total groups should be compressed
+                let columnWidth = parseColumnWidth(column.width);
+                
+                if (columnWidth === undefined) {
+                    // Apply default widths based on group
+                    const groupTitle = (group.title || '').toLowerCase();
+                    const isWeekGroup = groupTitle.includes('week') || groupTitle.includes('woche');
+                    const isTotalGroup = groupTitle.includes('total') || groupTitle.includes('gesamt') || groupTitle.includes('summe');
+                    
+                    if (groupIndex === 0) {
+                        // First group (Rang) - make it wider
+                        columnWidth = 120;
+                    } else if (isWeekGroup || isTotalGroup) {
+                        // Week and Total groups - compress them
+                        columnWidth = 80;
+                    } else {
+                        // Default width for other groups
+                        columnWidth = 100;
+                    }
+                }
+                
+                if (columnWidth !== undefined) {
+                    columnDefinition.width = columnWidth;
+                    columnDefinition.minWidth = columnWidth; // Prevent shrinking
+                    columnDefinition.maxWidth = columnWidth; // Prevent expanding
+                }
+
+                // Build CSS classes
+                let cssClasses = [];
+                if (column.align === 'right') {
+                    cssClasses.push('text-end');
+                } else if (column.align === 'left') {
+                    cssClasses.push('text-start');
+                } else {
+                    cssClasses.push('text-center');
+                }
+                
+                // Add highlighting class if group is highlighted
+                if (isHighlighted) {
+                    cssClasses.push('tab-col-highlighted');
+                }
+                
+                columnDefinition.cssClass = cssClasses.join(' ');
+
+                return columnDefinition;
+            }).filter(Boolean)
+        };
+
+        // Set frozen on the parent group, not individual columns
+        if (groupFrozenDirection) {
+            groupDefinition.frozen = groupFrozenDirection;
+        }
+
+        return groupDefinition;
+    }).filter(Boolean);
+
+    if (!tabulatorColumns.length) {
+        console.warn('No Tabulator column definitions could be created');
+        return;
+    }
+
     if (window[tableId + 'Instance']) {
         window[tableId + 'Instance'].destroy();
     }
 
-    // Create new Tabulator instance
+    const tooltipOption = settings.tooltips
+        ? function(cell) {
+            const value = cell.getValue();
+            if (value === null || value === undefined) {
+                return '';
+            }
+            if (typeof value === 'object') {
+                try {
+                    return JSON.stringify(value);
+                } catch (e) {
+                    return '';
+                }
+            }
+            return String(value);
+        }
+        : false;
+
     window[tableId + 'Instance'] = new Tabulator(`#${tableId}`, {
         data: transformedData,
-        columns: processedColumns,
-        layout: "fitDataStretch",
+        columns: tabulatorColumns,
+        layout: "fitColumns", // Changed from fitDataStretch to prevent last column from expanding
         responsiveLayout: false,
         pagination: false,
         movableColumns: false,
-        tooltips: false,
+        tooltips: tooltipOption,
         height: "auto",
         rowHeight: 40,
-        theme: "bootstrap",
+        theme: "semanticui",
         cssClass: "custom-tabulator",
         columnHeaderVertAlign: "middle",
+        tableBuilt: function() {
+            // Apply highlighting and fix header separator
+            // Use requestAnimationFrame for better timing
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    const tableElement = document.querySelector(`#${tableId}`);
+                    if (!tableElement) {
+                        console.warn(`[Tabulator ${tableId}] Table element not found`);
+                        return;
+                    }
+                    
+                    // Set CSS custom properties for highlighting styles
+                    tableElement.style.setProperty('--highlight-header-bg', HIGHLIGHT_STYLES.headerBackgroundColor);
+                    tableElement.style.setProperty('--highlight-cell-bg', HIGHLIGHT_STYLES.cellBackgroundColor);
+                    tableElement.style.setProperty('--highlight-header-weight', HIGHLIGHT_STYLES.headerFontWeight);
+                    tableElement.style.setProperty('--highlight-cell-weight', HIGHLIGHT_STYLES.cellFontWeight);
+                    
+                    // Build map of highlighted fields and groups
+                    const highlightedFields = new Set();
+                    const highlightedGroupTitles = new Set();
+                    data.columns.forEach((group, groupIndex) => {
+                        if (group.highlighted === true && group.columns) {
+                            highlightedGroupTitles.add(group.title || '');
+                            group.columns.forEach(col => {
+                                if (col.field) {
+                                    highlightedFields.add(col.field);
+                                }
+                            });
+                        }
+                    });
+                    
+                    if (highlightedFields.size > 0) {
+                        console.log(`[Tabulator ${tableId}] Applying highlighting to ${highlightedFields.size} fields:`, Array.from(highlightedFields));
+                        console.log(`[Tabulator ${tableId}] Highlighted groups:`, Array.from(highlightedGroupTitles));
+                    }
+                    
+                    const header = tableElement.querySelector('.tabulator-header');
+                    if (header) {
+                        // Remove full-width border from header containers
+                        header.style.setProperty('border-bottom', 'none', 'important');
+                        const headerContents = header.querySelector('.tabulator-header-contents');
+                        if (headerContents) {
+                            headerContents.style.setProperty('border-bottom', 'none', 'important');
+                        }
+                        const headers = header.querySelector('.tabulator-headers');
+                        if (headers) {
+                            headers.style.setProperty('border-bottom', 'none', 'important');
+                        }
+                        
+                        // Apply highlighting using multiple strategies for reliability
+                        if (highlightedFields.size > 0) {
+                            // Strategy 1: Find groups by data-highlighted attribute in title
+                            header.querySelectorAll('.tabulator-col-group').forEach((colGroup, groupIndex) => {
+                                const groupTitle = colGroup.querySelector('.tab-group-title[data-highlighted="true"]');
+                                if (groupTitle || highlightedGroupTitles.has(colGroup.getAttribute('aria-title') || '')) {
+                                    console.log(`[Tabulator ${tableId}] Found highlighted group at index ${groupIndex}`);
+                                    colGroup.classList.add('tab-group-highlighted');
+                                    // Only apply background to the main group container, not nested elements
+                                    colGroup.style.setProperty('background-color', HIGHLIGHT_STYLES.headerBackgroundColor, 'important');
+                                    
+                                    // Style all columns within this group
+                                    const cols = colGroup.querySelectorAll('.tabulator-col');
+                                    cols.forEach(col => {
+                                        col.classList.add('tab-col-highlighted');
+                                        // Only apply background to the column container
+                                        col.style.setProperty('background-color', HIGHLIGHT_STYLES.headerBackgroundColor, 'important');
+                                        // Only apply font-weight to title text, not background
+                                        const colTitle = col.querySelector('.tabulator-col-title');
+                                        if (colTitle) {
+                                            colTitle.style.setProperty('font-weight', HIGHLIGHT_STYLES.headerFontWeight, 'important');
+                                        }
+                                    });
+                                    
+                                    // Style group title - only font-weight, no background
+                                    const titleElement = colGroup.querySelector('.tabulator-col-title, .tab-group-title');
+                                    if (titleElement) {
+                                        titleElement.style.setProperty('font-weight', HIGHLIGHT_STYLES.headerFontWeight, 'important');
+                                    }
+                                }
+                            });
+                            
+                            // Strategy 2: Find columns by field attribute
+                            header.querySelectorAll('.tabulator-col[tabulator-field]').forEach(col => {
+                                const field = col.getAttribute('tabulator-field');
+                                if (field && highlightedFields.has(field)) {
+                                    col.classList.add('tab-col-highlighted');
+                                    col.style.setProperty('background-color', HIGHLIGHT_STYLES.headerBackgroundColor, 'important');
+                                    // Only apply font-weight to title text, not background
+                                    const colTitle = col.querySelector('.tabulator-col-title');
+                                    if (colTitle) {
+                                        colTitle.style.setProperty('font-weight', HIGHLIGHT_STYLES.headerFontWeight, 'important');
+                                    }
+                                }
+                            });
+                        }
+                    }
+                    
+                    // Apply highlighting to body cells using field names
+                    if (highlightedFields.size > 0) {
+                        const table = tableElement.querySelector('.tabulator-table');
+                        if (table) {
+                            const rows = table.querySelectorAll('.tabulator-row');
+                            let highlightedCellCount = 0;
+                            rows.forEach(row => {
+                                const cells = row.querySelectorAll('.tabulator-cell');
+                                cells.forEach(cell => {
+                                    const field = cell.getAttribute('tabulator-field');
+                                    if (field && highlightedFields.has(field)) {
+                                        cell.classList.add('tab-col-highlighted');
+                                        cell.style.setProperty('background-color', HIGHLIGHT_STYLES.cellBackgroundColor, 'important');
+                                        cell.style.setProperty('font-weight', HIGHLIGHT_STYLES.cellFontWeight, 'important');
+                                        cell.style.setProperty('color', 'inherit', 'important'); // Ensure text color is not affected
+                                        highlightedCellCount++;
+                                    }
+                                });
+                            });
+                            console.log(`[Tabulator ${tableId}] Applied highlighting to ${rows.length} rows, ${highlightedCellCount} cells`);
+                        } else {
+                            console.warn(`[Tabulator ${tableId}] Table body not found`);
+                        }
+                    }
+                });
+            });
+        },
+        dataRendered: function() {
+            // Re-apply highlighting after data is rendered (for dynamic updates)
+            const tableElement = document.querySelector(`#${tableId}`);
+            if (!tableElement) return;
+            
+            const highlightedFields = new Set();
+            data.columns.forEach((group) => {
+                if (group.highlighted === true && group.columns) {
+                    group.columns.forEach(col => {
+                        if (col.field) {
+                            highlightedFields.add(col.field);
+                        }
+                    });
+                }
+            });
+            
+            if (highlightedFields.size > 0) {
+                const table = tableElement.querySelector('.tabulator-table');
+                if (table) {
+                    const rows = table.querySelectorAll('.tabulator-row');
+                    rows.forEach(row => {
+                        const cells = row.querySelectorAll('.tabulator-cell');
+                        cells.forEach(cell => {
+                            const field = cell.getAttribute('tabulator-field');
+                                if (field && highlightedFields.has(field)) {
+                                    cell.classList.add('tab-col-highlighted');
+                                    cell.style.setProperty('background-color', HIGHLIGHT_STYLES.cellBackgroundColor, 'important');
+                                    cell.style.setProperty('font-weight', HIGHLIGHT_STYLES.cellFontWeight, 'important');
+                                    cell.style.setProperty('color', 'inherit', 'important');
+                                }
+                        });
+                    });
+                }
+            }
+        },
+        rowFormatter: function(row) {
+            if (!settings.enableSpecialRowStyling) {
+                const element = row.getElement();
+                element.classList.remove('tab-row-accent');
+                element.style.removeProperty('--row-accent-color');
+                element.style.removeProperty('--row-accent-overlay');
+            }
+
+            const rowData = row.getData();
+            const styling = rowData?.__rowMeta?.styling;
+            if (styling) {
+                applyElementStyles(row.getElement(), styling);
+            }
+
+            if (teamField && rowData[teamField]) {
+                const accentColor = getTeamColor(rowData[teamField]);
+                if (accentColor) {
+                    const element = row.getElement();
+                    element.classList.add('tab-row-accent');
+                    element.style.setProperty('--row-accent-color', accentColor);
+                    const overlay = toRgba(accentColor, 0.12);
+                    if (overlay) {
+                        element.style.setProperty('--row-accent-overlay', overlay);
+                    }
+                }
+            } else {
+                const element = row.getElement();
+                element.classList.remove('tab-row-accent');
+                element.style.removeProperty('--row-accent-color');
+                element.style.removeProperty('--row-accent-overlay');
+            }
+        }
     });
 
-    console.log(`Table "${tableId}" successfully created/updated`);
+    console.log(`Table "${tableId}" successfully created/updated (Tabulator)`);
 }
 
 function createTableBootstrap(containerId, tableData, columns = null, groupBy = null) {
@@ -1314,42 +1737,154 @@ function getTeamColor(teamName) {
 </script>
 
 <style>
-/* Custom Tabulator Styling */
-/* General Table Styles */
+/* Table theme with light/dark support */
+:root {
+    --table-surface: #ffffff;
+    --table-surface-alt: #f6f8fb;
+    --table-border-soft: rgba(15, 23, 42, 0.08);
+    --table-header-bg: #eef2f7;
+    --table-header-text: #0f172a;
+    --table-body-text: #1f2933;
+    --table-muted-text: #64748b;
+    --table-hover-bg: rgba(59, 130, 246, 0.08);
+    --table-selected-bg: rgba(99, 102, 241, 0.18);
+    --table-highlight-bg: rgba(15, 118, 110, 0.12);
+    --table-shadow: 0 12px 25px rgba(15, 23, 42, 0.08);
+}
+
+body.dark-mode,
+body[data-theme="dark"],
+:root[data-theme="dark"] {
+    --table-surface: #0f172a;
+    --table-surface-alt: #16213a;
+    --table-border-soft: rgba(226, 232, 240, 0.12);
+    --table-header-bg: #182645;
+    --table-header-text: #e2e8f0;
+    --table-body-text: #f1f5f9;
+    --table-muted-text: #94a3b8;
+    --table-hover-bg: rgba(56, 189, 248, 0.14);
+    --table-selected-bg: rgba(99, 102, 241, 0.28);
+    --table-highlight-bg: rgba(14, 165, 233, 0.2);
+    --table-shadow: 0 12px 30px rgba(2, 6, 23, 0.65);
+}
+
 .custom-tabulator {
-    border: none; /* Remove default borders */
-    background-color: transparent; /* Make background transparent */
-    font-family: 'Your Custom Font', sans-serif; /* Use your site's font */
+    border: none;
+    background: transparent;
+    font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+    color: var(--table-body-text);
 }
 
-/* Header Styles */
+.custom-tabulator .tabulator-tableHolder {
+    border-radius: 16px;
+    background: var(--table-surface);
+    box-shadow: var(--table-shadow);
+    border: 1px solid var(--table-border-soft);
+    overflow: hidden;
+}
+
 .custom-tabulator .tabulator-header {
-    background-color: #f8f9fa; /* Light background for header */
-    color: #264653; /* Dark text color */
-    font-weight: bold; /* Bold header text */
-    border-bottom: 2px solid #264653; /* Subtle border */
+    background: linear-gradient(120deg, var(--table-header-bg), transparent);
+    color: var(--table-header-text);
+    border: none;
+    border-bottom: none !important; /* Remove full-width separator */
+    padding: 4px 0;
 }
 
-/* Column Styles */
+/* Semantic UI theme customizations - black borders for column groups and columns */
+.custom-tabulator .tabulator-header .tabulator-col-group,
+.custom-tabulator .tabulator-header .tabulator-col {
+    border-bottom: 2px solid #000000 !important;
+    border-bottom-color: #000000 !important;
+}
+
 .custom-tabulator .tabulator-col {
-    border-right: 1px solid #264653; /* Subtle column borders */
+    border: none;
+    background: transparent;
 }
 
 .custom-tabulator .tabulator-col .tabulator-col-content {
-    padding: 10px; /* Add padding for better spacing */
+    padding: 0.85rem 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
 }
 
-/* Row Styles */
 .custom-tabulator .tabulator-row {
-    border-bottom: 1px solid #264653; /* Subtle row borders */
+    background: var(--table-surface);
+    border: none;
+    color: var(--table-body-text);
+    transition: background 160ms ease;
+    position: relative;
+    overflow: hidden;
 }
 
-.custom-tabulator .tabulator-row.tabulator-row-even {
-    background-color: #f9f9f9; /* Light gray for even rows */
+.custom-tabulator .tabulator-row:nth-child(even) {
+    background: var(--table-surface-alt);
 }
 
-.custom-tabulator .tabulator-row.tabulator-row-odd {
-    background-color: #ffffff; /* White for odd rows */
+.custom-tabulator .tabulator-row .tabulator-cell {
+    border: none;
+    padding: 0.85rem 0.75rem;
+    font-size: 0.95rem;
+}
+
+.custom-tabulator .tabulator-row:hover {
+    background: var(--table-hover-bg);
+}
+
+.custom-tabulator .tabulator-row.tab-row-accent::before {
+    content: "";
+    position: absolute;
+    left: 8px;
+    top: 12px;
+    bottom: 12px;
+    width: 4px;
+    border-radius: 999px;
+    background: var(--row-accent-color, transparent);
+    opacity: 0.9;
+}
+
+.custom-tabulator .tabulator-row.tab-row-accent {
+    padding-left: calc(0.85rem + 6px);
+    background-image: linear-gradient(90deg, var(--row-accent-overlay, rgba(0,0,0,0.02)), transparent 65%);
+}
+
+.dark-mode .custom-tabulator .tabulator-row.tab-row-accent,
+[data-theme="dark"] .custom-tabulator .tabulator-row.tab-row-accent {
+    background-image: linear-gradient(90deg, var(--row-accent-overlay, rgba(255,255,255,0.06)), transparent 65%);
+}
+
+.custom-tabulator .tabulator-row.tabulator-selected {
+    background: var(--table-selected-bg);
+}
+
+.custom-tabulator .tabulator-frozen {
+    box-shadow: inset -1px 0 var(--table-border-soft);
+    background: inherit;
+}
+
+.custom-tabulator .tabulator-placeholder {
+    background: var(--table-surface);
+    color: var(--table-muted-text);
+}
+
+.custom-tabulator .tabulator-footer {
+    background: var(--table-surface);
+    border: none;
+    color: var(--table-muted-text);
+}
+
+.tab-position-circle {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-weight: 600;
+    margin: 0 auto;
+    font-size: 0.85rem;
 }
 
 /* Hover Effects */
@@ -1381,21 +1916,24 @@ function getTeamColor(teamName) {
     background: rgba(38, 70, 83, 0.8); /* Darker thumb on hover */
 }
 
-/* Add this to your CSS file or style section */
-.tabulator-col-group {
-    background-color: white !important;
+/* Column group styling */
+.custom-tabulator .tabulator-col-group {
+    background-color: var(--table-header-bg) !important;
+    border-bottom: 2px solid #000000 !important;
+    border-bottom-color: #000000 !important;
 }
 
-.tabulator-col-group[data-group-index="0"] {
-    background-color: rgb(255, 255, 255) !important;
+.custom-tabulator .tabulator-col-group[data-group-index="0"],
+.custom-tabulator .tabulator-col-group[data-group-index="1"],
+.custom-tabulator .tabulator-col-group[data-group-index="2"] {
+    background-color: var(--table-header-bg) !important;
+    border-bottom: 2px solid #000000 !important;
+    border-bottom-color: #000000 !important;
 }
 
-.tabulator-col-group[data-group-index="1"] {
-    background-color: rgb(242, 247, 251) !important;
-}
-
-.tabulator-col-group[data-group-index="2"] {
-    background-color: rgb(229, 239, 247) !important;
+/* Column group titles */
+.custom-tabulator .tabulator-col-group .tabulator-col-group-title {
+    color: var(--table-header-text) !important;
 }
 
 
@@ -1436,4 +1974,97 @@ tr > td:nth-child(2),
 tr > th:nth-child(2) {
     border-left: none !important;
 }
+
+/* Semantic UI theme - prevent header separator from expanding */
+.custom-tabulator .tabulator-header,
+.custom-tabulator .tabulator-header-contents,
+.custom-tabulator .tabulator-headers {
+    border-bottom: none !important;
+}
+
+/* Only individual columns should have borders */
+.custom-tabulator .tabulator-header .tabulator-col-group,
+.custom-tabulator .tabulator-header .tabulator-col {
+    border-bottom: 2px solid #000000 !important;
+    border-bottom-color: #000000 !important;
+}
+
+/* Highlighted column group - Option 1: Subtle background + bold (CURRENT) */
+/* Use high specificity to override Semantic UI theme */
+/* CSS variables are set from JavaScript HIGHLIGHT_STYLES constants */
+.custom-tabulator .tabulator-header .tabulator-col-group.tab-group-highlighted,
+.custom-tabulator.tabulator .tabulator-header .tabulator-col-group.tab-group-highlighted,
+.tabulator.custom-tabulator .tabulator-header .tabulator-col-group.tab-group-highlighted,
+#testTableHighlight .tabulator-header .tabulator-col-group.tab-group-highlighted {
+    background-color: var(--highlight-header-bg, rgba(0, 0, 0, 0.05)) !important;
+}
+
+/* Group title - only font-weight, background comes from parent */
+.custom-tabulator .tabulator-header .tabulator-col-group.tab-group-highlighted .tabulator-col-title,
+.custom-tabulator .tabulator-header .tabulator-col-group.tab-group-highlighted .tabulator-col-content .tabulator-col-title,
+.custom-tabulator .tabulator-header .tabulator-col-group.tab-group-highlighted .tab-group-title,
+.tabulator.custom-tabulator .tabulator-header .tabulator-col-group.tab-group-highlighted .tabulator-col-title,
+#testTableHighlight .tabulator-header .tabulator-col-group.tab-group-highlighted .tabulator-col-title {
+    font-weight: var(--highlight-header-weight, 900) !important;
+    color: inherit !important;
+}
+
+.custom-tabulator .tabulator-header .tabulator-col.tab-col-highlighted,
+.custom-tabulator.tabulator .tabulator-header .tabulator-col.tab-col-highlighted,
+.tabulator.custom-tabulator .tabulator-header .tabulator-col.tab-col-highlighted {
+    background-color: var(--highlight-header-bg, rgba(0, 0, 0, 0.05)) !important;
+}
+
+/* Column title - only font-weight, background comes from parent */
+.custom-tabulator .tabulator-header .tabulator-col.tab-col-highlighted .tabulator-col-title,
+.custom-tabulator .tabulator-header .tabulator-col.tab-col-highlighted .tabulator-col-content .tabulator-col-title,
+.tabulator.custom-tabulator .tabulator-header .tabulator-col.tab-col-highlighted .tabulator-col-title {
+    font-weight: var(--highlight-header-weight, 900) !important;
+    color: inherit !important;
+}
+
+.custom-tabulator .tabulator-row .tabulator-cell.tab-col-highlighted,
+.custom-tabulator.tabulator .tabulator-row .tabulator-cell.tab-col-highlighted,
+.tabulator.custom-tabulator .tabulator-row .tabulator-cell.tab-col-highlighted {
+    background-color: var(--highlight-cell-bg, rgba(0, 0, 0, 0.03)) !important;
+    font-weight: var(--highlight-cell-weight, 700) !important;
+    color: inherit !important;
+}
+
+/* Alternative highlighting options (uncomment to use):
+   
+   Option 2: Left border accent
+   .custom-tabulator .tabulator-col-group.tab-group-highlighted {
+       border-left: 4px solid #000000 !important;
+   }
+   .custom-tabulator .tabulator-col.tab-col-highlighted {
+       border-left: 4px solid #000000 !important;
+   }
+   
+   Option 3: Darker background with white text
+   .custom-tabulator .tabulator-col-group.tab-group-highlighted,
+   .custom-tabulator .tabulator-col-group.tab-group-highlighted .tabulator-col-title {
+       background-color: #1f2933 !important;
+       color: #ffffff !important;
+       font-weight: 700 !important;
+   }
+   .custom-tabulator .tabulator-col.tab-col-highlighted,
+   .custom-tabulator .tabulator-col.tab-col-highlighted .tabulator-col-title {
+       background-color: #1f2933 !important;
+       color: #ffffff !important;
+       font-weight: 700 !important;
+   }
+   .custom-tabulator .tabulator-row .tabulator-cell.tab-col-highlighted {
+       background-color: #1f2933 !important;
+       color: #ffffff !important;
+       font-weight: 600 !important;
+   }
+   
+   Option 4: Thicker border
+   .custom-tabulator .tabulator-col-group.tab-group-highlighted,
+   .custom-tabulator .tabulator-col.tab-col-highlighted {
+       border-bottom: 3px solid #000000 !important;
+       border-top: 2px solid #000000 !important;
+   }
+*/
 </style> 

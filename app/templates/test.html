@@ -127,18 +127,39 @@
   </div>
 </div>
 
-<!-- Core dependencies -->
+<!-- Core dependencies - Load synchronously to ensure order -->
 <script src="{{ static_url('js/core/url-state-manager.js') }}"></script>
 <script src="{{ static_url('js/core/centralized-button-manager.js') }}"></script>
 
 <!-- Common Test Functions -->
 <script>
+    // Wait for dependencies to be available
+    function waitForDependencies(callback, maxAttempts = 50) {
+        let attempts = 0;
+        const check = () => {
+            attempts++;
+            if (typeof URLStateManager !== 'undefined' && typeof CentralizedButtonManager !== 'undefined') {
+                callback();
+            } else if (attempts < maxAttempts) {
+                setTimeout(check, 100);
+            } else {
+                console.error('❌ Failed to load dependencies after', maxAttempts, 'attempts');
+            }
+        };
+        check();
+    }
+    
     // Initialize the page with centralized button manager
     let urlStateManager;
     let buttonManager;
     
     async function initializePage() {
         try {
+            // Wait for dependencies
+            await new Promise((resolve) => {
+                waitForDependencies(resolve);
+            });
+            
             // Initialize URL state manager
             urlStateManager = new URLStateManager();
             
@@ -681,6 +702,69 @@ document.addEventListener('change', event => {
     if (event.target.name === 'season' || event.target.name === 'league') {
         renderScatterPlot();
     }
+});
+
+// Test table for highlighting verification
+document.addEventListener('DOMContentLoaded', function() {
+    // Create test container
+    const testContainer = document.createElement('div');
+    testContainer.className = 'card mb-4';
+    testContainer.innerHTML = `
+        <div class="card-header">
+            <h4>Highlighting Test Table</h4>
+        </div>
+        <div class="card-body">
+            <div id="testTableHighlight"></div>
+        </div>
+    `;
+    
+    // Insert before the closing container
+    const container = document.querySelector('.container-fluid');
+    if (container) {
+        container.appendChild(testContainer);
+    }
+    
+    // Create test table data
+    const testTableData = {
+        columns: [
+            {
+                title: "First Group",
+                columns: [
+                    { title: "Col 1", field: "col1", width: "100px" }
+                ]
+            },
+            {
+                title: "Second Group (Highlighted)",
+                highlighted: true,  // This group should be highlighted
+                columns: [
+                    { title: "Col 2", field: "col2", width: "100px" },
+                    { title: "Col 3", field: "col3", width: "100px" }
+                ]
+            }
+        ],
+        data: [
+            ["Row 1 Col 1", "Row 1 Col 2", "Row 1 Col 3"],
+            ["Row 2 Col 1", "Row 2 Col 2", "Row 2 Col 3"],
+            ["Row 3 Col 1", "Row 3 Col 2", "Row 3 Col 3"]
+        ],
+        title: "Test Table - Highlighting Verification",
+        description: "Second group (Col 2 + Col 3) should be highlighted"
+    };
+    
+    // Wait a bit for Tabulator to be available
+    setTimeout(() => {
+        if (typeof createTableTabulator === 'function') {
+            createTableTabulator('testTableHighlight', testTableData, {
+                disablePositionCircle: true,
+                tooltips: true
+            });
+            console.log('Test table created with highlighting');
+        } else {
+            console.error('createTableTabulator not available');
+            document.getElementById('testTableHighlight').innerHTML = 
+                '<div class="alert alert-warning">Tabulator not loaded yet. Please refresh.</div>';
+        }
+    }, 500);
 });
 </script>
 

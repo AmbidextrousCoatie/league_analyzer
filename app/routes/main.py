@@ -248,6 +248,11 @@ def test():
     """Test page for API routes"""
     return render_template('test_new.html')
 
+@bp.route('/test-tabulator')
+def test_tabulator():
+    """Test page for Tabulator highlighting"""
+    return render_template('test_tabulator.html')
+
 @bp.route('/database-test')
 def database_test():
     """Test page for database switching functionality"""
