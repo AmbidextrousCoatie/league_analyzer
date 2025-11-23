@@ -258,6 +258,11 @@ function createTableTabulator(tableId, data, options = {}) {
         console.error(`Container "${tableId}" not found for Tabulator table`);
         return;
     }
+    
+    // Ensure container takes full width
+    if (container.style.width === '') {
+        container.style.width = '100%';
+    }
 
     const columnOrder = flattenColumnMetadata(data.columns);
     if (!columnOrder.length) {
@@ -396,9 +401,9 @@ function createTableTabulator(tableId, data, options = {}) {
                 }
                 
                 if (columnWidth !== undefined) {
-                    columnDefinition.width = columnWidth;
-                    columnDefinition.minWidth = columnWidth; // Prevent shrinking
-                    columnDefinition.maxWidth = columnWidth; // Prevent expanding
+                    columnDefinition.minWidth = columnWidth; // Set minimum width, allow expansion
+                    columnDefinition.widthGrow = 1; // Allow column to grow proportionally
+                    // Don't set maxWidth to allow columns to expand if space is available
                 }
 
                 // Build CSS classes
@@ -467,7 +472,7 @@ function createTableTabulator(tableId, data, options = {}) {
     window[tableId + 'Instance'] = new Tabulator(`#${tableId}`, {
         data: transformedData,
         columns: tabulatorColumns,
-        layout: "fitColumns", // Changed from fitDataStretch to prevent last column from expanding
+        layout: "fitColumns", // Fit columns to content but allow growth
         responsiveLayout: false,
         pagination: false,
         movableColumns: false,
@@ -477,6 +482,7 @@ function createTableTabulator(tableId, data, options = {}) {
         theme: "semanticui",
         cssClass: "custom-tabulator",
         columnHeaderVertAlign: "middle",
+        width: "100%", // Ensure table takes full width of container
         ...(initialSort ? { initialSort: initialSort } : {}),
         tableBuilt: function() {
             // Apply highlighting and fix header separator
@@ -1997,6 +2003,7 @@ tr > th:nth-child(2) {
 .custom-tabulator .tabulator-header-contents,
 .custom-tabulator .tabulator-headers {
     border-bottom: none !important;
+    width: 100% !important; /* Ensure header takes full width */
 }
 
 /* Only individual columns should have borders */
@@ -2004,6 +2011,19 @@ tr > th:nth-child(2) {
 .custom-tabulator .tabulator-header .tabulator-col {
     border-bottom: 2px solid #000000 !important;
     border-bottom-color: #000000 !important;
+}
+
+/* Ensure table and table holder take full width */
+.custom-tabulator {
+    width: 100% !important;
+}
+
+.custom-tabulator .tabulator-tableHolder {
+    width: 100% !important;
+}
+
+.custom-tabulator .tabulator-table {
+    width: 100% !important;
 }
 
 /* Highlighted column group - Option 1: Subtle background + bold (CURRENT) */
