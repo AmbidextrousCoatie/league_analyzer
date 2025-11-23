@@ -36,6 +36,7 @@ class TableData:
     metadata: Optional[Dict[str, Any]] = field(default_factory=dict)  # Additional metadata for i18n and UI
     row_metadata: Optional[List[Dict[str, Any]]] = field(default_factory=list)  # Row-level metadata for styling
     cell_metadata: Optional[Dict[str, Dict[str, Any]]] = field(default_factory=dict)  # Cell-level metadata for styling (format: "row:col")
+    default_sort: Optional[Dict[str, str]] = None  # Default sort: {"field": "average", "dir": "desc"}
     
     def to_dict(self) -> Dict[str, Any]:
         """Convert to a dictionary suitable for JSON serialization"""
@@ -70,7 +71,8 @@ class TableData:
             **({"config": self.config} if self.config else {}),
             **({"metadata": self.metadata} if self.metadata else {}),
             **({"row_metadata": self.row_metadata} if self.row_metadata else {}),
-            **({"cell_metadata": self.cell_metadata} if self.cell_metadata else {})
+            **({"cell_metadata": self.cell_metadata} if self.cell_metadata else {}),
+            **({"default_sort": self.default_sort} if self.default_sort else {})
         }
 
 #@dataclass
