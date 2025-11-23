@@ -491,9 +491,10 @@ class LeagueSeasonOverviewBlock extends BaseContentBlock {
         // Create table using Tabulator
         if (typeof createTableTabulator === 'function') {
             createTableTabulator('team-vs-team-comparison-table-inline', data, {
-                disablePositionCircle: true,
+                disablePositionCircle: false,  // Enable position circles
                 enableSpecialRowStyling: true,
-                tooltips: true
+                tooltips: true,
+                teamField: 'team'  // Specify team field for colored circles
             });
         } else {
             console.error('createTableTabulator function not available');

@@ -3425,10 +3425,10 @@ class LeagueService:
         # Create table structure
         columns = [
             ColumnGroup(
-                title=i18n_service.get_text("team"),
-                frozen='left',  # Make the team name column sticky
-                style={"backgroundColor": "#f8f9fa"},  # Light gray background
+                title="",  # Empty title for position column group
+                frozen='left',  # Make the position and team name columns sticky
                 columns=[
+                    Column(title="#", field='pos', width='50px', align='center'),
                     Column(title=i18n_service.get_text("team"), field='team', width='180px', align='left')
                 ]
             )
@@ -3480,10 +3480,24 @@ class LeagueService:
         score_min, score_max = min(all_scores), max(all_scores)
         points_min, points_max = min(all_points), max(all_points)
         
+        # Calculate team positions based on average points (for sorting/ranking)
+        team_avg_points = {}
+        for team in teams:
+            team_points_list = []
+            for opponent in teams:
+                if team != opponent and opponent in comparison_data[team]:
+                    team_points_list.append(comparison_data[team][opponent]['avg_points'])
+            team_avg_points[team] = sum(team_points_list) / len(team_points_list) if team_points_list else 0
+        
+        # Sort teams by average points to determine position
+        sorted_teams = sorted(teams, key=lambda t: team_avg_points[t], reverse=True)
+        team_positions = {team: pos + 1 for pos, team in enumerate(sorted_teams)}
+        
         # Generate rows
         for row_idx, team in enumerate(teams):
-            row = [team]
-            col_idx = 2  # Start after team name column (index 0 is team name)
+            position = team_positions[team]
+            row = [position, team]  # Add position as first column
+            col_idx = 2  # Start after position (0) and team name (1) columns
             
             # Calculate team averages
             team_scores = []
