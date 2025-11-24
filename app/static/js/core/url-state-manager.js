@@ -30,6 +30,7 @@ class URLStateManager {
             week: params.get('week') || '',
             round: params.get('round') || '',
             league: params.get('league') || '',
+            league_long: params.get('league_long') || '',
             database: params.get('database') || 'db_real'
         };
     }
@@ -75,8 +76,16 @@ class URLStateManager {
      * Update state and URL
      */
     setState(newState, replaceHistory = false) {
+        const stateUpdate = { ...newState };
+        
+        // Ensure league_long is reset when league changes without explicit long name update
+        if (Object.prototype.hasOwnProperty.call(stateUpdate, 'league') &&
+            !Object.prototype.hasOwnProperty.call(stateUpdate, 'league_long')) {
+            stateUpdate.league_long = '';
+        }
+        
         const oldState = { ...this.state };
-        this.updateUrl(newState, replaceHistory);
+        this.updateUrl(stateUpdate, replaceHistory);
         
         // Only notify if state actually changed
         if (JSON.stringify(oldState) !== JSON.stringify(this.state)) {
@@ -137,6 +146,9 @@ class URLStateManager {
         
         // Clear the filter
         newState[filterName] = '';
+        if (filterName === 'league') {
+            newState.league_long = '';
+        }
         
         // Clear dependent filters
         if (dependencies[filterName]) {

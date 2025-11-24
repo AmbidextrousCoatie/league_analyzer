@@ -49,11 +49,12 @@ class LeagueSeasonOverviewBlock extends BaseContentBlock {
     }
 
     generateHTML(state) {
+        const leagueName = state.league_long || state.league || '';
         return `
             <div class="card mb-4">
                 <div class="card-header">
-                    <h5>${state.league} - ${typeof t === 'function' ? t('season', 'Season') : 'Season'} ${state.season}</h5>
-                    <p class="mb-0 text-muted">${typeof t === 'function' ? t('season_overview', 'Season Overview') : 'Season Overview'}</p>
+                    <h5>${leagueName} - ${typeof t === 'function' ? t('season', 'Season') : 'Season'} ${state.season}</h5>
+                    <!--<p class="mb-0 text-muted">${typeof t === 'function' ? t('season_overview', 'Season Overview') : 'Season Overview'}</p>-->
                 </div>
                 <div class="card-body">
                     <!-- 1st Row: League Standings (Full Width) -->

@@ -8,6 +8,7 @@ class LeagueStatsApp {
         this.currentState = {
             season: null,
             league: null,
+            league_long: null,
             week: null,
             round: null,
             team: null

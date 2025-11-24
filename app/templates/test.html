@@ -192,14 +192,24 @@ function loadLeagues() {
     fetch('/league/get_available_leagues')
         .then(response => response.json())
         .then(leagues => {
-            const buttonsLeague = leagues.map(league => `
-                <input type="radio" class="btn-check" name="league" id="league_${league}" 
-                       value="${league}" ${league === selectedLeague ? 'checked' : ''}>
-                <label class="btn btn-outline-primary" for="league_${league}">${league}</label>
+            const normalizedLeagues = (Array.isArray(leagues) ? leagues : []).map(league => {
+                if (league && typeof league === 'object') {
+                    const shortName = league.short_name || league.value || league.code || league.id || league.name || '';
+                    const longName = league.long_name || league.label || league.name || shortName;
+                    return { short_name: shortName, long_name: longName };
+                }
+                const value = league != null ? String(league) : '';
+                return { short_name: value, long_name: value };
+            }).filter(league => league.short_name);
+            
+            const buttonsLeague = normalizedLeagues.map(league => `
+                <input type="radio" class="btn-check" name="league" id="league_${league.short_name}" 
+                       value="${league.short_name}" data-long-name="${league.long_name}" ${league.short_name === selectedLeague ? 'checked' : ''}>
+                <label class="btn btn-outline-primary" for="league_${league.short_name}" title="${league.long_name}">${league.short_name}</label>
             `).join('');
             document.getElementById('buttonsLeague').innerHTML = buttonsLeague;
             
-            if (selectedLeague && leagues.includes(selectedLeague)) {
+            if (selectedLeague && normalizedLeagues.some(league => league.short_name === selectedLeague)) {
                 // First update available options (weeks and teams)
                 updateAvailableOptions();
                 

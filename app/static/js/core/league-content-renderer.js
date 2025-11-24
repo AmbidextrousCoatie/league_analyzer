@@ -125,7 +125,8 @@ class LeagueContentRenderer {
         const titleElement = document.querySelector('.card-header h4');
         if (titleElement) {
             if (state.season && state.league) {
-                titleElement.textContent = `${state.league} ${state.season} - ${modeConfig.title}`;
+                const leagueName = state.league_long || state.league || '';
+                titleElement.textContent = `${leagueName} ${state.season} - ${modeConfig.title}`;
             } else if (state.season) {
                 titleElement.textContent = `Season ${state.season} - ${modeConfig.title}`;
             } else {

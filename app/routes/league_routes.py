@@ -9,6 +9,7 @@ import sys
 from app.services.data_dict import DataDict
 from app.config.debug_config import debug_config
 from app.models.table_data import TableData, ColumnGroup, Column
+from business_logic.league import longNames
 
 bp = Blueprint('league', __name__)
 
@@ -382,7 +383,15 @@ def get_available_leagues():
     
         league_service = get_league_service()
         leagues = league_service.get_leagues()
-        return jsonify(leagues)
+        enriched_leagues = [
+            {
+                "short_name": league,
+                "long_name": longNames.get(league, league),
+                "value": league
+            }
+            for league in leagues
+        ]
+        return jsonify(enriched_leagues)
     except Exception as e:
         print(f"Error in get_available_leagues: {str(e)}")
         return jsonify({"error": str(e)}), 500

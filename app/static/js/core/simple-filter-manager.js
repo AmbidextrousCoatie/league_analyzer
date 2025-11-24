@@ -77,7 +77,8 @@ class SimpleFilterManager {
                 ]);
                 
                 if (leaguesResponse.ok) {
-                    this.availableData.leagues = await leaguesResponse.json();
+                    const leaguesJson = await leaguesResponse.json();
+                    this.availableData.leagues = this.normalizeLeagueData(leaguesJson);
                     this.populateLeagueButtons();
                 }
                 
@@ -90,6 +91,36 @@ class SimpleFilterManager {
         } catch (error) {
             console.error('❌ SimpleFilterManager: Failed to load initial data:', error);
         }
+    }
+    
+    normalizeLeagueData(leagues) {
+        if (!Array.isArray(leagues)) {
+            return [];
+        }
+        
+        return leagues.map(league => {
+            if (league && typeof league === 'object') {
+                const shortName = league.short_name || league.value || league.code || league.id || league.name || '';
+                const longName = league.long_name || league.label || league.name || shortName;
+                return {
+                    short_name: shortName,
+                    long_name: longName
+                };
+            }
+            const name = league != null ? String(league) : '';
+            return {
+                short_name: name,
+                long_name: name
+            };
+        }).filter(league => league.short_name);
+    }
+    
+    getLeagueLongName(shortName) {
+        if (!shortName || !this.availableData.leagues) {
+            return '';
+        }
+        const match = this.availableData.leagues.find(league => league.short_name === shortName);
+        return match ? match.long_name : '';
     }
     
     /**
@@ -115,13 +146,20 @@ class SimpleFilterManager {
                 }
                 // For league mode, set default league to "BayL" if no league is selected but season is selected
                 else if (!state.league && this.availableData.leagues && this.availableData.leagues.length > 0) {
-                    const defaultLeague = this.availableData.leagues.find(league => league === 'BayL') || this.availableData.leagues[0];
-                    state.league = defaultLeague;
-                    stateChanged = true;
-                    
-                    // Update URL with default league
-                    this.urlStateManager.setState({ ...state, league: defaultLeague });
-                    this.hasAutoSelected = true;
+                    const defaultLeagueEntry = this.availableData.leagues.find(league => league.short_name === 'BayL') || this.availableData.leagues[0];
+                    if (defaultLeagueEntry) {
+                        state.league = defaultLeagueEntry.short_name;
+                        state.league_long = defaultLeagueEntry.long_name;
+                        stateChanged = true;
+                        
+                        // Update URL with default league
+                        this.urlStateManager.setState({ 
+                            ...state, 
+                            league: defaultLeagueEntry.short_name,
+                            league_long: defaultLeagueEntry.long_name
+                        });
+                        this.hasAutoSelected = true;
+                    }
                 }
             }
             
@@ -522,18 +560,25 @@ class SimpleFilterManager {
         
         // If no league is selected, default to "BayL" or first available league
         if (!selectedLeague) {
-            selectedLeague = this.availableData.leagues.find(league => league === 'BayL') || this.availableData.leagues[0];
-            console.log(`🏆 No league selected, defaulting to: ${selectedLeague}`);
+            const defaultEntry = this.availableData.leagues.find(league => league.short_name === 'BayL') || this.availableData.leagues[0];
+            if (defaultEntry) {
+                selectedLeague = defaultEntry.short_name;
+                console.log(`🏆 No league selected, defaulting to: ${selectedLeague}`);
+            }
         }
         
         // Create league buttons
         const buttonsHtml = this.availableData.leagues.map(league => {
-            const isChecked = league === selectedLeague;
+            const isChecked = league.short_name === selectedLeague;
+            const safeId = league.short_name.replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_-]/g, '');
+            const longName = league.long_name || league.short_name;
             
             return `
-                <input type="radio" class="btn-check" name="league" id="league_${league}" 
-                       value="${league}" ${isChecked ? 'checked' : ''}>
-                <label class="btn btn-outline-primary" for="league_${league}">${league}</label>
+                <input type="radio" class="btn-check" name="league" id="league_${safeId}" 
+                       value="${league.short_name}" data-long-name="${longName}" ${isChecked ? 'checked' : ''}>
+                <label class="btn btn-outline-primary" for="league_${safeId}" title="${longName}">
+                    ${league.short_name}
+                </label>
             `;
         }).join('');
         
@@ -810,8 +855,9 @@ class SimpleFilterManager {
             
             if (target.name === 'league') {
                 const league = target.value;
+                const longName = target.dataset.longName || this.getLeagueLongName(league);
                 this.selectedButtons.set('league', league);
-                this.updateState({ league, season: '', week: '', team: '' });
+                this.updateState({ league, league_long: longName, season: '', week: '', team: '' });
             } else if (target.name === 'season') {
                 const season = target.value;
                 this.selectedButtons.set('season', season);
@@ -859,7 +905,7 @@ class SimpleFilterManager {
                     
                     // Trigger the appropriate state update for deselection
                     if (buttonName === 'league') {
-                        this.updateState({ league: '', season: '', week: '', team: '' });
+                        this.updateState({ league: '', league_long: '', season: '', week: '', team: '' });
                     } else if (buttonName === 'season') {
                         this.updateState({ season: '', week: '', team: '' });
                     } else if (buttonName === 'week') {

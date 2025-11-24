@@ -57,6 +57,7 @@ class CentralizedButtonManager {
         this.constraints = {};
         this.availableCandidates = {};
         this.selectedValues = {};
+        this.leagueMetadata = new Map();
         
         // Track which button group triggered the update
         this.triggerGroup = null;
@@ -238,7 +239,8 @@ class CentralizedButtonManager {
             }
             
             // Fetch candidates for this group
-            const candidates = await this.fetchCandidates(group);
+            const rawCandidates = await this.fetchCandidates(group);
+            const candidates = this.normalizeCandidates(group, rawCandidates);
             
             if (!candidates || candidates.length === 0) {
                 console.log(`⚠️ CentralizedButtonManager: No candidates for ${group.name}, clearing buttons`);
@@ -251,21 +253,40 @@ class CentralizedButtonManager {
             
             // Check if current selection is still valid
             const currentSelection = this.selectedValues[group.name];
-            // Convert both to strings for comparison since API might return numbers
             const isValidSelection = currentSelection && candidates.some(candidate => 
-                String(candidate) === String(currentSelection)
+                String(this.getCandidateValue(candidate, group.name)) === String(currentSelection)
             );
             
             if (isValidSelection) {
                 console.log(`✅ CentralizedButtonManager: Keeping current selection for ${group.name}: ${currentSelection}`);
                 // Add to constraints for next groups
                 this.constraints[group.name] = currentSelection;
+                if (group.name === 'league') {
+                    const selectedCandidate = candidates.find(candidate => 
+                        String(this.getCandidateValue(candidate, group.name)) === String(currentSelection)
+                    );
+                    const longName = selectedCandidate 
+                        ? (selectedCandidate.longName || selectedCandidate.long_name || selectedCandidate.label || currentSelection) 
+                        : '';
+                    this.currentState.league_long = longName;
+                    this.selectedValues.league_long = longName;
+                    
+                     // Ensure URL state also carries the long name (replace state to avoid new history entries)
+                    const urlState = this.urlStateManager.getState();
+                    if (longName && urlState.league_long !== longName) {
+                        this.urlStateManager.setState({ league_long: longName }, true);
+                    }
+                }
             } else {
                 console.log(`🔄 CentralizedButtonManager: Invalid selection for ${group.name}, clearing selection`);
                 // Clear this group's selection and don't add constraints
                 this.selectedValues[group.name] = '';
                 this.currentState[group.name] = '';
                 delete this.constraints[group.name];
+                if (group.name === 'league') {
+                    this.selectedValues.league_long = '';
+                    this.currentState.league_long = '';
+                }
             }
             
             // Always populate buttons with candidates, regardless of current selection validity
@@ -332,6 +353,11 @@ class CentralizedButtonManager {
         }
         
         let selectedValue = this.selectedValues[group.name] || '';
+        selectedValue = selectedValue != null ? String(selectedValue) : '';
+        
+        if (group.name === 'league') {
+            this.leagueMetadata.clear();
+        }
         
         console.log(`🎨 CentralizedButtonManager: Populating ${group.name} - current selection: "${selectedValue}", candidates:`, candidates);
         
@@ -371,17 +397,36 @@ class CentralizedButtonManager {
         
         // Create buttons HTML
         const buttonsHtml = candidates.map(candidate => {
-            // Ensure candidate is a string and create safe ID
-            const candidateStr = String(candidate);
-            const selectedStr = String(selectedValue);
-            const isChecked = candidateStr === selectedStr;
+            if (group.name === 'league') {
+                const value = String(this.getCandidateValue(candidate, group.name));
+                const longName = candidate.longName || candidate.long_name || candidate.label || value;
+                const isChecked = value === selectedValue;
+                const safeId = this.createSafeId(value, group.name);
+                const escapedValue = this.escapeAttribute(value);
+                const escapedLong = this.escapeAttribute(longName);
+                const escapedLabel = this.escapeHtml(value);
+                
+                this.leagueMetadata.set(value, longName);
+                
+                return `
+                    <input type="radio" class="btn-check" name="${group.name}" id="${group.name}_${safeId}" 
+                           value="${escapedValue}" data-long-name="${escapedLong}" ${isChecked ? 'checked' : ''}>
+                    <label class="btn btn-outline-primary" for="${group.name}_${safeId}" title="${this.escapeAttribute(longName)}">
+                        ${escapedLabel}
+                    </label>
+                `;
+            }
             
-            const safeId = candidateStr.replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_-]/g, '');
+            const candidateStr = String(candidate);
+            const isChecked = candidateStr === selectedValue;
+            const safeId = this.createSafeId(candidateStr, group.name);
+            const escapedValue = this.escapeAttribute(candidateStr);
+            const escapedLabel = this.escapeHtml(candidateStr);
             
             return `
                 <input type="radio" class="btn-check" name="${group.name}" id="${group.name}_${safeId}" 
-                       value="${candidateStr}" ${isChecked ? 'checked' : ''}>
-                <label class="btn btn-outline-primary" for="${group.name}_${safeId}">${candidateStr}</label>
+                       value="${escapedValue}" ${isChecked ? 'checked' : ''}>
+                <label class="btn btn-outline-primary" for="${group.name}_${safeId}">${escapedLabel}</label>
             `;
         }).join('');
         
@@ -405,6 +450,13 @@ class CentralizedButtonManager {
         this.selectedValues[group.name] = '';
         this.currentState[group.name] = '';
         delete this.constraints[group.name];
+        
+        if (group.name === 'league') {
+            this.leagueMetadata.clear();
+            this.selectedValues.league_long = '';
+            this.currentState.league_long = '';
+            delete this.constraints.league_long;
+        }
     }
     
     /**
@@ -453,10 +505,18 @@ class CentralizedButtonManager {
                 this.selectedValues[groupName] = value;
                 this.constraints[groupName] = value;
                 
+                const stateUpdate = { [groupName]: value };
+                
+                if (groupName === 'league') {
+                    const longName = target.dataset.longName || this.getLeagueLongName(value) || '';
+                    stateUpdate.league_long = longName;
+                    this.selectedValues.league_long = longName;
+                }
+                
                 console.log(`🎯 CentralizedButtonManager: Updated constraints:`, this.constraints);
                 
                 // Update URL state (this will trigger handleStateChange)
-                this.urlStateManager.setState({ [groupName]: value });
+                this.urlStateManager.setState(stateUpdate);
             }
         });
         
@@ -488,12 +548,84 @@ class CentralizedButtonManager {
                     
                     // Clear selection and update state
                     this.selectedValues[groupName] = '';
-                    this.urlStateManager.setState({ [groupName]: '' });
+                    if (groupName === 'league') {
+                        this.selectedValues.league_long = '';
+                        this.urlStateManager.setState({ league: '', league_long: '' });
+                    } else {
+                        this.urlStateManager.setState({ [groupName]: '' });
+                    }
                 }
             }
         });
     }
     
+    normalizeCandidates(group, candidates) {
+        if (!Array.isArray(candidates)) {
+            return [];
+        }
+        
+        if (group.name === 'league') {
+            return this.normalizeLeagueCandidates(candidates);
+        }
+        
+        return candidates;
+    }
+    
+    normalizeLeagueCandidates(candidates) {
+        return candidates.map(candidate => {
+            if (candidate && typeof candidate === 'object') {
+                const value = candidate.value || candidate.short_name || candidate.code || candidate.id || candidate.name || '';
+                const longName = candidate.long_name || candidate.longName || candidate.label || candidate.name || value;
+                const label = candidate.label || longName || value;
+                
+                return {
+                    value: value != null ? String(value) : '',
+                    longName: longName != null ? String(longName) : '',
+                    label: label != null ? String(label) : ''
+                };
+            }
+            
+            const strValue = candidate != null ? String(candidate) : '';
+            return {
+                value: strValue,
+                longName: strValue,
+                label: strValue
+            };
+        }).filter(candidate => candidate.value);
+    }
+    
+    getCandidateValue(candidate, groupName) {
+        if (groupName === 'league' && candidate && typeof candidate === 'object') {
+            return candidate.value;
+        }
+        return candidate;
+    }
+    
+    getLeagueLongName(value) {
+        if (!value) {
+            return '';
+        }
+        return this.leagueMetadata.get(value) || '';
+    }
+    
+    createSafeId(value) {
+        return String(value || '').replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_-]/g, '');
+    }
+    
+    escapeAttribute(value) {
+        return String(value || '')
+            .replace(/&/g, '&amp;')
+            .replace(/"/g, '&quot;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;');
+    }
+    
+    escapeHtml(value) {
+        return String(value || '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;');
+    }
     
     /**
      * Get current state

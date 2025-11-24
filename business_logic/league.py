@@ -2,8 +2,8 @@ import pandas as pd
 
 
 levels = {
-    "1. Bundesliga": 1,
-    "2. Bundesliga": 2,
+    "1. BL": 1,
+    "2. BL": 2,
     "BayL": 3,
     "LL N1": 4, 
     "LL N2": 4,
@@ -20,6 +20,27 @@ levels = {
     "KL N2": 7,
     "KL S1": 7,
     "KL S2": 7
+}
+
+longNames = {
+    "1. BL": "1. Bundesliga",
+    "2. BL": "2. Bundesliga",
+    "BayL": "Bayernliga",
+    "LL N1": "Landesliga Nord 1",
+    "LL N2": "Landesliga Nord 2",
+    "LL S": "Landesliga Süd",
+    "BZOL N1": "Bezirksoberliga Nord 1",
+    "BZOL N2": "Bezirksoberliga Nord 2",
+    "BZOL S1": "Bezirksoberliga Süd 1",
+    "BZOL S2": "Bezirksoberliga Süd 2",
+    "BZL N1": "Bezirksliga Nord 1",
+    "BZL N2": "Bezirksliga Nord 2",
+    "BZL S1": "Bezirksliga Süd 1",
+    "BZL S2": "Bezirksliga Süd 2",
+    "KL N1": "Kreisliga Nord 1",
+    "KL N2": "Kreisliga Nord 2",
+    "KL S1": "Kreisliga Süd 1",
+    "KL S2": "Kreisliga Süd 2",
 }
 
 class League:

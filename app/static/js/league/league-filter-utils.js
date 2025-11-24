@@ -22,6 +22,19 @@ function updateAllButtons() {
     updateTeamButtons();
 }
 
+function normalizeLeagueResponse(leagues) {
+    if (!Array.isArray(leagues)) return [];
+    return leagues.map(league => {
+        if (league && typeof league === 'object') {
+            const shortName = league.short_name || league.value || league.code || league.id || league.name || '';
+            const longName = league.long_name || league.label || league.name || shortName;
+            return { short_name: shortName, long_name: longName };
+        }
+        const value = league != null ? String(league) : '';
+        return { short_name: value, long_name: value };
+    }).filter(league => league.short_name);
+}
+
 /**
  * Update season buttons
  */
@@ -62,22 +75,26 @@ function updateLeagueButtons() {
     fetchWithDatabase(`/league/get_available_leagues?season=${currentState.season}`)
         .then(response => response.json())
         .then(leagues => {
-            const buttonsLeague = leagues.map(league => `
-                <input type="radio" class="btn-check" name="league" id="league_${league}" 
-                       value="${league}" ${league === currentState.league ? 'checked' : ''}>
-                <label class="btn btn-outline-primary" for="league_${league}">${league}</label>
+            const normalizedLeagues = normalizeLeagueResponse(leagues);
+            const buttonsLeague = normalizedLeagues.map(league => `
+                <input type="radio" class="btn-check" name="league" id="league_${league.short_name.replace(/\s+/g, '_')}" 
+                       value="${league.short_name}" data-long-name="${league.long_name}" ${league.short_name === currentState.league ? 'checked' : ''}>
+                <label class="btn btn-outline-primary" for="league_${league.short_name.replace(/\s+/g, '_')}" title="${league.long_name}">
+                    ${league.short_name}
+                </label>
             `).join('');
             document.getElementById('buttonsLeague').innerHTML = buttonsLeague;
             
             // Auto-select highest league if none selected
             const leagueInputs = document.querySelectorAll('input[name="league"]');
-            if (![...leagueInputs].some(input => input.checked) && leagues.length > 0) {
-                const sortedLeagues = leagues.sort();
+            if (![...leagueInputs].some(input => input.checked) && normalizedLeagues.length > 0) {
+                const sortedLeagues = [...normalizedLeagues].sort((a, b) => a.short_name.localeCompare(b.short_name));
                 const highestLeague = sortedLeagues[sortedLeagues.length - 1];
-                const highestInput = document.querySelector(`input[name="league"][value="${highestLeague}"]`);
+                const highestInput = document.querySelector(`input[name="league"][value="${highestLeague.short_name}"]`);
                 if (highestInput) {
                     highestInput.checked = true;
-                    currentState.league = highestLeague;
+                    currentState.league = highestLeague.short_name;
+                    currentState.league_long = highestLeague.long_name;
                 }
             }
         })

@@ -47,10 +47,11 @@ class LeagueAggregationBlock extends BaseContentBlock {
     }
 
     generateHTML(state) {
+        const leagueName = state.league_long || state.league || '';
         return `
             <div class="card mb-4">
                 <div class="card-header">
-                    <h5>${state.league} - ${typeof t === 'function' ? t('ui.league.all_time', 'All-Time Statistics') : 'All-Time Statistics'}</h5>
+                    <h5>${leagueName} - ${typeof t === 'function' ? t('ui.league.all_time', 'All-Time Statistics') : 'All-Time Statistics'}</h5>
                     <p class="mb-0 text-muted">${typeof t === 'function' ? t('ui.league.performance_all_seasons', 'League performance across all seasons') : 'League performance across all seasons'}</p>
                 </div>
                 <div class="card-body">
