@@ -225,6 +225,15 @@ function createTableTabulator(tableId, data, options = {}) {
         return rowObject;
     });
 
+    // Apply CSS classes for striped column groups before building column definitions
+    if (useStripedGroups && data.columns) {
+        ColorUtils.assignGroupStripeCss(data.columns);
+        ColorUtils.injectStripeCss(data.columns.length, {
+            headerAlpha: isCompactLayout ? 0.55 : 0.4,
+            cellAlpha: 0.25
+        });
+    }
+
     const tabulatorColumns = (data.columns || []).map((group, groupIndex) => {
         if (!Array.isArray(group.columns)) {
             return null;
@@ -235,17 +244,16 @@ function createTableTabulator(tableId, data, options = {}) {
         // Use backend flag for highlighting
         const isHighlighted = group.highlighted === true;
 
+        // Build cssClass: combine striped class (already added by assignGroupStripeCss) with highlight class
+        let groupCssClass = group.cssClass || '';
+        if (isHighlighted) {
+            groupCssClass = (groupCssClass + ' tab-group-highlighted').trim();
+        }
+
         const groupDefinition = {
             title: group.title || '',
             headerHozAlign: 'center',
-            // Add cssClass for highlighting
-            cssClass: isHighlighted ? 'tab-group-highlighted' : '',
-            // Add data attribute via titleFormatter for reliable DOM selection
-            titleFormatter: function(column) {
-                const title = group.title || '';
-                const dataHighlight = isHighlighted ? 'true' : 'false';
-                return `<span class="tab-group-title" data-highlighted="${dataHighlight}" data-group-index="${groupIndex}">${title}</span>`;
-            },
+            cssClass: groupCssClass,
             columns: group.columns.map((column, columnIndex) => {
                 const columnInfo = columnLookup[`${groupIndex}-${columnIndex}`];
                 if (!columnInfo) {
@@ -254,16 +262,22 @@ function createTableTabulator(tableId, data, options = {}) {
                 const field = columnInfo.field;
                 const headerAlign = column.align || 'center';
                 const columnStyles = column.style || {};
-                const stripeColors = ColorUtils.getStripeColors(groupIndex, {
-                    enabled: useStripedGroups,
-                    headerAlpha: isCompactLayout ? 0.55 : 0.4,
-                    cellAlpha: 0.18
-                });
+                
                 const formatter = function(cell) {
                     const value = cell.getValue();
                     const element = cell.getElement();
                     const rowData = cell.getRow().getData();
                     const rowIdx = rowData.__rowIndex;
+
+                    // Add stripe class and inline background for column group coloring
+                    if (useStripedGroups) {
+                        element.classList.add('col-group-' + groupIndex);
+                        // Also set inline style to ensure frozen columns get colored
+                        const stripeColors = ColorUtils.getStripeColors(groupIndex, { enabled: true, headerAlpha: 0.55 });
+                        if (stripeColors) {
+                            element.style.setProperty('background-color', stripeColors.headerBg, 'important');
+                        }
+                    }
 
                     // Add highlighting class and style to cell element if group is highlighted
                     if (isHighlighted) {
@@ -273,10 +287,6 @@ function createTableTabulator(tableId, data, options = {}) {
 
                     // Column-level inline styles
                     applyElementStyles(element, columnStyles);
-
-                    if (stripeColors) {
-                        element.style.setProperty('background-color', stripeColors.cellBg, 'important');
-                    }
 
                     // Cell metadata styles
                     const cellMeta = cellMetadataMap[rowIdx]?.[field];
@@ -299,6 +309,24 @@ function createTableTabulator(tableId, data, options = {}) {
                 // Check if it's a string that represents a number (e.g., "100.0", "99.5")
                 const isStringNumber = typeof sampleValue === 'string' && !isNaN(parseFloat(sampleValue)) && isFinite(sampleValue);
 
+                // Build column cssClass: combine striped class with any existing
+                // cssClass applies to cells, headerClass applies to column headers
+                // If striping is enabled, assignGroupStripeCss already added col-group-N to column.cssClass
+                // But we also need to add it here in case the backend column object wasn't modified
+                let colCssClass = column.cssClass || '';
+                let colHeaderClass = column.headerClass || '';
+                
+                // Ensure stripe class is added if striping is enabled
+                if (useStripedGroups) {
+                    const stripeClass = 'col-group-' + groupIndex;
+                    if (!colCssClass.includes(stripeClass)) {
+                        colCssClass = (colCssClass + ' ' + stripeClass).trim();
+                    }
+                    if (!colHeaderClass.includes(stripeClass)) {
+                        colHeaderClass = (colHeaderClass + ' ' + stripeClass).trim();
+                    }
+                }
+
                 const columnDefinition = {
                     title: column.title || '',
                     field,
@@ -308,7 +336,8 @@ function createTableTabulator(tableId, data, options = {}) {
                     // Use numeric sorter for both numbers and string numbers
                     sorter: column.sortable === false ? undefined : (isNumberColumn || isStringNumber ? 'number' : 'string'),
                     formatter,
-                    tooltip: settings.tooltips ? true : false
+                    tooltip: settings.tooltips ? true : false,
+                    cssClass: colCssClass || undefined
                 };
 
                 // Adjust column widths based on group
@@ -344,19 +373,6 @@ function createTableTabulator(tableId, data, options = {}) {
                     }
                 } else if (isCompactLayout) {
                     columnDefinition.widthGrow = 0;
-                }
-
-                if (stripeColors) {
-                    columnDefinition.titleFormatter = function(cell, formatterParams, onRendered) {
-                        onRendered(() => {
-                            const el = cell.getElement();
-                            if (el) {
-                                el.style.setProperty('background-color', stripeColors.headerBg, 'important');
-                                el.style.setProperty('font-weight', '600', 'important');
-                            }
-                        });
-                        return column.title || '';
-                    };
                 }
 
                 // Build CSS classes
@@ -453,6 +469,14 @@ function createTableTabulator(tableId, data, options = {}) {
                     tableElement.style.setProperty('--highlight-cell-bg', HIGHLIGHT_STYLES.cellBackgroundColor);
                     tableElement.style.setProperty('--highlight-header-weight', HIGHLIGHT_STYLES.headerFontWeight);
                     tableElement.style.setProperty('--highlight-cell-weight', HIGHLIGHT_STYLES.cellFontWeight);
+                    
+                    // Stripe coloring: assign group classes to column group headers
+                    // (cells and column headers get classes via cssClass/headerClass in column definitions)
+                    if (useStripedGroups) {
+                        tableElement.querySelectorAll('.tabulator-col-group').forEach((el, idx) => {
+                            el.classList.add('col-group-' + idx);
+                        });
+                    }
                     
                     // Build map of highlighted fields and groups
                     const highlightedFields = new Set();

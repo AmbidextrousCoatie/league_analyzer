@@ -17,7 +17,8 @@
         rainbowPastel: { positive: 2, negative: 5, highlight: 9 }
     };
 
-    const DEFAULT_STRIPE_PALETTE = ["#e9f0ff", "#f6f1ff"];
+    const DEFAULT_STRIPE_PALETTE = ["#e9f0ff", "#e9f0ff"];
+    //const DEFAULT_STRIPE_PALETTE = ["#e9f0ff", "#c2effc"];
 
     let currentPaletteName = "rainbowPastel";
     let currentPalette = TEAM_COLOR_PALETTES[currentPaletteName];
@@ -72,6 +73,78 @@
             headerBg: toRgba(color, headerAlpha),
             cellBg: toRgba(color, cellAlpha)
         };
+    }
+
+    /**
+     * Assigns CSS classes to column groups for striped coloring.
+     * Call this before creating the Tabulator instance.
+     * @param {Array} groups - Array of column group definitions
+     */
+    function assignGroupStripeCss(groups) {
+        groups.forEach((group, index) => {
+            // Add class to the group itself (for group header)
+            group.cssClass = ((group.cssClass || "") + " col-group-" + index).trim();
+            // Add class to all leaf columns
+            if (group.columns) {
+                assignLeafColumnCss(group.columns, index);
+            }
+        });
+    }
+
+    function assignLeafColumnCss(columns, groupIndex) {
+        columns.forEach(col => {
+            if (col.columns) {
+                // Nested group - recurse
+                assignLeafColumnCss(col.columns, groupIndex);
+            } else {
+                // Leaf column - cssClass for cells, headerClass for column headers
+                col.cssClass = ((col.cssClass || "") + " col-group-" + groupIndex).trim();
+                col.headerClass = ((col.headerClass || "") + " col-group-" + groupIndex).trim();
+            }
+        });
+    }
+
+    /**
+     * Generates CSS rules for striped column groups.
+     * @param {number} groupCount - Number of groups to generate rules for
+     * @param {Object} options - Options for colors
+     * @returns {string} CSS rules as a string
+     */
+    function generateStripeCss(groupCount, options = {}) {
+        const palette = options.palette || DEFAULT_STRIPE_PALETTE;
+        const headerAlpha = typeof options.headerAlpha === "number" ? options.headerAlpha : 0.55;
+        const cellAlpha = typeof options.cellAlpha === "number" ? options.cellAlpha : 0.25;
+        
+        let css = "";
+        for (let i = 0; i < groupCount; i++) {
+            const color = palette[i % palette.length];
+            const headerBg = toRgba(color, headerAlpha);
+            // Use same color for cells as headers
+            const cellBg = toRgba(color, headerAlpha);
+            // Cells (via formatter adding class)
+            css += `.tabulator-cell.col-group-${i} { background-color: ${cellBg} !important; }\n`;
+            // Column headers (via headerClass) - target the title element
+            css += `.tabulator-col.col-group-${i} .tabulator-col-title { background-color: ${headerBg} !important; }\n`;
+            // Group headers - target the group title element
+            css += `.tabulator-col-group.col-group-${i} .tabulator-col-group-title { background-color: ${headerBg} !important; }\n`;
+        }
+        return css;
+    }
+
+    /**
+     * Injects stripe CSS into the document if not already present.
+     * @param {number} groupCount - Number of groups
+     * @param {Object} options - Color options
+     */
+    function injectStripeCss(groupCount, options = {}) {
+        const styleId = "tabulator-stripe-styles";
+        let styleEl = document.getElementById(styleId);
+        if (!styleEl) {
+            styleEl = document.createElement("style");
+            styleEl.id = styleId;
+            document.head.appendChild(styleEl);
+        }
+        styleEl.textContent = generateStripeCss(groupCount, options);
     }
 
     function interpolateValue(value, minVal, maxVal) {
@@ -159,7 +232,10 @@
         getHeatMapColor,
         hexToRgb,
         toRgba,
-        teamColorMap
+        teamColorMap,
+        assignGroupStripeCss,
+        generateStripeCss,
+        injectStripeCss
     };
 
     globalObj.ColorUtils = ColorUtils;

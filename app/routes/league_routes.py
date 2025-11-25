@@ -19,6 +19,10 @@ def get_league_service():
     debug_config.log_service('LeagueService', 'create', f"database={database}")
     return LeagueService(database=database)
 
+@bp.route('/league/funsies')
+def funsies():
+    return render_template('funsies.html')
+
 @bp.route('/league/stats')
 def stats():
     try:
