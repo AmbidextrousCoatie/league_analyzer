@@ -1764,7 +1764,7 @@ class LeagueService:
                             week_points += float(team_week_bonus[Columns.points].sum())
                         
                         team_data[team]['weekly_data'][w] = {
-                            'points': week_points,
+                            'points': format_float_one_decimal(week_points),
                             'score': week_score,
                             'avg': round(week_avg, 1)
                         }
@@ -1810,20 +1810,6 @@ class LeagueService:
                 )
             ]
             
-            # Add weekly column groups
-            for w in weeks_to_show:
-                columns.append(
-                    ColumnGroup(
-                        title=f"{i18n_service.get_text('week')} {w}",
-                        columns=[
-                            Column(title=i18n_service.get_text("points"), field=f"week{w}_points", format="{:.1f}"),
-                            Column(title=i18n_service.get_text("score"), field=f"week{w}_score", format="{:,}"),
-                            Column(title=i18n_service.get_text("average"), field=f"week{w}_avg", format="{:.1f}")
-                        ]
-                    )
-                )
-            
-            # Add totals column group
             columns.append(
                 ColumnGroup(
                     title="Total",
@@ -1831,12 +1817,28 @@ class LeagueService:
                     header_style={"fontWeight": "bold"},
                     highlighted=True,  # Highlight the Total group
                     columns=[
-                        Column(title=i18n_service.get_text("points"), field="season_points", format="{:,}"),
-                        Column(title=i18n_service.get_text("pins"), field="season_score", format="{:,}"),
-                        Column(title=i18n_service.get_text("average"), field="season_avg", format="{:.1f}")
+                        Column(title=i18n_service.get_text("points"), field="season_points", format="{:,}", width="75px"),
+                        Column(title=i18n_service.get_text("pins"), field="season_score", format="{:,}", width="75px"),
+                        Column(title=i18n_service.get_text("average"), field="season_avg", format="{:.1f}", width="75px")
                     ]
                 )
             )
+
+            # Add weekly column groups
+            for w in weeks_to_show:
+                columns.append(
+                    ColumnGroup(
+                        title=f"{i18n_service.get_text('week')} {w}",
+                        columns=[
+                            Column(title=i18n_service.get_text("points"), field=f"week{w}_points", format="{:.1f}", width="75px"),
+                            Column(title=i18n_service.get_text("score"), field=f"week{w}_score", format="{:,}", width="75px"),
+                            Column(title=i18n_service.get_text("average"), field=f"week{w}_avg", format="{:.1f}", width="75px")
+                        ]
+                    )
+                )
+            
+            # Add totals column group
+
             
             # Prepare the data rows
             data = []
@@ -1850,16 +1852,16 @@ class LeagueService:
                 for w in weeks_to_show:
                     week_info = team_info['weekly_data'][w]
                     row.extend([
-                        week_info['points'],
+                        format_float_one_decimal(week_info['points']),
                         week_info['score'],
-                        week_info['avg']
+                        format_float_one_decimal(week_info['avg'])
                     ])
                 
                 # Add season totals
                 row.extend([
-                    team_info['season_points'],
+                    format_float_one_decimal(team_info['season_points']),
                     team_info['season_score'],
-                    team_info['season_avg']
+                    format_float_one_decimal(team_info['season_avg'])
                 ])
                 
                 data.append(row)
@@ -1882,7 +1884,8 @@ class LeagueService:
                     "striped": True,
                     "hover": True,
                     "responsive": True,
-                    "compact": False
+                    "compact": True,
+                    "stripedColGroups": True
                 }
             )
             

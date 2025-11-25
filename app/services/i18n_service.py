@@ -31,7 +31,7 @@ class I18nService:
             "status.initialization_error.title": {"en": "Initialization Error", "de": "Initialisierungsfehler"},
             "status.initialization_error.message": {"en": "Failed to initialize the league statistics application. Please refresh the page.", "de": "Die Liga-Statistik-Anwendung konnte nicht initialisiert werden. Bitte laden Sie die Seite neu."},
             # Initialization helpers for placeholders on league page
-            "status.initializing.season_league_standings": {"en": "Initializing season league standings...", "de": "Saison-Liga-Tabelle wird initialisiert..."},
+            "status.initializing.season_league_standings": {"en": "Initializing season league standings...", "de": "Tabellenstand wird initialisiert..."},
             "status.initializing.league_aggregation": {"en": "Initializing league aggregation...", "de": "Liga-Aggregation wird initialisiert..."},
             "status.initializing.league_season_overview": {"en": "Initializing season overview...", "de": "Saisonübersicht wird initialisiert..."},
             "status.initializing.season_overview": {"en": "Initializing detailed overview...", "de": "Detaillierte Übersicht wird initialisiert..."},
@@ -131,7 +131,7 @@ class I18nService:
             "ui.team_performance.player_performance": {"en": "Player Performance", "de": "Spielerleistung"},
             "ui.team_performance.player_perf_desc": {"en": "Individual player average scores per game with totals and averages", "de": "Durchschnittliche Spielergebnisse pro Spiel mit Summen und Durchschnitten"},
             "ui.team_performance.weekly_avg_game": {"en": "Weekly Avg/Game", "de": "Wöchentlich Ø/Spiel"},
-            "ui.team_performance.total_score": {"en": "Total Score", "de": "Gesamtpunkte"},
+            "ui.team_performance.total_score": {"en": "Total Score", "de": "Gesamtpinfall"},
             "ui.team_performance.avg_per_game": {"en": "Avg/Game", "de": "Ø/Spiel"},
 
             # Namespaced: Team History UI
@@ -161,7 +161,7 @@ class I18nService:
             "round": {"en": "#", "de": "#"},
             
             # Table titles and descriptions
-            "league_standings": {"en": "League Standings", "de": "Liga-Tabelle"},
+            "league_standings": {"en": "League Standings", "de": "Tabellenstand"},
             "league_history": {"en": "League History", "de": "Liga-Verlauf"},
             "team_week_details": {"en": "Team Week Details", "de": "Team-Spieltagedetails"},
             "head_to_head": {"en": "Head-to-Head", "de": "Direktvergleich"},
@@ -232,7 +232,7 @@ class I18nService:
             "date": {"en": "Date", "de": "Datum"},
             "match_info": {"en": "Match Info", "de": "Spiel-Info"},
             "match": {"en": "Match", "de": "Spiel"},
-            "total_points": {"en": "Total Points", "de": "Gesamtpunkte"},
+            "total_points": {"en": "Total Points", "de": "Gesamtpinfall"},
             "team_performance": {"en": "Team Performance", "de": "Team-Leistung"},
             "season_timetable": {"en": "Season Timetable", "de": "Saison-Spielplan"},
             "individual_averages": {"en": "Individual Averages", "de": "Einzel-Durchschnitte"},

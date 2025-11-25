@@ -63,7 +63,7 @@ class LeagueSeasonOverviewBlock extends BaseContentBlock {
                             <div class="card">
                                 <div class="card-header">
                                     <h6>${typeof t === 'function' ? t('league_standings', 'League Standings') : 'League Standings'}</h6>
-                                    <p class="mb-0 text-muted small">${typeof t === 'function' ? t('standings', 'Standings') : 'Standings'}</p>
+                                    <!--<p class="mb-0 text-muted small">${typeof t === 'function' ? t('standings', 'Standings') : 'Standings'}</p>-->
                                 </div>
                                 <div class="card-body">
                                     <div id="leagueStandingsTable"></div>
