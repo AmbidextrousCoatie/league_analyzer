@@ -1,96 +1,58 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/echarts@5.6.0/dist/echarts.min.js"></script>
+<script src="{{ static_url('js/theme/color-utils.js') }}"></script>
 
 <script>
-// Semantic Color System - Palette-specific mappings
-const SEMANTIC_COLOR_MAPPINGS = {
-    harmonic10: {
-        positive: 2,   // Green shade in harmonic10
-        negative: 3,   // Red shade in harmonic10
-        highlight: 9   // turquoise highlight in harmonic10
-    },
-    rainbowPastel: {
-        positive: 2,   // Green shade in rainbowPastel
-        negative: 6,   // Red shade in rainbowPastel
-        highlight: 9   // violet highlight in rainbowPastel
+const ColorUtilsRef = window.ColorUtils || {};
+
+let currentPaletteName = ColorUtilsRef.getCurrentPaletteName
+    ? ColorUtilsRef.getCurrentPaletteName()
+    : 'rainbowPastel';
+let currentPalette = ColorUtilsRef.getCurrentPalette
+    ? ColorUtilsRef.getCurrentPalette()
+    : (ColorUtilsRef.TEAM_COLOR_PALETTES?.[currentPaletteName] || []);
+
+function syncPalette(name) {
+    if (ColorUtilsRef.setPalette && ColorUtilsRef.setPalette(name)) {
+        currentPaletteName = ColorUtilsRef.getCurrentPaletteName();
+        currentPalette = ColorUtilsRef.getCurrentPalette();
+        return true;
     }
-    // Add more palette mappings here as needed
-    // modern: { positive: 1, negative: 5, highlight: 3 },
-    // dark: { positive: 3, negative: 7, highlight: 1 }
-};
+    if (ColorUtilsRef.TEAM_COLOR_PALETTES && ColorUtilsRef.TEAM_COLOR_PALETTES[name]) {
+        currentPaletteName = name;
+        currentPalette = ColorUtilsRef.TEAM_COLOR_PALETTES[name];
+        return true;
+    }
+    return false;
+}
 
 function getSemanticColor(semanticName) {
-    const currentPalette = TEAM_COLOR_PALETTES[currentPaletteName];
-    const semanticMapping = SEMANTIC_COLOR_MAPPINGS[currentPaletteName];
-    
-    if (semanticMapping && semanticMapping[semanticName] !== undefined) {
-        const paletteIndex = semanticMapping[semanticName];
-        if (currentPalette[paletteIndex]) {
-            return currentPalette[paletteIndex];
-        }
+    if (ColorUtilsRef.getSemanticColor) {
+        return ColorUtilsRef.getSemanticColor(semanticName);
     }
-    
-    // Fallback colors if palette doesn't have mapping or enough colors
     const fallbackColors = {
-        positive: '#2CA02C',  // Green
-        negative: '#D62728',  // Red
-        highlight: '#ffd700'  // Gold
+        positive: '#2CA02C',
+        negative: '#D62728',
+        highlight: '#ffd700'
     };
-    
     return fallbackColors[semanticName] || '#888';
 }
 
-// --- Team Color Palettes ---
-const TEAM_COLOR_PALETTES = {
-  "harmonic10": [
-    "#1F77B4", "#FF7F0E", "#2CA02C", "#D62728", "#9467BD",
-    "#8C564B", "#E377C2", "#7F7F7F", "#BCBD22", "#17BECF"
-  ],
-  "rainbowPastel": [
-    "#1B8CA6", "#2CA89A", "#8CBF8A", "#E6C86E", "#F7A86E",
-    "#E86E56", "#D95A6A", "#C94C8A", "#A04CBF", "#D6A4E6"
-  ]
-};
-
-// Default palette
-let currentPaletteName = "rainbowPastel";
-let currentPalette = TEAM_COLOR_PALETTES[currentPaletteName];
-
-// Make teamColorMap globally available
-window.teamColorMap = window.teamColorMap || {};
-
 function updateTeamColorMap(currentTeams) {
-  // Remove teams no longer present
-  Object.keys(window.teamColorMap).forEach(team => {
-    if (!currentTeams.includes(team)) {
-      delete window.teamColorMap[team];
+    if (ColorUtilsRef.updateTeamColorMap) {
+        ColorUtilsRef.updateTeamColorMap(currentTeams);
     }
-  });
-
-  // Assign colors to new teams
-  const usedColors = Object.values(window.teamColorMap);
-  let paletteIdx = 0;
-  currentTeams.forEach(team => {
-    if (!window.teamColorMap[team]) {
-      // Find the next unused color in the palette
-      while (paletteIdx < currentPalette.length && usedColors.includes(currentPalette[paletteIdx])) {
-        paletteIdx++;
-      }
-      // If we run out of unique colors, start reusing
-      window.teamColorMap[team] = currentPalette[paletteIdx % currentPalette.length];
-      paletteIdx++;
-    }
-  });
 }
-
-// Make updateTeamColorMap globally available
-window.updateTeamColorMap = updateTeamColorMap;
 
 function getTeamColor(team) {
-  return window.teamColorMap[team] || "#888"; // fallback color
+    if (ColorUtilsRef.getTeamColor) {
+        return ColorUtilsRef.getTeamColor(team);
+    }
+    return '#888';
 }
 
-// Make getTeamColor globally available
+window.teamColorMap = ColorUtilsRef.teamColorMap || window.teamColorMap || {};
+window.updateTeamColorMap = updateTeamColorMap;
 window.getTeamColor = getTeamColor;
 
 // --- Palette Switcher UI ---
@@ -98,13 +60,14 @@ function renderPaletteSwitcher(containerId = "paletteSwitcher") {
   const container = document.getElementById(containerId);
   if (!container) return;
   container.innerHTML = "<b>Color Palette:</b> ";
-  Object.keys(TEAM_COLOR_PALETTES).forEach(name => {
+  const palettes = ColorUtilsRef.TEAM_COLOR_PALETTES || {};
+  Object.keys(palettes).forEach(name => {
     const btn = document.createElement("button");
     btn.textContent = name.replace(/([A-Z])/g, " $1").replace(/^./, s => s.toUpperCase());
     btn.onclick = () => {
-      currentPaletteName = name;
-      currentPalette = TEAM_COLOR_PALETTES[name];
-      if (typeof window.refreshAllCharts === "function") window.refreshAllCharts();
+      if (syncPalette(name) && typeof window.refreshAllCharts === "function") {
+        window.refreshAllCharts();
+      }
     };
     btn.style.margin = "0 4px";
     btn.style.padding = "4px 10px";
@@ -133,9 +96,7 @@ document.addEventListener("DOMContentLoaded", function() {
     el.addEventListener('click', function(e) {
       e.preventDefault();
       const palette = el.getAttribute('data-palette');
-      if (palette && TEAM_COLOR_PALETTES[palette]) {
-        currentPaletteName = palette;
-        currentPalette = TEAM_COLOR_PALETTES[palette];
+      if (palette && syncPalette(palette)) {
         // Update navbar text
         const text = el.textContent.trim();
         const paletteText = document.getElementById('currentPaletteText');

@@ -1,4 +1,5 @@
 <link href="{{ static_url('vendor/tabulator/css/tabulator_semanticui.min.css') }}" rel="stylesheet">
+<script src="{{ static_url('js/theme/color-utils.js') }}"></script>
 <script type="text/javascript" src="{{ static_url('vendor/tabulator/js/tabulator.min.js') }}"></script>
 
 <script>
@@ -13,35 +14,7 @@ function createTable(config) {
 
     let currentData = [...data];
 
-    // Get colors for groups using #2196F3 as end color
-    const getGroupColors = () => {
-        const endColor = '#7ec2f8';  // Bootstrap primary blue
-        const startRGB = [255, 255, 255];  // white
-        const endRGB = hexToRgb(endColor);
-        
-        return headerGroups.map((_, index) => {
-            if (index === 0) return 'rgb(255, 255, 255)';  // First group is white
-            if (index === headerGroups.length - 1) return endColor;  // Last group is primary blue
-            
-            const factor = index / (headerGroups.length - 1);
-            const r = Math.round(startRGB[0] + (endRGB[0] - startRGB[0]) * factor);
-            const g = Math.round(startRGB[1] + (endRGB[1] - startRGB[1]) * factor);
-            const b = Math.round(startRGB[2] + (endRGB[2] - startRGB[2]) * factor);
-            
-            return `rgb(${r}, ${g}, ${b})`;
-        });
-    };
-
-    const hexToRgb = (hex) => {
-        hex = hex.replace(/^#/, '');
-        const bigint = parseInt(hex, 16);
-        const r = (bigint >> 16) & 255;
-        const g = (bigint >> 8) & 255;
-        const b = bigint & 255;
-        return [r, g, b];
-    };
-
-    const colors = getGroupColors();
+    const colors = ColorUtils.getGradientColors(headerGroups.length, '#ffffff', '#7ec2f8');
 
     // Create mappings for column colors and last group columns
     const columnColors = {};
@@ -122,34 +95,6 @@ function createTable(config) {
 }
 
 
-// Function to convert hex color to RGB
-const hexToRgb = (hex) => {
-    const bigint = parseInt(hex.slice(1), 16);
-    const r = (bigint >> 16) & 255;
-    const g = (bigint >> 8) & 255;
-    const b = bigint & 255;
-    return [r, g, b];
-};
-
-// Function to get colors for groups
-const getGroupColors = (headerGroups) => {
-    const endColor = '#2196F3';  // Bootstrap primary blue
-    const startRGB = [255, 255, 255];  // white
-    const endRGB = hexToRgb(endColor);
-    
-    return headerGroups.map((_, index) => {
-        if (index === 0) return 'rgb(255, 255, 255)';  // First group is white
-        if (index === headerGroups.length - 1) return endColor;  // Last group is primary blue
-        
-        const factor = index / (headerGroups.length - 1);
-        const r = Math.round(startRGB[0] + (endRGB[0] - startRGB[0]) * factor);
-        const g = Math.round(startRGB[1] + (endRGB[1] - startRGB[1]) * factor);
-        const b = Math.round(startRGB[2] + (endRGB[2] - startRGB[2]) * factor);
-        
-        return `rgb(${r}, ${g}, ${b})`;
-    });
-};
-
 function flattenColumnMetadata(columnGroups = []) {
     const flatColumns = [];
     columnGroups.forEach((group, groupIndex) => {
@@ -210,27 +155,6 @@ function parseColumnWidth(width) {
     return Number.isNaN(parsed) ? undefined : parsed;
 }
 
-function toRgba(color, alpha = 0.15) {
-    if (!color) {
-        return null;
-    }
-    if (color.startsWith('#')) {
-        const [r, g, b] = hexToRgb(color);
-        return `rgba(${r}, ${g}, ${b}, ${alpha})`;
-    }
-    const rgbMatch = color.match(/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/i);
-    if (rgbMatch) {
-        const [, r, g, b] = rgbMatch;
-        return `rgba(${r}, ${g}, ${b}, ${alpha})`;
-    }
-    const rgbaMatch = color.match(/^rgba\((\d+),\s*(\d+),\s*(\d+),\s*([\d.]+)\)$/i);
-    if (rgbaMatch) {
-        const [, r, g, b] = rgbaMatch;
-        return `rgba(${r}, ${g}, ${b}, ${alpha})`;
-    }
-    return color;
-}
-
 function createTableTabulator(tableId, data, options = {}) {
     const settings = {
         disablePositionCircle: false,
@@ -242,18 +166,6 @@ function createTableTabulator(tableId, data, options = {}) {
     const tableConfig = data.config || {};
     const isCompactLayout = tableConfig.compact === true;
     const useStripedGroups = tableConfig.stripedColGroups === true;
-    const stripedBaseColors = ['#f1f3f5', '#e7f00f'];
-    const getStripeColors = (groupIndex) => {
-        if (!useStripedGroups) {
-            return null;
-        }
-        const base = stripedBaseColors[groupIndex % stripedBaseColors.length];
-        return {
-            headerBg: toRgba(base, isCompactLayout ? 0.55 : 0.4),
-            cellBg: toRgba(base, 0.18)
-        };
-    };
-
     // Highlighting style constants
     const HIGHLIGHT_STYLES = {
         headerBackgroundColor: 'rgba(0, 0, 0, 0.05)',
@@ -342,7 +254,11 @@ function createTableTabulator(tableId, data, options = {}) {
                 const field = columnInfo.field;
                 const headerAlign = column.align || 'center';
                 const columnStyles = column.style || {};
-                const stripeColors = useStripedGroups ? getStripeColors(groupIndex) : null;
+                const stripeColors = ColorUtils.getStripeColors(groupIndex, {
+                    enabled: useStripedGroups,
+                    headerAlpha: isCompactLayout ? 0.55 : 0.4,
+                    cellAlpha: 0.18
+                });
                 const formatter = function(cell) {
                     const value = cell.getValue();
                     const element = cell.getElement();
@@ -697,7 +613,7 @@ function createTableTabulator(tableId, data, options = {}) {
                     const element = row.getElement();
                     element.classList.add('tab-row-accent');
                     element.style.setProperty('--row-accent-color', accentColor);
-                    const overlay = toRgba(accentColor, 0.12);
+                    const overlay = ColorUtils.toRgba(accentColor, 0.12);
                     if (overlay) {
                         element.style.setProperty('--row-accent-overlay', overlay);
                     }
@@ -940,39 +856,6 @@ function createTableBootstrap2(tableId, data) {
     document.getElementById(tableId).appendChild(tableWrapper); // Append new table
 
     console.log(`Table "${tableId}" successfully created/updated`);
-}
-
-function getHeatMapColor(value, minVal, maxVal) {
-    // Generate heat map color interpolating between #a9e9f9 (min) and #06313c (max)
-    if (value === "" || minVal === maxVal) {
-        return "#f8f9fa"; // Light gray for diagonal cells
-    }
-    
-    // Normalize value to 0-1 range
-    const ratio = (value - minVal) / (maxVal - minVal);
-    
-    // Convert hex colors to RGB
-    function hexToRgb(hexColor) {
-        hexColor = hexColor.replace('#', '');
-        return {
-            r: parseInt(hexColor.substr(0, 2), 16),
-            g: parseInt(hexColor.substr(2, 2), 16),
-            b: parseInt(hexColor.substr(4, 2), 16)
-        };
-    }
-    
-            // Define min and max colors
-            //const minColor = hexToRgb('#d9596a'); // Light red
-            //const maxColor = hexToRgb('#1b8da7'); // Blue-green
-            const minColor = hexToRgb('#dddddd'); // Light red
-            const maxColor = hexToRgb('#1b8da7'); // Blue-green
-    
-    // Interpolate between the two colors
-    const r = Math.round(minColor.r + (maxColor.r - minColor.r) * ratio);
-    const g = Math.round(minColor.g + (maxColor.g - minColor.g) * ratio);
-    const b = Math.round(minColor.b + (maxColor.b - minColor.b) * ratio);
-    
-    return `rgb(${r}, ${g}, ${b})`;
 }
 
 function createTableBootstrap3(tableId, data, options = {}) {
@@ -1589,10 +1472,10 @@ function createTableBootstrap3(tableId, data, options = {}) {
                                     const isPointsColumn = adjustedColIndex % 2 === 0; // Points columns are even positions (0, 2, 4, 6...)
                                     
                                     if (isScoreColumn && data.metadata.score_range) {
-                                        const color = getHeatMapColor(cellValue, data.metadata.score_range.min, data.metadata.score_range.max);
+                                        const color = ColorUtils.getHeatMapColor(cellValue, data.metadata.score_range.min, data.metadata.score_range.max);
                                         td.style.backgroundColor = color;
                                     } else if (isPointsColumn && data.metadata.points_range) {
-                                        const color = getHeatMapColor(cellValue, data.metadata.points_range.min, data.metadata.points_range.max);
+                                        const color = ColorUtils.getHeatMapColor(cellValue, data.metadata.points_range.min, data.metadata.points_range.max);
                                         td.style.backgroundColor = color;
                                     }
                                 }
@@ -1785,13 +1668,10 @@ function fetchAndRenderTable(tableId, url, params = {}) {
 
 // Function to get team color
 function getTeamColor(teamName) {
-    // Use the same color mapping as charts
-    if (typeof window.teamColorMap !== 'undefined' && window.teamColorMap[teamName]) {
-        return window.teamColorMap[teamName];
+    if (window.ColorUtils && typeof window.ColorUtils.getTeamColor === 'function') {
+        return window.ColorUtils.getTeamColor(teamName);
     }
-    
-    // Fallback to a default color if teamColorMap is not available
-    return "#888";
+    return '#888';
 }
 </script>
 

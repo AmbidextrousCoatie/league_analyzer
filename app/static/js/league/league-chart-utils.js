@@ -242,11 +242,18 @@ function updatePositionChart() {
  * Get team color for charts
  */
 function getTeamColor(teamName, teamIndex = 0) {
-    const colors = [
+    if (window.ColorUtils && typeof window.ColorUtils.getTeamColor === 'function') {
+        const color = window.ColorUtils.getTeamColor(teamName);
+        if (color && color !== '#888') {
+            return color;
+        }
+        return window.ColorUtils.getPaletteColor ? window.ColorUtils.getPaletteColor(teamIndex) : color;
+    }
+    const fallback = [
         '#28255c', '#592a6b', '#882c70', '#b4306b',
         '#d8405e', '#f25b4a', '#ff7f30', '#ffa600'
     ];
-    return colors[teamIndex % colors.length];
+    return fallback[teamIndex % fallback.length];
 }
 
 /**

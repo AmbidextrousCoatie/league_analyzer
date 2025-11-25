@@ -183,6 +183,9 @@ class TeamHistoryBlock extends BaseContentBlock {
      * Get team color (fallback to simple color if team color map not available)
      */
     getTeamColor(teamName) {
+        if (window.ColorUtils && typeof window.ColorUtils.getTeamColor === 'function') {
+            return window.ColorUtils.getTeamColor(teamName);
+        }
         if (typeof getTeamColorForBlock === 'function') {
             return getTeamColorForBlock(teamName);
         }
