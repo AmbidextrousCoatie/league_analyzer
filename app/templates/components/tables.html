@@ -269,14 +269,9 @@ function createTableTabulator(tableId, data, options = {}) {
                     const rowData = cell.getRow().getData();
                     const rowIdx = rowData.__rowIndex;
 
-                    // Add stripe class and inline background for column group coloring
+                    // Add stripe class for column group coloring; actual colors come from CSS
                     if (useStripedGroups) {
                         element.classList.add('col-group-' + groupIndex);
-                        // Also set inline style to ensure frozen columns get colored
-                        const stripeColors = ColorUtils.getStripeColors(groupIndex, { enabled: true, headerAlpha: 0.55 });
-                        if (stripeColors) {
-                            element.style.setProperty('background-color', stripeColors.headerBg, 'important');
-                        }
                     }
 
                     // Add highlighting class and style to cell element if group is highlighted
@@ -1823,7 +1818,22 @@ body[data-theme="dark"],
 
 .custom-tabulator .tabulator-frozen {
     box-shadow: inset -1px 0 var(--table-border-soft);
-    background: inherit;
+    z-index: 10;
+}
+
+/* Frozen Tabulator cells: force solid background so nothing shows through on scroll */
+.custom-tabulator .tabulator-row .tabulator-cell.tabulator-frozen {
+    background-color: var(--table-surface) !important;
+}
+
+.custom-tabulator .tabulator-row:nth-child(even) .tabulator-cell.tabulator-frozen {
+    background-color: var(--table-surface-alt) !important;
+}
+
+/* Frozen Tabulator headers: also force solid background (no transparent overlay) */
+.custom-tabulator .tabulator-header .tabulator-col.tabulator-frozen,
+.custom-tabulator .tabulator-header .tabulator-col-group.tabulator-frozen {
+    background-color: var(--table-header-bg) !important;
 }
 
 .custom-tabulator .tabulator-placeholder {
@@ -1914,7 +1924,8 @@ th {
 }
 /* Add more rules based on your number of groups */
 
-/* Remove ALL visual separation between frozen and non-frozen columns */
+/* Remove ALL visual separation between frozen and non-frozen columns
+   for custom sticky layouts (Bootstrap tables etc.) */
 [style*="position: sticky"] {
     box-shadow: none !important;
     border-right: none !important;

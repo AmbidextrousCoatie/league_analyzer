@@ -17,8 +17,10 @@
         rainbowPastel: { positive: 2, negative: 5, highlight: 9 }
     };
 
-    const DEFAULT_STRIPE_PALETTE = ["#e9f0ff", "#e9f0ff"];
-    //const DEFAULT_STRIPE_PALETTE = ["#e9f0ff", "#c2effc"];
+    // First color = base table background, second = accent stripe
+    // This makes one of the stripe colors effectively the "default" color.
+    //const DEFAULT_STRIPE_PALETTE = ["#ffffff", "#e9f0ff"];
+    const DEFAULT_STRIPE_PALETTE = ["#ffffff", "#999999"];
 
     let currentPaletteName = "rainbowPastel";
     let currentPalette = TEAM_COLOR_PALETTES[currentPaletteName];
@@ -119,14 +121,12 @@
         for (let i = 0; i < groupCount; i++) {
             const color = palette[i % palette.length];
             const headerBg = toRgba(color, headerAlpha);
-            // Use same color for cells as headers
-            const cellBg = toRgba(color, headerAlpha);
-            // Cells (via formatter adding class)
-            css += `.tabulator-cell.col-group-${i} { background-color: ${cellBg} !important; }\n`;
-            // Column headers (via headerClass) - target the title element
-            css += `.tabulator-col.col-group-${i} .tabulator-col-title { background-color: ${headerBg} !important; }\n`;
-            // Group headers - target the group title element
-            css += `.tabulator-col-group.col-group-${i} .tabulator-col-group-title { background-color: ${headerBg} !important; }\n`;
+            const cellBg = toRgba(color, cellAlpha);
+            // Body cells (but NOT frozen ones – they use solid row backgrounds to avoid see‑through)
+            css += `.tabulator-cell.col-group-${i}:not(.tabulator-frozen) { background-color: ${cellBg} !important; }\n`;
+            // Full header cells for this group (no small boxes just behind text), but not frozen headers
+            css += `.tabulator-col.col-group-${i}:not(.tabulator-frozen) { background-color: ${headerBg} !important; }\n`;
+            css += `.tabulator-col-group.col-group-${i}:not(.tabulator-frozen) { background-color: ${headerBg} !important; }\n`;
         }
         return css;
     }
