@@ -28,7 +28,7 @@ class ColumnGroup:
 @dataclass
 class TableData:
     """Complete table data structure."""
-    columns: List[ColumnGroup]
+    columns: Union[List[ColumnGroup], List[Column]]  # Accept either ColumnGroups or bare Columns
     data: List[List[Any]]
     title: Optional[str] = None
     description: Optional[str] = None
@@ -37,6 +37,12 @@ class TableData:
     row_metadata: Optional[List[Dict[str, Any]]] = field(default_factory=list)  # Row-level metadata for styling
     cell_metadata: Optional[Dict[str, Dict[str, Any]]] = field(default_factory=dict)  # Cell-level metadata for styling (format: "row:col")
     default_sort: Optional[Dict[str, str]] = None  # Default sort: {"field": "average", "dir": "desc"}
+    
+    def __post_init__(self):
+        """Normalize columns: if bare Columns are provided, wrap them in a ColumnGroup with empty title."""
+        if self.columns and len(self.columns) > 0 and isinstance(self.columns[0], Column):
+            # Convert List[Column] to List[ColumnGroup] by wrapping in a single group
+            self.columns = [ColumnGroup(title="", columns=list(self.columns))]
     
     def to_dict(self) -> Dict[str, Any]:
         """Convert to a dictionary suitable for JSON serialization"""

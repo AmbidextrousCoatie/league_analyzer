@@ -78,7 +78,7 @@ class LeagueSeasonOverviewBlock extends BaseContentBlock {
                             <div class="card">
                                 <div class="card-header">
                                     <h6>${typeof t === 'function' ? t('season_timetable', 'Season Timetable') : 'Season Timetable'}</h6>
-                                    <p class="mb-0 text-muted small">${typeof t === 'function' ? t('match_schedule', 'Match Schedule') : 'Match Schedule'}</p>
+                                    <!--<p class="mb-0 text-muted small">${typeof t === 'function' ? t('match_schedule', 'Match Schedule') : 'Match Schedule'}</p>-->
                                 </div>
                                 <div class="card-body">
                                     <div id="seasonTimetable"></div>
@@ -134,7 +134,7 @@ class LeagueSeasonOverviewBlock extends BaseContentBlock {
                             <div class="card">
                                 <div class="card-header">
                                     <h6>${typeof t === 'function' ? t('individual_averages', 'Individual Averages') : 'Individual Averages'}</h6>
-                                    <p class="mb-0 text-muted small">${typeof t === 'function' ? t('individual_performance', 'Individual Performance') : 'Individual Performance'}</p>
+                                    <!--<p class="mb-0 text-muted small">${typeof t === 'function' ? t('individual_performance', 'Individual Performance') : 'Individual Performance'}</p>-->
                                 </div>
                                 <div class="card-body">
                                     <div id="individualAveragesTable"></div>
@@ -288,7 +288,8 @@ class LeagueSeasonOverviewBlock extends BaseContentBlock {
             createTableTabulator('seasonTimetable', data, { 
                 disablePositionCircle: true,
                 enableSpecialRowStyling: true,
-                tooltips: true
+                tooltips: true,
+                skipTitleGeneration: true
             });
         } else {
             console.warn('createTableTabulator not available or invalid data format, falling back');

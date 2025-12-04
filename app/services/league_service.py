@@ -2644,23 +2644,18 @@ class LeagueService:
                     status = "⏳ Pending"
                 
                 table_data.append([
-                    f"Week {week_num}",
+                    week_num,
                     date if date and str(date) != 'nan' else "TBD",
                     location if location and str(location) != 'nan' else f"{league} Venue",
                     status
                 ])
             
-            # Create table structure
+            # Create table structure - can pass bare Columns directly, no need for ColumnGroup wrapper
             columns = [
-                ColumnGroup(
-                    title=i18n_service.get_text("season_timetable"),
-                    columns=[
-                        Column(title=i18n_service.get_text("week"), field="week", width="100px", align="center"),
-                        Column(title=i18n_service.get_text("date"), field="date", width="120px", align="center"),
-                        Column(title=i18n_service.get_text("location"), field="location", width="200px", align="left"),
-                        Column(title=i18n_service.get_text("status"), field="status", width="150px", align="center")
-                    ]
-                )
+                Column(title=i18n_service.get_text("week"), field="week", width="100px", align="center"),
+                Column(title=i18n_service.get_text("date"), field="date", width="120px", align="center"),
+                Column(title=i18n_service.get_text("location"), field="location", width="200px", align="left"),
+                Column(title=i18n_service.get_text("status"), field="status", width="150px", align="center")
             ]
             
             return TableData(
@@ -2777,24 +2772,14 @@ class LeagueService:
             
             # Create table structure
             columns = [
-                ColumnGroup(
-                    title=i18n_service.get_text("player"),
-                    frozen='left',  # Make only the player name column sticky
-                    columns=[
-                        Column(title=i18n_service.get_text("player"), field="player", width="180px", align="left")
-                    ]
-                ),
-                ColumnGroup(
-                    title=i18n_service.get_text("individual_averages"),
-                    columns=[
-                        Column(title=i18n_service.get_text("team"), field="team", width="130px", align="left"),
-                        Column(title=i18n_service.get_text("games"), field="games", width="70px", align="center"),
-                        Column(title=i18n_service.get_text("total_points"), field="total_points", width="100px", align="center"),
-                        Column(title=i18n_service.get_text("average"), field="average", width="90px", align="center"),
-                        Column(title=i18n_service.get_text("high_game"), field="high_game", width="90px", align="center")
-                    ]
-                )
+               
+                Column(title=i18n_service.get_text("team"), field="team", width="130px", align="left"),
+                Column(title=i18n_service.get_text("games"), field="games", width="70px", align="center"),
+                Column(title=i18n_service.get_text("total_points"), field="total_points", width="100px", align="center"),
+                Column(title=i18n_service.get_text("average"), field="average", width="90px", align="center"),
+                Column(title=i18n_service.get_text("high_game"), field="high_game", width="90px", align="center")
             ]
+                
             
             title_suffix = ""
             if week is not None:

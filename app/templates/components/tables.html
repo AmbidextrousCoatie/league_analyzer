@@ -156,6 +156,7 @@ function parseColumnWidth(width) {
 }
 
 function createTableTabulator(tableId, data, options = {}) {
+    
     const settings = {
         disablePositionCircle: false,
         enableSpecialRowStyling: false,
@@ -225,8 +226,11 @@ function createTableTabulator(tableId, data, options = {}) {
         return rowObject;
     });
 
+    // Check if all group titles are empty - if so, flatten structure (no groups)
+    const hasGroupTitles = data.columns.some(group => group.title && group.title.trim() !== '');
+    
     // Apply CSS classes for striped column groups before building column definitions
-    if (useStripedGroups && data.columns) {
+    if (useStripedGroups && data.columns && hasGroupTitles) {
         ColorUtils.assignGroupStripeCss(data.columns);
         ColorUtils.injectStripeCss(data.columns.length, {
             headerAlpha: isCompactLayout ? 0.55 : 0.4,
@@ -234,7 +238,130 @@ function createTableTabulator(tableId, data, options = {}) {
         });
     }
 
-    const tabulatorColumns = (data.columns || []).map((group, groupIndex) => {
+    // If no group titles, flatten to direct columns (no groups)
+    let tabulatorColumns;
+    if (!hasGroupTitles) {
+        // Flatten: extract all columns from all groups and pass directly to Tabulator
+        tabulatorColumns = [];
+        data.columns.forEach((group, groupIndex) => {
+            if (!Array.isArray(group.columns)) {
+                return;
+            }
+            
+            const groupFrozenDirection = group.frozen === 'left' || group.frozen === 'right' ? group.frozen : null;
+            const isHighlighted = group.highlighted === true;
+            
+            group.columns.forEach((column, columnIndex) => {
+                const columnInfo = columnLookup[`${groupIndex}-${columnIndex}`];
+                if (!columnInfo) {
+                    return;
+                }
+                const field = columnInfo.field;
+                const headerAlign = column.align || 'center';
+                const columnStyles = column.style || {};
+                
+                const formatter = function(cell) {
+                    const value = cell.getValue();
+                    const element = cell.getElement();
+                    const rowData = cell.getRow().getData();
+                    const rowIdx = rowData.__rowIndex;
+
+                    // Add highlighting class and style to cell element if group is highlighted
+                    if (isHighlighted) {
+                        element.classList.add('tab-col-highlighted');
+                        element.style.setProperty('font-weight', HIGHLIGHT_STYLES.cellFontWeight, 'important');
+                    }
+
+                    // Column-level inline styles
+                    applyElementStyles(element, columnStyles);
+
+                    // Cell metadata styles
+                    const cellMeta = cellMetadataMap[rowIdx]?.[field];
+                    if (cellMeta) {
+                        applyElementStyles(element, cellMeta);
+                    }
+
+                    // Special handling for position column
+                    if (!settings.disablePositionCircle && groupIndex === 0 && columnIndex === 0) {
+                        const teamName = teamField ? rowData[teamField] : null;
+                        const color = getTeamColor(teamName);
+                        return `<div class="tab-position-circle" style="background-color: ${color};">${value ?? ''}</div>`;
+                    }
+
+                    return value ?? '';
+                };
+
+                const sampleValue = transformedData.length ? transformedData[0][field] : null;
+                const isNumberColumn = typeof sampleValue === 'number';
+                const isStringNumber = typeof sampleValue === 'string' && !isNaN(parseFloat(sampleValue)) && isFinite(sampleValue);
+
+                let colCssClass = column.cssClass || '';
+                let colHeaderClass = column.headerClass || '';
+                
+                // Build CSS classes
+                let cssClasses = [];
+                if (column.align === 'right') {
+                    cssClasses.push('text-end');
+                } else if (column.align === 'left') {
+                    cssClasses.push('text-start');
+                } else {
+                    cssClasses.push('text-center');
+                }
+                
+                if (isHighlighted) {
+                    cssClasses.push('tab-col-highlighted');
+                }
+                
+                if (colCssClass) {
+                    cssClasses.push(colCssClass);
+                }
+
+                const columnDefinition = {
+                    title: column.title || '',
+                    field,
+                    hozAlign: headerAlign,
+                    headerHozAlign: headerAlign,
+                    headerSort: column.sortable !== false,
+                    sorter: column.sortable === false ? undefined : (isNumberColumn || isStringNumber ? 'number' : 'string'),
+                    formatter,
+                    tooltip: settings.tooltips ? true : false,
+                    cssClass: cssClasses.join(' ') || undefined
+                };
+
+                // Set frozen on individual column if group was frozen
+                if (groupFrozenDirection) {
+                    columnDefinition.frozen = groupFrozenDirection;
+                }
+
+                // Column widths
+                let columnWidth = parseColumnWidth(column.width);
+                if (columnWidth === undefined) {
+                    if (groupIndex === 0) {
+                        columnWidth = 120;
+                    } else {
+                        columnWidth = 100;
+                    }
+                }
+
+                if (columnWidth !== undefined) {
+                    if (isCompactLayout) {
+                        columnDefinition.width = columnWidth;
+                        columnDefinition.minWidth = columnWidth;
+                        columnDefinition.widthGrow = 0;
+                    } else {
+                        columnDefinition.minWidth = columnWidth;
+                        columnDefinition.widthGrow = 1;
+                    }
+                } else if (isCompactLayout) {
+                    columnDefinition.widthGrow = 0;
+                }
+
+                tabulatorColumns.push(columnDefinition);
+            });
+        });
+    } else {
+        // Normal structure with groups
+        tabulatorColumns = (data.columns || []).map((group, groupIndex) => {
         if (!Array.isArray(group.columns)) {
             return null;
         }
@@ -397,7 +524,8 @@ function createTableTabulator(tableId, data, options = {}) {
         }
 
         return groupDefinition;
-    }).filter(Boolean);
+        }).filter(Boolean);
+    }
 
     if (!tabulatorColumns.length) {
         console.warn('No Tabulator column definitions could be created');
@@ -449,13 +577,13 @@ function createTableTabulator(tableId, data, options = {}) {
         width: "100%", // Ensure table takes full width of container
         ...(initialSort ? { initialSort: initialSort } : {}),
         tableBuilt: function() {
-            // Apply highlighting and fix header separator
-            // Use requestAnimationFrame for better timing
-            requestAnimationFrame(() => {
+            try {
+                // Apply highlighting and fix header separator
+                // Use requestAnimationFrame for better timing
                 requestAnimationFrame(() => {
+                    requestAnimationFrame(() => {
                     const tableElement = document.querySelector(`#${tableId}`);
                     if (!tableElement) {
-                        console.warn(`[Tabulator ${tableId}] Table element not found`);
                         return;
                     }
                     
@@ -487,13 +615,9 @@ function createTableTabulator(tableId, data, options = {}) {
                         }
                     });
                     
-                    if (highlightedFields.size > 0) {
-                        console.log(`[Tabulator ${tableId}] Applying highlighting to ${highlightedFields.size} fields:`, Array.from(highlightedFields));
-                        console.log(`[Tabulator ${tableId}] Highlighted groups:`, Array.from(highlightedGroupTitles));
-                    }
-                    
                     const header = tableElement.querySelector('.tabulator-header');
                     if (header) {
+                        
                         // Remove full-width border from header containers
                         header.style.setProperty('border-bottom', 'none', 'important');
                         const headerContents = header.querySelector('.tabulator-header-contents');
@@ -511,7 +635,6 @@ function createTableTabulator(tableId, data, options = {}) {
                             header.querySelectorAll('.tabulator-col-group').forEach((colGroup, groupIndex) => {
                                 const groupTitle = colGroup.querySelector('.tab-group-title[data-highlighted="true"]');
                                 if (groupTitle || highlightedGroupTitles.has(colGroup.getAttribute('aria-title') || '')) {
-                                    console.log(`[Tabulator ${tableId}] Found highlighted group at index ${groupIndex}`);
                                     colGroup.classList.add('tab-group-highlighted');
                                     
                                     // Style all columns within this group
@@ -567,20 +690,49 @@ function createTableTabulator(tableId, data, options = {}) {
                                     }
                                 });
                             });
-                            console.log(`[Tabulator ${tableId}] Applied highlighting to ${rows.length} rows, ${highlightedCellCount} cells`);
-                        } else {
-                            console.warn(`[Tabulator ${tableId}] Table body not found`);
                         }
 
                         // Column stripes handled via CSS classes
                     }
                 });
             });
+            } catch (error) {
+                console.error(`[Tabulator ${tableId}] Error in tableBuilt callback:`, error);
+            }
         },
         dataRendered: function() {
             // Re-apply highlighting after data is rendered (for dynamic updates)
             const tableElement = document.querySelector(`#${tableId}`);
             if (!tableElement) return;
+            
+            // Re-check and hide empty group headers (in case table was re-rendered)
+            const header = tableElement.querySelector('.tabulator-header');
+            if (header) {
+                const hasGroupTitles = data.columns.some(group => group.title && group.title.trim() !== '');
+                if (!hasGroupTitles) {
+                    const headerRows = header.querySelector('.tabulator-header-rows');
+                    if (headerRows) {
+                        const rows = headerRows.querySelectorAll('.tabulator-header-row');
+                        rows.forEach(row => {
+                            const colGroups = row.querySelectorAll('.tabulator-col-group');
+                            if (colGroups.length > 0) {
+                                let allEmpty = true;
+                                colGroups.forEach(colGroup => {
+                                    const titleEl = colGroup.querySelector('.tabulator-col-group-title, .tabulator-col-title');
+                                    if (titleEl && titleEl.textContent && titleEl.textContent.trim() !== '') {
+                                        allEmpty = false;
+                                    }
+                                });
+                                if (allEmpty) {
+                                    row.style.setProperty('display', 'none', 'important');
+                                    row.style.setProperty('height', '0', 'important');
+                                    row.style.setProperty('min-height', '0', 'important');
+                                }
+                            }
+                        });
+                    }
+                }
+            }
             
             const highlightedFields = new Set();
             data.columns.forEach((group) => {
@@ -646,235 +798,101 @@ function createTableTabulator(tableId, data, options = {}) {
         }
     };
 
-    window[tableId + 'Instance'] = new Tabulator(`#${tableId}`, tabulatorOptions);
+    const tabulatorInstance = new Tabulator(`#${tableId}`, tabulatorOptions);
+    window[tableId + 'Instance'] = tabulatorInstance;
 
     console.log(`Table "${tableId}" successfully created/updated (Tabulator)`);
-}
-
-function createTableBootstrap(containerId, tableData, columns = null, groupBy = null) {
-    console.log('Creating Bootstrap table with:', {
-        containerId,
-        tableData,
-        columns,
-        groupBy
-    });
-
-    // Parse tableData if it's a string
-    if (typeof tableData === 'string') {
+    
+    // Register tableBuilt callback AFTER instantiation (as shown in funsies.html)
+    // This is more reliable than passing it as an option
+    tabulatorInstance.on("tableBuilt", function() {
         try {
-            tableData = JSON.parse(tableData);
-        } catch (e) {
-            console.error('Failed to parse data:', e);
-            return;
-        }
-    }
-
-    // Extract columns and data from tableData if they exist
-    if (tableData.columns && tableData.data) {
-        columns = tableData.columns;
-        tableData = tableData.data;
-    }
-
-    console.log('Processed data:', {
-        columns,
-        tableData
-    });
-
-    // Check if all required parameters are present
-    if (!containerId || !tableData || !columns) {
-        console.error('Missing required parameters:', { containerId, tableData, columns });
-        return;
-    }
-
-    const container = document.getElementById(containerId);
-    if (!container) {
-        console.error('Container not found:', containerId);
-        return;
-    }
-
-    // Clear existing content
-    container.innerHTML = '';
-
-    // Create table wrapper for horizontal scroll
-    const tableWrapper = document.createElement('div');
-    tableWrapper.className = 'table-responsive';
-    
-    const table = document.createElement('table');
-    table.className = 'table table-striped table-hover';
-    
-    // Create header
-    const thead = document.createElement('thead');
-    const headerRow = document.createElement('tr');
-    
-    // Handle column groups if present
-    if (columns[0] && columns[0].children) {
-        // Add group headers
-        const groupHeaderRow = document.createElement('tr');
-        columns.forEach(group => {
-            const th = document.createElement('th');
-            th.textContent = group.title || '';
-            th.colSpan = group.children ? group.children.length : 1;
-            groupHeaderRow.appendChild(th);
-        });
-        thead.appendChild(groupHeaderRow);
-
-        // Add sub-headers
-        const subHeaderRow = document.createElement('tr');
-        columns.forEach(group => {
-            if (group.children) {
-                group.children.forEach(col => {
-                    const th = document.createElement('th');
-                    th.textContent = col.title || '';
-                    if (col.width) {
-                        th.style.minWidth = col.width;
-                    }
-                    subHeaderRow.appendChild(th);
+            // Check if all group titles are empty - if so, hide the group header row
+            const hasGroupTitles = data.columns.some(group => group.title && group.title.trim() !== '');
+            
+            if (!hasGroupTitles) {
+                requestAnimationFrame(() => {
+                    requestAnimationFrame(() => {
+                        const tableElement = document.querySelector(`#${tableId}`);
+                        if (!tableElement) return;
+                        
+                        const header = tableElement.querySelector('.tabulator-header');
+                        if (!header) return;
+                        
+                        // Check if all group titles are empty
+                        let allGroupTitlesEmpty = true;
+                        data.columns.forEach((group) => {
+                            if (group.title && group.title.trim() !== '') {
+                                allGroupTitlesEmpty = false;
+                            }
+                        });
+                        
+                        if (allGroupTitlesEmpty) {
+                            // Structure 1: .tabulator-header-rows > .tabulator-header-row (standard structure)
+                            // Hide the entire header row that contains only empty group titles
+                            const headerRows = header.querySelector('.tabulator-header-rows');
+                            if (headerRows) {
+                                const rows = headerRows.querySelectorAll('.tabulator-header-row');
+                                rows.forEach((row) => {
+                                    const colGroups = row.querySelectorAll('.tabulator-col-group');
+                                    if (colGroups.length > 0) {
+                                        let rowAllEmpty = true;
+                                        colGroups.forEach((colGroup) => {
+                                            const titleEl = colGroup.querySelector('.tabulator-col-group-title');
+                                            const titleText = titleEl ? titleEl.textContent.trim() : '';
+                                            if (titleText !== '') {
+                                                rowAllEmpty = false;
+                                            }
+                                        });
+                                        if (rowAllEmpty) {
+                                            // Hide the entire header row (this is the group title row)
+                                            // Column headers are in a separate row below
+                                            row.style.setProperty('display', 'none', 'important');
+                                            row.style.setProperty('height', '0', 'important');
+                                            row.style.setProperty('min-height', '0', 'important');
+                                        }
+                                    }
+                                });
+                            }
+                            
+                            // Structure 2: col-groups directly in header (alternative structure)
+                            // Check if column headers are children of col-groups or separate
+                            const colGroups = header.querySelectorAll('.tabulator-col-group');
+                            colGroups.forEach((colGroup, idx) => {
+                                const groupTitleEl = colGroup.querySelector('.tabulator-col-group-title');
+                                const titleText = groupTitleEl ? groupTitleEl.textContent.trim() : '';
+                                const columnHeaders = colGroup.querySelectorAll('.tabulator-col');
+                                
+                                if (titleText === '') {
+                                    if (columnHeaders.length > 0) {
+                                        // Column headers ARE children of col-group - we can't hide the col-group
+                                        // Instead, hide only the title element and minimize the col-group height
+                                        if (groupTitleEl) {
+                                            groupTitleEl.style.setProperty('display', 'none', 'important');
+                                            groupTitleEl.style.setProperty('height', '0', 'important');
+                                        }
+                                        // Minimize col-group but keep it visible for column headers
+                                        colGroup.style.setProperty('min-height', '0', 'important');
+                                        colGroup.style.setProperty('padding-top', '0', 'important');
+                                        colGroup.style.setProperty('padding-bottom', '0', 'important');
+                                    } else {
+                                        // No column headers in col-group - safe to hide entire col-group
+                                        colGroup.style.setProperty('display', 'none', 'important');
+                                        colGroup.style.setProperty('height', '0', 'important');
+                                        colGroup.style.setProperty('min-height', '0', 'important');
+                                        colGroup.style.setProperty('padding', '0', 'important');
+                                        colGroup.style.setProperty('margin', '0', 'important');
+                                    }
+                                }
+                            });
+                        }
+                    });
                 });
             }
-        });
-        thead.appendChild(subHeaderRow);
-    } else {
-        // Simple columns without groups
-        columns.forEach(col => {
-            const th = document.createElement('th');
-            th.textContent = col.title || '';
-            if (col.width) {
-                th.style.minWidth = col.width;
-            }
-            headerRow.appendChild(th);
-        });
-        thead.appendChild(headerRow);
-    }
-    
-    table.appendChild(thead);
-    
-    // Create body
-    const tbody = document.createElement('tbody');
-    
-    // Get flat columns for data mapping
-    const flatColumns = columns.reduce((acc, col) => {
-        if (col.children) {
-            return [...acc, ...col.children];
-        }
-        return [...acc, col];
-    }, []);
-
-    // Add rows
-    tableData.forEach(row => {
-        const tr = document.createElement('tr');
-        flatColumns.forEach(col => {
-            const td = document.createElement('td');
-            td.textContent = row[col.field] || '';
-            tr.appendChild(td);
-        });
-        tbody.appendChild(tr);
-    });
-    
-    table.appendChild(tbody);
-    tableWrapper.appendChild(table);
-    container.appendChild(tableWrapper);
-    
-    return table;
-}
-
-function createTableBootstrap2(tableId, data) {
-    // Check if the data has columns and data
-    if (!data || !data.columns || !data.data) {
-        console.error('Invalid data format');
-        return;
-    }
-
-    // Transform the data from array format to object format
-    const transformedData = data.data.map(row => {
-        const obj = {};
-        let index = 0; // Initialize index to track the position in the row array
-
-        // Loop through each column group
-        data.columns.forEach(colGroup => {
-            if (colGroup.columns) {
-                // Loop through each column in the group
-                colGroup.columns.forEach(col => {
-                    obj[col.field] = row[index]; // Assign the value from the row to the object
-                    index++; // Increment index for the next field
-                });
-            }
-        });
-        return obj; // Return the transformed object
-    });
-
-    // Create table wrapper for horizontal scroll
-    const tableWrapper = document.createElement('div');
-    tableWrapper.className = 'table-responsive';
-
-    // Create table
-    const table = document.createElement('table');
-    table.className = 'table table-striped table-hover';
-
-    // Create header
-    const thead = document.createElement('thead');
-
-    // Add group headers
-    const groupHeaderRow = document.createElement('tr');
-    data.columns.forEach(colGroup => {
-        const th = document.createElement('th');
-        th.textContent = colGroup.title || '';
-        th.colSpan = colGroup.columns ? colGroup.columns.length : 1;
-        groupHeaderRow.appendChild(th);
-    });
-    thead.appendChild(groupHeaderRow);
-
-    // Add sub-headers
-    const subHeaderRow = document.createElement('tr');
-    data.columns.forEach(colGroup => {
-        if (colGroup.columns) {
-            colGroup.columns.forEach((col, index) => {
-                const th = document.createElement('th');
-                th.textContent = col.title || '';
-                // Add subtle vertical lines between column groups
-                if (index < colGroup.columns.length - 1) {
-                    th.style.borderRight = '1px solid #dee2e6'; // Bootstrap's default border color
-                }
-                subHeaderRow.appendChild(th);
-            });
+        } catch (error) {
+            console.error(`[Tabulator ${tableId}] Error in tableBuilt event handler:`, error);
         }
     });
-    thead.appendChild(subHeaderRow);
-    
-    table.appendChild(thead);
-
-    // Create body
-    const tbody = document.createElement('tbody');
-
-    // Add rows
-    transformedData.forEach(rowData => {
-        const tr = document.createElement('tr');
-        data.columns.forEach(colGroup => {
-            if (colGroup.columns) {
-                colGroup.columns.forEach((col, index) => {
-                    const td = document.createElement('td');
-                    td.textContent = rowData[col.field] || ''; // Use the transformed data
-
-                    // Freeze the first two columns
-                    if (index < 2) {
-                        td.style.position = 'sticky';
-                        td.style.left = `${index * 100}px`; // Adjust based on your layout
-                        td.style.zIndex = '1'; // Ensure it stays above other content
-                        td.style.backgroundColor = '#fff'; // Background color to prevent transparency
-                    }
-
-                    tr.appendChild(td);
-                });
-            }
-        });
-        tbody.appendChild(tr);
-    });
-
-    table.appendChild(tbody);
-    tableWrapper.appendChild(table);
-    document.getElementById(tableId).innerHTML = ''; // Clear existing content
-    document.getElementById(tableId).appendChild(tableWrapper); // Append new table
-
-    console.log(`Table "${tableId}" successfully created/updated`);
 }
 
 function createTableBootstrap3(tableId, data, options = {}) {
@@ -882,6 +900,16 @@ function createTableBootstrap3(tableId, data, options = {}) {
     if (!data || !data.columns || !data.data) {
         console.error('Invalid data format');
         return;
+    }
+
+    // Normalize columns: if bare Column objects are provided (have 'field' but no 'columns'),
+    // wrap them in a ColumnGroup with empty title to match expected structure
+    if (data.columns.length > 0 && data.columns[0].field && !data.columns[0].columns) {
+        // These are bare Column objects, wrap them in a single group
+        data.columns = [{
+            title: "",
+            columns: data.columns
+        }];
     }
 
     // Get table configuration
@@ -954,63 +982,68 @@ function createTableBootstrap3(tableId, data, options = {}) {
         thead.style.backgroundColor = '#fff';
     }
 
-    // Add group headers
-    const groupHeaderRow = document.createElement('tr');
-    data.columns.forEach((colGroup, groupIndex) => {
-        const th = document.createElement('th');
-        th.textContent = colGroup.title || '';
-        th.colSpan = colGroup.columns ? colGroup.columns.length : 1;
-        th.style.padding = '8px';
-        th.style.textAlign = 'center';
-        th.className = 'align-middle';
-        
-        // Add vertical borders between groups
-        if (groupIndex > 0) {
-            th.style.borderLeft = '2px solid #264653';
-        }
-        
-        // Apply group styles
-        if (colGroup.style) {
-            Object.entries(colGroup.style).forEach(([key, value]) => {
-                th.style[key] = value;
-            });
-        }
-        
-        // Apply header styles
-        if (colGroup.headerStyle) {
-            Object.entries(colGroup.headerStyle).forEach(([key, value]) => {
-                th.style[key] = value;
-            });
-        }
-        
-        // Apply group width
-        if (colGroup.width) {
-            th.style.width = colGroup.width;
-        }
-        
-        // Freeze column group headers if the group is frozen
-        if (colGroup.frozen) {
-            th.style.position = 'sticky';
-            if (colGroup.frozen === 'left') {
-                // Calculate left position based on previous frozen groups
-                let leftPos = 0;
-                for (let g = 0; g < groupIndex; g++) {
-                    if (data.columns[g].frozen === 'left') {
-                        // Sum up widths of all columns in previous frozen groups
-                        data.columns[g].columns.forEach(c => {
-                            leftPos += parseInt(c.width || '100px');
-                        });
-                    }
-                }
-                th.style.left = `${leftPos}px`;
+    // Check if any group has a non-empty title - only show group header row if at least one title exists
+    const hasGroupTitles = data.columns.some(colGroup => colGroup.title && colGroup.title.trim() !== '');
+    
+    // Add group headers (only if at least one group has a title)
+    if (hasGroupTitles) {
+        const groupHeaderRow = document.createElement('tr');
+        data.columns.forEach((colGroup, groupIndex) => {
+            const th = document.createElement('th');
+            th.textContent = colGroup.title || '';
+            th.colSpan = colGroup.columns ? colGroup.columns.length : 1;
+            th.style.padding = '8px';
+            th.style.textAlign = 'center';
+            th.className = 'align-middle';
+            
+            // Add vertical borders between groups
+            if (groupIndex > 0) {
+                th.style.borderLeft = '2px solid #264653';
             }
-            th.style.zIndex = '2';  // Higher than regular cells
-            th.style.backgroundColor = colGroup.style?.backgroundColor || '#fff';
-        }
-        
-        groupHeaderRow.appendChild(th);
-    });
-    thead.appendChild(groupHeaderRow);
+            
+            // Apply group styles
+            if (colGroup.style) {
+                Object.entries(colGroup.style).forEach(([key, value]) => {
+                    th.style[key] = value;
+                });
+            }
+            
+            // Apply header styles
+            if (colGroup.headerStyle) {
+                Object.entries(colGroup.headerStyle).forEach(([key, value]) => {
+                    th.style[key] = value;
+                });
+            }
+            
+            // Apply group width
+            if (colGroup.width) {
+                th.style.width = colGroup.width;
+            }
+            
+            // Freeze column group headers if the group is frozen
+            if (colGroup.frozen) {
+                th.style.position = 'sticky';
+                if (colGroup.frozen === 'left') {
+                    // Calculate left position based on previous frozen groups
+                    let leftPos = 0;
+                    for (let g = 0; g < groupIndex; g++) {
+                        if (data.columns[g].frozen === 'left') {
+                            // Sum up widths of all columns in previous frozen groups
+                            data.columns[g].columns.forEach(c => {
+                                leftPos += parseInt(c.width || '100px');
+                            });
+                        }
+                    }
+                    th.style.left = `${leftPos}px`;
+                }
+                th.style.zIndex = '2';  // Higher than regular cells
+                th.style.backgroundColor = colGroup.style?.backgroundColor || '#fff';
+            }
+            
+            groupHeaderRow.appendChild(th);
+        });
+        thead.appendChild(groupHeaderRow);
+    }
 
     // Add sub-headers with sort functionality
     const subHeaderRow = document.createElement('tr');
