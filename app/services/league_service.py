@@ -27,6 +27,7 @@ from app.models.series_data import SeriesData
 from data_access.schema import Columns
 from itertools import accumulate
 from app.config.debug_config import debug_config
+from app.utils.color_constants import get_theme_color
 # from data_access.series_data import calculate_series_data, get_player_series_data, get_team_series_data
 
 
@@ -135,7 +136,7 @@ class LeagueService:
                 ColumnGroup(
                     title=i18n_service.get_text("team"),
                     frozen="left",
-                    style={"backgroundColor": "#f8f9fa"},
+                    style={"backgroundColor": get_theme_color("background")},
                     columns=[
                         Column(title=i18n_service.get_text("team"), field="team_name", width="200px", align="left"),
                         Column(title=i18n_service.get_text("pins"), field="team_pins", width="80px", align="center"),
@@ -144,7 +145,7 @@ class LeagueService:
                 ),
                 ColumnGroup(
                     title=i18n_service.get_text("opponent"),
-                    style={"backgroundColor": "#f0f0f0"},
+                    style={"backgroundColor": get_theme_color("surface_light")},
                     columns=[
                         Column(title=i18n_service.get_text("points"), field="opponent_points", width="80px", align="center"),
                         Column(title=i18n_service.get_text("pins"), field="opponent_pins", width="80px", align="center"),
@@ -354,7 +355,7 @@ class LeagueService:
                 ColumnGroup(
                     title=team,  # Selected team name
                     frozen="left",
-                    style={"backgroundColor": "#f8f9fa"},
+                    style={"backgroundColor": get_theme_color("background")},
                     columns=[
                         Column(title=i18n_service.get_text("player"), field="player_name", width="200px", align="left"),
                         Column(title=i18n_service.get_text("pins"), field="player_pins", width="80px", align="center"),
@@ -363,7 +364,7 @@ class LeagueService:
                 ),
                 ColumnGroup(
                     title=opponent_name,  # Opposing team name
-                    style={"backgroundColor": "#f0f0f0"},
+                    style={"backgroundColor": get_theme_color("surface_light")},
                     columns=[
                         Column(title=i18n_service.get_text("points"), field="opponent_points", width="80px", align="center"),
                         Column(title=i18n_service.get_text("pins"), field="opponent_pins", width="80px", align="center"),
@@ -624,7 +625,7 @@ class LeagueService:
             ColumnGroup(
                 title=i18n_service.get_text("ranking"),
                 frozen="left",  # Freeze this group to the left
-                style={"backgroundColor": "#f8f9fa"},  # Light gray background
+                style={"backgroundColor": get_theme_color("background")},  # Light gray background
                 columns=[
                     Column(title="#", field="pos", width="50px", align="center"),
                     Column(title=i18n_service.get_text("team"), field="team", width="200px", align="left")
@@ -650,7 +651,7 @@ class LeagueService:
         columns.append(
             ColumnGroup(
                 title=i18n_service.get_text("total"),
-                style={"backgroundColor": "#e9ecef"},
+                style={"backgroundColor": get_theme_color("surface_alt")},
                 header_style={"fontWeight": "bold"},
                 columns=[
                     Column(title=i18n_service.get_text("points"), field="total_points", width="80px", align="center"),
@@ -1016,7 +1017,7 @@ class LeagueService:
                 ColumnGroup(
                     title=i18n_service.get_text("player"),
                     frozen="left",
-                    style={"backgroundColor": "#f8f9fa"},
+                    style={"backgroundColor": get_theme_color("background")},
                     columns=[
                         Column(title=i18n_service.get_text("position"), field="position", width="50px", align="center"),
                         Column(title=i18n_service.get_text("name"), field="name", width="200px", align="left")
@@ -1041,7 +1042,7 @@ class LeagueService:
             columns.append(
                 ColumnGroup(
                     title=i18n_service.get_text("total"),
-                    style={"backgroundColor": "#e9ecef"},
+                    style={"backgroundColor": get_theme_color("surface_alt")},
                     header_style={"fontWeight": "bold"},
                     columns=[
                         Column(title=i18n_service.get_text("points"), field="total_points", width="80px", align="center"),
@@ -1802,7 +1803,7 @@ class LeagueService:
                 ColumnGroup(
                     title=i18n_service.get_text("ranking"),
                     frozen="left",
-                    style={"backgroundColor": "#f8f9fa"},
+                    style={"backgroundColor": get_theme_color("background")},
                     columns=[
                         Column(title="#", field="pos", width="50px", align="center"),
                         Column(title=i18n_service.get_text("team"), field="team", width="200px", align="left")
@@ -1813,7 +1814,7 @@ class LeagueService:
             columns.append(
                 ColumnGroup(
                     title="Total",
-                    style={"backgroundColor": "#e9ecef"},
+                    style={"backgroundColor": get_theme_color("surface_alt")},
                     header_style={"fontWeight": "bold"},
                     highlighted=True,  # Highlight the Total group
                     columns=[
@@ -2080,7 +2081,7 @@ class LeagueService:
             columns = [
                 ColumnGroup(
                     title=i18n_service.get_text("match_info"),
-                    style={"backgroundColor": "#f8f9fa"},
+                    style={"backgroundColor": get_theme_color("background")},
                     columns=[
                         Column(title=i18n_service.get_text("round"), field="round_number", width="60px", align="center"),
                         Column(title=i18n_service.get_text("opponent"), field="opponent_name", width="120px", align="left"),
@@ -2110,7 +2111,7 @@ class LeagueService:
             columns.append(
                 ColumnGroup(
                     title=i18n_service.get_text("team"),
-                    style={"backgroundColor": "#e9ecef"},
+                    style={"backgroundColor": get_theme_color("surface_alt")},
                     header_style={"fontWeight": "bold"},
                     columns=[
                         Column(title=i18n_service.get_text("score"), field="team_score", width="80px", align="center"),
@@ -2772,7 +2773,7 @@ class LeagueService:
             
             # Create table structure
             columns = [
-               
+                Column(title=i18n_service.get_text("player"), field="player", width="180px", align="left"),
                 Column(title=i18n_service.get_text("team"), field="team", width="130px", align="left"),
                 Column(title=i18n_service.get_text("games"), field="games", width="70px", align="center"),
                 Column(title=i18n_service.get_text("total_points"), field="total_points", width="100px", align="center"),
@@ -3516,8 +3517,8 @@ class LeagueService:
                     # Diagonal cells - empty cells (no merge, no "-")
                     row.extend(["", ""])
                     # Add light gray background to both diagonal cells
-                    cell_metadata[f"{row_idx}:{col_idx}"] = {"backgroundColor": "#f8f9fa"}
-                    cell_metadata[f"{row_idx}:{col_idx + 1}"] = {"backgroundColor": "#f8f9fa"}
+                    cell_metadata[f"{row_idx}:{col_idx}"] = {"backgroundColor": get_theme_color("background")}
+                    cell_metadata[f"{row_idx}:{col_idx + 1}"] = {"backgroundColor": get_theme_color("background")}
                     col_idx += 2
             
             # Add team averages

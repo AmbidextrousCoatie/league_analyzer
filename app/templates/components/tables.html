@@ -14,7 +14,11 @@ function createTable(config) {
 
     let currentData = [...data];
 
-    const colors = ColorUtils.getGradientColors(headerGroups.length, '#ffffff', '#7ec2f8');
+    const colors = ColorUtils.getGradientColors(
+        headerGroups.length, 
+        ColorUtils.getThemeColor('surface') || '#ffffff', 
+        ColorUtils.getThemeColor('accent') || '#7ec2f8'
+    );
 
     // Create mappings for column colors and last group columns
     const columnColors = {};
@@ -998,7 +1002,7 @@ function createTableBootstrap3(tableId, data, options = {}) {
             
             // Add vertical borders between groups
             if (groupIndex > 0) {
-                th.style.borderLeft = '2px solid #264653';
+                th.style.borderLeft = `2px solid ${ColorUtils.getThemeColor('border') || '#264653'}`;
             }
             
             // Apply group styles
@@ -1037,7 +1041,7 @@ function createTableBootstrap3(tableId, data, options = {}) {
                     th.style.left = `${leftPos}px`;
                 }
                 th.style.zIndex = '2';  // Higher than regular cells
-                th.style.backgroundColor = colGroup.style?.backgroundColor || '#fff';
+                th.style.backgroundColor = colGroup.style?.backgroundColor || (ColorUtils.getThemeColor('surface') || '#fff');
             }
             
             groupHeaderRow.appendChild(th);
@@ -1150,7 +1154,7 @@ function createTableBootstrap3(tableId, data, options = {}) {
                 
                 // Add vertical borders between groups
                 if (index === 0 && groupIndex > 0) {
-                    th.style.borderLeft = '2px solid #264653';
+                    th.style.borderLeft = `2px solid ${ColorUtils.getThemeColor('border') || '#264653'}`;
                 }
                 
                 // Freeze column headers if the group is frozen
@@ -1173,7 +1177,7 @@ function createTableBootstrap3(tableId, data, options = {}) {
                         th.style.left = `${leftPos}px`;
                     }
                     th.style.zIndex = '2';  // Higher than regular cells
-                    th.style.backgroundColor = colGroup.style?.backgroundColor || '#fff';
+                    th.style.backgroundColor = colGroup.style?.backgroundColor || (ColorUtils.getThemeColor('surface') || '#fff');
                 }
                 
                 subHeaderRow.appendChild(th);
@@ -1462,8 +1466,8 @@ function createTableBootstrap3(tableId, data, options = {}) {
                                 
                                 // Add borders
                                 if (index === 0 && groupIndex > 0) {
-                                    td1.style.borderLeft = '2px solid #264653';
-                                    td2.style.borderLeft = '2px solid #264653';
+                                    td1.style.borderLeft = `2px solid ${ColorUtils.getThemeColor('border') || '#264653'}`;
+                                    td2.style.borderLeft = `2px solid ${ColorUtils.getThemeColor('border') || '#264653'}`;
                                 }
                                 
                                 tr1.appendChild(td1);
@@ -1511,7 +1515,7 @@ function createTableBootstrap3(tableId, data, options = {}) {
                         if (data.metadata && data.metadata.score_range && data.metadata.points_range) {
                             if (value === "") {
                                 // Empty cells (diagonal) get light gray background
-                                td.style.backgroundColor = "#f8f9fa";
+                                td.style.backgroundColor = ColorUtils.getThemeColor('background') || "#f8f9fa";
                             } else {
                                 const cellValue = parseFloat(value);
                                 if (!isNaN(cellValue)) {
@@ -1609,7 +1613,7 @@ function createTableBootstrap3(tableId, data, options = {}) {
                         
                         // Add vertical borders between groups (including between Team and first opponent)
                         if (index === 0 && groupIndex > 0) {
-                            td.style.borderLeft = '2px solid #264653';
+                            td.style.borderLeft = `2px solid ${ColorUtils.getThemeColor('border') || '#264653'}`;
                         }
                         
                         // Freeze columns if specified
@@ -1637,7 +1641,7 @@ function createTableBootstrap3(tableId, data, options = {}) {
                                 td.style.borderLeft = 'none';
                             }
                             td.style.zIndex = '1';
-                            td.style.backgroundColor = colGroup.style?.backgroundColor || '#fff';
+                            td.style.backgroundColor = colGroup.style?.backgroundColor || (ColorUtils.getThemeColor('surface') || '#fff');
                         }
                         
                         tr.appendChild(td);
@@ -1730,12 +1734,12 @@ function getTeamColor(teamName) {
 <style>
 /* Table theme with light/dark support */
 :root {
-    --table-surface: #ffffff;
+    --table-surface: var(--theme-surface, #ffffff);
     --table-surface-alt: #f6f8fb;
     --table-border-soft: rgba(15, 23, 42, 0.08);
     --table-header-bg: #eef2f7;
     --table-header-text: #0f172a;
-    --table-body-text: #1f2933;
+    --table-body-text: var(--theme-table-body-text, #1f2933);
     --table-muted-text: #64748b;
     --table-hover-bg: rgba(59, 130, 246, 0.08);
     --table-selected-bg: rgba(99, 102, 241, 0.18);
@@ -1743,20 +1747,12 @@ function getTeamColor(teamName) {
     --table-shadow: 0 12px 25px rgba(15, 23, 42, 0.08);
 }
 
+/* Dark mode styles are now applied via ColorUtils.applyDarkMode() */
+/* This selector is kept for compatibility but colors come from CSS variables */
 body.dark-mode,
 body[data-theme="dark"],
 :root[data-theme="dark"] {
-    --table-surface: #0f172a;
-    --table-surface-alt: #16213a;
-    --table-border-soft: rgba(226, 232, 240, 0.12);
-    --table-header-bg: #182645;
-    --table-header-text: #e2e8f0;
-    --table-body-text: #f1f5f9;
-    --table-muted-text: #94a3b8;
-    --table-hover-bg: rgba(56, 189, 248, 0.14);
-    --table-selected-bg: rgba(99, 102, 241, 0.28);
-    --table-highlight-bg: rgba(14, 165, 233, 0.2);
-    --table-shadow: 0 12px 30px rgba(2, 6, 23, 0.65);
+    /* Colors are set via CSS variables by ColorUtils */
 }
 
 .custom-tabulator {
@@ -1900,7 +1896,7 @@ body[data-theme="dark"],
 
 /* Frozen Column Styles */
 .custom-tabulator .tabulator-frozen {
-    background-color: #ffffff; /* Background for frozen columns */
+    background-color: var(--theme-surface, #ffffff); /* Background for frozen columns */
     z-index: 10; /* Ensure frozen columns are above others */
 }
 
@@ -1914,7 +1910,7 @@ body[data-theme="dark"],
 }
 
 .custom-tabulator .tabulator-tableHolder::-webkit-scrollbar-thumb {
-    background: #264653; /* Thumb color */
+    background: var(--theme-border, #264653); /* Thumb color */
     border-radius: 4px; /* Rounded corners */
 }
 
@@ -1944,7 +1940,7 @@ body[data-theme="dark"],
 
 
 .border-right {
-    border-right: 1px solid #264653; /* Bootstrap's default border color */
+    border-right: 1px solid var(--theme-border, #264653); /* Bootstrap's default border color */
 }
 
 .table-responsive {
@@ -1953,7 +1949,7 @@ body[data-theme="dark"],
 
 th {
     position: relative; /* Required for sticky positioning */
-    background-color: #f8f9fa; /* Header background color */
+    background-color: var(--theme-background, #f8f9fa); /* Header background color */
 }
 /* Add more rules based on your number of groups */
 
@@ -2054,7 +2050,7 @@ tr > th:nth-child(2) {
 
 .custom-tabulator .tabulator-col-group,
 .custom-tabulator .tabulator-col {
-    background-color: #ffffff;
+    background-color: var(--theme-surface, #ffffff);
 }
 
 /* Alternative highlighting options (uncomment to use):
@@ -2070,19 +2066,19 @@ tr > th:nth-child(2) {
    Option 3: Darker background with white text
    .custom-tabulator .tabulator-col-group.tab-group-highlighted,
    .custom-tabulator .tabulator-col-group.tab-group-highlighted .tabulator-col-title {
-       background-color: #1f2933 !important;
-       color: #ffffff !important;
+       background-color: var(--theme-table-body-text, #1f2933) !important;
+       color: var(--theme-text-on-primary, #ffffff) !important;
        font-weight: 700 !important;
    }
    .custom-tabulator .tabulator-col.tab-col-highlighted,
    .custom-tabulator .tabulator-col.tab-col-highlighted .tabulator-col-title {
-       background-color: #1f2933 !important;
-       color: #ffffff !important;
+       background-color: var(--theme-table-body-text, #1f2933) !important;
+       color: var(--theme-text-on-primary, #ffffff) !important;
        font-weight: 700 !important;
    }
    .custom-tabulator .tabulator-row .tabulator-cell.tab-col-highlighted {
-       background-color: #1f2933 !important;
-       color: #ffffff !important;
+       background-color: var(--theme-table-body-text, #1f2933) !important;
+       color: var(--theme-text-on-primary, #ffffff) !important;
        font-weight: 600 !important;
    }
    

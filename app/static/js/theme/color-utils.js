@@ -17,6 +17,90 @@
         rainbowPastel: { positive: 2, negative: 5, highlight: 9 }
     };
 
+    // Theme colors - used throughout the application
+    const THEME_COLORS = {
+        // Primary colors
+        primary: "#0a9dc7",           // Dark blue - navbar, card headers
+        secondary: "#4aa8c2",         // Light blue - buttons, interactive elements
+        accent: "#7dcfe6",             // Lightest blue - highlights, accents
+        
+        // Background colors
+        background: "#f8f9fa",        // Main page background
+        surface: "#ffffff",           // Card/container background
+        surfaceAlt: "#e9ecef",        // Alternate surface (lighter gray)
+        surfaceLight: "#f0f0f0",      // Light gray variant
+        
+        // Text colors
+        textOnPrimary: "#ffffff",     // Text on primary background
+        textOnSecondary: "#ffffff",   // Text on secondary background
+        textOnLight: "#0a9dc7",       // Text on light background
+        
+        // Border colors
+        border: "#264653",             // Dark teal/green borders
+        borderLight: "#dee2e6",        // Light borders
+        borderSoft: "rgba(15, 23, 42, 0.08)", // Soft border (light mode)
+        
+        // Table colors
+        tableHeaderBg: "#eef2f7",     // Table header background
+        tableHeaderText: "#0f172a",   // Table header text
+        tableBodyText: "#1f2933",     // Table body text
+        tableMutedText: "#64748b",    // Muted text
+        
+        // Heat map colors
+        heatMapStart: "#dddddd",      // Heat map start color
+        heatMapEnd: "#1b8da7",        // Heat map end color
+        heatMapLow: "#d9596a",        // Heat map low value
+        heatMapHigh: "#1b8da7",       // Heat map high value
+        
+        // Status colors
+        warning: "#86e1b3",            // Warning states
+        info: "#a1e8c4",              // Info states
+        success: "#d4edda",           // Success states
+        danger: "#f8d7da",            // Danger states
+    };
+
+    // Dark mode theme colors
+    const THEME_COLORS_DARK = {
+        // Primary colors (same as light mode)
+        primary: "#0a9dc7",
+        secondary: "#4aa8c2",
+        accent: "#7dcfe6",
+        
+        // Background colors (dark)
+        background: "#0f172a",        // Dark slate background
+        surface: "#1e293b",           // Dark surface
+        surfaceAlt: "#334155",        // Alternate dark surface
+        surfaceLight: "#475569",      // Light dark variant
+        
+        // Text colors (light for dark backgrounds)
+        textOnPrimary: "#ffffff",
+        textOnSecondary: "#ffffff",
+        textOnLight: "#e2e8f0",       // Light text on dark background
+        
+        // Border colors (light for dark mode)
+        border: "#475569",            // Lighter border for dark mode
+        borderLight: "#64748b",       // Light border
+        borderSoft: "rgba(226, 232, 240, 0.12)", // Soft border (dark mode)
+        
+        // Table colors (dark)
+        tableHeaderBg: "#182645",     // Dark table header background
+        tableHeaderText: "#e2e8f0",   // Light table header text
+        tableBodyText: "#f1f5f9",     // Light table body text
+        tableMutedText: "#94a3b8",    // Muted text (dark mode)
+        
+        // Heat map colors (same as light mode)
+        heatMapStart: "#dddddd",
+        heatMapEnd: "#1b8da7",
+        heatMapLow: "#d9596a",
+        heatMapHigh: "#1b8da7",
+        
+        // Status colors (adjusted for dark mode)
+        warning: "#86e1b3",
+        info: "#a1e8c4",
+        success: "#d4edda",
+        danger: "#f8d7da",
+    };
+
     // First color = base table background, second = accent stripe
     // This makes one of the stripe colors effectively the "default" color.
     //const DEFAULT_STRIPE_PALETTE = ["#ffffff", "#e9f0ff"];
@@ -152,9 +236,13 @@
         return (value - minVal) / (maxVal - minVal);
     }
 
+    function getThemeColor(colorName) {
+        return THEME_COLORS[colorName] || null;
+    }
+
     function getHeatMapColor(value, minVal, maxVal, options = {}) {
-        const startColor = options.startColor || "#dddddd";
-        const endColor = options.endColor || "#1b8da7";
+        const startColor = options.startColor || THEME_COLORS.heatMapStart;
+        const endColor = options.endColor || THEME_COLORS.heatMapEnd;
 
         const ratio = Math.min(Math.max(interpolateValue(value, minVal, maxVal), 0), 1);
         const [r1, g1, b1] = hexToRgb(startColor);
@@ -217,14 +305,111 @@
         return fallbacks[semanticName] || "#888";
     }
 
+    // Dark mode management
+    function isDarkMode() {
+        if (typeof localStorage !== 'undefined') {
+            const stored = localStorage.getItem('darkMode');
+            if (stored !== null) {
+                return stored === 'true';
+            }
+        }
+        // Check if system prefers dark mode
+        if (typeof window !== 'undefined' && window.matchMedia) {
+            return window.matchMedia('(prefers-color-scheme: dark)').matches;
+        }
+        return false;
+    }
+
+    function setDarkMode(enabled) {
+        if (typeof localStorage !== 'undefined') {
+            localStorage.setItem('darkMode', enabled ? 'true' : 'false');
+        }
+        applyDarkMode(enabled);
+    }
+
+    function toggleDarkMode() {
+        const current = isDarkMode();
+        setDarkMode(!current);
+        return !current;
+    }
+
+    function applyDarkMode(enabled) {
+        const root = document.documentElement;
+        const body = document.body;
+        const theme = enabled ? THEME_COLORS_DARK : THEME_COLORS;
+        
+        // Set data-theme attribute
+        if (enabled) {
+            root.setAttribute('data-theme', 'dark');
+            body.classList.add('dark-mode');
+        } else {
+            root.setAttribute('data-theme', 'light');
+            body.classList.remove('dark-mode');
+        }
+        
+        // Apply theme colors as CSS variables
+        Object.keys(theme).forEach(key => {
+            const cssKey = '--theme-' + key.replace(/([A-Z])/g, '-$1').toLowerCase();
+            root.style.setProperty(cssKey, theme[key]);
+        });
+        
+        // Apply table-specific dark mode variables
+        if (enabled) {
+            root.style.setProperty('--table-surface', theme.surface);
+            root.style.setProperty('--table-surface-alt', theme.surfaceAlt);
+            root.style.setProperty('--table-border-soft', theme.borderSoft);
+            root.style.setProperty('--table-header-bg', theme.tableHeaderBg);
+            root.style.setProperty('--table-header-text', theme.tableHeaderText);
+            root.style.setProperty('--table-body-text', theme.tableBodyText);
+            root.style.setProperty('--table-muted-text', theme.tableMutedText);
+            root.style.setProperty('--table-hover-bg', 'rgba(56, 189, 248, 0.14)');
+            root.style.setProperty('--table-selected-bg', 'rgba(99, 102, 241, 0.28)');
+            root.style.setProperty('--table-highlight-bg', 'rgba(14, 165, 233, 0.2)');
+            root.style.setProperty('--table-shadow', '0 12px 30px rgba(2, 6, 23, 0.65)');
+        } else {
+            root.style.setProperty('--table-surface', THEME_COLORS.surface);
+            root.style.setProperty('--table-surface-alt', '#f6f8fb');
+            root.style.setProperty('--table-border-soft', THEME_COLORS.borderSoft);
+            root.style.setProperty('--table-header-bg', THEME_COLORS.tableHeaderBg);
+            root.style.setProperty('--table-header-text', THEME_COLORS.tableHeaderText);
+            root.style.setProperty('--table-body-text', THEME_COLORS.tableBodyText);
+            root.style.setProperty('--table-muted-text', THEME_COLORS.tableMutedText);
+            root.style.setProperty('--table-hover-bg', 'rgba(59, 130, 246, 0.08)');
+            root.style.setProperty('--table-selected-bg', 'rgba(99, 102, 241, 0.18)');
+            root.style.setProperty('--table-highlight-bg', 'rgba(15, 118, 110, 0.12)');
+            root.style.setProperty('--table-shadow', '0 12px 25px rgba(15, 23, 42, 0.08)');
+        }
+        
+        // Dispatch event for other components
+        if (typeof window !== 'undefined') {
+            window.dispatchEvent(new CustomEvent('themeChanged', { 
+                detail: { darkMode: enabled } 
+            }));
+        }
+    }
+
+    // Initialize dark mode on load
+    if (typeof document !== 'undefined') {
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => {
+                applyDarkMode(isDarkMode());
+            });
+        } else {
+            applyDarkMode(isDarkMode());
+        }
+    }
+
     const ColorUtils = {
         TEAM_COLOR_PALETTES,
         SEMANTIC_COLOR_MAPPINGS,
+        THEME_COLORS,
+        THEME_COLORS_DARK,
         getCurrentPaletteName: () => currentPaletteName,
         getCurrentPalette: () => [...currentPalette],
         setPalette,
         getPaletteColor,
         getSemanticColor,
+        getThemeColor,
         updateTeamColorMap,
         getTeamColor,
         getGradientColors,
@@ -235,7 +420,11 @@
         teamColorMap,
         assignGroupStripeCss,
         generateStripeCss,
-        injectStripeCss
+        injectStripeCss,
+        isDarkMode,
+        setDarkMode,
+        toggleDarkMode,
+        applyDarkMode
     };
 
     globalObj.ColorUtils = ColorUtils;

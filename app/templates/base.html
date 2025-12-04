@@ -9,13 +9,12 @@
     <!-- Custom CSS -->
     <style>
         :root {
-            /* Color Palette */
-            --color-green-light: #a1e8c4;   /* Lightest green */
-            --color-green: #86e1b3;         /* Light green */
-            --color-blue-lightest: #7dcfe6; /* Light blue-green */
-            --color-blue-light: #4aa8c2;    /* Light blue */
-            --color-blue: #0a9dc7;          /* Dark blue */
-
+            /* Color Palette - initialized from ColorUtils via JavaScript */
+            --color-green-light: #a1e8c4;   /* Lightest green - fallback */
+            --color-green: #86e1b3;         /* Light green - fallback */
+            --color-blue-lightest: #7dcfe6; /* Light blue-green - fallback */
+            --color-blue-light: #4aa8c2;    /* Light blue - fallback */
+            --color-blue: #0a9dc7;          /* Dark blue - fallback */
 
             /* Semantic Color Assignments */
             --theme-primary: var(--color-blue);         /* Main UI elements like navbar, card headers */
@@ -24,38 +23,54 @@
             --theme-warning: var(--color-green);        /* Warning states */
             --theme-info: var(--color-green-light);     /* Info states */
             
-            /* Background Colors */
-            --theme-background: #f8f9fa;
-            --theme-surface: #ffffff;
+            /* Background Colors - initialized from ColorUtils via JavaScript */
+            --theme-background: #f8f9fa;  /* fallback */
+            --theme-surface: #ffffff;     /* fallback */
             
-            /* Text Colors */
-            --theme-text-on-primary: #ffffff;
-            --theme-text-on-secondary: #ffffff;
+            /* Text Colors - initialized from ColorUtils via JavaScript */
+            --theme-text-on-primary: #ffffff;      /* fallback */
+            --theme-text-on-secondary: #ffffff;    /* fallback */
             --theme-text-on-light: var(--color-blue);
         }
 
         body {
             background-color: var(--theme-background);
             color: var(--theme-text-on-light);
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        
+        /* Dark mode body styles */
+        body.dark-mode {
+            background-color: var(--theme-background);
+            color: var(--theme-text-on-light);
         }
 
         .navbar {
             background-color: var(--theme-primary) !important;
+            transition: background-color 0.3s ease;
         }
 
         .navbar-brand, .nav-link {
             color: var(--theme-text-on-primary) !important;
+            transition: color 0.3s ease;
         }
 
         .card {
             border-color: var(--theme-primary);
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             background-color: var(--theme-surface);
+            transition: background-color 0.3s ease, border-color 0.3s ease;
         }
 
         .card-header {
             background-color: var(--theme-primary);
             color: var(--theme-text-on-primary);
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        
+        /* Dark mode card adjustments */
+        body.dark-mode .card {
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
         }
 
         /* Button Styles */
@@ -145,8 +160,42 @@
         {% block content %}{% endblock %}
     </div>
 
+    <!-- Color Utils - must load before other scripts that use colors -->
+    <script src="{{ static_url('js/theme/color-utils.js') }}"></script>
+    
     <!-- Bootstrap JS and dependencies -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Initialize theme colors from ColorUtils -->
+    <script>
+        // Initialize CSS variables from ColorUtils immediately (ColorUtils is loaded above)
+        // Dark mode initialization happens in ColorUtils.applyDarkMode()
+        (function() {
+            if (window.ColorUtils && window.ColorUtils.THEME_COLORS) {
+                const root = document.documentElement;
+                const theme = window.ColorUtils.THEME_COLORS;
+                
+                // Set CSS variables from ColorUtils (light mode defaults)
+                root.style.setProperty('--color-blue', theme.primary);
+                root.style.setProperty('--color-blue-light', theme.secondary);
+                root.style.setProperty('--color-blue-lightest', theme.accent);
+                root.style.setProperty('--color-green', theme.warning);
+                root.style.setProperty('--color-green-light', theme.info);
+                root.style.setProperty('--theme-background', theme.background);
+                root.style.setProperty('--theme-surface', theme.surface);
+                root.style.setProperty('--theme-text-on-primary', theme.textOnPrimary);
+                root.style.setProperty('--theme-text-on-secondary', theme.textOnSecondary);
+                root.style.setProperty('--theme-text-on-light', theme.textOnLight);
+                root.style.setProperty('--theme-border', theme.border);
+                root.style.setProperty('--theme-table-header-bg', theme.tableHeaderBg);
+                root.style.setProperty('--theme-table-header-text', theme.tableHeaderText);
+                root.style.setProperty('--theme-table-body-text', theme.tableBodyText);
+                root.style.setProperty('--theme-table-muted-text', theme.tableMutedText);
+                
+                // Dark mode will be applied by ColorUtils.applyDarkMode() if needed
+            }
+        })();
+    </script>
     
     <!-- Language switching functionality -->
     <script>

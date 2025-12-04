@@ -1005,7 +1005,7 @@ class ResponseDisplayBlock extends BaseContentBlock {
         const url = chartInstance.getDataURL({
             type: 'png',
             pixelRatio: 2,
-            backgroundColor: '#fff'
+            backgroundColor: window.ColorUtils?.getThemeColor('surface') || '#fff'
         });
         
         const a = document.createElement('a');

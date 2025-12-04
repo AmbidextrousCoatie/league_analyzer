@@ -200,7 +200,7 @@ class TeamWinPercentageBlock {
                 rowMetadata[index] = {
                     styling: {
                         fontWeight: 'bold',
-                        backgroundColor: '#f8f9fa'
+                        backgroundColor: window.ColorUtils?.getThemeColor('background') || '#f8f9fa'
                     }
                 };
             } else {

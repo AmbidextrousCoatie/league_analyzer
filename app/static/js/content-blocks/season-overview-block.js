@@ -345,7 +345,7 @@ class SeasonOverviewBlock extends BaseContentBlock {
         
         const legendHtml = teams.map(team => `
             <div class="mx-3 mb-2 d-flex align-items-center">
-                <div style="width: 20px; height: 20px; border-radius: 50%; background-color: ${window.ColorUtils ? window.ColorUtils.getTeamColor(team) : (typeof getTeamColor === 'function' ? getTeamColor(team) : '#007bff')}; margin-right: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">
+                <div style="width: 20px; height: 20px; border-radius: 50%; background-color: ${window.ColorUtils ? window.ColorUtils.getTeamColor(team) : (typeof getTeamColor === 'function' ? getTeamColor(team) : (window.ColorUtils?.getThemeColor('primary') || '#007bff'))}; margin-right: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">
                     
                 </div>
                 <span>${team}</span>

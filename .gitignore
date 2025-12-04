@@ -25,3 +25,7 @@ database/data/tmp/*
 database/relational_csv/new/*
 docs/*.md
 app/routes/__pycache__/league_routes.cpython-312.pyc
+setup_venv.ps1
+app/templates/funsies.html
+2025_BYL_M-1.xlsx
+

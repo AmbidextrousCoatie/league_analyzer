@@ -47,6 +47,12 @@
                     </ul>
                 </li>
                 <li class="nav-item">
+                    <a class="nav-link" href="#" id="darkModeToggle" role="button" aria-label="Toggle dark mode">
+                        <span id="darkModeIcon">🌙</span>
+                        <span id="darkModeText" class="d-none d-md-inline">Dark Mode</span>
+                    </a>
+                </li>
+                <li class="nav-item">
                     <a class="nav-link" href="{{ url_for('main.impressum') }}" id="impressumLink">Impressum</a>
                 </li>
                 <script>
@@ -148,6 +154,38 @@
                                 btn.disabled = false;
                             }, 3000);
                         });
+                        
+                        // Dark mode toggle handler
+                        const darkModeToggle = document.getElementById('darkModeToggle');
+                        const darkModeIcon = document.getElementById('darkModeIcon');
+                        const darkModeText = document.getElementById('darkModeText');
+                        
+                        if (darkModeToggle && window.ColorUtils) {
+                            // Update icon/text based on current state
+                            function updateDarkModeUI(isDark) {
+                                if (darkModeIcon) {
+                                    darkModeIcon.textContent = isDark ? '☀️' : '🌙';
+                                }
+                                if (darkModeText) {
+                                    darkModeText.textContent = isDark ? 'Light Mode' : 'Dark Mode';
+                                }
+                            }
+                            
+                            // Initialize UI
+                            updateDarkModeUI(window.ColorUtils.isDarkMode());
+                            
+                            // Toggle handler
+                            darkModeToggle.addEventListener('click', function(e) {
+                                e.preventDefault();
+                                const newState = window.ColorUtils.toggleDarkMode();
+                                updateDarkModeUI(newState);
+                            });
+                            
+                            // Listen for theme changes (in case changed elsewhere)
+                            window.addEventListener('themeChanged', function(e) {
+                                updateDarkModeUI(e.detail.darkMode);
+                            });
+                        }
                     });
                 </script>
                 <style>
