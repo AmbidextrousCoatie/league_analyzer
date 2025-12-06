@@ -319,7 +319,8 @@ class LeagueSeasonOverviewBlock extends BaseContentBlock {
             const firstTeamData = Object.values(data.data_accumulated)[0];
             if (firstTeamData && Array.isArray(firstTeamData)) {
                 const numWeeks = firstTeamData.length;
-                const labels = Array.from({length: numWeeks}, (_, i) => `Week ${i + 1}`);
+                const weekLabel = typeof t === 'function' ? t('week', 'Week') : 'Week';
+                const labels = Array.from({length: numWeeks}, (_, i) => `${weekLabel} ${i + 1}`);
                 
                 createLineChart(
                     data.data_accumulated,
@@ -349,7 +350,8 @@ class LeagueSeasonOverviewBlock extends BaseContentBlock {
             const firstTeamData = Object.values(data.data)[0];
             if (firstTeamData && Array.isArray(firstTeamData)) {
                 const numWeeks = firstTeamData.length;
-                const labels = Array.from({length: numWeeks}, (_, i) => `Week ${i + 1}`);
+                const weekLabel = typeof t === 'function' ? t('week', 'Week') : 'Week';
+                const labels = Array.from({length: numWeeks}, (_, i) => `${weekLabel} ${i + 1}`);
                 
                 createLineChart(
                     data.data,
@@ -379,7 +381,8 @@ class LeagueSeasonOverviewBlock extends BaseContentBlock {
             const firstTeamData = Object.values(data.data)[0];
             if (firstTeamData && Array.isArray(firstTeamData)) {
                 const numWeeks = firstTeamData.length;
-                const labels = Array.from({length: numWeeks}, (_, i) => `Week ${i + 1}`);
+                const weekLabel = typeof t === 'function' ? t('week', 'Week') : 'Week';
+                const labels = Array.from({length: numWeeks}, (_, i) => `${weekLabel} ${i + 1}`);
                 
                 createScatterChartMultiAxis(
                     data.data,
