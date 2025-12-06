@@ -337,7 +337,7 @@ class CentralizedButtonManager {
         
         const candidates = await response.json();
         console.log(`📊 CentralizedButtonManager: Received candidates for ${group.name}:`, candidates);
-        console.log(`📊 CentralizedButtonManager: Candidate types:`, candidates.map(c => typeof c));
+        //console.log(`📊 CentralizedButtonManager: Candidate types:`, candidates.map(c => typeof c));
         
         return candidates;
     }

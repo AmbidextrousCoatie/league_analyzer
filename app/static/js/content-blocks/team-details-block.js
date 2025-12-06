@@ -105,17 +105,11 @@ class TeamDetailsBlock extends BaseContentBlock {
                     </div>  
                     
                     <!-- Team Individual Averages Section -->
-                    <div class="card mt-4">
-                        <div class="card-header">
-                            <h6 data-i18n="team_individual_averages">Team Individual Averages</h6>
-                            <p class="mb-0 text-muted small">Player statistics for this team in this specific week</p>
-                        </div>
-                        <div class="card-body">
-                            <div id="teamIndividualAveragesTable">
-                                <div class="text-center py-3">
-                                    <div class="spinner-border text-primary" role="status">
-                                        <span class="visually-hidden">Loading team individual averages...</span>
-                                    </div>
+                    <div class="mt-4">
+                        <div id="teamIndividualAveragesCard">
+                            <div class="text-center py-3">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Loading team individual averages...</span>
                                 </div>
                             </div>
                         </div>
@@ -213,14 +207,17 @@ class TeamDetailsBlock extends BaseContentBlock {
                     enableSpecialRowStyling: true
                 };
                 
-                // Use the proper createTableBootstrap3 function for structured TableData
-                if (typeof createTableBootstrap3 === 'function') {
-                    console.log(`Using createTableBootstrap3 function for team details (${view} view)`);
+                // Use Tabulator for structured TableData
+                if (typeof createTableTabulator === 'function') {
+                    console.log(`Using createTableTabulator function for team details (${view} view)`);
+                    createTableTabulator('teamTableWeekDetails', tableData, {
+                        ...tableOptions,
+                        tooltips: true
+                    });
+                } else if (typeof createTableBootstrap3 === 'function') {
+                    // Fallback to Bootstrap
+                    console.log(`Fallback: Using createTableBootstrap3 function for team details (${view} view)`);
                     createTableBootstrap3('teamTableWeekDetails', tableData, tableOptions);
-                } else if (typeof createTable === 'function') {
-                    console.log('Fallback: Using createTable function');
-                    const tableHTML = createTable(tableData);
-                    container.innerHTML = tableHTML;
                 } else {
                     console.error('No table creation function available');
                     container.innerHTML = '<div class="alert alert-warning">Table creation function not available</div>';
@@ -264,41 +261,25 @@ class TeamDetailsBlock extends BaseContentBlock {
     async loadTeamIndividualAverages(state) {
         const { season, league, week, team } = state;
         
-        try {
-            console.log(`Loading team individual averages for ${team} in ${league} ${season} week ${week}`);
-            
-            const url = `/league/get_individual_averages?league=${encodeURIComponent(league)}&season=${encodeURIComponent(season)}&week=${encodeURIComponent(week)}&team=${encodeURIComponent(team)}`;
-            console.log(`Fetching team individual averages from: ${url}`);
-            
-            const response = await fetchWithDatabase(url);
-            
-            if (!response.ok) {
-                throw new Error(`HTTP ${response.status}`);
-            }
-            
-            const data = await response.json();
-            console.log('Team individual averages data received:', data);
-            
-            // Create the table using the existing createTableBootstrap3 function
-            if (typeof createTableBootstrap3 === 'function' && data) {
-                createTableBootstrap3('teamIndividualAveragesTable', data, {
-                    disablePositionCircle: true, // Individual averages don't need team colors
-                    enableSpecialRowStyling: true
-                });
-                console.log('Team individual averages table created successfully');
-            } else {
-                console.warn('createTableBootstrap3 not available or no data received');
-                const container = document.getElementById('teamIndividualAveragesTable');
-                if (container) {
-                    container.innerHTML = '<div class="alert alert-info">Team individual averages data not available</div>';
-                }
-            }
-            
-        } catch (error) {
-            console.error('Error loading team individual averages:', error);
-            const container = document.getElementById('teamIndividualAveragesTable');
+        // Use shared utility function that handles both loading and rendering
+        if (typeof loadAndRenderIndividualAverages === 'function') {
+            await loadAndRenderIndividualAverages(
+                { league, season, week, team },
+                {
+                    containerId: 'teamIndividualAveragesCard',
+                    tableId: 'teamIndividualAveragesTable',
+                    headerLevel: 'h6',
+                    disablePositionCircle: true,
+                    enableSpecialRowStyling: true,
+                    tooltips: true
+                },
+                'Error loading team individual averages'
+            );
+        } else {
+            console.error('loadAndRenderIndividualAverages utility function not available');
+            const container = document.getElementById('teamIndividualAveragesCard');
             if (container) {
-                container.innerHTML = '<div class="alert alert-danger">Error loading team individual averages</div>';
+                container.innerHTML = '<div class="alert alert-info">Team individual averages data not available</div>';
             }
         }
     }

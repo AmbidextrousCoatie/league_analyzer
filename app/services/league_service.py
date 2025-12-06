@@ -1811,6 +1811,7 @@ class LeagueService:
                 )
             ]
             
+            # Add totals column group first (after ranking) - matches data order
             columns.append(
                 ColumnGroup(
                     title="Total",
@@ -1825,7 +1826,7 @@ class LeagueService:
                 )
             )
 
-            # Add weekly column groups
+            # Add weekly column groups after totals
             for w in weeks_to_show:
                 columns.append(
                     ColumnGroup(
@@ -1837,8 +1838,6 @@ class LeagueService:
                         ]
                     )
                 )
-            
-            # Add totals column group
 
             
             # Prepare the data rows
@@ -1849,7 +1848,14 @@ class LeagueService:
                 # Start with position and team name
                 row = [i, team]
                 
-                # Add weekly data
+                # Add season totals first (matches column order: Ranking -> Totals -> Weeks)
+                row.extend([
+                    format_float_one_decimal(team_info['season_points']),
+                    team_info['season_score'],
+                    format_float_one_decimal(team_info['season_avg'])
+                ])
+                
+                # Add weekly data after totals
                 for w in weeks_to_show:
                     week_info = team_info['weekly_data'][w]
                     row.extend([
@@ -1857,13 +1863,6 @@ class LeagueService:
                         week_info['score'],
                         format_float_one_decimal(week_info['avg'])
                     ])
-                
-                # Add season totals
-                row.extend([
-                    format_float_one_decimal(team_info['season_points']),
-                    team_info['season_score'],
-                    format_float_one_decimal(team_info['season_avg'])
-                ])
                 
                 data.append(row)
             
@@ -2782,16 +2781,21 @@ class LeagueService:
             ]
                 
             
-            title_suffix = ""
+            # Build title with i18n and article_male + season/week logic (description content moved to title)
             if week is not None:
-                title_suffix += f" - Week {week}"
+                title = f"{i18n_service.get_text('individual_performance')} {i18n_service.get_text('week')} {week}"
+            else:
+                title = f"{i18n_service.get_text('individual_performance')} {i18n_service.get_text('article_male')} {i18n_service.get_text('season')}"
+            
             if team is not None:
-                title_suffix += f" - {team}"
+                # Add team info if specified
+                title += f" - {team}"
+            
             return TableData(
                 columns=columns,
                 data=table_data,
-                title=f"{league} {season} - Individual Averages{title_suffix}",
-                description="Player averages sorted by performance"
+                title=title,
+                description=None
             )
             
         except Exception as e:

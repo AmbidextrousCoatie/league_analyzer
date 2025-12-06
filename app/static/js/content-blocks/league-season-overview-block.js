@@ -124,13 +124,11 @@ class LeagueSeasonOverviewBlock extends BaseContentBlock {
                     <!-- 4th Row: Individual Averages (Full Width) -->
                     <div class="row">
                         <div class="col-12">
-                            <div class="card">
-                                <div class="card-header">
-                                    <h6>${typeof t === 'function' ? t('individual_averages', 'Individual Averages') : 'Individual Averages'}</h6>
-                                    <!--<p class="mb-0 text-muted small">${typeof t === 'function' ? t('individual_performance', 'Individual Performance') : 'Individual Performance'}</p>-->
-                                </div>
-                                <div class="card-body">
-                                    <div id="individualAveragesTable"></div>
+                            <div id="individualAveragesCard">
+                                <div class="text-center py-3">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="visually-hidden">${typeof t === 'function' ? t('status.loading', 'Loading individual averages...') : 'Loading individual averages...'}</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -186,33 +184,22 @@ class LeagueSeasonOverviewBlock extends BaseContentBlock {
                 })
             );
             
-            dataPromises.push(
-                this.loadIndividualAverages(league, season).catch(error => {
-                    console.warn('Individual averages endpoint not available');
-                    return null;
-                })
-            );
-
-            // Load team vs team comparison
-            dataPromises.push(
-                this.loadTeamVsTeamComparison(league, season).catch(error => {
-                    console.warn('Team vs team comparison endpoint not available');
-                    return null;
-                })
-            );
-
-            const [standingsData, pointsData, positionsData, timetableData, averagesData, teamVsTeamData] = await Promise.all(dataPromises);
+            const [standingsData, pointsData, positionsData, timetableData] = await Promise.all(dataPromises);
 
             // Create components with available data
             if (timetableData) this.createTimetable(timetableData);
             if (standingsData) this.createStandingsTable(standingsData);
-            if (averagesData) this.createAveragesTable(averagesData);
             if (pointsData) {
                 this.createPointsChart(pointsData);
                 this.createWeeklyPointsChart(pointsData);
             }
             if (positionsData) this.createPositionsChart(positionsData);
-            if (teamVsTeamData) this.createTeamVsTeamComparison(teamVsTeamData);
+            
+            // Load and render individual averages using shared utility
+            this.loadIndividualAverages(league, season);
+            
+            // Load and render team vs team comparison using shared utility
+            this.loadTeamVsTeamComparison(league, season);
 
         } catch (error) {
             console.error('Error loading season data:', error);
@@ -235,12 +222,27 @@ class LeagueSeasonOverviewBlock extends BaseContentBlock {
     }
 
     async loadIndividualAverages(league, season) {
-        // TODO: Create endpoint for individual averages
-        const response = await fetchWithDatabase(`/league/get_individual_averages?league=${league}&season=${season}`);
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}`);
+        // Use shared utility function that handles both loading and rendering
+        if (typeof loadAndRenderIndividualAverages === 'function') {
+            await loadAndRenderIndividualAverages(
+                { league, season },
+                {
+                    containerId: 'individualAveragesCard',
+                    tableId: 'individualAveragesTable',
+                    headerLevel: 'h6',
+                    disablePositionCircle: true,
+                    enableSpecialRowStyling: true,
+                    tooltips: true
+                },
+                typeof t === 'function' ? t('error_loading_individual_averages', 'Error loading individual averages') : 'Error loading individual averages'
+            );
+        } else {
+            console.error('loadAndRenderIndividualAverages utility function not available');
+            const container = document.getElementById('individualAveragesCard');
+            if (container) {
+                container.innerHTML = `<div class="alert alert-info">${typeof t === 'function' ? t('no_data', 'Individual averages not available') : 'Individual averages not available'}</div>`;
+            }
         }
-        return await response.json();
     }
 
     createMockTimetable(season) {
@@ -309,15 +311,6 @@ class LeagueSeasonOverviewBlock extends BaseContentBlock {
         }
     }
 
-    createAveragesTable(data) {
-        if (typeof createTableTabulator === 'function' && data?.columns) {
-            createTableTabulator('individualAveragesTable', data, {
-                disablePositionCircle: true,
-                enableSpecialRowStyling: true,
-                tooltips: true
-            });
-        }
-    }
 
     createPointsChart(data) {
         console.log('DEBUG: createPointsChart called with data:', data);
@@ -408,98 +401,26 @@ class LeagueSeasonOverviewBlock extends BaseContentBlock {
     }
 
     async loadTeamVsTeamComparison(league, season) {
-        const url = new URL('/league/get_team_vs_team_comparison', window.location.origin);
-        url.searchParams.append('league', league);
-        url.searchParams.append('season', season);
-        
-        // Add database parameter
-        const database = getCurrentDatabase();
-        if (database) {
-            url.searchParams.append('database', database);
-        }
-
-        const response = await fetch(url);
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-        }
-        
-        const data = await response.json();
-        
-        if (data.error) {
-            throw new Error(`API Error: ${data.error}`);
-        }
-        
-        return data;
-    }
-
-    createTeamVsTeamComparison(data) {
-        if (!data || !data.columns || !data.data) {
-            console.warn('No team vs team comparison data available');
-            return;
-        }
-
-        const container = document.getElementById('team-vs-team-comparison-inline');
-        if (!container) {
-            console.error('Team vs team comparison container not found');
-            return;
-        }
-
-        // Create the team vs team comparison card
-        container.innerHTML = `
-            <div class="card">
-                <div class="card-header">
-                    <h6>${data.title || 'Team vs Team Comparison Matrix'}</h6>
-                    <p class="mb-0 text-muted small">${data.description || 'Matrix showing team performance against each opponent'}</p>
-                </div>
-                <div class="card-body">
-                    <div id="team-vs-team-comparison-table-inline"></div>
-                    <div class="row mt-3">
-                        <div class="col-12">
-                            <div class="card">
-                                <div class="card-header">
-                                    <h6>Heat Map Legend</h6>
-                                </div>
-                                <div class="card-body">
-                                    <div class="row">
-                                        <div class="col-md-6">
-                                            <h6>Score Heat Map</h6>
-                                            <div class="d-flex align-items-center">
-                                                <span class="me-2">Low:</span>
-                                                <div class="heat-map-legend me-2" style="background: ${window.ColorUtils?.getThemeColor('heatMapLow') || '#d9596a'}; width: 20px; height: 20px;"></div>
-                                                <span class="me-2">High:</span>
-                                                <div class="heat-map-legend" style="background: ${window.ColorUtils?.getThemeColor('heatMapHigh') || '#1b8da7'}; width: 20px; height: 20px;"></div>
-                                            </div>
-                                            <small class="text-muted">Range: ${data.metadata?.score_range?.min || 'N/A'} - ${data.metadata?.score_range?.max || 'N/A'}</small>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <h6>Points Heat Map</h6>
-                                            <div class="d-flex align-items-center">
-                                                <span class="me-2">Low:</span>
-                                                <div class="heat-map-legend me-2" style="background: ${window.ColorUtils?.getThemeColor('heatMapLow') || '#d9596a'}; width: 20px; height: 20px;"></div>
-                                                <span class="me-2">High:</span>
-                                                <div class="heat-map-legend" style="background: ${window.ColorUtils?.getThemeColor('heatMapHigh') || '#1b8da7'}; width: 20px; height: 20px;"></div>
-                                            </div>
-                                            <small class="text-muted">Range: ${data.metadata?.points_range?.min || 'N/A'} - ${data.metadata?.points_range?.max || 'N/A'}</small>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `;
-
-        // Create table using Tabulator
-        if (typeof createTableTabulator === 'function') {
-            createTableTabulator('team-vs-team-comparison-table-inline', data, {
-                disablePositionCircle: false,  // Enable position circles
-                enableSpecialRowStyling: true,
-                tooltips: true,
-                teamField: 'team'  // Specify team field for colored circles
-            });
+        // Use shared utility function that handles both loading and rendering
+        if (typeof loadAndRenderTeamVsTeamComparison === 'function') {
+            await loadAndRenderTeamVsTeamComparison(
+                { league, season },
+                {
+                    containerId: 'team-vs-team-comparison-inline',
+                    tableId: 'team-vs-team-comparison-table-inline',
+                    headerLevel: 'h6',
+                    disablePositionCircle: false,  // Enable position circles
+                    enableHeatMap: true,
+                    teamField: 'team'  // Specify team field for colored circles
+                },
+                typeof t === 'function' ? t('no_data', 'Team vs team comparison not available') : 'Team vs team comparison not available'
+            );
         } else {
-            console.error('createTableTabulator function not available');
+            console.error('loadAndRenderTeamVsTeamComparison utility function not available');
+            const container = document.getElementById('team-vs-team-comparison-inline');
+            if (container) {
+                container.innerHTML = `<div class="alert alert-info">${typeof t === 'function' ? t('no_data', 'Team vs team comparison not available') : 'Team vs team comparison not available'}</div>`;
+            }
         }
     }
 

@@ -67,10 +67,19 @@ class MatchDayBlock extends BaseContentBlock {
     }
 
     generateHTML(state) {
+        const leagueName = state.league_long || state.league || '';
+        const season = state.season || '';
+        const week = state.week || '';
+        
+        // Build title with league, season, and week
+        const title = week 
+            ? `${leagueName} - ${season} - ${typeof t === 'function' ? t('week', 'Week') : 'Week'} ${week}`
+            : `${leagueName} - ${season}`;
+        
         return `
             <div class="card mb-4">
                 <div class="card-header">
-                    <h5 data-i18n="league_results_match_day">League Results - Match Day</h5>
+                    <h5>${title}</h5>
                 </div>
                 <div class="card-body">
                     <!-- Content Area -->
@@ -87,7 +96,7 @@ class MatchDayBlock extends BaseContentBlock {
                         <div class="col-md-4">
                             <div id="honorScores" class="card">
                                 <div class="card-header">
-                                    <h5 data-i18n="honor_scores">Honor Scores</h5>
+                                    <h5>${typeof t === 'function' ? t('honor_scores', 'Honor Scores') : 'Honor Scores'}</h5>
                                 </div>
                                 <div class="card-body">
                                     <!-- Loading state -->
@@ -99,20 +108,33 @@ class MatchDayBlock extends BaseContentBlock {
                                     
                                     <!-- Content will be populated here -->
                                     <div class="mb-3" id="individualScoresSection" style="display: none;">
-                                        <h6 data-i18n="top_individual_scores">Top Individual Scores</h6>
+                                        <h6>${typeof t === 'function' ? t('top_individual_scores', 'Top Individual Scores') : 'Top Individual Scores'}</h6>
                                         <div id="individualScores"></div>
                                     </div>
                                     <div class="mb-3" id="teamScoresSection" style="display: none;">
-                                        <h6 data-i18n="top_team_scores">Top Team Scores</h6>
+                                        <h6>${typeof t === 'function' ? t('top_team_scores', 'Top Team Scores') : 'Top Team Scores'}</h6>
                                         <div id="teamScores"></div>
                                     </div>
                                     <div class="mb-3" id="individualAveragesSection" style="display: none;">
-                                        <h6 data-i18n="best_individual_averages">Best Individual Averages</h6>
+                                        <h6>${typeof t === 'function' ? t('best_individual_averages', 'Best Individual Averages') : 'Best Individual Averages'}</h6>
                                         <div id="individualAverages"></div>
                                     </div>
                                     <div class="mb-3" id="teamAveragesSection" style="display: none;">
-                                        <h6 data-i18n="best_team_averages">Best Team Averages</h6>
+                                        <h6>${typeof t === 'function' ? t('best_team_averages', 'Best Team Averages') : 'Best Team Averages'}</h6>
                                         <div id="teamAverages"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Individual Performance Section (Full Width) -->
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <div id="weekIndividualAveragesCard">
+                                <div class="text-center py-3">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="visually-hidden">${typeof t === 'function' ? t('status.loading', 'Loading individual averages...') : 'Loading individual averages...'}</span>
                                     </div>
                                 </div>
                             </div>
@@ -123,27 +145,6 @@ class MatchDayBlock extends BaseContentBlock {
                     <div class="row mt-4">
                         <div class="col-12">
                             <div id="team-vs-team-comparison-matchday"></div>
-                        </div>
-                    </div>
-                    
-                    <!-- Individual Averages Section (Full Width) -->
-                    <div class="row mt-4">
-                        <div class="col-12">
-                            <div class="card">
-                                <div class="card-header">
-                                    <h6 data-i18n="individual_averages_week">Individual Averages - Week</h6>
-                                    <p class="mb-0 text-muted small">Player performance statistics for this specific week</p>
-                                </div>
-                                <div class="card-body">
-                                    <div id="weekIndividualAveragesTable">
-                                        <div class="text-center py-3">
-                                            <div class="spinner-border text-primary" role="status">
-                                                <span class="visually-hidden">${typeof t === 'function' ? t('status.loading', 'Loading individual averages...') : 'Loading individual averages...'}</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -193,17 +194,20 @@ class MatchDayBlock extends BaseContentBlock {
             
             const container = document.getElementById('tableLeagueWeek');
             if (container) {
-                // Use the proper createTableBootstrap3 function for structured TableData
-                if (typeof createTableBootstrap3 === 'function') {
-                    console.log('Using createTableBootstrap3 function for week table');
-                    createTableBootstrap3('tableLeagueWeek', tableData, { 
+                // Use Tabulator for structured TableData
+                if (typeof createTableTabulator === 'function') {
+                    console.log('Using createTableTabulator function for week table');
+                    createTableTabulator('tableLeagueWeek', tableData, { 
                         disablePositionCircle: false, // Week standings should show team color circles
+                        enableSpecialRowStyling: true,
+                        tooltips: true
+                    });
+                } else if (typeof createTableBootstrap3 === 'function') {
+                    console.log('Fallback: Using createTableBootstrap3 function');
+                    createTableBootstrap3('tableLeagueWeek', tableData, { 
+                        disablePositionCircle: false,
                         enableSpecialRowStyling: true 
                     });
-                } else if (typeof createTable === 'function') {
-                    console.log('Fallback: Using createTable function');
-                    const tableHTML = createTable(tableData);
-                    container.innerHTML = tableHTML;
                 } else {
                     console.error('No table creation function available');
                     container.innerHTML = `<div class="alert alert-warning">${typeof t === 'function' ? t('no_data', 'Table creation function not available') : 'Table creation function not available'}</div>`;
@@ -353,143 +357,49 @@ class MatchDayBlock extends BaseContentBlock {
     async loadIndividualAverages(state) {
         const { season, league, week } = state;
         
-        try {
-            console.log(`Loading individual averages for ${league} ${season} week ${week}`);
-            
-            const url = `/league/get_individual_averages?league=${encodeURIComponent(league)}&season=${encodeURIComponent(season)}&week=${encodeURIComponent(week)}`;
-            console.log(`Fetching individual averages from: ${url}`);
-            
-            const response = await fetchWithDatabase(url);
-            
-            if (!response.ok) {
-                throw new Error(`HTTP ${response.status}`);
-            }
-            
-            const data = await response.json();
-            console.log('Individual averages data received:', data);
-            
-            // Create the table using the existing createTableBootstrap3 function
-            if (typeof createTableBootstrap3 === 'function' && data) {
-                createTableBootstrap3('weekIndividualAveragesTable', data, {
-                    disablePositionCircle: true, // Individual averages don't need team colors
-                    enableSpecialRowStyling: true
-                });
-                console.log('Individual averages table created successfully');
-            } else {
-                console.warn('createTableBootstrap3 not available or no data received');
-                const container = document.getElementById('weekIndividualAveragesTable');
-                if (container) {
-                    container.innerHTML = `<div class="alert alert-info">${typeof t === 'function' ? t('no_data', 'Individual averages data not available') : 'Individual averages data not available'}</div>`;
-                }
-            }
-            
-        } catch (error) {
-            console.error('Error loading individual averages:', error);
-            const container = document.getElementById('weekIndividualAveragesTable');
+        // Use shared utility function that handles both loading and rendering
+        if (typeof loadAndRenderIndividualAverages === 'function') {
+            await loadAndRenderIndividualAverages(
+                { league, season, week },
+                {
+                    containerId: 'weekIndividualAveragesCard',
+                    tableId: 'weekIndividualAveragesTable',
+                    headerLevel: 'h6',
+                    disablePositionCircle: true,
+                    enableSpecialRowStyling: true,
+                    tooltips: true
+                },
+                typeof t === 'function' ? t('error_loading_individual_averages', 'Error loading individual averages') : 'Error loading individual averages'
+            );
+        } else {
+            console.error('loadAndRenderIndividualAverages utility function not available');
+            const container = document.getElementById('weekIndividualAveragesCard');
             if (container) {
-                container.innerHTML = `<div class="alert alert-danger">${typeof t === 'function' ? t('error_loading_individual_averages', 'Error loading individual averages') : 'Error loading individual averages'}</div>`;
+                container.innerHTML = `<div class="alert alert-info">${typeof t === 'function' ? t('no_data', 'Individual averages data not available') : 'Individual averages data not available'}</div>`;
             }
         }
     }
 
     async loadTeamVsTeamComparison(season, league, week) {
-        try {
-            const url = new URL('/league/get_team_vs_team_comparison', window.location.origin);
-            url.searchParams.append('league', league);
-            url.searchParams.append('season', season);
-            url.searchParams.append('week', week);
-            
-            // Add database parameter
-            const database = getCurrentDatabase();
-            if (database) {
-                url.searchParams.append('database', database);
-            }
-
-            const response = await fetch(url);
-            if (!response.ok) {
-                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-            }
-            
-            const data = await response.json();
-            
-            if (data.error) {
-                throw new Error(`API Error: ${data.error}`);
-            }
-            
-            this.createTeamVsTeamComparison(data);
-            
-        } catch (error) {
-            console.error('Error loading team vs team comparison:', error);
+        // Use shared utility function
+        if (typeof loadAndRenderTeamVsTeamComparison === 'function') {
+            await loadAndRenderTeamVsTeamComparison(
+                { league, season, week },
+                {
+                    containerId: 'team-vs-team-comparison-matchday',
+                    tableId: 'team-vs-team-comparison-table-matchday',
+                    headerLevel: 'h6',
+                    disablePositionCircle: false,
+                    enableHeatMap: true
+                },
+                typeof t === 'function' ? t('no_data', 'Team vs team comparison not available for this week') : 'Team vs team comparison not available for this week'
+            );
+        } else {
+            console.error('loadAndRenderTeamVsTeamComparison utility function not available');
             const container = document.getElementById('team-vs-team-comparison-matchday');
             if (container) {
                 container.innerHTML = `<div class="alert alert-info">${typeof t === 'function' ? t('no_data', 'Team vs team comparison not available for this week') : 'Team vs team comparison not available for this week'}</div>`;
             }
-        }
-    }
-
-    createTeamVsTeamComparison(data) {
-        if (!data || !data.columns || !data.data) {
-            console.warn('No team vs team comparison data available');
-            return;
-        }
-
-        const container = document.getElementById('team-vs-team-comparison-matchday');
-        if (!container) {
-            console.error('Team vs team comparison container not found');
-            return;
-        }
-
-        // Create the team vs team comparison card
-        container.innerHTML = `
-            <div class="card">
-                <div class="card-header">
-                    <h6>${data.title || 'Team vs Team Comparison Matrix'}</h6>
-                    <p class="mb-0 text-muted small">${data.description || 'Matrix showing team performance against each opponent'}</p>
-                </div>
-                <div class="card-body">
-                    <div id="team-vs-team-comparison-table-matchday"></div>
-                    <div class="row mt-3">
-                        <div class="col-12">
-                            <div class="card">
-                                <div class="card-header">
-                                    <h6>Heat Map Legend</h6>
-                                </div>
-                                <div class="card-body">
-                                    <div class="row">
-                                        <div class="col-md-6">
-                                            <h6>Score Heat Map</h6>
-                                            <div class="d-flex align-items-center">
-                                                <span class="me-2">Low:</span>
-                                                <div class="heat-map-legend me-2" style="background: ${window.ColorUtils?.getThemeColor('heatMapLow') || '#d9596a'}; width: 20px; height: 20px;"></div>
-                                                <span class="me-2">High:</span>
-                                                <div class="heat-map-legend" style="background: ${window.ColorUtils?.getThemeColor('heatMapHigh') || '#1b8da7'}; width: 20px; height: 20px;"></div>
-                                            </div>
-                                            <small class="text-muted">Range: ${data.metadata?.score_range?.min || 'N/A'} - ${data.metadata?.score_range?.max || 'N/A'}</small>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <h6>Points Heat Map</h6>
-                                            <div class="d-flex align-items-center">
-                                                <span class="me-2">Low:</span>
-                                                <div class="heat-map-legend me-2" style="background: ${window.ColorUtils?.getThemeColor('heatMapLow') || '#d9596a'}; width: 20px; height: 20px;"></div>
-                                                <span class="me-2">High:</span>
-                                                <div class="heat-map-legend" style="background: ${window.ColorUtils?.getThemeColor('heatMapHigh') || '#1b8da7'}; width: 20px; height: 20px;"></div>
-                                            </div>
-                                            <small class="text-muted">Range: ${data.metadata?.points_range?.min || 'N/A'} - ${data.metadata?.points_range?.max || 'N/A'}</small>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `;
-
-        // Create table using createTableBootstrap3
-        if (typeof createTableBootstrap3 === 'function') {
-            createTableBootstrap3('team-vs-team-comparison-table-matchday', data);
-        } else {
-            console.error('createTableBootstrap3 function not available');
         }
     }
 }
