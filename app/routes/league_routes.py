@@ -39,16 +39,6 @@ def stats():
         debug_config.log_route('league.stats', params, f"ERROR: {str(e)}")
         return jsonify({"error": str(e)}), 500
 
-@bp.route('/league/get_combinations')
-def get_combinations():
-    try:
-        league_service = get_league_service()
-        return jsonify(league_service.get_valid_combinations())
-    except Exception as e:
-        print(f"Error in get_combinations: {str(e)}")
-        return jsonify({"error": str(e)}), 500
-
-
 @bp.route('/league/get_available_weeks')
 def get_available_weeks():
     try:
@@ -274,24 +264,6 @@ def get_season_league_standings():
             traceback.print_exc()
         return jsonify({"error": str(e)}), 500
 
-@bp.route('/league/get_team_week_details')
-def get_team_week_details():
-    
-    season = request.args.get('season')
-    week = request.args.get('week')
-    team = request.args.get('team')
-    league = request.args.get('league')
-    
-    print(f"Team Week Details - Received request with: season={season}, league={league}, week={week}, team={team}")
-
-    week = int(request.args.get('week'))
-    
-    league_service = get_league_service()
-    details = league_service.get_team_week_details(league, season, team, week)
-    print(details)
-    
-    return jsonify({'config': details})
-
 @bp.route('/league/get_team_week_details_table')
 def get_team_week_details_table():
     try:
@@ -453,48 +425,6 @@ def get_team_points():
         return jsonify({'error': str(e)}), 500
 
 
-
-@bp.route('/league/get_team_points_vs_average')
-def get_team_points_vs_average():
-    try:
-        season = request.args.get('season')
-        league = request.args.get('league')
-           
-
-        print(f"Team Points vs Average - Received request with: season={season}, league={league}")
-        if not all([season, league]):
-            return jsonify({'error': i18n_service.get_text('missing_parameters')}), 400
-            
-        league_service = get_league_service()
-        points_data = league_service.get_team_points_during_season(
-            league_name=league,
-            season=season
-        )
-
-        averages_data = league_service.get_team_averages_simple(
-            league_name=league,
-            season=season
-        )
-       
-        # Extract data from the new SeriesData structure
-        points_raw = points_data["data"]
-        averages_raw = averages_data["data"]
-
-        points_vs_average = dict()
-
-        for team, points in points_raw.items():
-            averages = averages_raw[team]
-            points_vs_average[team] = [[averages[i] , points[i]] for i in range(len(points))]
-       
-        #print("############################")
-        #print(points_vs_average)    
-        #print("############################")
-        return jsonify(points_vs_average)
-        
-    except Exception as e:
-        print(f"Error in get_team_points_vs_average: {str(e)}")
-        print(traceback.format_exc())
-        return jsonify({'error': str(e)}), 500
 
 @bp.route('/get_latest_events')
 def get_latest_events():

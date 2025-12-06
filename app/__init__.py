@@ -55,9 +55,10 @@ def create_app():
         from app.utils.cache_buster import get_static_url
         return dict(static_url=get_static_url)
     
-    from app.routes import main, player_routes, league_routes, team_routes
+    from app.routes import main, player_routes, league_routes, league_routes_legacy, team_routes
     app.register_blueprint(main.bp)
     app.register_blueprint(player_routes.bp)
     app.register_blueprint(league_routes.bp)
+    app.register_blueprint(league_routes_legacy.bp_legacy)
     app.register_blueprint(team_routes.bp)
     return app 

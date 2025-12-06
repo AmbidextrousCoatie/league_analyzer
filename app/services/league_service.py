@@ -2,21 +2,6 @@ from typing import List, Dict, Any, Optional, Union
 import datetime
 import pandas as pd
 
-
-def format_float_one_decimal(value: Union[int, float]) -> str:
-    """
-    Format a number to always show one decimal place, even if it's a whole number.
-    Example: 100 -> "100.0", 100.5 -> "100.5"
-    
-    Args:
-        value: The number to format
-        
-    Returns:
-        String representation with exactly one decimal place
-    """
-    return f"{float(value):.1f}"
-
-
 from data_access.adapters.data_adapter_factory import DataAdapterFactory, DataAdapterSelector
 from data_access.models.league_models import LeagueQuery, TeamSeasonPerformance, LeagueStandings, TeamWeeklyPerformance
 from app.services.i18n_service import i18n_service
@@ -28,6 +13,12 @@ from data_access.schema import Columns
 from itertools import accumulate
 from app.config.debug_config import debug_config
 from app.utils.color_constants import get_theme_color, get_heat_map_color
+from app.utils.league_utils import (
+    format_float_one_decimal,
+    get_league_level,
+    convert_to_simple_types,
+    apply_heat_map_to_columns
+)
 # from data_access.series_data import calculate_series_data, get_player_series_data, get_team_series_data
 
 
@@ -560,151 +551,10 @@ class LeagueService:
             last_updated=datetime.datetime.now().isoformat()
         )
 
-    def get_league_results(self, league: str, season: str) -> LeagueResults:
-        """Get league results using the new data structure"""
-        stats = self.stats_service.get_league_statistics(league, season)
-        if not stats:
-            return None
-            
-        # Calculate ranking based on total points
-        ranking = sorted(
-            stats.team_stats.keys(),
-            key=lambda x: stats.team_stats[x].season_summary.total_points,
-            reverse=True
-        )
-        
-        return LeagueResults(
-            name=league,
-            level=self._get_league_level(league),
-            weeks=stats.weekly_summaries,
-            ranking=ranking,
-            data=stats.season_summary
-        )
-
     def _get_league_level(self, league: str) -> int:
-        """Get the level of a league"""
-        # This is a placeholder implementation
-        # You should implement the actual logic based on your requirements
-        return 1
+        """Get the level of a league (delegates to utility function)"""
+        return get_league_level(league)
 
-    def get_league_week_table(self, season: str, league: str, week: Optional[int] = None, depth: int = 1) -> TableData:
-        """
-        Get a formatted table for league standings with weekly breakdowns.
-        
-        Args:
-            season: The season identifier
-            league: The league name
-            week: The current week (if None, gets the latest)
-            depth: How many previous weeks to include
-            
-        Returns:
-            TableData object with the league standings
-        """
-        # If week is not specified, get the latest week
-        if week is None:
-            week = self.get_latest_week(season, league)
-        
-        # Get team performances from the adapter
-        team_performances = self.adapter.get_league_standings(season, league, week)
-        
-        if not team_performances:
-            # Return empty table structure
-            return TableData(
-                columns=[],
-                data=[],
-                title=f"{i18n_service.get_text('no_data_available_for')} {league} - {season}"
-            )
-        
-        # Sort by total points (descending) and assign positions
-        team_performances.sort(key=lambda x: (x.total_points, x.total_score), reverse=True)
-        for i, perf in enumerate(team_performances, 1):
-            perf.position = i
-        
-        # Create column groups
-        columns = [
-            ColumnGroup(
-                title=i18n_service.get_text("ranking"),
-                frozen="left",  # Freeze this group to the left
-                style={"backgroundColor": get_theme_color("background")},  # Light gray background
-                columns=[
-                    Column(title="#", field="pos", width="50px", align="center"),
-                    Column(title=i18n_service.get_text("team"), field="team", width="200px", align="left")
-                ]
-            )
-        ]
-        
-        # Add columns for each week
-        start_week = max(1, week - depth + 1)
-        for w in range(start_week, week + 1):
-            columns.append(
-                ColumnGroup(
-                    title=f"{i18n_service.get_text('week')} {w}",
-                    columns=[
-                        Column(title=i18n_service.get_text("pins"), field=f"week{w}_score", format="{:,}"),
-                        Column(title=i18n_service.get_text("points"), field=f"week{w}_points", format="{:.1f}"),
-                        Column(title=i18n_service.get_text("avg"), field=f"week{w}_avg", format="{:.1f}")
-                    ]
-                )
-            )
-        
-        # Add totals column group
-        columns.append(
-            ColumnGroup(
-                title=i18n_service.get_text("total"),
-                style={"backgroundColor": get_theme_color("surface_alt")},
-                header_style={"fontWeight": "bold"},
-                columns=[
-                    Column(title=i18n_service.get_text("points"), field="total_points", width="80px", align="center"),
-                    Column(title=i18n_service.get_text("score"), field="total_score", width="80px", align="center"),
-                    Column(title=i18n_service.get_text("avg"), field="average", width="80px", align="center")
-                ]
-            )
-        )
-        
-        # Prepare the data rows
-        data = []
-        for team in team_performances:
-            # Create a map of week to performance for easy lookup
-            week_to_perf = {p.week: p for p in team.weekly_performances}
-            
-            # Start with position and team name
-            row = [team.position, team.team_name]
-            
-            # Add weekly data
-            for w in range(start_week, week + 1):
-                perf = week_to_perf.get(w)
-                if perf:
-                    # Calculate average using players_per_team
-                    weekly_avg = perf.score / perf.players_per_team
-                    row.extend([perf.score / 2.0, perf.points, round(weekly_avg / 10.0, 1)])
-                else:
-                    row.extend([0, 0, 0])  # No data for this week
-            
-            # @todo: this is a hack to normalize the score, the factor 2.0 amd 10.0 is arbitrary, fix it in the structure
-            # Add season totals
-            row.extend([
-                team.total_score / 2.0,
-                team.total_points,
-                team.average / 10.0
-            ])
-            
-            data.append(row)
-        
-        # Create and return the TableData with configuration
-        return TableData(
-            columns=columns,
-            data=data,
-            title=f"{league} Standings - {season}",
-            description=f"{i18n_service.get_text('through_week')} {week}",
-            config={
-                "stickyHeader": True,  # Make header sticky
-                "striped": True,       # Use striped rows
-                "hover": True,         # Enable hover effect
-                "responsive": True,    # Make table responsive
-                "compact": False       # Use normal spacing
-            }
-        )
-    
     def get_league_performance_chart(self, season: str, league: str, team_id: Optional[str] = None) -> PlotData:
         """
         Get a chart showing team performance over time.
@@ -886,23 +736,6 @@ class LeagueService:
         #    return []
         return self.adapter.get_weeks(season, league_name)
 
-    def get_valid_combinations(self) -> Dict[str, Dict[str, List[str]]]:
-        """Get valid combinations of season, league, and weeks"""
-        # This is a placeholder implementation - adjust based on your data structure
-        result = {}
-        seasons = self.get_seasons()
-        
-        for season in seasons:
-            result[season] = {}
-            leagues = self.get_leagues()
-            
-            for league in leagues:
-                weeks = self.get_weeks(league_name=league, season=season)
-                if weeks:
-                    result[season][league] = weeks
-        
-        return result
-
     def get_teams_in_league_season(self, league: str, season: str) -> List[str]:
         """Get teams in a specific league and season"""
         # Create a query to get all teams in this league and season
@@ -920,32 +753,6 @@ class LeagueService:
             return teams
         
         return []
-
-    def get_team_week_details(self, league: str, season: str, team: str, week: int) -> Dict[str, Any]:
-        """Get details for a specific team in a specific week"""
-        # Create a query for this specific team, league, season, and week
-        query = LeagueQuery(season=season, league=league, team=team, week=week)
-        
-        # Get the data
-        team_data = self.adapter.get_filtered_data(query.to_filter_dict())
-        
-        if team_data.empty:
-            return {"config": []}
-        
-        # Process the data into the expected format for the frontend
-        config = []
-        
-        # Add player details
-        for _, row in team_data.iterrows():
-            if "Player" in team_data.columns and "Score" in team_data.columns and "Opponent" in team_data.columns:
-                player_detail = {
-                    "player": row.get("Player", ""),
-                    "score": row.get("Score", 0),
-                    "opponent": row.get("Opponent", "")
-                }
-                config.append(player_detail)
-        
-        return {"config": config}
 
     def get_team_week_details_table_data(self, league: str, season: str, team: str, week: int) -> TableData:
         """Get team week details as a TableData object for rendering"""
@@ -1303,28 +1110,6 @@ class LeagueService:
                 title=f"{i18n_service.get_text('error_loading_data_for')} {team} - {i18n_service.get_text('week')} {week}"
             )
 
-    def get_team_points_during_season(self, league_name: str, season: str) -> Dict[str, Any]:
-        """Get team points throughout a season"""
-        # Get all teams and their performances
-        standings = self.get_league_standings(season, league_name)
-        
-        if not standings.teams:
-            return SeriesData(
-                label_x_axis="Spieltag", 
-                label_y_axis="Punkte", 
-                name="Punkte im Saisonverlauf", 
-                query_params={"season": season, "league": league_name}
-            ).to_dict()
-        
-        series_data = SeriesData(label_x_axis="Spieltag", label_y_axis="Punkte", name="Punkte im Saisonverlauf", 
-                                 query_params={"season": season, "league": league_name})
-        
-        for team in standings.teams:
-            week_performances = [p.points for p in team.weekly_performances]
-            series_data.add_data(team.team_name, week_performances)
-
-        return series_data.to_dict()
-
     def get_team_averages_during_season(self, league_name: str, season: str) -> Dict[str, Any]:
         """Get team averages throughout a season"""
         # Get all teams and their performances
@@ -1520,47 +1305,6 @@ class LeagueService:
             "individual_averages": individual_averages_list,
             "team_averages": team_averages_list
         }
-
-    def get_league_history_table(self, league_name: str, season: str, week: Optional[int] = None, 
-                               depth: Optional[int] = None, debug_output: bool = False) -> Dict[str, Any]:
-        """Get league history table data"""
-        # This is a placeholder implementation - adjust based on your specific requirements
-        # Get team performances
-        standings = self.get_league_standings(season, league_name, week)
-        
-        if not standings.teams:
-            return {"message": "No data found"}
-        
-        # Process data into the expected format
-        result = {
-            "title": f"{league_name} - {season} History",
-            "teams": []
-        }
-        # @todo: this is a hack to normalize the score, the factor 2.5 is arbitrary, fix it in the structure
-        for team in standings.teams:
-            team_data = {
-                "name": team.team_name,
-                "total_points": team.total_points,
-                "total_score": team.total_score,
-                "average": team.average,
-                "position": team.position,
-                "weekly_performances": []
-            }
-            
-            for perf in team.weekly_performances:
-                team_data["weekly_performances"].append({
-                    "week": perf.week,
-                    "score": perf.score,
-                    "points": perf.points,
-                    "players_per_team": perf.players_per_team
-                })
-            
-            result["teams"].append(team_data)
-        
-        if debug_output:
-            print(f"League history table: {result}")
-        
-        return result
 
     def get_league_history_table_data(self, league_name: str, season: str, week: Optional[int] = None) -> TableData:
         """
@@ -3021,17 +2765,8 @@ class LeagueService:
             return TableData(columns=[], data=[], title=i18n_service.get_text("error_loading_team_record_games"))
 
     def _convert_to_simple_types(self, data):
-        """Convert numpy types to simple Python types for JSON serialization"""
-        if isinstance(data, dict):
-            return {key: self._convert_to_simple_types(value) for key, value in data.items()}
-        elif isinstance(data, list):
-            return [self._convert_to_simple_types(item) for item in data]
-        elif hasattr(data, 'item'):  # numpy scalar
-            return data.item()
-        elif isinstance(data, (int, float, str, bool)) or data is None:
-            return data
-        else:
-            return str(data)
+        """Convert numpy types to simple Python types for JSON serialization (delegates to utility function)"""
+        return convert_to_simple_types(data)
 
     def get_team_analysis(self, league: str, season: str, team: str) -> Dict[str, Any]:
         """Get detailed team analysis including individual player performance and win percentages"""
@@ -3259,7 +2994,7 @@ class LeagueService:
     def _apply_heat_map_to_columns(self, table_data: List[List], cell_metadata: Dict[str, Dict],
                                     column_indices: List[int], min_val: float = None, max_val: float = None) -> Dict[str, Dict]:
         """
-        Apply heat map coloring to specified column indices.
+        Apply heat map coloring to specified column indices (delegates to utility function).
         
         Args:
             table_data: List of rows, where each row is a list of values
@@ -3271,36 +3006,7 @@ class LeagueService:
         Returns:
             Updated cell_metadata dictionary
         """
-        if not table_data or not column_indices:
-            return cell_metadata
-        
-        # Extract all values from specified columns
-        all_values = []
-        for row in table_data:
-            for col_idx in column_indices:
-                if col_idx < len(row):
-                    value = row[col_idx]
-                    # Only include numeric values (skip empty strings, None, etc.)
-                    if isinstance(value, (int, float)) and value != "":
-                        all_values.append(value)
-        
-        if not all_values:
-            return cell_metadata
-        
-        # Calculate min/max if not provided
-        calculated_min = min(all_values) if min_val is None else min_val
-        calculated_max = max(all_values) if max_val is None else max_val
-        
-        # Apply coloring to each cell in specified columns
-        for row_idx, row in enumerate(table_data):
-            for col_idx in column_indices:
-                if col_idx < len(row):
-                    value = row[col_idx]
-                    if isinstance(value, (int, float)) and value != "":
-                        color = get_heat_map_color(value, calculated_min, calculated_max)
-                        cell_metadata[f"{row_idx}:{col_idx}"] = {"backgroundColor": color}
-        
-        return cell_metadata
+        return apply_heat_map_to_columns(table_data, cell_metadata, column_indices, min_val, max_val)
 
     def get_team_vs_team_comparison_table(self, league: str, season: str, week: int = None) -> 'TableData':
         """
