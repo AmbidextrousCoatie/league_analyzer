@@ -57,3 +57,66 @@ def get_theme_color(color_name: str) -> str:
     """
     return THEME_COLORS.get(color_name, "")
 
+
+def hex_to_rgb(hex_color: str) -> tuple:
+    """
+    Convert hex color to RGB tuple.
+    
+    Args:
+        hex_color: Hex color string (with or without #)
+        
+    Returns:
+        Tuple of (r, g, b) values
+    """
+    hex_color = hex_color.lstrip('#')
+    return tuple(int(hex_color[i:i+2], 16) for i in (0, 2, 4))
+
+
+def get_heat_map_color(value: float, min_val: float, max_val: float, 
+                       start_color: str = None, end_color: str = None,
+                       use_low_high: bool = True) -> str:
+    """
+    Generate heat map color interpolating between start and end colors.
+    Matches the JavaScript ColorUtils.getHeatMapColor implementation.
+    
+    Args:
+        value: The value to map to a color
+        min_val: Minimum value in the range
+        max_val: Maximum value in the range
+        start_color: Optional start color (low value). If None, uses theme color
+        end_color: Optional end color (high value). If None, uses theme color
+        use_low_high: If True (default), uses heat_map_low/high. If False, uses heat_map_start/end
+        
+    Returns:
+        RGB color string (e.g., "rgb(123, 45, 67)")
+    """
+    if value == "" or value is None or min_val == max_val:
+        return get_theme_color("background") or "#f8f9fa"
+    
+    # Use theme colors if not specified
+    if start_color is None:
+        if use_low_high:
+            start_color = THEME_COLORS.get("heat_map_low", "#d9596a")
+        else:
+            start_color = THEME_COLORS.get("heat_map_start", "#dddddd")
+    if end_color is None:
+        if use_low_high:
+            end_color = THEME_COLORS.get("heat_map_high", "#1b8da7")
+        else:
+            end_color = THEME_COLORS.get("heat_map_end", "#1b8da7")
+    
+    # Normalize value to 0-1 range, clamped between 0 and 1
+    ratio = (value - min_val) / (max_val - min_val) if max_val != min_val else 0
+    ratio = max(0, min(1, ratio))  # Clamp between 0 and 1
+    
+    # Convert hex colors to RGB
+    r1, g1, b1 = hex_to_rgb(start_color)
+    r2, g2, b2 = hex_to_rgb(end_color)
+    
+    # Interpolate between the two colors
+    r = round(r1 + (r2 - r1) * ratio)
+    g = round(g1 + (g2 - g1) * ratio)
+    b = round(b1 + (b2 - b1) * ratio)
+    
+    return f"rgb({r}, {g}, {b})"
+
