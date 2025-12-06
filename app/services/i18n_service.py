@@ -197,6 +197,9 @@ class I18nService:
             # Card headers and UI elements
             "league_statistics": {"en": "League Statistics", "de": "Liga-Statistiken"},
             "season": {"en": "Season", "de": "Saison"},
+            "article_male": {"en":"the", "de":"der"},
+            "article_female": {"en":"the", "de":"die"},
+            "article_neutral": {"en":"the", "de":"das"},
             "league": {"en": "League", "de": "Liga"},
             "season_overview": {"en": "Season Overview", "de": "Saison-Übersicht"},
             "position_in_season_progress": {"en": "Position in Season ProgressSSSssSS", "de": "Position im Saison-Verlauf"},
@@ -239,7 +242,7 @@ class I18nService:
             "individual_performance": {"en": "Individual Performance", "de": "Einzel-Leistung"},
             "record_individual_games": {"en": "Record Individual Games", "de": "Rekord Einzelspiele"},
             "record_team_games": {"en": "Record Team Games", "de": "Rekord Teamspiele"},
-            "team_vs_team_comparison_matrix": {"en": "Team vs Team Comparison Matrix", "de": "Team vs Team Vergleichsmatrix"},
+            "team_vs_team_comparison_matrix": {"en": "Team vs Team Comparison", "de": "Mannschaftsvergleich"},
             "league_leader": {"en": "League Leader", "de": "Liga-Führer"},
             "league_average": {"en": "League Average", "de": "Liga-Durchschnitt"},
             "pins_per_game": {"en": "Pins per game", "de": "Pins pro Spiel"},
@@ -270,7 +273,7 @@ class I18nService:
             "standings": {"en": "Standings", "de": "Tabelle"},
             "win_percentage": {"en": "Win Percentage", "de": "Siegquote"},
             "performance": {"en": "Performance", "de": "Leistung"},
-            "average_scores_and_match_points_between_teams": {"en": "Average scores and match points between teams", "de": "Durchschnittliche Ergebnisse und Matchpunkte zwischen Teams"},
+            "team_vs_team_comparison_matrix_explanation": {"en": "Average scores and match points between teams", "de": "Gegenüberstellung der erzielten Pins und Punkte im direkten Vergleich der Teams während"},
         }
 
         # Derive runtime per-language maps from catalog

@@ -27,7 +27,7 @@ from app.models.series_data import SeriesData
 from data_access.schema import Columns
 from itertools import accumulate
 from app.config.debug_config import debug_config
-from app.utils.color_constants import get_theme_color
+from app.utils.color_constants import get_theme_color, get_heat_map_color
 # from data_access.series_data import calculate_series_data, get_player_series_data, get_team_series_data
 
 
@@ -3252,9 +3252,62 @@ class LeagueService:
                 'players': []
             }
 
-    def get_team_vs_team_comparison(self, league: str, season: str, week: int = None) -> Dict[str, Any]:
-        """Get team vs team comparison matrix with real data from database"""
+    def _apply_heat_map_to_columns(self, table_data: List[List], cell_metadata: Dict[str, Dict],
+                                    column_indices: List[int], min_val: float = None, max_val: float = None) -> Dict[str, Dict]:
+        """
+        Apply heat map coloring to specified column indices.
+        
+        Args:
+            table_data: List of rows, where each row is a list of values
+            cell_metadata: Dictionary mapping "row:col" to cell metadata
+            column_indices: List of column indices (0-based) to apply coloring to
+            min_val: Optional minimum value for color scale. If None, calculated from data
+            max_val: Optional maximum value for color scale. If None, calculated from data
+            
+        Returns:
+            Updated cell_metadata dictionary
+        """
+        if not table_data or not column_indices:
+            return cell_metadata
+        
+        # Extract all values from specified columns
+        all_values = []
+        for row in table_data:
+            for col_idx in column_indices:
+                if col_idx < len(row):
+                    value = row[col_idx]
+                    # Only include numeric values (skip empty strings, None, etc.)
+                    if isinstance(value, (int, float)) and value != "":
+                        all_values.append(value)
+        
+        if not all_values:
+            return cell_metadata
+        
+        # Calculate min/max if not provided
+        calculated_min = min(all_values) if min_val is None else min_val
+        calculated_max = max(all_values) if max_val is None else max_val
+        
+        # Apply coloring to each cell in specified columns
+        for row_idx, row in enumerate(table_data):
+            for col_idx in column_indices:
+                if col_idx < len(row):
+                    value = row[col_idx]
+                    if isinstance(value, (int, float)) and value != "":
+                        color = get_heat_map_color(value, calculated_min, calculated_max)
+                        cell_metadata[f"{row_idx}:{col_idx}"] = {"backgroundColor": color}
+        
+        return cell_metadata
+
+    def get_team_vs_team_comparison_table(self, league: str, season: str, week: int = None) -> 'TableData':
+        """
+        Get team vs team comparison as TableData with heat map.
+        Teams are sorted by average points (across all opponents) before table creation
+        to ensure proper matrix alignment with diagonal cells.
+        """
+        from app.models.table_data import TableData, ColumnGroup, Column
+        
         try:
+            # ========== DATA COLLECTION ==========
             # Get all teams in the league/season
             team_filters = {
                 Columns.league_name: {'value': league, 'operator': 'eq'},
@@ -3266,34 +3319,28 @@ class LeagueService:
             if week is not None:
                 team_filters[Columns.week] = {'value': week, 'operator': 'eq'}
             
-            # Get all teams
             teams_data = self.adapter.get_filtered_data(
                 columns=[Columns.team_name], 
                 filters=team_filters
             )
             
             if teams_data.empty:
-                return {}
+                return TableData(
+                    columns=[],
+                    data=[],
+                    title=i18n_service.get_text("team_vs_team_comparison_matrix"),
+                    description="No data available",
+                    config={"striped": True, "hover": True, "compact": True, "stickyHeader": True}
+                )
             
             teams = sorted(teams_data[Columns.team_name].unique())
-            
-            # Get all match data for the teams
-            match_filters = {
-                Columns.league_name: {'value': league, 'operator': 'eq'},
-                Columns.season: {'value': season, 'operator': 'eq'},
-                Columns.computed_data: {'value': True, 'operator': 'eq'},  # Team-level data
-                Columns.input_data: {'value': False, 'operator': 'eq'}
-            }
-            
-            if week is not None:
-                match_filters[Columns.week] = {'value': week, 'operator': 'eq'}
             
             # Get team match data (computed team totals)
             # Team totals have position=0 for both BayL and BZOL N1 structures
             team_total_filters = {
                 Columns.league_name: {'value': league, 'operator': 'eq'},
                 Columns.season: {'value': season, 'operator': 'eq'},
-                Columns.computed_data: {'value': True, 'operator': 'eq'},  # Team-level data
+                Columns.computed_data: {'value': True, 'operator': 'eq'},
                 Columns.input_data: {'value': False, 'operator': 'eq'},
                 Columns.position: {'value': 0, 'operator': 'eq'}  # Team totals have position 0
             }
@@ -3310,7 +3357,7 @@ class LeagueService:
             individual_filters = {
                 Columns.league_name: {'value': league, 'operator': 'eq'},
                 Columns.season: {'value': season, 'operator': 'eq'},
-                Columns.computed_data: {'value': False, 'operator': 'eq'},  # Individual player data
+                Columns.computed_data: {'value': False, 'operator': 'eq'},
                 Columns.input_data: {'value': True, 'operator': 'eq'}
             }
             
@@ -3322,11 +3369,16 @@ class LeagueService:
                 filters=individual_filters
             )
             
-            
             if team_matches.empty:
-                return {}
+                return TableData(
+                    columns=[],
+                    data=[],
+                    title=i18n_service.get_text("team_vs_team_comparison_matrix"),
+                    description="No match data available",
+                    config={"striped": True, "hover": True, "compact": True, "stickyHeader": True}
+                )
             
-            # Calculate team vs team statistics
+            # ========== CALCULATE COMPARISON DATA ==========
             comparison_data = {}
             for team in teams:
                 comparison_data[team] = {}
@@ -3345,16 +3397,16 @@ class LeagueService:
                             total_points_list = []
                             for _, match in team_vs_opponent.iterrows():
                                 round_number = match[Columns.round_number]
-                                week = match[Columns.week]
+                                match_week = match[Columns.week]
                                 
                                 # Get team match points (0-3)
                                 team_match_points = match[Columns.points]
                                 
-                                # Get individual points for this match (individual games have actual match numbers)
+                                # Get individual points for this match
                                 individual_match_data = individual_data[
                                     (individual_data[Columns.team_name] == team) & 
                                     (individual_data[Columns.team_name_opponent] == opponent) &
-                                    (individual_data[Columns.week] == week)
+                                    (individual_data[Columns.week] == match_week)
                                 ]
                                 
                                 # Filter by round number to get the specific match
@@ -3370,7 +3422,6 @@ class LeagueService:
                             
                             avg_points = round(sum(total_points_list) / len(total_points_list), 1) if total_points_list else 0.0
                         else:
-                            # No matches found, use default values
                             avg_score = 0.0
                             avg_points = 0.0
                         
@@ -3379,204 +3430,178 @@ class LeagueService:
                             'avg_points': avg_points
                         }
             
-            return {
-                'teams': teams,
-                'comparison_data': comparison_data,
-                'league': league,
-                'season': season,
-                'week': week
-            }
+            # ========== DATA EXTENSION: Calculate team averages and sort ==========
+            # Calculate average points for each team (across all opponents)
+            team_avg_points = {}
+            for team in teams:
+                team_points_list = []
+                for opponent in teams:
+                    if team != opponent and opponent in comparison_data[team]:
+                        team_points_list.append(comparison_data[team][opponent]['avg_points'])
+                team_avg_points[team] = sum(team_points_list) / len(team_points_list) if team_points_list else 0
+            
+            # Sort teams by average points (descending) - this determines row/column order
+            sorted_teams = sorted(teams, key=lambda t: team_avg_points[t], reverse=True)
+            team_positions = {team: pos + 1 for pos, team in enumerate(sorted_teams)}
+            
+            # ========== CREATE TABLE STRUCTURE ==========
+            columns = [
+                ColumnGroup(
+                    title=f'{i18n_service.get_text("opponent")} →',
+                    frozen='left',
+                    columns=[
+                        Column(title="#", field='pos', width='50px', align='center'),
+                        Column(title=f'{i18n_service.get_text("team")} ↓', field='team', width='180px', align='left')
+                    ]
+                )
+            ]
+            
+            # Add average columns first (bold) - right after position/team group
+            columns.append(ColumnGroup(
+                title=i18n_service.get_text("average"),
+                columns=[
+                    Column(title=i18n_service.get_text("score"), field='avg_score', width='80px', align='center'),
+                    Column(title=i18n_service.get_text("points"), field='avg_points', width='80px', align='center')
+                ],
+                header_style={"fontWeight": "bold"}
+            ))
+            
+            # Add columns for each team (using sorted order)
+            for team in sorted_teams:
+                columns.append(ColumnGroup(
+                    title=team,
+                    columns=[
+                        Column(title=i18n_service.get_text("score"), field=f'{team}_score', width='80px', align='center'),
+                        Column(title=i18n_service.get_text("points"), field=f'{team}_points', width='80px', align='center')
+                    ]
+                ))
+            
+            # ========== GENERATE TABLE ROWS ==========
+            table_data = []
+            cell_metadata = {}
+            
+            # Collect all score and points values for heat map min/max calculation
+            all_scores = []
+            all_points = []
+            
+            for team in sorted_teams:
+                for opponent in sorted_teams:
+                    if team != opponent and opponent in comparison_data[team]:
+                        all_scores.append(comparison_data[team][opponent]['avg_score'])
+                        all_points.append(comparison_data[team][opponent]['avg_points'])
+            
+            if not all_scores or not all_points:
+                return TableData(
+                    columns=columns,
+                    data=[],
+                    title=i18n_service.get_text("team_vs_team_comparison_matrix"),
+                    description="No match data available",
+                    config={"striped": True, "hover": True, "compact": True, "stickyHeader": True}
+                )
+            
+            score_min, score_max = min(all_scores), max(all_scores)
+            points_min, points_max = min(all_points), max(all_points)
+            
+            # Determine column indices for heat map (same for all rows)
+            # Position: 0, Team: 1, Average: 2-3, then pairs of (score, points) for each opponent
+            num_teams = len(sorted_teams)
+            score_column_indices = []
+            points_column_indices = []
+            
+            # Average columns are first (right after position and team)
+            avg_score_col_idx = 2
+            avg_points_col_idx = 3
+            
+            # Team columns come after averages
+            col_idx = 4  # Start after position (0), team name (1), and averages (2-3)
+            for _ in range(num_teams):
+                score_column_indices.append(col_idx)
+                points_column_indices.append(col_idx + 1)
+                col_idx += 2
+            
+            # Generate rows (using sorted teams)
+            for row_idx, team in enumerate(sorted_teams):
+                position = team_positions[team]
+                row = [position, team]
+                
+                team_scores = []
+                team_points = []
+                
+                # Collect all team vs opponent data first
+                for opponent in sorted_teams:
+                    if team != opponent:
+                        if opponent in comparison_data[team]:
+                            score = comparison_data[team][opponent]['avg_score']
+                            points = comparison_data[team][opponent]['avg_points']
+                        else:
+                            score = 0.0
+                            points = 0.0
+                        team_scores.append(score)
+                        team_points.append(points)
+                
+                # Calculate and add team averages first (columns 2-3)
+                avg_score = round(sum(team_scores) / len(team_scores), 1) if team_scores else 0
+                avg_points = round(sum(team_points) / len(team_points), 1) if team_points else 0
+                row.extend([avg_score, avg_points])
+                
+                # Add team columns (starting at column 4)
+                col_idx = 4
+                for opponent in sorted_teams:
+                    if team != opponent:
+                        if opponent in comparison_data[team]:
+                            score = comparison_data[team][opponent]['avg_score']
+                            points = comparison_data[team][opponent]['avg_points']
+                        else:
+                            score = 0.0
+                            points = 0.0
+                        
+                        row.extend([score, points])
+                        col_idx += 2
+                    else:
+                        # Diagonal cells - empty cells
+                        row.extend(["", ""])
+                        cell_metadata[f"{row_idx}:{col_idx}"] = {"backgroundColor": get_theme_color("background")}
+                        cell_metadata[f"{row_idx}:{col_idx + 1}"] = {"backgroundColor": get_theme_color("background")}
+                        col_idx += 2
+                
+                table_data.append(row)
+            
+            # ========== APPLY HEAT MAP COLORING ==========
+            # Apply heat map using generic function (automatically skips empty diagonal cells)
+            self._apply_heat_map_to_columns(table_data, cell_metadata, score_column_indices, score_min, score_max)
+            self._apply_heat_map_to_columns(table_data, cell_metadata, points_column_indices, points_min, points_max)
+            self._apply_heat_map_to_columns(table_data, cell_metadata, [avg_score_col_idx], score_min, score_max)
+            self._apply_heat_map_to_columns(table_data, cell_metadata, [avg_points_col_idx], points_min, points_max)
+            
+            # ========== RETURN TABLE DATA ==========
+            return TableData(
+                columns=columns,
+                data=table_data,
+                title=i18n_service.get_text("team_vs_team_comparison_matrix"),
+                description=f"{i18n_service.get_text('team_vs_team_comparison_matrix_explanation')}{f' {i18n_service.get_text('week')} {week}.' if week else f' {i18n_service.get_text('article_male')} {i18n_service.get_text('season')}.'}",
+                config={
+                    "striped": True,
+                    "hover": True,
+                    "compact": True,
+                    "stickyHeader": True
+                },
+                cell_metadata=cell_metadata,
+                metadata={
+                    "score_range": {"min": score_min, "max": score_max},
+                    "points_range": {"min": points_min, "max": points_max},
+                    "week": week
+                }
+            )
             
         except Exception as e:
-            print(f"Error in get_team_vs_team_comparison: {str(e)}")
-            return {}
-
-    def get_team_vs_team_comparison_table(self, league: str, season: str, week: int = None) -> 'TableData':
-        """Get team vs team comparison as TableData with heat map"""
-        from app.models.table_data import TableData, ColumnGroup, Column
-        
-        # Get the raw data
-        data = self.get_team_vs_team_comparison(league, season, week)
-        
-        if not data or not data.get('teams') or not data.get('comparison_data'):
-            # Return empty table if no data
+            print(f"Error in get_team_vs_team_comparison_table: {str(e)}")
             return TableData(
                 columns=[],
                 data=[],
                 title=i18n_service.get_text("team_vs_team_comparison_matrix"),
-                description="No data available",
+                description=f"Error: {str(e)}",
                 config={"striped": True, "hover": True, "compact": True, "stickyHeader": True}
             )
-        
-        teams = data['teams']
-        comparison_data = data['comparison_data']
-        
-        # Create table structure
-        columns = [
-            ColumnGroup(
-                title="",  # Empty title for position column group
-                frozen='left',  # Make the position and team name columns sticky
-                columns=[
-                    Column(title="#", field='pos', width='50px', align='center'),
-                    Column(title=i18n_service.get_text("team"), field='team', width='180px', align='left')
-                ]
-            )
-        ]
-        
-        # Add columns for each team
-        for team in teams:
-            columns.append(ColumnGroup(
-                title=team,
-                columns=[
-                    Column(title=i18n_service.get_text("score"), field=f'{team}_score', width='80px', align='center'),
-                    Column(title=i18n_service.get_text("points"), field=f'{team}_points', width='80px', align='center')
-                ]
-            ))
-        
-        # Add average columns
-        columns.append(ColumnGroup(
-            title=i18n_service.get_text("average"),
-            columns=[
-                Column(title=i18n_service.get_text("score"), field='avg_score', width='80px', align='center'),
-                Column(title=i18n_service.get_text("points"), field='avg_points', width='80px', align='center')
-            ]
-        ))
-        
-        # Create table data
-        table_data = []
-        cell_metadata = {}
-        
-        # Calculate min/max values for heat map
-        all_scores = []
-        all_points = []
-        
-        for team in teams:
-            for opponent in teams:
-                if team != opponent and opponent in comparison_data[team]:
-                    all_scores.append(comparison_data[team][opponent]['avg_score'])
-                    all_points.append(comparison_data[team][opponent]['avg_points'])
-        
-        if not all_scores or not all_points:
-            # No valid data
-            return TableData(
-                columns=columns,
-                data=[],
-                title=i18n_service.get_text("team_vs_team_comparison_matrix"),
-                description="No match data available",
-                config={"striped": True, "hover": True, "compact": True, "stickyHeader": True}
-            )
-        
-        score_min, score_max = min(all_scores), max(all_scores)
-        points_min, points_max = min(all_points), max(all_points)
-        
-        # Calculate team positions based on average points (for sorting/ranking)
-        team_avg_points = {}
-        for team in teams:
-            team_points_list = []
-            for opponent in teams:
-                if team != opponent and opponent in comparison_data[team]:
-                    team_points_list.append(comparison_data[team][opponent]['avg_points'])
-            team_avg_points[team] = sum(team_points_list) / len(team_points_list) if team_points_list else 0
-        
-        # Sort teams by average points to determine position
-        sorted_teams = sorted(teams, key=lambda t: team_avg_points[t], reverse=True)
-        team_positions = {team: pos + 1 for pos, team in enumerate(sorted_teams)}
-        
-        # Generate rows
-        for row_idx, team in enumerate(teams):
-            position = team_positions[team]
-            row = [position, team]  # Add position as first column
-            col_idx = 2  # Start after position (0) and team name (1) columns
-            
-            # Calculate team averages
-            team_scores = []
-            team_points = []
-            
-            for opponent in teams:
-                if team != opponent:
-                    if opponent in comparison_data[team]:
-                        score = comparison_data[team][opponent]['avg_score']
-                        points = comparison_data[team][opponent]['avg_points']
-                    else:
-                        score = 0.0
-                        points = 0.0
-                    
-                    row.extend([score, points])
-                    
-                    # Add heat map colors
-                    score_color = self._get_heat_map_color(score, score_min, score_max)
-                    points_color = self._get_heat_map_color(points, points_min, points_max)
-                    
-                    cell_metadata[f"{row_idx}:{col_idx}"] = {"backgroundColor": score_color}
-                    cell_metadata[f"{row_idx}:{col_idx + 1}"] = {"backgroundColor": points_color}
-                    
-                    team_scores.append(score)
-                    team_points.append(points)
-                    col_idx += 2
-                else:
-                    # Diagonal cells - empty cells (no merge, no "-")
-                    row.extend(["", ""])
-                    # Add light gray background to both diagonal cells
-                    cell_metadata[f"{row_idx}:{col_idx}"] = {"backgroundColor": get_theme_color("background")}
-                    cell_metadata[f"{row_idx}:{col_idx + 1}"] = {"backgroundColor": get_theme_color("background")}
-                    col_idx += 2
-            
-            # Add team averages
-            avg_score = round(sum(team_scores) / len(team_scores), 1) if team_scores else 0
-            avg_points = round(sum(team_points) / len(team_points), 1) if team_points else 0
-            row.extend([avg_score, avg_points])
-            
-            # Add heat map colors for average columns
-            avg_score_color = self._get_heat_map_color(avg_score, score_min, score_max)
-            avg_points_color = self._get_heat_map_color(avg_points, points_min, points_max)
-            cell_metadata[f"{row_idx}:{col_idx}"] = {"backgroundColor": avg_score_color}
-            cell_metadata[f"{row_idx}:{col_idx + 1}"] = {"backgroundColor": avg_points_color}
-            
-            table_data.append(row)
-        
-        # Create TableData object
-        return TableData(
-            columns=columns,
-            data=table_data,
-            title=i18n_service.get_text("team_vs_team_comparison_matrix"),
-            description=f"{i18n_service.get_text('average_scores_and_match_points_between_teams')}{f' ({i18n_service.get_text('week')} {week})' if week else f' ({i18n_service.get_text('season')})'}",
-            config={
-                "striped": True,
-                "hover": True,
-                "compact": True,
-                "stickyHeader": True
-            },
-            cell_metadata=cell_metadata,
-            metadata={
-                "score_range": {"min": score_min, "max": score_max},
-                "points_range": {"min": points_min, "max": points_max},
-                "week": week
-            }
-        )
-
-    def _get_heat_map_color(self, value, min_val, max_val):
-        """Generate heat map color interpolating between #a9e9f9 (min) and #06313c (max)"""
-        if value == "" or min_val == max_val:
-            return "#f8f9fa"  # Light gray for diagonal cells
-        
-        # Normalize value to 0-1 range
-        ratio = (value - min_val) / (max_val - min_val)
-        
-        # Convert hex colors to RGB
-        def hex_to_rgb(hex_color):
-            hex_color = hex_color.lstrip('#')
-            return tuple(int(hex_color[i:i+2], 16) for i in (0, 2, 4))
-        
-        # Define min and max colors
-        min_color = hex_to_rgb('#d9596a')  # Light blue
-        max_color = hex_to_rgb('#1b8da7')  # Dark blue-green
-        
-        # Interpolate between the two colors
-        r = int(min_color[0] + (max_color[0] - min_color[0]) * ratio)
-        g = int(min_color[1] + (max_color[1] - min_color[1]) * ratio)
-        b = int(min_color[2] + (max_color[2] - min_color[2]) * ratio)
-        
-        return f"rgb({r}, {g}, {b})"
 
     def get_season_league_standings(self, season: str) -> Dict[str, Any]:
         """
