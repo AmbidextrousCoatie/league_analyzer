@@ -3450,8 +3450,18 @@ class LeagueService:
                     title=f'{i18n_service.get_text("opponent")} →',
                     frozen='left',
                     columns=[
-                        Column(title="#", field='pos', width='50px', align='center'),
-                        Column(title=f'{i18n_service.get_text("team")} ↓', field='team', width='180px', align='left')
+                        Column(
+                            title="#", 
+                            field='pos', 
+                            width='50px', 
+                            align='center'
+                        ),
+                        Column(
+                            title=f'{i18n_service.get_text("team")} ↓', 
+                            field='team', 
+                            width='180px', 
+                            align='left'
+                        )
                     ]
                 )
             ]
@@ -3460,8 +3470,20 @@ class LeagueService:
             columns.append(ColumnGroup(
                 title=i18n_service.get_text("average"),
                 columns=[
-                    Column(title=i18n_service.get_text("score"), field='avg_score', width='80px', align='center'),
-                    Column(title=i18n_service.get_text("points"), field='avg_points', width='80px', align='center')
+                    Column(
+                        title=i18n_service.get_text("score"), 
+                        field='avg_score', 
+                        width='80px', 
+                        align='center',
+                        tooltip=f'{i18n_service.get_text("average")} {i18n_service.get_text("score")} vs. all opponents'
+                    ),
+                    Column(
+                        title=i18n_service.get_text("points"), 
+                        field='avg_points', 
+                        width='80px', 
+                        align='center',
+                        tooltip=f'{i18n_service.get_text("average")} {i18n_service.get_text("points")} vs. all opponents'
+                    )
                 ],
                 header_style={"fontWeight": "bold"}
             ))
@@ -3471,8 +3493,20 @@ class LeagueService:
                 columns.append(ColumnGroup(
                     title=team,
                     columns=[
-                        Column(title=i18n_service.get_text("score"), field=f'{team}_score', width='80px', align='center'),
-                        Column(title=i18n_service.get_text("points"), field=f'{team}_points', width='80px', align='center')
+                        Column(
+                            title=i18n_service.get_text("score"), 
+                            field=f'{team}_score', 
+                            width='80px', 
+                            align='center',
+                            tooltip=f'{i18n_service.get_text("average")} {i18n_service.get_text("score")} vs. {team}'
+                        ),
+                        Column(
+                            title=i18n_service.get_text("points"), 
+                            field=f'{team}_points', 
+                            width='80px', 
+                            align='center',
+                            tooltip=f'{i18n_service.get_text("average")} {i18n_service.get_text("points")} vs. {team}'
+                        )
                     ]
                 ))
             

@@ -13,6 +13,7 @@ class Column:
     align: Optional[str] = "center"  # "left", "center", "right"
     format: Optional[str] = None  # Format string for numbers, dates, etc.
     style: Optional[Dict[str, str]] = None  # Custom CSS styles
+    tooltip: Optional[str] = None  # Tooltip text for column header
 
 @dataclass
 class ColumnGroup:
@@ -59,7 +60,8 @@ class TableData:
                             **({"width": col.width} if col.width else {}),
                             **({"align": col.align} if col.align else {}),
                             **({"format": col.format} if col.format else {}),
-                            **({"style": col.style} if col.style else {})
+                            **({"style": col.style} if col.style else {}),
+                            **({"tooltip": col.tooltip} if col.tooltip else {})
                         } 
                         for col in group.columns
                     ],

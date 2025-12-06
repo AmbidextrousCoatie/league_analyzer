@@ -329,6 +329,10 @@ function createTableTabulator(tableId, data, options = {}) {
                     sorter: column.sortable === false ? undefined : (isNumberColumn || isStringNumber ? 'number' : 'string'),
                     formatter,
                     tooltip: settings.tooltips ? true : false,
+                    // Add header tooltip: use explicit tooltip if provided, otherwise default to title
+                    headerTooltip: (column.tooltip !== undefined && column.tooltip !== null && column.tooltip !== '') 
+                        ? column.tooltip 
+                        : (column.title || ''),
                     cssClass: cssClasses.join(' ') || undefined
                 };
 
@@ -463,6 +467,10 @@ function createTableTabulator(tableId, data, options = {}) {
                     sorter: column.sortable === false ? undefined : (isNumberColumn || isStringNumber ? 'number' : 'string'),
                     formatter,
                     tooltip: settings.tooltips ? true : false,
+                    // Add header tooltip: use explicit tooltip if provided, otherwise default to title
+                    headerTooltip: (column.tooltip !== undefined && column.tooltip !== null && column.tooltip !== '') 
+                        ? column.tooltip 
+                        : (column.title || ''),
                     cssClass: colCssClass || undefined
                 };
 
@@ -893,6 +901,53 @@ function createTableTabulator(tableId, data, options = {}) {
                     });
                 });
             }
+            
+            // Add tooltips to all column headers (ensure all headers have tooltips)
+            // This ensures tooltips work even if headerTooltip property didn't apply
+            requestAnimationFrame(() => {
+                const allColumnHeaders = tableElement.querySelectorAll('.tabulator-col');
+                allColumnHeaders.forEach((colElement) => {
+                    // Skip if already has a tooltip
+                    if (colElement.getAttribute('title')) {
+                        return;
+                    }
+                    
+                    const titleElement = colElement.querySelector('.tabulator-col-title');
+                    if (!titleElement) {
+                        return;
+                    }
+                    
+                    // Get the column title text
+                    const titleText = titleElement.textContent || titleElement.innerText || '';
+                    if (!titleText.trim()) {
+                        return;
+                    }
+                    
+                    let tooltipText = titleText.trim();
+                    
+                    // Find the corresponding column definition to get explicit tooltip if available
+                    const field = colElement.getAttribute('tabulator-field');
+                    if (field && data.columns) {
+                        // Search for explicit tooltip in column definitions
+                        for (const group of data.columns) {
+                            if (group.columns) {
+                                for (const col of group.columns) {
+                                    if (col.field === field) {
+                                        if (col.tooltip !== undefined && col.tooltip !== null) {
+                                            tooltipText = col.tooltip;
+                                        }
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    
+                    // Set tooltip on both the column element and title element
+                    colElement.setAttribute('title', tooltipText);
+                    titleElement.setAttribute('title', tooltipText);
+                });
+            });
         } catch (error) {
             console.error(`[Tabulator ${tableId}] Error in tableBuilt event handler:`, error);
         }
@@ -1088,6 +1143,13 @@ function createTableBootstrap3(tableId, data, options = {}) {
                     
                     const titleSpan = document.createElement('span');
                     titleSpan.textContent = col.title || '';
+                    // Add tooltip to header: use explicit tooltip if provided, otherwise default to title
+                    const tooltipText = (col.tooltip !== undefined && col.tooltip !== null) 
+                        ? col.tooltip 
+                        : col.title || '';
+                    if (tooltipText) {
+                        th.setAttribute('title', tooltipText);
+                    }
                     headerContent.appendChild(titleSpan);
                     
                     const sortIcon = document.createElement('span');
@@ -1150,6 +1212,13 @@ function createTableBootstrap3(tableId, data, options = {}) {
                     });
                 } else {
                     th.textContent = col.title || '';
+                    // Add tooltip to header: use explicit tooltip if provided, otherwise default to title
+                    const tooltipText = (col.tooltip !== undefined && col.tooltip !== null) 
+                        ? col.tooltip 
+                        : col.title || '';
+                    if (tooltipText) {
+                        th.setAttribute('title', tooltipText);
+                    }
                 }
                 
                 // Add vertical borders between groups
