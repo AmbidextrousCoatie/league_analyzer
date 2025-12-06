@@ -168,10 +168,16 @@ function createLineChart(data, order, containerId, title, labels, invertYAxis = 
         smooth: false
     }));
 
+
+    tooltipOrder = 'valueDesc';
+    if (invertYAxis) {
+        tooltipOrder = 'valueAsc';
+    }
     // Chart options
     const chartOptions = {
         tooltip: {
-            trigger: 'axis'
+            trigger: 'axis',
+            order: tooltipOrder // Order tooltips by value depending on the invertYAxis flag
         },
         legend: {
             show: false
