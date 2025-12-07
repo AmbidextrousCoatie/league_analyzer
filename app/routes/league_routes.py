@@ -540,7 +540,7 @@ def get_translations():
                     "location", "status", "date", "player", "season", "league",
                     
                     # Table titles and descriptions
-                    "league_standings", "league_history", "team_week_details", "head_to_head", 
+                    "league_standings", "league_standings_all_leagues", "league_history", "team_week_details", "head_to_head", 
                     "match_day", "through_week", "week_results", "total_until_week",
                     "match_info", "match", "total_points", "team_performance", "season_timetable",
                     "individual_averages", "individual_performance", "record_individual_games", 

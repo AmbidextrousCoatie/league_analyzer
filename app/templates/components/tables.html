@@ -269,6 +269,7 @@ function createTableTabulator(tableId, data, options = {}) {
                     const element = cell.getElement();
                     const rowData = cell.getRow().getData();
                     const rowIdx = rowData.__rowIndex;
+                    const row = cell.getRow();
 
                     // Add highlighting class and style to cell element if group is highlighted
                     if (isHighlighted) {
@@ -279,17 +280,79 @@ function createTableTabulator(tableId, data, options = {}) {
                     // Column-level inline styles
                     applyElementStyles(element, columnStyles);
 
-                    // Cell metadata styles
+                    // Cell metadata styles (heatmap colors) - apply with !important to override striping
                     const cellMeta = cellMetadataMap[rowIdx]?.[field];
                     if (cellMeta) {
-                        applyElementStyles(element, cellMeta);
+                        // Apply heatmap background color with !important to override striping CSS
+                        if (cellMeta.backgroundColor) {
+                            element.style.setProperty('background-color', cellMeta.backgroundColor, 'important');
+                        }
+                        // Apply other styles normally
+                        Object.entries(cellMeta).forEach(([property, value]) => {
+                            if (property !== 'backgroundColor' && value !== undefined && value !== null) {
+                                element.style[property] = value;
+                            }
+                        });
                     }
 
-                    // Special handling for position column
-                    if (!settings.disablePositionCircle && groupIndex === 0 && columnIndex === 0) {
-                        const teamName = teamField ? rowData[teamField] : null;
-                        const color = getTeamColor(teamName);
-                        return `<div class="tab-position-circle" style="background-color: ${color};">${value ?? ''}</div>`;
+                    // Special handling for position columns
+                    // Check if this is a position column by field name or by position (first column of first group)
+                    const isPositionColumn = field === 'team_position' || field === 'opponent_position' || 
+                                            (!settings.disablePositionCircle && groupIndex === 0 && columnIndex === 0);
+                    
+                    if (isPositionColumn && !settings.disablePositionCircle) {
+                        let teamName = null;
+                        if (field === 'team_position') {
+                            // For team position, use team name from the same row
+                            teamName = rowData['team_name'] || (teamField ? rowData[teamField] : null);
+                        } else if (field === 'opponent_position') {
+                            // For opponent position, use opponent name from the same row
+                            // Always use the raw data array for reliability
+                            if (rowIdx !== undefined && rowIdx >= 0 && data.data && data.data[rowIdx]) {
+                                // Find the column index for opponent_name in columnOrder
+                                const opponentNameIndex = columnOrder.findIndex(ci => ci.field === 'opponent_name');
+                                if (opponentNameIndex >= 0 && opponentNameIndex < data.data[rowIdx].length) {
+                                    const rawRow = data.data[rowIdx];
+                                    teamName = rawRow[opponentNameIndex] || null;
+                                    
+                                    // Debug logging (remove after fixing)
+                                    if (value && rowIdx < 3) { // Only log first 3 rows to avoid spam
+                                        console.log(`[opponent_position] Row ${rowIdx}: opponentNameIndex=${opponentNameIndex}, rawRow[${opponentNameIndex}]=${teamName}, rowData['opponent_name']=${rowData['opponent_name']}`);
+                                    }
+                                } else {
+                                    console.warn(`[opponent_position] Row ${rowIdx}: Invalid opponentNameIndex=${opponentNameIndex} or row length mismatch`);
+                                }
+                            } else {
+                                // Fallback: try rowData
+                                teamName = rowData['opponent_name'] || null;
+                                
+                                // Last resort: try to get it from the row's opponent_name cell
+                                if (!teamName) {
+                                    try {
+                                        const opponentNameCell = row.getCell('opponent_name');
+                                        if (opponentNameCell) {
+                                            teamName = opponentNameCell.getValue();
+                                        }
+                                    } catch (e) {
+                                        // Cell might not be rendered yet
+                                    }
+                                }
+                            }
+                        } else {
+                            // Fallback: first column of first group (original logic)
+                            teamName = teamField ? rowData[teamField] : null;
+                        }
+                        
+                        if (teamName) {
+                            // Normalize team name (trim whitespace) to ensure it matches the color map
+                            const normalizedTeamName = String(teamName).trim();
+                            const color = getTeamColor(normalizedTeamName);
+                            // Debug logging for opponent_position
+                            if (field === 'opponent_position' && rowIdx < 3) {
+                                console.log(`[opponent_position] Row ${rowIdx}: teamName="${normalizedTeamName}", color="${color}", inMap=${window.ColorUtils?.teamColorMap?.[normalizedTeamName] ? 'yes' : 'no'}`);
+                            }
+                            return `<div class="tab-position-circle" style="background-color: ${color};">${value ?? ''}</div>`;
+                        }
                     }
 
                     return value ?? '';
@@ -403,6 +466,7 @@ function createTableTabulator(tableId, data, options = {}) {
                     const element = cell.getElement();
                     const rowData = cell.getRow().getData();
                     const rowIdx = rowData.__rowIndex;
+                    const row = cell.getRow();
 
                     // Add stripe class for column group coloring; actual colors come from CSS
                     if (useStripedGroups) {
@@ -418,17 +482,79 @@ function createTableTabulator(tableId, data, options = {}) {
                     // Column-level inline styles
                     applyElementStyles(element, columnStyles);
 
-                    // Cell metadata styles
+                    // Cell metadata styles (heatmap colors) - apply with !important to override striping
                     const cellMeta = cellMetadataMap[rowIdx]?.[field];
                     if (cellMeta) {
-                        applyElementStyles(element, cellMeta);
+                        // Apply heatmap background color with !important to override striping CSS
+                        if (cellMeta.backgroundColor) {
+                            element.style.setProperty('background-color', cellMeta.backgroundColor, 'important');
+                        }
+                        // Apply other styles normally
+                        Object.entries(cellMeta).forEach(([property, value]) => {
+                            if (property !== 'backgroundColor' && value !== undefined && value !== null) {
+                                element.style[property] = value;
+                            }
+                        });
                     }
 
-                    // Special handling for position column (first column of first group)
-                    if (!settings.disablePositionCircle && columnInfo.groupIndex === 0 && columnInfo.columnIndex === 0) {
-                        const teamName = teamField ? rowData[teamField] : null;
-                        const color = getTeamColor(teamName);
-                        return `<div class="tab-position-circle" style="background-color: ${color};">${value ?? ''}</div>`;
+                    // Special handling for position columns
+                    // Check if this is a position column by field name or by position (first column of first group)
+                    const isPositionColumn = field === 'team_position' || field === 'opponent_position' || 
+                                            (!settings.disablePositionCircle && columnInfo.groupIndex === 0 && columnInfo.columnIndex === 0);
+                    
+                    if (isPositionColumn && !settings.disablePositionCircle) {
+                        let teamName = null;
+                        if (field === 'team_position') {
+                            // For team position, use team name from the same row
+                            teamName = rowData['team_name'] || (teamField ? rowData[teamField] : null);
+                        } else if (field === 'opponent_position') {
+                            // For opponent position, use opponent name from the same row
+                            // Always use the raw data array for reliability
+                            if (rowIdx !== undefined && rowIdx >= 0 && data.data && data.data[rowIdx]) {
+                                // Find the column index for opponent_name in columnOrder
+                                const opponentNameIndex = columnOrder.findIndex(ci => ci.field === 'opponent_name');
+                                if (opponentNameIndex >= 0 && opponentNameIndex < data.data[rowIdx].length) {
+                                    const rawRow = data.data[rowIdx];
+                                    teamName = rawRow[opponentNameIndex] || null;
+                                    
+                                    // Debug logging (remove after fixing)
+                                    if (value && rowIdx < 3) { // Only log first 3 rows to avoid spam
+                                        console.log(`[opponent_position] Row ${rowIdx}: opponentNameIndex=${opponentNameIndex}, rawRow[${opponentNameIndex}]=${teamName}, rowData['opponent_name']=${rowData['opponent_name']}`);
+                                    }
+                                } else {
+                                    console.warn(`[opponent_position] Row ${rowIdx}: Invalid opponentNameIndex=${opponentNameIndex} or row length mismatch`);
+                                }
+                            } else {
+                                // Fallback: try rowData
+                                teamName = rowData['opponent_name'] || null;
+                                
+                                // Last resort: try to get it from the row's opponent_name cell
+                                if (!teamName) {
+                                    try {
+                                        const opponentNameCell = row.getCell('opponent_name');
+                                        if (opponentNameCell) {
+                                            teamName = opponentNameCell.getValue();
+                                        }
+                                    } catch (e) {
+                                        // Cell might not be rendered yet
+                                    }
+                                }
+                            }
+                        } else {
+                            // Fallback: first column of first group (original logic)
+                            teamName = teamField ? rowData[teamField] : null;
+                        }
+                        
+                        if (teamName) {
+                            // Normalize team name (trim whitespace) to ensure it matches the color map
+                            const normalizedTeamName = String(teamName).trim();
+                            const color = getTeamColor(normalizedTeamName);
+                            // Debug logging for opponent_position
+                            if (field === 'opponent_position' && rowIdx < 3) {
+                                console.log(`[opponent_position] Row ${rowIdx}: teamName="${normalizedTeamName}", color="${color}", inMap=${window.ColorUtils?.teamColorMap?.[normalizedTeamName] ? 'yes' : 'no'}`);
+                            }
+                            return `<div class="tab-position-circle" style="background-color: ${color};">${value ?? ''}</div>`;
+                        }
                     }
 
                     return value ?? '';
@@ -575,18 +701,32 @@ function createTableTabulator(tableId, data, options = {}) {
 
     // Extract teams from data and update team color map
     // This ensures team colors are available when rendering tables on direct navigation
-    let teams = [];
-    if (data.data && data.data.length > 0) {
-        // Check if this is a team vs team comparison table (has "Team vs Team Comparison" in title)
-        if (data.title && (data.title.includes('Team vs Team Comparison') || data.title.includes('Team vs Team Vergleichsmatrix'))) {
-            teams = data.data.map(row => row[0]).filter(team => team && typeof team === 'string');
-        } else {
-            // Standard tables with team names in second column (index 1)
-            teams = data.data.map(row => row[1]).filter(team => team && typeof team === 'string');
-        }
-        
-        if (teams.length > 0 && typeof window.updateTeamColorMap === 'function') {
-            window.updateTeamColorMap(teams);
+    // Skip if disableTeamColorUpdate is set (e.g., when handling multiple tables manually)
+    if (!settings.disableTeamColorUpdate) {
+        let teams = [];
+        if (data.data && data.data.length > 0) {
+            // Check if this is a team vs team comparison table (has "Team vs Team Comparison" in title)
+            if (data.title && (data.title.includes('Team vs Team Comparison') || data.title.includes('Team vs Team Vergleichsmatrix'))) {
+                teams = data.data.map(row => row[0]).filter(team => team && typeof team === 'string');
+            } else {
+                // Standard tables with team names in second column (index 1)
+                teams = data.data.map(row => row[1]).filter(team => team && typeof team === 'string');
+                
+                // For game overview tables, also extract opponent names (typically in last column)
+                // Check if we have an opponent_name field in columnOrder
+                const opponentNameIndex = columnOrder.findIndex(ci => ci.field === 'opponent_name');
+                if (opponentNameIndex >= 0) {
+                    const opponentTeams = data.data.map(row => row[opponentNameIndex]).filter(team => team && typeof team === 'string');
+                    teams = [...teams, ...opponentTeams];
+                }
+            }
+            
+            // Remove duplicates
+            teams = [...new Set(teams)];
+            
+            if (teams.length > 0 && typeof window.updateTeamColorMap === 'function') {
+                window.updateTeamColorMap(teams);
+            }
         }
     }
 

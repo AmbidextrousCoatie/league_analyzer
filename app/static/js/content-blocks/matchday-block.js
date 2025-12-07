@@ -82,51 +82,42 @@ class MatchDayBlock extends BaseContentBlock {
                     <h5>${title}</h5>
                 </div>
                 <div class="card-body">
-                    <!-- Content Area -->
-                    <div class="row">
-                        <div class="col-md-8">
-                            <div id="tableLeagueWeek">
-                                <div class="text-center py-3">
-                                    <div class="spinner-border text-primary" role="status">
-                                        <span class="visually-hidden">${typeof t === 'function' ? t('status.loading_data', 'Loading results...') : 'Loading results...'}</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div id="honorScores" class="card">
-                                <div class="card-header">
-                                    <h5>${typeof t === 'function' ? t('honor_scores', 'Honor Scores') : 'Honor Scores'}</h5>
-                                </div>
-                                <div class="card-body">
-                                    <!-- Loading state -->
+                    <!-- Content Area - League Standings + Honor Scores -->
+                    ${typeof window.generateLeagueStandingsCardHTML === 'function' 
+                        ? window.generateLeagueStandingsCardHTML({
+                            league: leagueName,
+                            week: week,
+                            season: season,
+                            tableId: 'tableLeagueWeek',
+                            honorScoresPrefix: ''
+                          })
+                        : `
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div id="tableLeagueWeek">
                                     <div class="text-center py-3">
-                                        <div class="spinner-border spinner-border-sm text-primary" role="status">
-                                            <span class="visually-hidden">${typeof t === 'function' ? t('status.loading', 'Loading honor scores...') : 'Loading honor scores...'}</span>
+                                        <div class="spinner-border text-primary" role="status">
+                                            <span class="visually-hidden">${typeof t === 'function' ? t('status.loading_data', 'Loading results...') : 'Loading results...'}</span>
                                         </div>
                                     </div>
-                                    
-                                    <!-- Content will be populated here -->
-                                    <div class="mb-3" id="individualScoresSection" style="display: none;">
-                                        <h6>${typeof t === 'function' ? t('top_individual_scores', 'Top Individual Scores') : 'Top Individual Scores'}</h6>
-                                        <div id="individualScores"></div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div id="honorScores" class="card">
+                                    <div class="card-header">
+                                        <h5>${typeof t === 'function' ? t('honor_scores', 'Honor Scores') : 'Honor Scores'}</h5>
                                     </div>
-                                    <div class="mb-3" id="teamScoresSection" style="display: none;">
-                                        <h6>${typeof t === 'function' ? t('top_team_scores', 'Top Team Scores') : 'Top Team Scores'}</h6>
-                                        <div id="teamScores"></div>
-                                    </div>
-                                    <div class="mb-3" id="individualAveragesSection" style="display: none;">
-                                        <h6>${typeof t === 'function' ? t('best_individual_averages', 'Best Individual Averages') : 'Best Individual Averages'}</h6>
-                                        <div id="individualAverages"></div>
-                                    </div>
-                                    <div class="mb-3" id="teamAveragesSection" style="display: none;">
-                                        <h6>${typeof t === 'function' ? t('best_team_averages', 'Best Team Averages') : 'Best Team Averages'}</h6>
-                                        <div id="teamAverages"></div>
+                                    <div class="card-body">
+                                        <div class="text-center py-3">
+                                            <div class="spinner-border spinner-border-sm text-primary" role="status">
+                                                <span class="visually-hidden">${typeof t === 'function' ? t('status.loading', 'Loading honor scores...') : 'Loading honor scores...'}</span>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
+                        `}
                     
                     <!-- Individual Performance Section (Full Width) -->
                     <div class="row mt-4">
@@ -192,25 +183,27 @@ class MatchDayBlock extends BaseContentBlock {
             
             console.log('League week table data:', tableData); // Debug logging
             
-            const container = document.getElementById('tableLeagueWeek');
-            if (container) {
-                // Use Tabulator for structured TableData
-                if (typeof createTableTabulator === 'function') {
-                    console.log('Using createTableTabulator function for week table');
-                    createTableTabulator('tableLeagueWeek', tableData, { 
-                        disablePositionCircle: false, // Week standings should show team color circles
-                        enableSpecialRowStyling: true,
-                        tooltips: true
-                    });
-                } else if (typeof createTableBootstrap3 === 'function') {
-                    console.log('Fallback: Using createTableBootstrap3 function');
-                    createTableBootstrap3('tableLeagueWeek', tableData, { 
-                        disablePositionCircle: false,
-                        enableSpecialRowStyling: true 
-                    });
-                } else {
-                    console.error('No table creation function available');
-                    container.innerHTML = `<div class="alert alert-warning">${typeof t === 'function' ? t('no_data', 'Table creation function not available') : 'Table creation function not available'}</div>`;
+            // Use shared utility function
+            if (typeof window.renderLeagueStandingsTable === 'function') {
+                window.renderLeagueStandingsTable('tableLeagueWeek', tableData);
+            } else {
+                // Fallback to old implementation
+                const container = document.getElementById('tableLeagueWeek');
+                if (container) {
+                    if (typeof createTableTabulator === 'function') {
+                        createTableTabulator('tableLeagueWeek', tableData, { 
+                            disablePositionCircle: false,
+                            enableSpecialRowStyling: true,
+                            tooltips: true
+                        });
+                    } else if (typeof createTableBootstrap3 === 'function') {
+                        createTableBootstrap3('tableLeagueWeek', tableData, { 
+                            disablePositionCircle: false,
+                            enableSpecialRowStyling: true 
+                        });
+                    } else {
+                        container.innerHTML = `<div class="alert alert-warning">${typeof t === 'function' ? t('no_data', 'Table creation function not available') : 'Table creation function not available'}</div>`;
+                    }
                 }
             }
         } catch (error) {
@@ -241,6 +234,13 @@ class MatchDayBlock extends BaseContentBlock {
     populateHonorScores(data) {
         console.log('Populating honor scores with data:', data); // Debug logging
         
+        // Use shared utility function
+        if (typeof window.populateHonorScores === 'function') {
+            window.populateHonorScores(data, '');
+            return;
+        }
+        
+        // Fallback to old implementation
         // Individual Scores
         if (data.individual_scores && data.individual_scores.length > 0) {
             const individualScoresHtml = data.individual_scores

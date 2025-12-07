@@ -122,6 +122,13 @@ class LeagueService:
                     title=f"{i18n_service.get_text('no_data_available')} - {i18n_service.get_text('game')} {round_number}"
                 )
             
+            # Get league standings to determine team positions
+            standings = self.get_league_standings(season, league, week)
+            team_positions = {}
+            if standings and standings.teams:
+                for team in standings.teams:
+                    team_positions[team.team_name] = team.position
+            
             # Create column groups
             columns = [
                 ColumnGroup(
@@ -129,6 +136,7 @@ class LeagueService:
                     frozen="left",
                     style={"backgroundColor": get_theme_color("background")},
                     columns=[
+                        Column(title=i18n_service.get_text("position"), field="team_position", width="60px", align="center", tooltip=i18n_service.get_text("position")),
                         Column(title=i18n_service.get_text("team"), field="team_name", width="200px", align="left"),
                         Column(title=i18n_service.get_text("pins"), field="team_pins", width="80px", align="center"),
                         Column(title=i18n_service.get_text("points"), field="team_points", width="80px", align="center")
@@ -140,6 +148,7 @@ class LeagueService:
                     columns=[
                         Column(title=i18n_service.get_text("points"), field="opponent_points", width="80px", align="center"),
                         Column(title=i18n_service.get_text("pins"), field="opponent_pins", width="80px", align="center"),
+                        Column(title=i18n_service.get_text("position"), field="opponent_position", width="60px", align="center", tooltip=i18n_service.get_text("position")),
                         Column(title=i18n_service.get_text("opponent"), field="opponent_name", width="200px", align="left")
                     ]
                 )
@@ -196,17 +205,30 @@ class LeagueService:
                     opponent_pins = 0
                     total_opponent_points = 0.0
                 
+                # Get positions for both teams
+                team_position = team_positions.get(team_name, None)
+                opponent_position = team_positions.get(opponent_name, None)
+                
                 data.append([
+                    team_position if team_position is not None else '',
                     team_name,
                     team_pins,
                     total_team_points,
                     total_opponent_points,
                     opponent_pins,
+                    opponent_position if opponent_position is not None else '',
                     opponent_name
                 ])
                 
                 processed_teams.add(team_name)
                 processed_teams.add(opponent_name)
+            
+            # Apply heatmap coloring to points and pins columns
+            cell_metadata = {}
+            # Pins columns: team_pins (index 2) and opponent_pins (index 5)
+            apply_heat_map_to_columns(data, cell_metadata, [2, 5])
+            # Points columns: team_points (index 3) and opponent_points (index 4)
+            apply_heat_map_to_columns(data, cell_metadata, [3, 4])
             
             return TableData(
                 columns=columns,
@@ -218,8 +240,10 @@ class LeagueService:
                     "striped": True,
                     "hover": True,
                     "responsive": True,
-                    "compact": False
-                }
+                    "compact": False,
+                    "stripedColGroups": True
+                },
+                cell_metadata=cell_metadata
             )
             
         except Exception as e:

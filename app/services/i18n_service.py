@@ -1,6 +1,7 @@
 from typing import Dict, Any
 from enum import Enum
 import threading
+import hashlib
 
 class Language(Enum):
     ENGLISH = "en"
@@ -10,7 +11,6 @@ class I18nService:
     """Internationalization service for managing multi-language strings"""
     
     def __init__(self, default_language: Language = Language.ENGLISH):
-        self._translations_version = "2025-10-30-3"
         self.default_language = default_language
         self._current_language = default_language
         self._lock = threading.Lock()
@@ -162,6 +162,7 @@ class I18nService:
             
             # Table titles and descriptions
             "league_standings": {"en": "League Standings", "de": "Tabellenstand"},
+            "league_standings_all_leagues": {"en": "Current Standings in all Leagues", "de": "Aktuelle Tabellenstände in allen Ligen"},
             "league_history": {"en": "League History", "de": "Liga-Verlauf"},
             "team_week_details": {"en": "Team Week Details", "de": "Team-Spieltagedetails"},
             "head_to_head": {"en": "Head-to-Head", "de": "Direktvergleich"},
@@ -278,6 +279,12 @@ class I18nService:
 
         # Derive runtime per-language maps from catalog
         self._translations = self._build_translations_from_catalog(self._catalog)
+        
+        # Generate version hash from catalog keys to invalidate cache when translations change
+        # Sort keys for consistent hashing
+        catalog_keys = sorted(self._catalog.keys())
+        catalog_hash = hashlib.md5(str(catalog_keys).encode()).hexdigest()[:8]
+        self._translations_version = f"cat-{catalog_hash}"
     
     def get_text(self, key: str) -> str:
         """Get translated text for the given key"""

@@ -50,8 +50,7 @@ class SeasonLeagueStandingsBlock extends BaseContentBlock {
         return `
             <div class="card mb-4">
                 <div class="card-header">
-                    <h5>${typeof t === 'function' ? t('league_standings', 'League Standings') : 'League Standings'} – ${typeof t === 'function' ? t('through_week', 'Through Week') : 'Through Week'} (${state.season})</h5>
-                    <p class="mb-0 text-muted">${typeof t === 'function' ? t('week_results', 'Week Results & Season Totals') : 'Week Results & Season Totals'}</p>
+                    <h5>${typeof t === 'function' ? t('league_standings_all_leagues', 'Current Standings in all Leagues') : 'Current Standings in all Leagues'} – ${typeof t === 'function' ? t('season', 'Season') : 'Season'} ${state.season}</h5>
                 </div>
                 <div class="card-body">
                     <div id="seasonLeagueStandingsContent">
@@ -108,6 +107,8 @@ class SeasonLeagueStandingsBlock extends BaseContentBlock {
         // Create a card for each league
         data.leagues.forEach(leagueData => {
             const { league, week, standings, honor_scores } = leagueData;
+            const leagueId = league.replace(/\s+/g, '_');
+            const tableId = `tableSeasonLeagueStandings_${leagueId}`;
             
             html += `
                 <div class="card mb-3">
@@ -115,41 +116,47 @@ class SeasonLeagueStandingsBlock extends BaseContentBlock {
                         <h6 class="mb-0">${league} - ${typeof t === 'function' ? (t('match_day_label', 'Match Day')) : 'Match Day'} ${week}</h6>
                     </div>
                     <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-8">
-                                <h6>${typeof t === 'function' ? t('league_standings', 'League Standings') : 'League Standings'}</h6>
-                                <div id="tableSeasonLeagueStandings_${league.replace(/\s+/g, '_')}"></div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="card">
-                                    <div class="card-header">
-                                        <h6>${typeof t === 'function' ? t('honor_scores', 'Honor Scores') : 'Honor Scores'}</h6>
-                                    </div>
-                                    <div class="card-body">
-                                        <!-- Individual Scores -->
-                                        <div class="mb-3" id="individualScoresSection_${league.replace(/\s+/g, '_')}" style="display: none;">
-                                            <h6>${typeof t === 'function' ? t('top_individual_scores', 'Top Individual Scores') : 'Top Individual Scores'}</h6>
-                                            <div id="individualScores_${league.replace(/\s+/g, '_')}"></div>
+                        ${typeof window.generateLeagueStandingsCardHTML === 'function' 
+                            ? window.generateLeagueStandingsCardHTML({
+                                league: league,
+                                week: week,
+                                season: season,
+                                tableId: tableId,
+                                honorScoresPrefix: leagueId
+                              })
+                            : `
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <h6>${typeof t === 'function' ? t('league_standings', 'League Standings') : 'League Standings'}</h6>
+                                    <div id="${tableId}"></div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h6>${typeof t === 'function' ? t('honor_scores', 'Honor Scores') : 'Honor Scores'}</h6>
                                         </div>
-                                        <!-- Team Scores -->
-                                        <div class="mb-3" id="teamScoresSection_${league.replace(/\s+/g, '_')}" style="display: none;">
-                                            <h6>${typeof t === 'function' ? t('top_team_scores', 'Top Team Scores') : 'Top Team Scores'}</h6>
-                                            <div id="teamScores_${league.replace(/\s+/g, '_')}"></div>
-                                        </div>
-                                        <!-- Individual Averages -->
-                                        <div class="mb-3" id="individualAveragesSection_${league.replace(/\s+/g, '_')}" style="display: none;">
-                                            <h6>${typeof t === 'function' ? t('best_individual_averages', 'Best Individual Averages') : 'Best Individual Averages'}</h6>
-                                            <div id="individualAverages_${league.replace(/\s+/g, '_')}"></div>
-                                        </div>
-                                        <!-- Team Averages -->
-                                        <div class="mb-3" id="teamAveragesSection_${league.replace(/\s+/g, '_')}" style="display: none;">
-                                            <h6>${typeof t === 'function' ? t('best_team_averages', 'Best Team Averages') : 'Best Team Averages'}</h6>
-                                            <div id="teamAverages_${league.replace(/\s+/g, '_')}"></div>
+                                        <div class="card-body">
+                                            <div class="mb-3" id="individualScoresSection_${leagueId}" style="display: none;">
+                                                <h6>${typeof t === 'function' ? t('top_individual_scores', 'Top Individual Scores') : 'Top Individual Scores'}</h6>
+                                                <div id="individualScores_${leagueId}"></div>
+                                            </div>
+                                            <div class="mb-3" id="teamScoresSection_${leagueId}" style="display: none;">
+                                                <h6>${typeof t === 'function' ? t('top_team_scores', 'Top Team Scores') : 'Top Team Scores'}</h6>
+                                                <div id="teamScores_${leagueId}"></div>
+                                            </div>
+                                            <div class="mb-3" id="individualAveragesSection_${leagueId}" style="display: none;">
+                                                <h6>${typeof t === 'function' ? t('best_individual_averages', 'Best Individual Averages') : 'Best Individual Averages'}</h6>
+                                                <div id="individualAverages_${leagueId}"></div>
+                                            </div>
+                                            <div class="mb-3" id="teamAveragesSection_${leagueId}" style="display: none;">
+                                                <h6>${typeof t === 'function' ? t('best_team_averages', 'Best Team Averages') : 'Best Team Averages'}</h6>
+                                                <div id="teamAverages_${leagueId}"></div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                            `}
                     </div>
                 </div>
             `;
@@ -158,124 +165,97 @@ class SeasonLeagueStandingsBlock extends BaseContentBlock {
         contentContainer.innerHTML = html;
         
         // Create tables and honor scores for each league
+        // Each league gets its own color cycle starting from position 1
         data.leagues.forEach(leagueData => {
             const { league, standings, honor_scores } = leagueData;
-            const tableId = `tableSeasonLeagueStandings_${league.replace(/\s+/g, '_')}`;
-            const honorScoresId = `honorScoresSeasonLeague_${league.replace(/\s+/g, '_')}`;
+            const leagueId = league.replace(/\s+/g, '_');
+            const tableId = `tableSeasonLeagueStandings_${leagueId}`;
             
-            // Create standings table
-            if (standings && typeof createTableBootstrap3 === 'function') {
-                console.log(`Creating table for league ${league} with ${standings.data ? standings.data.length : 0} rows`);
-                createTableBootstrap3(tableId, standings, {
-                    disablePositionCircle: false, // Show position circles for league standings
-                    enableSpecialRowStyling: true,
-                    compact: true
+            // Extract teams for this league and assign colors starting from palette index 0
+            // This ensures each league has its own independent color cycle
+            if (standings && standings.data && standings.data.length > 0) {
+                const leagueTeams = [];
+                standings.data.forEach(row => {
+                    if (row && row.length > 1 && typeof row[1] === 'string' && row[1].trim() !== '') {
+                        leagueTeams.push(row[1]);
+                    }
                 });
+                
+                // Remove duplicates
+                const uniqueLeagueTeams = [...new Set(leagueTeams)];
+                
+                // Assign colors to this league's teams starting from palette index 0
+                // Clear existing colors for these teams first so they restart the cycle
+                if (uniqueLeagueTeams.length > 0) {
+                    // Access teamColorMap and getPaletteColor from ColorUtils
+                    const teamColorMap = (window.ColorUtils && window.ColorUtils.teamColorMap) || (window.teamColorMap) || {};
+                    const getPaletteColor = (window.ColorUtils && window.ColorUtils.getPaletteColor) || 
+                                          (window.getPaletteColor) || 
+                                          ((idx) => '#888');
+                    
+                    // Clear colors for this league's teams (so they get reassigned from index 0)
+                    uniqueLeagueTeams.forEach(team => {
+                        if (teamColorMap[team]) {
+                            delete teamColorMap[team];
+                        }
+                    });
+                    
+                    // Now assign colors starting from index 0 for this league
+                    let paletteIdx = 0;
+                    uniqueLeagueTeams.forEach(team => {
+                        if (!teamColorMap[team]) {
+                            teamColorMap[team] = getPaletteColor(paletteIdx++);
+                        }
+                    });
+                    
+                    // Update the global reference if needed
+                    if (window.ColorUtils) {
+                        window.ColorUtils.teamColorMap = teamColorMap;
+                    }
+                    if (window.teamColorMap) {
+                        window.teamColorMap = teamColorMap;
+                    }
+                    
+                    console.log(`Assigned colors to ${uniqueLeagueTeams.length} teams for league ${league} (starting from palette index 0)`);
+                }
+            }
+            
+            // Use shared utility function for standings table
+            if (typeof window.renderLeagueStandingsTable === 'function') {
+                window.renderLeagueStandingsTable(tableId, standings);
             } else {
-                document.getElementById(tableId).innerHTML = `
-                    <div class="alert alert-warning">
-                        <p class="mb-0">${typeof t === 'function' ? t('no_data_available_for', 'No data available for') : 'No data available for'} ${league}.</p>
-                    </div>
-                `;
+                // Fallback
+                const container = document.getElementById(tableId);
+                if (container && standings) {
+                    if (typeof createTableTabulator === 'function') {
+                        createTableTabulator(tableId, standings, { 
+                            disablePositionCircle: false,
+                            enableSpecialRowStyling: true,
+                            tooltips: true
+                        });
+                    } else if (typeof createTableBootstrap3 === 'function') {
+                        createTableBootstrap3(tableId, standings, {
+                            disablePositionCircle: false,
+                            enableSpecialRowStyling: true,
+                            compact: true
+                        });
+                    } else {
+                        container.innerHTML = `
+                            <div class="alert alert-warning">
+                                <p class="mb-0">${typeof t === 'function' ? t('no_data_available_for', 'No data available for') : 'No data available for'} ${league}.</p>
+                            </div>
+                        `;
+                    }
+                }
             }
             
-            // Populate honor scores
-            this.populateHonorScores(honor_scores, null, league);
+            // Use shared utility function for honor scores
+            if (typeof window.populateHonorScores === 'function') {
+                window.populateHonorScores(honor_scores, leagueId);
+            } else {
+                console.error('populateHonorScores utility function not available');
+            }
         });
-    }
-
-    populateHonorScores(honorScoresData, containerId, league) {
-        const leagueId = league.replace(/\s+/g, '_');
-        
-        // Individual Scores
-        if (honorScoresData.individual_scores && honorScoresData.individual_scores.length > 0) {
-            const individualScoresHtml = honorScoresData.individual_scores
-                .filter(score => score && typeof score === 'object') // Filter out invalid entries
-                .map(score => {
-                    // Handle the actual API format: {player: 'Omar Weiß (Schweinfurt 1)', score: 272}
-                    const playerInfo = score.player || score.player_name || score.name || 'Unknown Player';
-                    const scoreValue = score.score || score.value || 'N/A';
-                    
-                    return `
-                        <div class="d-flex justify-content-between">
-                            <span>${playerInfo}</span>
-                            <strong>${scoreValue}</strong>
-                        </div>
-                    `;
-                }).join('');
-            
-            if (individualScoresHtml) {
-                document.getElementById(`individualScores_${leagueId}`).innerHTML = individualScoresHtml;
-                document.getElementById(`individualScoresSection_${leagueId}`).style.display = 'block';
-            }
-        }
-
-        // Team Scores
-        if (honorScoresData.team_scores && honorScoresData.team_scores.length > 0) {
-            const teamScoresHtml = honorScoresData.team_scores
-                .filter(score => score && typeof score === 'object') // Filter out invalid entries
-                .map(score => {
-                    // Handle the actual API format
-                    const teamName = score.team || score.team_name || score.name || 'Unknown Team';
-                    const totalScore = score.score || score.total_score || score.value || 'N/A';
-                    
-                    return `
-                        <div class="d-flex justify-content-between">
-                            <span>${teamName}</span>
-                            <strong>${totalScore}</strong>
-                        </div>
-                    `;
-                }).join('');
-            
-            if (teamScoresHtml) {
-                document.getElementById(`teamScores_${leagueId}`).innerHTML = teamScoresHtml;
-                document.getElementById(`teamScoresSection_${leagueId}`).style.display = 'block';
-            }
-        }
-
-        // Individual Averages
-        if (honorScoresData.individual_averages && honorScoresData.individual_averages.length > 0) {
-            const individualAveragesHtml = honorScoresData.individual_averages
-                .filter(avg => avg && typeof avg === 'object') // Filter out invalid entries
-                .map(avg => {
-                    const playerInfo = avg.player || avg.player_name || avg.name || 'Unknown Player';
-                    const averageValue = avg.average || avg.value || 'N/A';
-                    
-                    return `
-                        <div class="d-flex justify-content-between">
-                            <span>${playerInfo}</span>
-                            <strong>${averageValue}</strong>
-                        </div>
-                    `;
-                }).join('');
-            
-            if (individualAveragesHtml) {
-                document.getElementById(`individualAverages_${leagueId}`).innerHTML = individualAveragesHtml;
-                document.getElementById(`individualAveragesSection_${leagueId}`).style.display = 'block';
-            }
-        }
-
-        // Team Averages
-        if (honorScoresData.team_averages && honorScoresData.team_averages.length > 0) {
-            const teamAveragesHtml = honorScoresData.team_averages
-                .filter(avg => avg && typeof avg === 'object') // Filter out invalid entries
-                .map(avg => {
-                    const teamName = avg.team || avg.team_name || avg.name || 'Unknown Team';
-                    const averageValue = avg.average || avg.value || 'N/A';
-                    
-                    return `
-                        <div class="d-flex justify-content-between">
-                            <span>${teamName}</span>
-                            <strong>${averageValue}</strong>
-                        </div>
-                    `;
-                }).join('');
-            
-            if (teamAveragesHtml) {
-                document.getElementById(`teamAverages_${leagueId}`).innerHTML = teamAveragesHtml;
-                document.getElementById(`teamAveragesSection_${leagueId}`).style.display = 'block';
-            }
-        }
     }
 
     hide() {

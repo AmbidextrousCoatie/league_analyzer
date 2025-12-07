@@ -144,17 +144,20 @@ class GameOverviewBlock extends BaseContentBlock {
             
             const container = document.getElementById('tableGameOverview');
             if (container) {
-                // Use the proper createTableBootstrap3 function for structured TableData
-                if (typeof createTableBootstrap3 === 'function') {
-                    console.log('Using createTableBootstrap3 function for game overview table');
+                // Use Tabulator for the game overview table
+                if (typeof createTableTabulator === 'function') {
+                    console.log('Using createTableTabulator function for game overview table');
+                    createTableTabulator('tableGameOverview', tableData, { 
+                        disablePositionCircle: false, // Enable position circles for team and opponent positions
+                        enableSpecialRowStyling: true,
+                        tooltips: true
+                    });
+                } else if (typeof createTableBootstrap3 === 'function') {
+                    console.log('Fallback: Using createTableBootstrap3 function');
                     createTableBootstrap3('tableGameOverview', tableData, { 
-                        disablePositionCircle: true, // Game overview doesn't need team color circles
+                        disablePositionCircle: true,
                         enableSpecialRowStyling: true 
                     });
-                } else if (typeof createTable === 'function') {
-                    console.log('Fallback: Using createTable function');
-                    const tableHTML = createTable(tableData);
-                    container.innerHTML = tableHTML;
                 } else {
                     console.error('No table creation function available');
                     container.innerHTML = `<div class="alert alert-warning">${typeof t === 'function' ? t('no_data', 'Table creation function not available') : 'Table creation function not available'}</div>`;
