@@ -150,7 +150,8 @@ class GameOverviewBlock extends BaseContentBlock {
                     createTableTabulator('tableGameOverview', tableData, { 
                         disablePositionCircle: false, // Enable position circles for team and opponent positions
                         enableSpecialRowStyling: true,
-                        tooltips: true
+                        tooltips: true,
+                        enableHeatMap: true // Enable heatmap coloring for pins and points columns
                     });
                 } else if (typeof createTableBootstrap3 === 'function') {
                     console.log('Fallback: Using createTableBootstrap3 function');

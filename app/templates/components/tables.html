@@ -166,6 +166,7 @@ function createTableTabulator(tableId, data, options = {}) {
         enableSpecialRowStyling: false,
         tooltips: true,
         teamField: null,
+        enableHeatMap: false,  // Enable heatmap coloring for numeric columns
         ...options
     };
     const tableConfig = data.config || {};
@@ -268,6 +269,86 @@ function createTableTabulator(tableId, data, options = {}) {
     // Check if data is already objects or arrays
     const isArrayFormat = Array.isArray(data.data) && data.data.length > 0 && Array.isArray(data.data[0]);
     
+    // Build heatmap min/max values for numeric columns if heatmap is enabled
+    // Group fields by data type and calculate global min/max per type
+    const heatmapRanges = {}; // field -> {min, max} (using global type ranges)
+    const typeRanges = {}; // type -> {min, max} (global ranges per data type)
+    if (settings.enableHeatMap && data.data && data.data.length > 0) {
+        // Identify numeric columns and categorize by data type
+        const fieldTypeMap = {}; // field -> type
+        const typeFields = { score: [], points: [] }; // type -> [fields]
+        
+        columnOrder.forEach(info => {
+            const field = info.field;
+            const fieldLower = field.toLowerCase();
+            
+            // Categorize fields by data type
+            // Check for "points" first to catch "avg_points" correctly
+            if (fieldLower.includes('points')) {
+                fieldTypeMap[field] = 'points';
+                typeFields.points.push(field);
+            } else if (fieldLower.includes('score') || fieldLower.includes('pins') || 
+                       fieldLower.includes('avg') || fieldLower.includes('average')) {
+                fieldTypeMap[field] = 'score';
+                typeFields.score.push(field);
+            }
+        });
+        
+        // Calculate global min/max for each data type across all fields of that type
+        Object.keys(typeFields).forEach(type => {
+            const fields = typeFields[type];
+            if (fields.length === 0) return;
+            
+            const allValues = [];
+            fields.forEach(field => {
+                data.data.forEach(row => {
+                    let value = null;
+                    if (isArrayFormat) {
+                        const colIndex = columnOrder.findIndex(co => co.field === field);
+                        if (colIndex >= 0 && colIndex < row.length) {
+                            value = row[colIndex];
+                        }
+                    } else if (typeof row === 'object' && row !== null) {
+                        value = row[field];
+                    }
+                    
+                    // Only include numeric values (0 is valid, but exclude null/undefined/empty)
+                    if (value !== null && value !== undefined && value !== '' && !isNaN(parseFloat(value))) {
+                        const numValue = typeof value === 'number' ? value : parseFloat(value);
+                        if (isFinite(numValue)) {
+                            allValues.push(numValue);
+                        }
+                    }
+                });
+            });
+            
+            if (allValues.length > 0) {
+                const minVal = Math.min(...allValues);
+                const maxVal = Math.max(...allValues);
+                
+                // Only set range if min and max are different and valid
+                if (minVal !== maxVal && isFinite(minVal) && isFinite(maxVal)) {
+                    typeRanges[type] = {
+                        min: minVal,
+                        max: maxVal
+                    };
+                    
+                    // Assign the global range to all fields of this type
+                    fields.forEach(field => {
+                        heatmapRanges[field] = typeRanges[type];
+                    });
+                    
+                    // Debug logging
+                    console.log(`[Heatmap] Type "${type}": min=${minVal}, max=${maxVal}, fields=[${fields.join(', ')}]`);
+                } else {
+                    console.warn(`[Heatmap] Type "${type}": Invalid range (min=${minVal}, max=${maxVal}), skipping heatmap for this type`);
+                }
+            } else {
+                console.warn(`[Heatmap] Type "${type}": No valid values found, skipping heatmap`);
+            }
+        });
+    }
+    
     const transformedData = data.data.map((row, rowIndex) => {
         const rowObject = { __rowIndex: rowIndex };
         
@@ -356,10 +437,10 @@ function createTableTabulator(tableId, data, options = {}) {
                     // Column-level inline styles
                     applyElementStyles(element, columnStyles);
 
-                    // Cell metadata styles (heatmap colors) - apply with !important to override striping
+                    // Cell metadata styles (from backend) - apply with !important to override striping
                     const cellMeta = cellMetadataMap[rowIdx]?.[field];
                     if (cellMeta) {
-                        // Apply heatmap background color with !important to override striping CSS
+                        // Apply background color with !important to override striping CSS
                         if (cellMeta.backgroundColor) {
                             element.style.setProperty('background-color', cellMeta.backgroundColor, 'important');
                         }
@@ -369,6 +450,17 @@ function createTableTabulator(tableId, data, options = {}) {
                                 element.style[property] = value;
                             }
                         });
+                    }
+                    
+                    // Frontend heatmap coloring (if enabled and field has a range)
+                    if (settings.enableHeatMap && heatmapRanges[field]) {
+                        const numValue = typeof value === 'number' ? value : (typeof value === 'string' ? parseFloat(value) : null);
+                        if (numValue !== null && !isNaN(numValue) && isFinite(numValue)) {
+                            const range = heatmapRanges[field];
+                            // Use theme colors from color-utils.js
+                            const heatmapColor = ColorUtils.getHeatMapColor(numValue, range.min, range.max);
+                            element.style.setProperty('background-color', heatmapColor, 'important');
+                        }
                     }
 
                     // Format numeric values based on decimal_places metadata FIRST (before special cases)
@@ -648,10 +740,10 @@ function createTableTabulator(tableId, data, options = {}) {
                     // Column-level inline styles
                     applyElementStyles(element, columnStyles);
 
-                    // Cell metadata styles (heatmap colors) - apply with !important to override striping
+                    // Cell metadata styles (from backend) - apply with !important to override striping
                     const cellMeta = cellMetadataMap[rowIdx]?.[field];
                     if (cellMeta) {
-                        // Apply heatmap background color with !important to override striping CSS
+                        // Apply background color with !important to override striping CSS
                         if (cellMeta.backgroundColor) {
                             element.style.setProperty('background-color', cellMeta.backgroundColor, 'important');
                         }
@@ -661,6 +753,20 @@ function createTableTabulator(tableId, data, options = {}) {
                                 element.style[property] = value;
                             }
                         });
+                    }
+                    
+                    // Frontend heatmap coloring (if enabled and field has a range)
+                    if (settings.enableHeatMap && heatmapRanges[field]) {
+                        const numValue = typeof value === 'number' ? value : (typeof value === 'string' ? parseFloat(value) : null);
+                        if (numValue !== null && !isNaN(numValue) && isFinite(numValue)) {
+                            const range = heatmapRanges[field];
+                            // Ensure range is valid
+                            if (range && isFinite(range.min) && isFinite(range.max) && range.min !== range.max) {
+                                // Use current heatmap palette (no explicit colors = uses current palette)
+                                const heatmapColor = ColorUtils.getHeatMapColor(numValue, range.min, range.max);
+                                element.style.setProperty('background-color', heatmapColor, 'important');
+                            }
+                        }
                     }
 
                     // Special handling for position columns

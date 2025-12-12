@@ -158,7 +158,8 @@ class GameTeamDetailsBlock extends BaseContentBlock {
                         disablePositionCircle: true, // Game team details doesn't need team color circles
                         enableSpecialRowStyling: true,
                         tooltips: true,
-                        highlightLastRow: true // Highlight the totals row
+                        highlightLastRow: true, // Highlight the totals row
+                        enableHeatMap: true // Enable heatmap coloring for pins and points columns
                     });
                 } else if (typeof createTableBootstrap3 === 'function') {
                     console.log('Fallback: Using createTableBootstrap3 function');

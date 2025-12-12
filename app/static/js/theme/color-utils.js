@@ -47,12 +47,11 @@
         tableBodyText: "#1f2933",     // Table body text
         tableMutedText: "#64748b",    // Muted text
         
-        // Heat map colors
-        heatMapStart: "#dddddd",      // Heat map start color
-        heatMapEnd: "#1b8da7",        // Heat map end color
-        heatMapLow: "#d9596a",        // Heat map low value
-        heatMapHigh: "#1b8da7",       // Heat map high value
-        
+        // Heat map colors (legacy - will be overridden by current palette)
+        heatMapStart: "#dddddd",
+        heatMapEnd: "#1b8da7",
+        heatMapLow: "#d9596a",
+        heatMapHigh: "#1b8da7",
         // Status colors
         warning: "#86e1b3",            // Warning states
         info: "#a1e8c4",              // Info states
@@ -101,6 +100,80 @@
         success: "#d4edda",
         danger: "#f8d7da",
     };
+
+    // Heatmap palettes - separate from THEME_COLORS for easier switching
+    const HEATMAP_PALETTES = {
+        1: {
+            start: TEAM_COLOR_PALETTES.rainbowPastel[8],
+            end: TEAM_COLOR_PALETTES.rainbowPastel[0],
+            mid: "#B5B5B5"
+        },
+        2: {
+            start: TEAM_COLOR_PALETTES.rainbowPastel[5],
+            end: TEAM_COLOR_PALETTES.rainbowPastel[1],
+            mid: "#C0C0C0"
+        },
+        3: {
+            start: TEAM_COLOR_PALETTES.rainbowPastel[7],
+            end: TEAM_COLOR_PALETTES.rainbowPastel[2],
+            mid: "#C2C2C2"
+        },
+        4: {
+            start: TEAM_COLOR_PALETTES.rainbowPastel[3],
+            end: TEAM_COLOR_PALETTES.rainbowPastel[0],
+            mid: "#C8C8C8"
+        },     
+        5: {
+            start: TEAM_COLOR_PALETTES.rainbowPastel[7],
+            end: TEAM_COLOR_PALETTES.rainbowPastel[0],
+            mid: "#B5B5B5"
+        },
+        6: {
+            start: TEAM_COLOR_PALETTES.rainbowPastel[6],
+            end: TEAM_COLOR_PALETTES.rainbowPastel[0],
+            mid: "#C8C8C8"
+        },
+        // Default palette matching original theme colors
+        default: {
+            start: "#dddddd",
+            end: "#1b8da7",
+            mid: "#B5B5B5"
+        }
+    };
+
+    // Current heatmap palette (defaults to palette 1)
+    let currentHeatmapPaletteId = 6;
+
+    /**
+     * Get the current heatmap palette
+     * @returns {Object} Current heatmap palette with start, end, low, high, mid colors
+     */
+    function getCurrentHeatmapPalette() {
+        return HEATMAP_PALETTES[currentHeatmapPaletteId] || HEATMAP_PALETTES[1];
+    }
+
+    /**
+     * Set the current heatmap palette
+     * @param {number|string} paletteId - Palette ID (1, 2, or 'default')
+     * @returns {boolean} True if palette was set successfully
+     */
+    function setHeatmapPalette(paletteId) {
+        if (HEATMAP_PALETTES[paletteId]) {
+            currentHeatmapPaletteId = paletteId;
+            console.log(`[Heatmap] Switched to palette ${paletteId}:`, getCurrentHeatmapPalette());
+            return true;
+        }
+        console.warn(`[Heatmap] Palette ${paletteId} not found. Available palettes:`, Object.keys(HEATMAP_PALETTES));
+        return false;
+    }
+
+    /**
+     * Get available heatmap palette IDs
+     * @returns {Array} Array of available palette IDs
+     */
+    function getAvailableHeatmapPalettes() {
+        return Object.keys(HEATMAP_PALETTES);
+    }
 
     // First color = base table background, second = accent stripe
     // This makes one of the stripe colors effectively the "default" color.
@@ -241,18 +314,104 @@
         return THEME_COLORS[colorName] || null;
     }
 
+    function rgbToHsl(r, g, b) {
+        r /= 255;
+        g /= 255;
+        b /= 255;
+    
+        const max = Math.max(r, g, b);
+        const min = Math.min(r, g, b);
+        const d = max - min;
+    
+        let h = 0;
+        let s = 0;
+        let l = (max + min) / 2;
+    
+        if (d !== 0) {
+            s = d / (1 - Math.abs(2 * l - 1));
+    
+            switch (max) {
+                case r: h = ((g - b) / d) % 6; break;
+                case g: h = (b - r) / d + 2; break;
+                case b: h = (r - g) / d + 4; break;
+            }
+    
+            h *= 60;
+            if (h < 0) h += 360;
+        }
+    
+        return { h, s, l };
+    }
+    
+    function hslToRgbString(h, s, l) {
+        h = h / 360;
+    
+        let r, g, b;
+    
+        if (s === 0) {
+            r = g = b = l; // Graustufen
+        } else {
+            const hue2rgb = (p, q, t) => {
+                if (t < 0) t += 1;
+                if (t > 1) t -= 1;
+                if (t < 1/6) return p + (q - p) * 6 * t;
+                if (t < 1/2) return q;
+                if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+                return p;
+            };
+    
+            const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+            const p = 2 * l - q;
+    
+            r = hue2rgb(p, q, h + 1/3);
+            g = hue2rgb(p, q, h);
+            b = hue2rgb(p, q, h - 1/3);
+        }
+    
+        return `rgb(${Math.round(r * 255)}, ${Math.round(g * 255)}, ${Math.round(b * 255)})`;
+    }
+
     function getHeatMapColor(value, minVal, maxVal, options = {}) {
-        const startColor = options.startColor || THEME_COLORS.heatMapStart;
-        const endColor = options.endColor || THEME_COLORS.heatMapEnd;
-
-        const ratio = Math.min(Math.max(interpolateValue(value, minVal, maxVal), 0), 1);
-        const [r1, g1, b1] = hexToRgb(startColor);
-        const [r2, g2, b2] = hexToRgb(endColor);
-
-        const r = Math.round(r1 + (r2 - r1) * ratio);
-        const g = Math.round(g1 + (g2 - g1) * ratio);
-        const b = Math.round(b1 + (b2 - b1) * ratio);
-        return `rgb(${r}, ${g}, ${b})`;
+        const startHex = options.startColor || HEATMAP_PALETTES[currentHeatmapPaletteId].start || "#d9596a";
+        const endHex   = options.endColor   || HEATMAP_PALETTES[currentHeatmapPaletteId].end || "#1b8da7";
+        const midHex   = options.midColor   || HEATMAP_PALETTES[currentHeatmapPaletteId].mid || "#C0C0C0";
+    
+        const k = options.curveStrength || 2;  // Nichtlinearität
+    
+        // linear normalized t
+        let t = Math.min(Math.max((value - minVal) / (maxVal - minVal), 0), 1);
+    
+        // nonlinear arctan transform
+        const nonlinear = (Math.atan(k*(t - 0.5)) / Math.atan(k*0.5) + 1) / 2;
+        t = nonlinear;
+    
+        const start = rgbToHsl(...hexToRgb(startHex));
+        const end   = rgbToHsl(...hexToRgb(endHex));
+        const mid   = rgbToHsl(...hexToRgb(midHex));
+    
+        mid.s = 0;  // ensure perfect gray
+    
+        let h, s, l;
+    
+        if (t < 0.5) {
+            const u = t / 0.5;
+            h = start.h;
+            s = start.s * (1 - u);
+            l = start.l + (mid.l - start.l) * u;
+        } else {
+            const u = (t - 0.5) / 0.5;
+            h = end.h;
+            s = mid.s + (end.s - mid.s) * u;
+            l = mid.l + (end.l - mid.l) * u;
+        }
+    
+        return hslToRgbString(h, s, l);
+    }
+    
+    // === Hilfsfunktion: HUE korrekt zirkulär interpolieren ===
+    function circularMix(h1, h2, t) {
+        let diff = ((h2 - h1 + 540) % 360) - 180;
+        return (h1 + diff * t + 360) % 360;
     }
 
     function getPaletteColor(index) {
@@ -459,6 +618,11 @@
         getGradientColors,
         getStripeColors,
         getHeatMapColor,
+        HEATMAP_PALETTES,
+        getCurrentHeatmapPalette,
+        setHeatmapPalette,
+        getAvailableHeatmapPalettes,
+        getCurrentHeatmapPaletteId: () => currentHeatmapPaletteId,
         hexToRgb,
         toRgba,
         teamColorMap,

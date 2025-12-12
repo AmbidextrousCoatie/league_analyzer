@@ -223,13 +223,7 @@ class LeagueService:
                 processed_teams.add(team_name)
                 processed_teams.add(opponent_name)
             
-            # Apply heatmap coloring to points and pins columns
-            cell_metadata = {}
-            # Pins columns: team_pins (index 2) and opponent_pins (index 5)
-            apply_heat_map_to_columns(data, cell_metadata, [2, 5])
-            # Points columns: team_points (index 3) and opponent_points (index 4)
-            apply_heat_map_to_columns(data, cell_metadata, [3, 4])
-            
+            # Heatmap coloring is now handled in the frontend
             return TableData(
                 columns=columns,
                 data=data,
@@ -242,8 +236,7 @@ class LeagueService:
                     "responsive": True,
                     "compact": False,
                     "stripedColGroups": True
-                },
-                cell_metadata=cell_metadata
+                }
             )
             
         except Exception as e:
@@ -3637,13 +3630,7 @@ class LeagueService:
                 
                 table_data.append(row)
             
-            # ========== APPLY HEAT MAP COLORING ==========
-            # Apply heat map using generic function (automatically skips empty diagonal cells)
-            self._apply_heat_map_to_columns(table_data, cell_metadata, score_column_indices, score_min, score_max)
-            self._apply_heat_map_to_columns(table_data, cell_metadata, points_column_indices, points_min, points_max)
-            self._apply_heat_map_to_columns(table_data, cell_metadata, [avg_score_col_idx], score_min, score_max)
-            self._apply_heat_map_to_columns(table_data, cell_metadata, [avg_points_col_idx], points_min, points_max)
-            
+            # Heatmap coloring is now handled in the frontend
             # ========== RETURN TABLE DATA ==========
             return TableData(
                 columns=columns,
@@ -3656,7 +3643,6 @@ class LeagueService:
                     "compact": True,
                     "stickyHeader": True
                 },
-                cell_metadata=cell_metadata,
                 metadata={
                     "score_range": {"min": score_min, "max": score_max},
                     "points_range": {"min": points_min, "max": points_max},
