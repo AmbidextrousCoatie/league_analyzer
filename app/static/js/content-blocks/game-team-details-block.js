@@ -77,10 +77,18 @@ class GameTeamDetailsBlock extends BaseContentBlock {
     }
 
     generateHTML(state) {
+        // Build dynamic title with game number, team name, and translations
+        const gameText = typeof t === 'function' ? t('game', 'Game') : 'Game';
+        const ofText = typeof t === 'function' ? t('of', 'of') : 'of';
+        const teamText = typeof t === 'function' ? t('team', 'Team') : 'Team';
+        const titleText = typeof t === 'function' ? t('results', 'Results') : 'Results';
+        
+        const title = `${titleText} - ${gameText} ${state.round || ''} ${ofText} ${teamText} ${state.team || ''}`;
+        
         return `
             <div class="card mb-4">
                 <div class="card-header">
-                    <h5 data-i18n="game_team_details">Game Team Details</h5>
+                    <h5>${title}</h5>
                 </div>
                 <div class="card-body">
                     <div id="tableGameTeamDetails">
@@ -143,18 +151,22 @@ class GameTeamDetailsBlock extends BaseContentBlock {
             
             const container = document.getElementById('tableGameTeamDetails');
             if (container) {
-                // Use the proper createTableBootstrap3 function for structured TableData
-                if (typeof createTableBootstrap3 === 'function') {
-                    console.log('Using createTableBootstrap3 function for game team details table');
-                    createTableBootstrap3('tableGameTeamDetails', tableData, { 
+                // Use Tabulator for the game team details table
+                if (typeof createTableTabulator === 'function') {
+                    console.log('Using createTableTabulator function for game team details table');
+                    createTableTabulator('tableGameTeamDetails', tableData, { 
                         disablePositionCircle: true, // Game team details doesn't need team color circles
                         enableSpecialRowStyling: true,
+                        tooltips: true,
                         highlightLastRow: true // Highlight the totals row
                     });
-                } else if (typeof createTable === 'function') {
-                    console.log('Fallback: Using createTable function');
-                    const tableHTML = createTable(tableData);
-                    container.innerHTML = tableHTML;
+                } else if (typeof createTableBootstrap3 === 'function') {
+                    console.log('Fallback: Using createTableBootstrap3 function');
+                    createTableBootstrap3('tableGameTeamDetails', tableData, { 
+                        disablePositionCircle: true,
+                        enableSpecialRowStyling: true,
+                        highlightLastRow: true
+                    });
                 } else {
                     console.error('No table creation function available');
                     container.innerHTML = `<div class="alert alert-warning">${typeof t === 'function' ? t('no_data', 'Table creation function not available') : 'Table creation function not available'}</div>`;

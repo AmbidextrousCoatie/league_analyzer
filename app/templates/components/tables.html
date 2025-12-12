@@ -213,17 +213,76 @@ function createTableTabulator(tableId, data, options = {}) {
     const teamFieldGuess = data.columns?.[0]?.columns?.[1]?.field || null;
     const teamField = settings.teamField || teamFieldGuess;
 
+    // Build a map of field -> decimal_places for formatting data before passing to Tabulator
+    const decimalPlacesMap = {};
+    data.columns.forEach((group) => {
+        if (Array.isArray(group.columns)) {
+            group.columns.forEach((column) => {
+                if (column.decimal_places !== undefined && column.decimal_places !== null && column.field) {
+                    decimalPlacesMap[column.field] = parseInt(column.decimal_places);
+                }
+            });
+        }
+    });
+
+    // Format numeric values in data based on decimal_places BEFORE passing to Tabulator
+    if (Object.keys(decimalPlacesMap).length > 0 && Array.isArray(data.data)) {
+        data.data = data.data.map((row) => {
+            if (Array.isArray(row)) {
+                // Array format: [val1, val2, ...]
+                return row.map((cell, index) => {
+                    const columnInfo = columnOrder[index];
+                    if (columnInfo && decimalPlacesMap[columnInfo.field] !== undefined) {
+                        const decimalPlaces = decimalPlacesMap[columnInfo.field];
+                        const numValue = typeof cell === 'number' ? cell : (typeof cell === 'string' ? parseFloat(cell) : null);
+                        if (numValue !== null && !isNaN(numValue) && isFinite(numValue)) {
+                            return numValue.toFixed(decimalPlaces);
+                        }
+                    }
+                    return cell;
+                });
+            } else if (typeof row === 'object' && row !== null) {
+                // Object format: {field1: val1, field2: val2, ...}
+                const formattedRow = {...row};
+                Object.keys(decimalPlacesMap).forEach((field) => {
+                    if (formattedRow[field] !== undefined && formattedRow[field] !== null) {
+                        const decimalPlaces = decimalPlacesMap[field];
+                        const numValue = typeof formattedRow[field] === 'number' ? formattedRow[field] : (typeof formattedRow[field] === 'string' ? parseFloat(formattedRow[field]) : null);
+                        if (numValue !== null && !isNaN(numValue) && isFinite(numValue)) {
+                            formattedRow[field] = numValue.toFixed(decimalPlaces);
+                        }
+                    }
+                });
+                return formattedRow;
+            }
+            return row;
+        });
+    }
+
     const cellMetadataMap = mapCellMetadata(data.cell_metadata || {}, columnOrder);
     const rowMetadataMap = (data.row_metadata || []).reduce((acc, meta, index) => {
         acc[index] = meta || {};
         return acc;
     }, {});
 
+    // Check if data is already objects or arrays
+    const isArrayFormat = Array.isArray(data.data) && data.data.length > 0 && Array.isArray(data.data[0]);
+    
     const transformedData = data.data.map((row, rowIndex) => {
         const rowObject = { __rowIndex: rowIndex };
-        columnOrder.forEach((columnInfo, columnIndex) => {
-            rowObject[columnInfo.field] = row[columnIndex];
-        });
+        
+        if (isArrayFormat) {
+            // Transform array format: [val1, val2, ...] -> {field1: val1, field2: val2, ...}
+            columnOrder.forEach((columnInfo, columnIndex) => {
+                rowObject[columnInfo.field] = row[columnIndex];
+            });
+        } else {
+            // Already object format: {field1: val1, field2: val2, ...} - use directly
+            columnOrder.forEach((columnInfo) => {
+                rowObject[columnInfo.field] = row[columnInfo.field];
+            });
+        }
+        
         if (rowMetadataMap[rowIndex]) {
             rowObject.__rowMeta = rowMetadataMap[rowIndex];
         }
@@ -263,6 +322,20 @@ function createTableTabulator(tableId, data, options = {}) {
                 const field = columnInfo.field;
                 const headerAlign = column.align || 'center';
                 const columnStyles = column.style || {};
+                // Store decimal_places in a variable to ensure it's captured correctly in the closure
+                // Check both column.decimal_places and columnInfo.column.decimal_places for compatibility
+                let decimalPlaces = null;
+                if (column.decimal_places !== undefined && column.decimal_places !== null) {
+                    decimalPlaces = parseInt(column.decimal_places);
+                } else if (columnInfo.column && columnInfo.column.decimal_places !== undefined && columnInfo.column.decimal_places !== null) {
+                    decimalPlaces = parseInt(columnInfo.column.decimal_places);
+                }
+                
+                // Debug: Log ALL columns to see structure (filter in console if needed)
+                // ALWAYS log for week columns to verify code is running
+                if (field.startsWith('week_')) {
+                    console.log(`[Decimal Debug] Field: "${field}", decimalPlaces: ${decimalPlaces}, column.decimal_places: ${column.decimal_places}, column keys:`, Object.keys(column));
+                }
                 
                 const formatter = function(cell) {
                     const value = cell.getValue();
@@ -295,6 +368,76 @@ function createTableTabulator(tableId, data, options = {}) {
                         });
                     }
 
+                    // Format numeric values based on decimal_places metadata FIRST (before special cases)
+                    // This ensures decimal formatting is applied unless overridden by special formatting
+                    let formattedValue = value;
+                    // Get decimal_places - try multiple sources to ensure we get it
+                    let currentDecimalPlaces = decimalPlaces;
+                    if (currentDecimalPlaces === null) {
+                        // Try to get from column object directly (closure should have access)
+                        if (column && column.decimal_places !== undefined && column.decimal_places !== null) {
+                            currentDecimalPlaces = parseInt(column.decimal_places);
+                        }
+                    }
+                    
+                    if (currentDecimalPlaces !== null && !isNaN(currentDecimalPlaces) && currentDecimalPlaces >= 0) {
+                        // Handle both number and string numeric values
+                        let numValue = null;
+                        if (typeof value === 'number') {
+                            numValue = value;
+                        } else if (typeof value === 'string' && value !== '' && value !== null && value !== undefined) {
+                            // Try to parse as float - handle empty strings and whitespace
+                            const trimmed = String(value).trim();
+                            if (trimmed !== '' && trimmed !== 'null' && trimmed !== 'undefined' && trimmed !== 'NaN') {
+                                const parsed = parseFloat(trimmed);
+                                if (!isNaN(parsed) && isFinite(parsed)) {
+                                    numValue = parsed;
+                                }
+                            }
+                        }
+                        
+                        if (numValue !== null && !isNaN(numValue) && isFinite(numValue)) {
+                            formattedValue = String(numValue.toFixed(currentDecimalPlaces));
+                            // IMPORTANT: Return early to ensure formatted value is used
+                            // Don't let special cases override the formatted numeric value
+                            // (except for player_initials and position columns which return HTML)
+                        }
+                    }
+                    
+                    // Special handling for player_initials column (colored circle with player initial)
+                    if (field === 'player_initials') {
+                        const playerName = rowData['player_name'] || null;
+                        if (playerName && value !== null && value !== undefined && value !== '') {
+                            // Normalize player name (trim whitespace) to ensure it matches the color map
+                            const normalizedPlayerName = String(playerName).trim();
+                            // Try multiple sources for player color - access directly at render time
+                            let color = null;
+                            // First try window.ColorUtils.playerColorMap (most reliable)
+                            if (window.ColorUtils && window.ColorUtils.playerColorMap) {
+                                color = window.ColorUtils.playerColorMap[normalizedPlayerName];
+                            }
+                            // Then try window.playerColorMap
+                            if (!color && window.playerColorMap) {
+                                color = window.playerColorMap[normalizedPlayerName];
+                            }
+                            // Fallback to getTeamColor which should check playerColorMap
+                            if (!color) {
+                                color = getTeamColor(normalizedPlayerName);
+                            }
+                            // Final fallback to a visible color (not gray, use a default palette color)
+                            if (!color || color === '#888') {
+                                // Use a hash-based color for consistency if not in map
+                                let hash = 0;
+                                for (let i = 0; i < normalizedPlayerName.length; i++) {
+                                    hash = normalizedPlayerName.charCodeAt(i) + ((hash << 5) - hash);
+                                }
+                                const hue = Math.abs(hash % 360);
+                                color = `hsl(${hue}, 70%, 50%)`;
+                            }
+                            return `<div class="tab-position-circle" style="background-color: ${color} !important;">${value}</div>`;
+                        }
+                    }
+
                     // Special handling for position columns
                     // Check if this is a position column by field name or by position (first column of first group)
                     const isPositionColumn = field === 'team_position' || field === 'opponent_position' || 
@@ -314,11 +457,6 @@ function createTableTabulator(tableId, data, options = {}) {
                                 if (opponentNameIndex >= 0 && opponentNameIndex < data.data[rowIdx].length) {
                                     const rawRow = data.data[rowIdx];
                                     teamName = rawRow[opponentNameIndex] || null;
-                                    
-                                    // Debug logging (remove after fixing)
-                                    if (value && rowIdx < 3) { // Only log first 3 rows to avoid spam
-                                        console.log(`[opponent_position] Row ${rowIdx}: opponentNameIndex=${opponentNameIndex}, rawRow[${opponentNameIndex}]=${teamName}, rowData['opponent_name']=${rowData['opponent_name']}`);
-                                    }
                                 } else {
                                     console.warn(`[opponent_position] Row ${rowIdx}: Invalid opponentNameIndex=${opponentNameIndex} or row length mismatch`);
                                 }
@@ -340,22 +478,31 @@ function createTableTabulator(tableId, data, options = {}) {
                             }
                         } else {
                             // Fallback: first column of first group (original logic)
-                            teamName = teamField ? rowData[teamField] : null;
+                            // Try player_name first (for player-based tables), then team_name
+                            teamName = rowData['player_name'] || (teamField ? rowData[teamField] : null);
                         }
                         
                         if (teamName) {
-                            // Normalize team name (trim whitespace) to ensure it matches the color map
-                            const normalizedTeamName = String(teamName).trim();
-                            const color = getTeamColor(normalizedTeamName);
-                            // Debug logging for opponent_position
-                            if (field === 'opponent_position' && rowIdx < 3) {
-                                console.log(`[opponent_position] Row ${rowIdx}: teamName="${normalizedTeamName}", color="${color}", inMap=${window.ColorUtils?.teamColorMap?.[normalizedTeamName] ? 'yes' : 'no'}`);
+                            // Normalize name (trim whitespace) to ensure it matches the color map
+                            const normalizedName = String(teamName).trim();
+                            // Try player color map first, then team color map
+                            let color = null;
+                            if (window.ColorUtils && window.ColorUtils.playerColorMap) {
+                                color = window.ColorUtils.playerColorMap[normalizedName];
                             }
-                            return `<div class="tab-position-circle" style="background-color: ${color};">${value ?? ''}</div>`;
+                            if (!color && window.playerColorMap) {
+                                color = window.playerColorMap[normalizedName];
+                            }
+                            if (!color) {
+                                color = getTeamColor(normalizedName);
+                            }
+                            // Use formattedValue if decimal formatting was applied, otherwise use original value
+                            return `<div class="tab-position-circle" style="background-color: ${color};">${formattedValue ?? ''}</div>`;
                         }
                     }
-
-                    return value ?? '';
+                    
+                    // Return formatted value (with decimal places applied if applicable)
+                    return formattedValue ?? '';
                 };
 
                 const sampleValue = transformedData.length ? transformedData[0][field] : null;
@@ -383,6 +530,21 @@ function createTableTabulator(tableId, data, options = {}) {
                     cssClasses.push(colCssClass);
                 }
 
+                // Determine if we should use custom formatter or Tabulator's built-in number formatter
+                let formatterToUse = formatter;
+                let formatterParamsToUse = {};
+                
+                // If decimal_places is specified, we MUST use our custom formatter
+                // (Tabulator's number formatter doesn't support custom decimal places)
+                if (decimalPlaces !== null && !isNaN(decimalPlaces) && decimalPlaces >= 0) {
+                    formatterToUse = formatter;
+                    formatterParamsToUse = {};
+                    // Debug: Log that we're using custom formatter
+                    if (field.startsWith('week_')) {
+                        console.log(`[Formatter Setup] Field: "${field}", Using custom formatter with decimalPlaces: ${decimalPlaces}`);
+                    }
+                }
+                
                 const columnDefinition = {
                     title: column.title || '',
                     field,
@@ -390,7 +552,8 @@ function createTableTabulator(tableId, data, options = {}) {
                     headerHozAlign: headerAlign,
                     headerSort: column.sortable !== false,
                     sorter: column.sortable === false ? undefined : (isNumberColumn || isStringNumber ? 'number' : 'string'),
-                    formatter,
+                    formatter: formatterToUse,
+                    formatterParams: formatterParamsToUse,
                     tooltip: settings.tooltips ? true : false,
                     // Add header tooltip: use explicit tooltip if provided, otherwise default to title
                     headerTooltip: (column.tooltip !== undefined && column.tooltip !== null && column.tooltip !== '') 

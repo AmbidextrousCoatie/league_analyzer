@@ -555,7 +555,7 @@ def get_translations():
                     # Chart labels
                     "match_day_label", "position_label", "points_label", "average_label",
                     "position_progression", "points_progression", "average_progression",
-                    "cumulative_points",
+                    "cumulative_points", "game_team_details",
                     
                     # Error messages
                     "season_league_required", "no_data_available", "error_loading_timetable",
@@ -567,7 +567,7 @@ def get_translations():
                     
                     # Card headers and UI elements
                     "league_statistics", "season_overview", "position_in_season_progress", 
-                    "points_in_season_progress", "points_per_match_day", "position_per_match_day", 
+                    "points_in_season_progress", "points_per_match_day", "score_per_match_day", "position_per_match_day", 
                     "average_per_match_day", "points_vs_average", "league_results_match_day", 
                     "honor_scores", "top_individual_scores", "top_team_scores", 
                     "best_individual_averages", "best_team_averages", "score_sheet_selected_team", 
@@ -580,7 +580,7 @@ def get_translations():
                     "venue", "match_schedule", "top_individual_performances", "individual_scores",
                     "all_individual_scores_for", "view", "own_team", "standings", 
                     "win_percentage", "performance", "average_scores_and_match_points_between_teams",
-                    "week", "season",
+                    "week", "season", "of", "results", "game_team_details.title",
 
                     # Namespaced: UI languages
                     "ui.language.english", "ui.language.german",
@@ -847,18 +847,56 @@ def get_team_analysis():
         league = request.args.get('league')
         season = request.args.get('season')
         team = request.args.get('team')
-        
+
         if not all([league, season, team]):
             return jsonify({'error': 'Missing required parameters: league, season, team'}), 400
-        
+
         print(f"Team Analysis - Received request with: league={league}, season={season}, team={team}")
-        
+
         league_service = get_league_service()
         analysis_data = league_service.get_team_analysis(league=league, season=season, team=team)
         return jsonify(analysis_data)
-        
+
     except Exception as e:
         print(f"Error in get_team_analysis: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
+@bp.route('/league/get_team_performance_table')
+def get_team_performance_table():
+    """Get team performance table as TableData - can be passed directly to createTableTabulator"""
+    try:
+        league = request.args.get('league')
+        season = request.args.get('season')
+        team = request.args.get('team')
+
+        if not all([league, season, team]):
+            return jsonify({'error': 'Missing required parameters: league, season, team'}), 400
+
+        league_service = get_league_service()
+        table_data = league_service.get_team_performance_table_data(league=league, season=season, team=team)
+        return jsonify(table_data.to_dict())
+
+    except Exception as e:
+        print(f"Error in get_team_performance_table: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
+@bp.route('/league/get_team_win_percentage_table')
+def get_team_win_percentage_table():
+    """Get team win percentage table as TableData - can be passed directly to createTableTabulator"""
+    try:
+        league = request.args.get('league')
+        season = request.args.get('season')
+        team = request.args.get('team')
+
+        if not all([league, season, team]):
+            return jsonify({'error': 'Missing required parameters: league, season, team'}), 400
+
+        league_service = get_league_service()
+        table_data = league_service.get_team_win_percentage_table_data(league=league, season=season, team=team)
+        return jsonify(table_data.to_dict())
+
+    except Exception as e:
+        print(f"Error in get_team_win_percentage_table: {str(e)}")
         return jsonify({'error': str(e)}), 500
 
 @bp.route('/league/get_individual_averages')

@@ -81,7 +81,7 @@ class TeamDetailsBlock extends BaseContentBlock {
                     <div class="card">
                         <div class="card-header d-flex justify-content-between align-items-center">
                             <div>
-                                <h5 data-i18n="score_sheet_selected_team">Score Sheet for Selected Team</h5>
+                            <h5>${typeof t === 'function' ? t('block.team_details.title', 'Score Sheet for Selected Team') : 'Score Sheet for Selected Team'}</h5>    
                                 <div id="teamDetailsMetadata" class="text-muted small">
                                     ${state.team} - ${matchDayText} ${state.week}
                                 </div>
@@ -185,6 +185,7 @@ class TeamDetailsBlock extends BaseContentBlock {
         try {
             // Determine endpoint based on view
             let endpoint = '/league/get_team_week_details_table';
+
             if (view === 'new') {
                 endpoint = '/league/get_team_individual_scores_table';
             } else if (view === 'newFull') {
@@ -204,7 +205,8 @@ class TeamDetailsBlock extends BaseContentBlock {
                 const tableOptions = {
                     disablePositionCircle: true, // Team details should never show color circles for player numbers
                     mergeCells: view === 'newFull',
-                    enableSpecialRowStyling: true
+                    enableSpecialRowStyling: true,
+                    striped: true
                 };
                 
                 // Use Tabulator for structured TableData

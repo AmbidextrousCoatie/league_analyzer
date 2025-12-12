@@ -12,6 +12,7 @@ class Column:
     width: Optional[str] = None
     align: Optional[str] = "center"  # "left", "center", "right"
     format: Optional[str] = None  # Format string for numbers, dates, etc.
+    decimal_places: Optional[int] = None  # Number of decimal places to display (0, 1, 2, etc.)
     style: Optional[Dict[str, str]] = None  # Custom CSS styles
     tooltip: Optional[str] = None  # Tooltip text for column header
 
@@ -60,6 +61,7 @@ class TableData:
                             **({"width": col.width} if col.width else {}),
                             **({"align": col.align} if col.align else {}),
                             **({"format": col.format} if col.format else {}),
+                            **({"decimal_places": col.decimal_places} if col.decimal_places is not None else {}),
                             **({"style": col.style} if col.style else {}),
                             **({"tooltip": col.tooltip} if col.tooltip else {})
                         } 

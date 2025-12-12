@@ -59,6 +59,7 @@ class I18nService:
             "block.team_details.title": {"en": "Score Sheet for Selected Team", "de": "Spielbericht für ausgewähltes Team"},
             "block.team_details.view.classic": {"en": "Classic", "de": "Klassisch"},
             "block.team_details.view.new": {"en": "New", "de": "Neu"},
+            "game_team_details.title": {"en": "Game Team Details", "de": "Spiel-Team-Details"},
             "block.clutch_analysis.title": {"en": "Clutch Performance", "de": "Leistung in engen Spielen"},
             "block.clutch_analysis.description": {"en": "Performance in close games (<10 point margin)", "de": "Leistung in knappen Spielen (<10 Punkte Differenz)"},
             "block.consistency_metrics.title": {"en": "Consistency Metrics", "de": "Konsistenz-Metriken"},
@@ -91,7 +92,7 @@ class I18nService:
             "ui.win_percentage.trends": {"en": "Win Percentage Trends", "de": "Siegquote-Trends"},
             "ui.win_percentage.trends_desc": {"en": "Individual player win percentages over time", "de": "Einzelspieler-Siegquoten über die Zeit"},
             "ui.win_percentage.player": {"en": "Player", "de": "Spieler"},
-            "ui.win_percentage.weekly": {"en": "Weekly Win %", "de": "Wöchentliche Sieg %"},
+            "ui.win_percentage.weekly": {"en": "Weekly Win %", "de": "Gewinnquote pro Spieltag in %"},
             "ui.win_percentage.totals": {"en": "Totals", "de": "Gesamtwerte"},
             "ui.win_percentage.total_wins": {"en": "Total Wins", "de": "Gesamtsiege"},
             "ui.win_percentage.total_matches": {"en": "Total Matches", "de": "Gesamtspiele"},
@@ -130,7 +131,7 @@ class I18nService:
             "ui.team_performance.trends_desc": {"en": "Individual player performance over time", "de": "Leistung einzelner Spieler über die Zeit"},
             "ui.team_performance.player_performance": {"en": "Player Performance", "de": "Spielerleistung"},
             "ui.team_performance.player_perf_desc": {"en": "Individual player average scores per game with totals and averages", "de": "Durchschnittliche Spielergebnisse pro Spiel mit Summen und Durchschnitten"},
-            "ui.team_performance.weekly_avg_game": {"en": "Weekly Avg/Game", "de": "Wöchentlich Ø/Spiel"},
+            "ui.team_performance.weekly_avg_game": {"en": "Weekly Average per Game", "de": "Durchschnitt pro Spieltag"},
             "ui.team_performance.total_score": {"en": "Total Score", "de": "Gesamtpinfall"},
             "ui.team_performance.avg_per_game": {"en": "Avg/Game", "de": "Ø/Spiel"},
 
@@ -159,6 +160,8 @@ class I18nService:
             "ranking": {"en": "Ranking", "de": "Rang"},
             "opponent": {"en": "Opponent", "de": "Gegner"},
             "round": {"en": "#", "de": "#"},
+            "of": {"en": "of", "de": "von"},
+            "results": {"en": "Results", "de": "Ergebnisse"},
             
             # Table titles and descriptions
             "league_standings": {"en": "League Standings", "de": "Tabellenstand"},
@@ -205,6 +208,7 @@ class I18nService:
             "season_overview": {"en": "Season Overview", "de": "Saison-Übersicht"},
             "position_in_season_progress": {"en": "Position in Season ProgressSSSssSS", "de": "Position im Saison-Verlauf"},
             "points_in_season_progress": {"en": "Points in Season Progress", "de": "Punkte im Saison-Verlauf"},
+            "score_per_match_day": {"en": "Score per Match Day", "de": "Pins pro Spieltag"},
             "points_per_match_day": {"en": "Points per Match Day", "de": "Punkte pro Spieltag"},
             "position_per_match_day": {"en": "Position per Match Day", "de": "Position pro Spieltag"},
             "average_per_match_day": {"en": "Average per Match Day", "de": "Durchschnitt pro Spieltag"},
@@ -221,7 +225,7 @@ class I18nService:
             "please_select_combination": {"en": "Please select a combination of Season and League.", "de": "Bitte wählen Sie eine Kombination aus Saison und Liga."},
             "please_select_match_day": {"en": "Please select a match day.", "de": "Bitte wählen Sie einen Spieltag."},
             "please_select_team": {"en": "Please select a team to display the score sheet.", "de": "Bitte wählen Sie ein Team, um den Spielbericht anzuzeigen."},
-            
+            "game_team_details": {"en": "Details of Team Game", "de": "Ergebnisse von Spiel"},
             # Chart labels
             "match_day_format": {"en": "Match Day #{week}", "de": "Spieltag #{week}"},
             

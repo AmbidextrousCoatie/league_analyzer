@@ -89,8 +89,6 @@ class LeagueStatsApp {
             const teamDetailsBlock = new TeamDetailsBlock();
             console.log('🔄 Creating TeamPerformanceBlock...');
             const teamPerformanceBlock = new TeamPerformanceBlock();
-            console.log('🔄 Creating TeamWinPercentageBlock...');
-            const teamWinPercentageBlock = new TeamWinPercentageBlock();
             console.log('🔄 Creating GameOverviewBlock...');
             const gameOverviewBlock = new GameOverviewBlock();
             console.log('🔄 Creating GameTeamDetailsBlock...');
@@ -104,7 +102,6 @@ class LeagueStatsApp {
             this.contentBlocks.set('matchday', matchDayBlock);
             this.contentBlocks.set('team-details', teamDetailsBlock);
             this.contentBlocks.set('team-performance', teamPerformanceBlock);
-            this.contentBlocks.set('team-win-percentage', teamWinPercentageBlock);
             this.contentBlocks.set('game-overview', gameOverviewBlock);
             this.contentBlocks.set('game-team-details', gameTeamDetailsBlock);
             

@@ -136,19 +136,19 @@ class LeagueService:
                     frozen="left",
                     style={"backgroundColor": get_theme_color("background")},
                     columns=[
-                        Column(title=i18n_service.get_text("position"), field="team_position", width="60px", align="center", tooltip=i18n_service.get_text("position")),
+                        Column(title=i18n_service.get_text("position"), field="team_position", width="60px", align="center", tooltip=i18n_service.get_text("position"), decimal_places=0),
                         Column(title=i18n_service.get_text("team"), field="team_name", width="200px", align="left"),
-                        Column(title=i18n_service.get_text("pins"), field="team_pins", width="80px", align="center"),
-                        Column(title=i18n_service.get_text("points"), field="team_points", width="80px", align="center")
+                        Column(title=i18n_service.get_text("pins"), field="team_pins", width="80px", align="center", decimal_places=0),
+                        Column(title=i18n_service.get_text("points"), field="team_points", width="80px", align="center", decimal_places=0)
                     ]
                 ),
                 ColumnGroup(
                     title=i18n_service.get_text("opponent"),
                     style={"backgroundColor": get_theme_color("surface_light")},
                     columns=[
-                        Column(title=i18n_service.get_text("points"), field="opponent_points", width="80px", align="center"),
-                        Column(title=i18n_service.get_text("pins"), field="opponent_pins", width="80px", align="center"),
-                        Column(title=i18n_service.get_text("position"), field="opponent_position", width="60px", align="center", tooltip=i18n_service.get_text("position")),
+                        Column(title=i18n_service.get_text("points"), field="opponent_points", width="80px", align="center", decimal_places=0),
+                        Column(title=i18n_service.get_text("pins"), field="opponent_pins", width="80px", align="center", decimal_places=0),
+                        Column(title=i18n_service.get_text("position"), field="opponent_position", width="60px", align="center", tooltip=i18n_service.get_text("position"), decimal_places=0),
                         Column(title=i18n_service.get_text("opponent"), field="opponent_name", width="200px", align="left")
                     ]
                 )
@@ -373,16 +373,16 @@ class LeagueService:
                     style={"backgroundColor": get_theme_color("background")},
                     columns=[
                         Column(title=i18n_service.get_text("player"), field="player_name", width="200px", align="left"),
-                        Column(title=i18n_service.get_text("pins"), field="player_pins", width="80px", align="center"),
-                        Column(title=i18n_service.get_text("points"), field="points", width="80px", align="center")
+                        Column(title=i18n_service.get_text("pins"), field="player_pins", width="80px", align="center", decimal_places=0),
+                        Column(title=i18n_service.get_text("points"), field="points", width="80px", align="center", decimal_places=0)
                     ]
                 ),
                 ColumnGroup(
                     title=opponent_name,  # Opposing team name
                     style={"backgroundColor": get_theme_color("surface_light")},
                     columns=[
-                        Column(title=i18n_service.get_text("points"), field="opponent_points", width="80px", align="center"),
-                        Column(title=i18n_service.get_text("pins"), field="opponent_pins", width="80px", align="center"),
+                        Column(title=i18n_service.get_text("points"), field="opponent_points", width="80px", align="center", decimal_places=0),
+                        Column(title=i18n_service.get_text("pins"), field="opponent_pins", width="80px", align="center", decimal_places=0),
                         Column(title=i18n_service.get_text("player"), field="opponent_player_name", width="200px", align="left")
                     ]
                 )
@@ -850,7 +850,7 @@ class LeagueService:
                     frozen="left",
                     style={"backgroundColor": get_theme_color("background")},
                     columns=[
-                        Column(title=i18n_service.get_text("position"), field="position", width="50px", align="center"),
+                        Column(title=i18n_service.get_text("position"), field="position", width="50px", align="center", decimal_places=0),
                         Column(title=i18n_service.get_text("name"), field="name", width="200px", align="left")
                     ]
                 )
@@ -863,8 +863,8 @@ class LeagueService:
                     ColumnGroup(
                         title=opponent_name,
                         columns=[
-                            Column(title=i18n_service.get_text("pins"), field=f"game{game}_score", width="80px", align="center"),
-                            Column(title=i18n_service.get_text("points"), field=f"game{game}_points", width="60px", align="center")
+                            Column(title=i18n_service.get_text("pins"), field=f"game{game}_score", width="80px", align="center", decimal_places=0),
+                            Column(title=i18n_service.get_text("points"), field=f"game{game}_points", width="60px", align="center", decimal_places=0)
                         ]
                     )
                 )
@@ -876,9 +876,9 @@ class LeagueService:
                     style={"backgroundColor": get_theme_color("surface_alt")},
                     header_style={"fontWeight": "bold"},
                     columns=[
-                        Column(title=i18n_service.get_text("points"), field="total_points", width="80px", align="center"),
-                        Column(title=i18n_service.get_text("score"), field="total_score", width="80px", align="center"),
-                        Column(title=i18n_service.get_text("avg"), field="average", width="80px", align="center")
+                        Column(title=i18n_service.get_text("points"), field="total_points", width="80px", align="center", decimal_places=0),
+                        Column(title=i18n_service.get_text("score"), field="total_score", width="80px", align="center", decimal_places=0),
+                        Column(title=i18n_service.get_text("avg"), field="average", width="80px", align="center", decimal_places=1)
                     ]
                 )
             )
@@ -1573,7 +1573,7 @@ class LeagueService:
                     frozen="left",
                     style={"backgroundColor": get_theme_color("background")},
                     columns=[
-                        Column(title="#", field="pos", width="50px", align="center"),
+                        Column(title="#", field="pos", width="50px", align="center", decimal_places=0),
                         Column(title=i18n_service.get_text("team"), field="team", width="200px", align="left")
                     ]
                 )
@@ -1587,9 +1587,9 @@ class LeagueService:
                     header_style={"fontWeight": "bold"},
                     highlighted=True,  # Highlight the Total group
                     columns=[
-                        Column(title=i18n_service.get_text("points"), field="season_points", format="{:,}", width="75px"),
-                        Column(title=i18n_service.get_text("pins"), field="season_score", format="{:,}", width="75px"),
-                        Column(title=i18n_service.get_text("average"), field="season_avg", format="{:.1f}", width="75px")
+                        Column(title=i18n_service.get_text("points"), field="season_points", format="{:,}", width="75px", decimal_places=0),
+                        Column(title=i18n_service.get_text("pins"), field="season_score", format="{:,}", width="75px", decimal_places=0),
+                        Column(title=i18n_service.get_text("average"), field="season_avg", format="{:.1f}", width="75px", decimal_places=1)
                     ]
                 )
             )
@@ -1600,9 +1600,9 @@ class LeagueService:
                     ColumnGroup(
                         title=f"{i18n_service.get_text('week')} {w}",
                         columns=[
-                            Column(title=i18n_service.get_text("points"), field=f"week{w}_points", format="{:.1f}", width="75px"),
-                            Column(title=i18n_service.get_text("score"), field=f"week{w}_score", format="{:,}", width="75px"),
-                            Column(title=i18n_service.get_text("average"), field=f"week{w}_avg", format="{:.1f}", width="75px")
+                            Column(title=i18n_service.get_text("points"), field=f"week{w}_points", format="{:.1f}", width="75px", decimal_places=1),
+                            Column(title=i18n_service.get_text("score"), field=f"week{w}_score", format="{:,}", width="75px", decimal_places=0),
+                            Column(title=i18n_service.get_text("average"), field=f"week{w}_avg", format="{:.1f}", width="75px", decimal_places=1)
                         ]
                     )
                 )
@@ -1850,7 +1850,7 @@ class LeagueService:
                     title=i18n_service.get_text("match_info"),
                     style={"backgroundColor": get_theme_color("background")},
                     columns=[
-                        Column(title=i18n_service.get_text("round"), field="round_number", width="60px", align="center"),
+                        Column(title=i18n_service.get_text("round"), field="round_number", width="60px", align="center", decimal_places=0),
                         Column(title=i18n_service.get_text("opponent"), field="opponent_name", width="120px", align="left"),
                     ]
                 )
@@ -1861,9 +1861,9 @@ class LeagueService:
                 return ColumnGroup(
                     title=player,
                         columns=[
-                        Column(title=i18n_service.get_text("position"), field=f"{prefix}{player}_pos", width="50px", align="center"),
-                        Column(title=i18n_service.get_text("score"), field=f"{prefix}{player}_score", width="80px", align="center"),
-                        Column(title=i18n_service.get_text("points"), field=f"{prefix}{player}_points", width="60px", align="center"),
+                        Column(title=i18n_service.get_text("position"), field=f"{prefix}{player}_pos", width="50px", align="center", decimal_places=0),
+                        Column(title=i18n_service.get_text("score"), field=f"{prefix}{player}_score", width="80px", align="center", decimal_places=0),
+                        Column(title=i18n_service.get_text("points"), field=f"{prefix}{player}_points", width="60px", align="center", decimal_places=0),
                     ]
                 )
 
@@ -1881,8 +1881,8 @@ class LeagueService:
                     style={"backgroundColor": get_theme_color("surface_alt")},
                     header_style={"fontWeight": "bold"},
                     columns=[
-                        Column(title=i18n_service.get_text("score"), field="team_score", width="80px", align="center"),
-                        Column(title=i18n_service.get_text("points"), field="team_points", width="80px", align="center")
+                        Column(title=i18n_service.get_text("score"), field="team_score", width="80px", align="center", decimal_places=0),
+                        Column(title=i18n_service.get_text("points"), field="team_points", width="80px", align="center", decimal_places=0)
                     ]
                 )
             )
@@ -2090,15 +2090,15 @@ class LeagueService:
                 columns=[
                     Column(title=i18n_service.get_text("opponent"), field="opponent", width="120px", align="left", sortable=False),
                     Column(title=i18n_service.get_text("total_points"), field="team_total_points", width="100px", align="center", sortable=False,
-                           style={"fontWeight": "bold"}),
+                           style={"fontWeight": "bold"}, decimal_places=0),
                 ]
                 #style={"borderRight": "2px solid #264653"}  # Vertical bar after Opponents group (same color as other borders)
             ),
             ColumnGroup(
                 title=team,
                 columns=[
-                    Column(title=i18n_service.get_text("pins"), field="team_score", width="80px", align="center", sortable=False),
-                    Column(title=i18n_service.get_text("points"), field="team_points", width="80px", align="center", sortable=False),
+                    Column(title=i18n_service.get_text("pins"), field="team_score", width="80px", align="center", sortable=False, decimal_places=0),
+                    Column(title=i18n_service.get_text("points"), field="team_points", width="80px", align="center", sortable=False, decimal_places=0),
                       # Make Total Points column bold
                 ]
             )
@@ -2109,9 +2109,9 @@ class LeagueService:
                 ColumnGroup(
                     title=player_name,
                     columns=[
-                        Column(title=i18n_service.get_text("pins"), field=f"{player_info['identifier']}_score", width="80px", align="center", sortable=False),
-                        Column(title=i18n_service.get_text("points"), field=f"{player_info['identifier']}_points", width="50px", align="center", sortable=False),
-                        Column(title=i18n_service.get_text("position"), field=f"{player_info['identifier']}_pos", width="50px", align="center", sortable=False),
+                        Column(title=i18n_service.get_text("pins"), field=f"{player_info['identifier']}_score", width="80px", align="center", sortable=False, decimal_places=0),
+                        Column(title=i18n_service.get_text("points"), field=f"{player_info['identifier']}_points", width="50px", align="center", sortable=False, decimal_places=0),
+                        Column(title=i18n_service.get_text("position"), field=f"{player_info['identifier']}_pos", width="50px", align="center", sortable=False, decimal_places=0),
                         
                     ]
                 )
@@ -2335,7 +2335,7 @@ class LeagueService:
                     title="",  # Empty title since it's shown in card header
                     columns=[
                         Column(title=i18n_service.get_text("team"), field="team", width="180px", align="left"),
-                        Column(title=i18n_service.get_text("average"), field="average", width="90px", align="center"),
+                        Column(title=i18n_service.get_text("average"), field="average", width="90px", align="center", decimal_places=1),
                         Column(title=i18n_service.get_text("season"), field="season", width="90px", align="center"),
                         Column(title=i18n_service.get_text("league"), field="league", width="90px", align="left")
                     ]
@@ -2420,7 +2420,7 @@ class LeagueService:
             
             # Create table structure - can pass bare Columns directly, no need for ColumnGroup wrapper
             columns = [
-                Column(title=i18n_service.get_text("week"), field="week", width="100px", align="center"),
+                Column(title=i18n_service.get_text("week"), field="week", width="100px", align="center", decimal_places=0),
                 Column(title=i18n_service.get_text("date"), field="date", width="120px", align="center"),
                 Column(title=i18n_service.get_text("location"), field="location", width="200px", align="left"),
                 Column(title=i18n_service.get_text("status"), field="status", width="150px", align="center")
@@ -2542,10 +2542,10 @@ class LeagueService:
             columns = [
                 Column(title=i18n_service.get_text("player"), field="player", width="180px", align="left"),
                 Column(title=i18n_service.get_text("team"), field="team", width="130px", align="left"),
-                Column(title=i18n_service.get_text("games"), field="games", width="70px", align="center"),
-                Column(title=i18n_service.get_text("total_points"), field="total_points", width="100px", align="center"),
-                Column(title=i18n_service.get_text("average"), field="average", width="90px", align="center"),
-                Column(title=i18n_service.get_text("high_game"), field="high_game", width="90px", align="center")
+                Column(title=i18n_service.get_text("games"), field="games", width="70px", align="center", decimal_places=0),
+                Column(title=i18n_service.get_text("total_points"), field="total_points", width="100px", align="center", decimal_places=0),
+                Column(title=i18n_service.get_text("average"), field="average", width="90px", align="center", decimal_places=1),
+                Column(title=i18n_service.get_text("high_game"), field="high_game", width="90px", align="center", decimal_places=0)
             ]
                 
             
@@ -2633,7 +2633,7 @@ class LeagueService:
                     title="",  # Empty title since it's shown in card header
                     columns=[
                         Column(title=i18n_service.get_text("player"), field="player", width="180px", align="left"),
-                        Column(title=i18n_service.get_text("average"), field="average", width="90px", align="center"),
+                        Column(title=i18n_service.get_text("average"), field="average", width="90px", align="center", decimal_places=1),
                         Column(title=i18n_service.get_text("season"), field="season", width="90px", align="center"),
                         Column(title=i18n_service.get_text("league"), field="league", width="90px", align="left"),
                         Column(title=i18n_service.get_text("team"), field="team", width="180px", align="left")                        
@@ -2702,11 +2702,11 @@ class LeagueService:
                     title="",  # Empty title since it's shown in card header
                     columns=[
                         Column(title=i18n_service.get_text("player"), field="player", width="180px", align="left"),
-                        Column(title=i18n_service.get_text("score"), field="score", width="90px", align="center"),
+                        Column(title=i18n_service.get_text("score"), field="score", width="90px", align="center", decimal_places=0),
                         Column(title=i18n_service.get_text("season"), field="season", width="90px", align="center"),
                         Column(title=i18n_service.get_text("league"), field="league", width="90px", align="left"),
                         Column(title=i18n_service.get_text("team"), field="team", width="180px", align="left"),
-                        Column(title=i18n_service.get_text("week"), field="week", width="90px", align="center")
+                        Column(title=i18n_service.get_text("week"), field="week", width="90px", align="center", decimal_places=0)
                     ]
                 )
             ]
@@ -2766,10 +2766,10 @@ class LeagueService:
                     title="",  # Empty title since it's shown in card header
                     columns=[
                         Column(title=i18n_service.get_text("team"), field="team", width="180px", align="left"),
-                        Column(title=i18n_service.get_text("score"), field="score", width="90px", align="center"),
+                        Column(title=i18n_service.get_text("score"), field="score", width="90px", align="center", decimal_places=0),
                         Column(title=i18n_service.get_text("season"), field="season", width="90px", align="center"),
                         Column(title=i18n_service.get_text("league"), field="league", width="90px", align="left"),
-                        Column(title=i18n_service.get_text("week"), field="week", width="90px", align="center"),
+                        Column(title=i18n_service.get_text("week"), field="week", width="90px", align="center", decimal_places=0),
                     ]
                         
                 )
@@ -2908,14 +2908,14 @@ class LeagueService:
                     team_week_scores.append(None)  # Use None for missing data
             
             # Add data to series
-            performance_series.add_data(f"{team} (Team Average)", team_week_scores)
+            performance_series.add_data(f"{team}", team_week_scores)
             
             # Override the incorrect totals with correct ones
-            performance_series.total[f"{team} (Team Average)"] = round(team_total_score, 2)
-            performance_series.average[f"{team} (Team Average)"] = round(team_total_score / team_total_games, 2) if team_total_games > 0 else 0
+            performance_series.total[f"{team}"] = round(team_total_score, 2)
+            performance_series.average[f"{team}"] = round(team_total_score / team_total_games, 2) if team_total_games > 0 else 0
             
             # Store count of valid data points for frontend use
-            performance_series.counts[f"{team} (Team Average)"] = team_total_games
+            performance_series.counts[f"{team}"] = team_total_games
             
             # Add individual player win percentage data
             for player in players:
@@ -2985,14 +2985,14 @@ class LeagueService:
                 team_total_matches += week_matches_count
             
             # Add data to series
-            win_percentage_series.add_data(f"{team} (Team)", team_week_wins)
+            win_percentage_series.add_data(f"{team}", team_week_wins)
             
             # Override the incorrect totals with correct ones
-            win_percentage_series.total[f"{team} (Team)"] = team_total_wins
-            win_percentage_series.average[f"{team} (Team)"] = round((team_total_wins / team_total_matches) * 100, 1) if team_total_matches > 0 else 0
+            win_percentage_series.total[f"{team}"] = team_total_wins
+            win_percentage_series.average[f"{team}"] = round((team_total_wins / team_total_matches) * 100, 1) if team_total_matches > 0 else 0
             
             # Store count of valid data points for frontend use
-            win_percentage_series.counts[f"{team} (Team)"] = team_total_matches
+            win_percentage_series.counts[f"{team}"] = team_total_matches
             
             # Return data using existing SeriesData interface
             return {
@@ -3014,6 +3014,309 @@ class LeagueService:
                 'weeks': [],
                 'players': []
             }
+
+    def get_team_performance_table_data(self, league: str, season: str, team: str) -> TableData:
+        """Get team performance table as TableData - can be passed directly to createTableTabulator"""
+        try:
+            # Reuse the data collection logic from get_team_analysis
+            analysis_data = self.get_team_analysis(league=league, season=season, team=team)
+            
+            if 'error' in analysis_data:
+                return TableData(
+                    columns=[],
+                    data=[],
+                    title=f"Error: {analysis_data['error']}"
+                )
+            
+            performance_data = analysis_data.get('performance_data', {})
+            # weeks comes as list of strings like ['Week 1', 'Week 2', ...], extract count
+            weeks_list = analysis_data.get('weeks', [])
+            num_weeks = len(weeks_list) if weeks_list else 0
+            team_name = analysis_data.get('team', team)
+            teamAverageKey = f"{team_name}"
+            
+            # Debug: Check if we have data
+            if num_weeks == 0:
+                print(f"WARNING: No weeks data in get_team_performance_table_data for {team} in {league} {season}")
+                print(f"analysis_data keys: {list(analysis_data.keys())}")
+                print(f"performance_data keys: {list(performance_data.keys()) if isinstance(performance_data, dict) else type(performance_data)}")
+            
+            # Build columns
+            columns = [
+                ColumnGroup(
+                    title=i18n_service.get_text('player'),
+                    columns=[
+                        Column(title='', field='player_initials', width='50px', align='center'),
+                        Column(title=i18n_service.get_text('player'), field='player_name', width='180px', align="left")
+                    ]
+                )
+            ]
+            
+            # Add week columns
+            week_columns = []
+            for idx in range(num_weeks):
+                week_columns.append(
+                    Column(
+                        title=f"{idx + 1}",
+                        field=f'week_{idx + 1}',
+                        width='80px',
+                        align='center',
+                        tooltip=i18n_service.get_text('match_day_label') + ' ' + str(idx + 1),
+                        decimal_places=1  # Weekly averages typically have 1 decimal place
+                    )
+                )
+            if week_columns:
+                columns.append(ColumnGroup(
+                    title=i18n_service.get_text('ui.team_performance.weekly_avg_game'),
+                    columns=week_columns
+                ))
+            
+            # Add totals columns
+            columns.append(ColumnGroup(
+                title=i18n_service.get_text('ui.win_percentage.totals'),
+                columns=[
+                    Column(title=i18n_service.get_text('ui.team_performance.total_score'), field='total_score', width='100px', align='center', decimal_places=0),
+                    Column(title=i18n_service.get_text('games'), field='total_games', width='80px', align='center', decimal_places=0),
+                    Column(title=i18n_service.get_text('ui.team_performance.avg_per_game'), field='avg_per_game', width='100px', align='center', decimal_places=1)
+                ]
+            ))
+            
+            # Build data rows
+            table_data = []
+            data_dict = performance_data.get('data', {})
+            total_dict = performance_data.get('total', {})
+            average_dict = performance_data.get('average', {})
+            counts_dict = performance_data.get('counts', {})
+            
+            # Process individual players first
+            for playerName in sorted(data_dict.keys()):
+                if playerName == teamAverageKey:
+                    continue
+                
+                playerData = data_dict[playerName]
+                row = {
+                    'player_initials': playerName[0].upper() if playerName else '',
+                    'player_name': playerName
+                }
+                
+                # Add week data
+                for idx in range(num_weeks):
+                    weekValue = playerData[idx] if idx < len(playerData) else None
+                    row[f'week_{idx + 1}'] = weekValue
+                
+                # Add totals
+                row['total_score'] = round(total_dict.get(playerName, 0) * 100) / 100
+                row['total_games'] = counts_dict.get(playerName, 0)
+                row['avg_per_game'] = round(average_dict.get(playerName, 0) * 100) / 100
+                
+                table_data.append(row)
+            
+            # Add team average as last row
+            if teamAverageKey in data_dict:
+                teamData = data_dict[teamAverageKey]
+                row = {
+                    'player_initials': 'T',
+                    'player_name': teamAverageKey
+                }
+                
+                for idx in range(num_weeks):
+                    weekValue = teamData[idx] if idx < len(teamData) else None
+                    row[f'week_{idx + 1}'] = weekValue
+                
+                row['total_score'] = round(total_dict.get(teamAverageKey, 0) * 100) / 100
+                row['total_games'] = counts_dict.get(teamAverageKey, 0)
+                row['avg_per_game'] = round(average_dict.get(teamAverageKey, 0) * 100) / 100
+                
+                table_data.append(row)
+            
+            # Row metadata for team average row (bold)
+            row_metadata = []
+            for idx, row in enumerate(table_data):
+                if row['player_name'] == teamAverageKey:
+                    row_metadata.append({
+                        'styling': {
+                            'fontWeight': 'bold',
+                            'backgroundColor': get_theme_color('background') or '#f8f9fa'
+                        }
+                    })
+                else:
+                    row_metadata.append({})
+            
+            result = TableData(
+                columns=columns,
+                data=table_data,
+                title=f"{team_name} - {i18n_service.get_text('ui.team_performance.player_performance')}",
+                description=i18n_service.get_text('ui.team_performance.player_perf_desc'),
+                row_metadata=row_metadata,
+                config={
+                    'striped': True,
+                    'hover': True,
+                    'compact': True,
+                    'stickyHeader': True,
+                    'numberOfdecimalplaces': 1
+                }
+            )
+            
+            return result
+            
+        except Exception as e:
+            print(f"Error in get_team_performance_table_data: {e}")
+            return TableData(
+                columns=[],
+                data=[],
+                title=f"Error: {str(e)}"
+            )
+    
+    def get_team_win_percentage_table_data(self, league: str, season: str, team: str) -> TableData:
+        """Get team win percentage table as TableData - can be passed directly to createTableTabulator"""
+        try:
+            # Reuse the data collection logic from get_team_analysis
+            analysis_data = self.get_team_analysis(league=league, season=season, team=team)
+            
+            if 'error' in analysis_data:
+                return TableData(
+                    columns=[],
+                    data=[],
+                    title=f"Error: {analysis_data['error']}"
+                )
+            
+            win_percentage_data = analysis_data.get('win_percentage_data', {})
+            # weeks comes as list of strings like ['Week 1', 'Week 2', ...], extract count
+            weeks_list = analysis_data.get('weeks', [])
+            num_weeks = len(weeks_list) if weeks_list else 0
+            team_name = analysis_data.get('team', team)
+            teamKey = f"{team_name}"
+            
+            # Debug: Check if we have data
+            if num_weeks == 0:
+                print(f"WARNING: No weeks data in get_team_win_percentage_table_data for {team} in {league} {season}")
+                print(f"analysis_data keys: {list(analysis_data.keys())}")
+                print(f"win_percentage_data keys: {list(win_percentage_data.keys()) if isinstance(win_percentage_data, dict) else type(win_percentage_data)}")
+            
+            # Build columns
+            columns = [
+                ColumnGroup(
+                    title=i18n_service.get_text('player'),
+                    columns=[
+                        Column(title='', field='player_initials', width='50px', align='center'),
+                        Column(title=i18n_service.get_text('ui.win_percentage.player'), field='player_name', width='180px', align='left')
+                    ]
+                )
+            ]
+            
+            # Add week columns
+            week_columns = []
+            for idx in range(num_weeks):
+                week_columns.append(
+                    Column(
+                        title=f"{idx + 1}",
+                        field=f'week_{idx + 1}',
+                        width='80px',
+                        align='center',
+                        tooltip=f"{i18n_service.get_text('week')} {idx + 1}",
+                        decimal_places=1  # Win percentages typically have 1 decimal place
+                    )
+                )
+            if week_columns:
+                columns.append(ColumnGroup(
+                    title=i18n_service.get_text('ui.win_percentage.weekly'),
+                    columns=week_columns
+                ))
+            
+            # Add totals columns
+            columns.append(ColumnGroup(
+                title=i18n_service.get_text('ui.win_percentage.totals'),
+                columns=[
+                    Column(title=i18n_service.get_text('ui.win_percentage.total_wins'), field='total_wins', width='100px', align='center', decimal_places=0),
+                    Column(title=i18n_service.get_text('ui.win_percentage.total_matches'), field='total_matches', width='100px', align='center', decimal_places=0),
+                    Column(title=i18n_service.get_text('ui.win_percentage.win_percentage'), field='win_percentage', width='80px', align='center', decimal_places=1)
+                ]
+            ))
+            
+            # Build data rows
+            table_data = []
+            data_dict = win_percentage_data.get('data', {})
+            total_dict = win_percentage_data.get('total', {})
+            average_dict = win_percentage_data.get('average', {})
+            counts_dict = win_percentage_data.get('counts', {})
+            
+            # Process individual players first
+            for playerName in sorted(data_dict.keys()):
+                if playerName == teamKey:
+                    continue
+                
+                playerData = data_dict[playerName]
+                row = {
+                    'player_initials': playerName[0].upper() if playerName else '',
+                    'player_name': playerName
+                }
+                
+                # Add week data
+                for idx in range(num_weeks):
+                    weekValue = playerData[idx] if idx < len(playerData) else None
+                    row[f'week_{idx + 1}'] = weekValue
+                
+                # Add totals
+                row['total_wins'] = total_dict.get(playerName, 0)
+                row['total_matches'] = counts_dict.get(playerName, 0)
+                row['win_percentage'] = average_dict.get(playerName, 0)
+                
+                table_data.append(row)
+            
+            # Add team as last row
+            if teamKey in data_dict:
+                teamData = data_dict[teamKey]
+                row = {
+                    'player_initials': 'T',
+                    'player_name': teamKey
+                }
+                
+                for idx in range(num_weeks):
+                    weekValue = teamData[idx] if idx < len(teamData) else None
+                    row[f'week_{idx + 1}'] = weekValue
+                
+                row['total_wins'] = total_dict.get(teamKey, 0)
+                row['total_matches'] = counts_dict.get(teamKey, 0)
+                row['win_percentage'] = average_dict.get(teamKey, 0)
+                
+                table_data.append(row)
+            
+            # Row metadata for team row (bold)
+            row_metadata = []
+            for idx, row in enumerate(table_data):
+                if row['player_name'] == teamKey:
+                    row_metadata.append({
+                        'styling': {
+                            'fontWeight': 'bold',
+                            'backgroundColor': get_theme_color('background') or '#f8f9fa'
+                        }
+                    })
+                else:
+                    row_metadata.append({})
+            
+            result = TableData(
+                columns=columns,
+                data=table_data,
+                title=f"{team_name} - {i18n_service.get_text('ui.win_percentage.title')}",
+                description=i18n_service.get_text('ui.win_percentage.individual_desc'),
+                row_metadata=row_metadata,
+                config={
+                    'striped': True,
+                    'hover': True,
+                    'compact': True,
+                    'stickyHeader': True
+                }
+            )
+            
+            return result
+            
+        except Exception as e:
+            print(f"Error in get_team_win_percentage_table_data: {e}")
+            return TableData(
+                columns=[],
+                data=[],
+                title=f"Error: {str(e)}"
+            )
 
     def _apply_heat_map_to_columns(self, table_data: List[List], cell_metadata: Dict[str, Dict],
                                     column_indices: List[int], min_val: float = None, max_val: float = None) -> Dict[str, Dict]:

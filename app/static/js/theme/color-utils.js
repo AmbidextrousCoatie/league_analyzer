@@ -280,6 +280,46 @@
         if (teamName && teamColorMap[teamName]) {
             return teamColorMap[teamName];
         }
+        // Also check playerColorMap as fallback (for player names in charts)
+        if (teamName && playerColorMap[teamName]) {
+            return playerColorMap[teamName];
+        }
+        return getPaletteColor(fallbackIndex);
+    }
+
+    // Player name color map (similar to team color map but for player names)
+    const playerColorMap = globalObj.playerColorMap || {};
+
+    function updatePlayerColorMap(currentPlayers = []) {
+        if (!Array.isArray(currentPlayers)) return;
+
+        Object.keys(playerColorMap).forEach(player => {
+            if (!currentPlayers.includes(player)) {
+                delete playerColorMap[player];
+            }
+        });
+
+        let paletteIdx = 0;
+        currentPlayers.forEach(player => {
+            if (!playerColorMap[player]) {
+                playerColorMap[player] = getPaletteColor(paletteIdx++);
+            }
+        });
+    }
+
+    function getPlayerColor(playerName, fallbackIndex = 0) {
+        if (playerName && playerColorMap[playerName]) {
+            return playerColorMap[playerName];
+        }
+        // If not in map, assign a color based on hash of name for consistency
+        if (playerName) {
+            let hash = 0;
+            for (let i = 0; i < playerName.length; i++) {
+                hash = playerName.charCodeAt(i) + ((hash << 5) - hash);
+            }
+            const index = Math.abs(hash) % currentPalette.length;
+            return getPaletteColor(index);
+        }
         return getPaletteColor(fallbackIndex);
     }
 
@@ -412,12 +452,15 @@
         getThemeColor,
         updateTeamColorMap,
         getTeamColor,
+        updatePlayerColorMap,
+        getPlayerColor,
         getGradientColors,
         getStripeColors,
         getHeatMapColor,
         hexToRgb,
         toRgba,
         teamColorMap,
+        playerColorMap,
         assignGroupStripeCss,
         generateStripeCss,
         injectStripeCss,
@@ -429,7 +472,10 @@
 
     globalObj.ColorUtils = ColorUtils;
     globalObj.teamColorMap = teamColorMap;
+    globalObj.playerColorMap = playerColorMap;
     globalObj.getTeamColor = getTeamColor;
+    globalObj.getPlayerColor = getPlayerColor;
     globalObj.updateTeamColorMap = updateTeamColorMap;
+    globalObj.updatePlayerColorMap = updatePlayerColorMap;
 })();
 

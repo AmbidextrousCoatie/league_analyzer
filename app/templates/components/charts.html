@@ -443,10 +443,29 @@ function createScatterChart_vanilla(data, chartId, title, axis_labels) {
 }
 
 
-function createScatterChartMultiAxis(data, order, containerId, title, labels) {
+function createScatterChartMultiAxis(data, order, containerId, title, labels, options = {}) {
     const container = document.getElementById(containerId);
     
     console.log('Order:', order);
+
+    // Extract normalization options with defaults
+    const {
+        minValue = null,        // Minimum value bound (null = auto from data)
+        maxValue = null,        // Maximum value bound (null = auto from data)
+        minCircleSize = 7,     // Minimum circle size in pixels
+        maxCircleSize = 45,     // Maximum circle size in pixels
+        hideNaValues = true     // Hide circles for null/undefined values (n/a = no participation)
+    } = options;
+    
+    // Debug logging
+    console.log('createScatterChartMultiAxis options:', {
+        minValue,
+        maxValue,
+        minCircleSize,
+        maxCircleSize,
+        hideNaValues,
+        receivedOptions: options
+    });
 
     // Dispose of existing chart instance if it exists
     const existingChart = echarts.getInstanceByDom(container);
@@ -463,6 +482,82 @@ function createScatterChartMultiAxis(data, order, containerId, title, labels) {
     const teams = order;
     const singleAxis = [];
     const series = [];
+    
+    // Calculate value bounds if not provided
+    let valueMin = minValue;
+    let valueMax = maxValue;
+    if (valueMin === null || valueMax === null) {
+        // Auto-calculate from all data values
+        const allValues = [];
+        teams.forEach(team => {
+            if (data[team] && Array.isArray(data[team])) {
+                data[team].forEach(value => {
+                    if (value !== null && value !== undefined && !isNaN(value)) {
+                        allValues.push(value);
+                    }
+                });
+            }
+        });
+        if (allValues.length > 0) {
+            if (valueMin === null) valueMin = Math.min(...allValues);
+            if (valueMax === null) valueMax = Math.max(...allValues);
+        } else {
+            // Fallback if no valid data
+            valueMin = 0;
+            valueMax = 100;
+        }
+    }
+    
+    // Calculate scaling factor for circle size normalization
+    const valueRange = valueMax - valueMin;
+    const circleSizeRange = maxCircleSize - minCircleSize;
+    
+    console.log('Scaling parameters:', {
+        valueMin,
+        valueMax,
+        valueRange,
+        minCircleSize,
+        maxCircleSize,
+        circleSizeRange
+    });
+    
+    // Helper function to normalize circle size based on value
+    const normalizeCircleSize = function(value) {
+        // Handle null/undefined/NaN values (n/a = no participation)
+        if (value === null || value === undefined || isNaN(value)) {
+            // Return 0 to hide the circle if hideNaValues is true, otherwise use minimum size
+            const result = hideNaValues ? 0 : minCircleSize;
+            console.log('normalizeCircleSize: null/undefined/NaN', result);
+            return result;
+        }
+        
+        // Note: value === 0 is a valid numeric value (e.g., 0% win rate = participated but lost all)
+        // So we still show a circle for 0, just scaled to the minimum size
+        
+        // Clamp value to bounds
+        const clampedValue = Math.max(valueMin, Math.min(valueMax, value));
+        
+        // Linear scaling: map value from [valueMin, valueMax] to [minCircleSize, maxCircleSize]
+        if (valueRange === 0) {
+            const result = (minCircleSize + maxCircleSize) / 2;
+            return result;
+        }
+        
+        const normalized = (clampedValue - valueMin) / valueRange;
+        const result = minCircleSize + normalized * circleSizeRange;
+        
+        // Debug first few calls
+        if (Math.random() < 0.01) { // Sample 1% of calls to avoid spam
+            console.log('normalizeCircleSize:', {
+                value,
+                clampedValue,
+                normalized,
+                result
+            });
+        }
+        
+        return result;
+    };
     
     // Configure for each team
     teams.forEach(function (team, idx) {
@@ -499,7 +594,29 @@ function createScatterChartMultiAxis(data, order, containerId, title, labels) {
             }
         });
         
-        const seriesData = data[team].map((value, index) => [index, value]);
+        // Pre-calculate symbol sizes and filter out null/undefined values
+        // Format: [x, y, size] - ECharts will use the third element as symbolSize
+        // Only include data points that should be visible (not null/undefined when hideNaValues is true)
+        const seriesData = data[team]
+            .map((value, index) => {
+                // Skip null/undefined/NaN values if hideNaValues is true
+                if (hideNaValues && (value === null || value === undefined || isNaN(value))) {
+                    return null; // Mark for filtering - don't include in chart at all
+                }
+                // Calculate size for valid values
+                const size = normalizeCircleSize(value);
+                return [index, value, size];
+            })
+            .filter(item => item !== null); // Remove null entries (n/a values) - they won't be rendered
+        
+        // Log sample sizes for debugging (first team only)
+        if (idx === 0 && seriesData.length > 0) {
+            console.log('Sample data points with sizes for first team:', seriesData.slice(0, 5).map(d => ({
+                x: d[0],
+                y: d[1],
+                size: d[2]
+            })));
+        }
         
         series.push({
             name: team,
@@ -507,8 +624,10 @@ function createScatterChartMultiAxis(data, order, containerId, title, labels) {
             coordinateSystem: 'singleAxis',
             type: 'scatter',
             data: seriesData,
+            // Use the third element of data array as symbolSize
             symbolSize: function(dataItem) {
-                return Math.max(dataItem[1] / teams.length * 7, 10);
+                // dataItem format: [x, y, size]
+                return dataItem[2] || minCircleSize;
             },
             itemStyle: {
                 color: getTeamColor(team)
@@ -525,9 +644,16 @@ function createScatterChartMultiAxis(data, order, containerId, title, labels) {
         tooltip: {
             position: 'top',
             formatter: function(params) {
+                const value = params.data[1];
+                // Handle null/undefined values
+                if (value === null || value === undefined || isNaN(value)) {
+                    return `${teams[params.seriesIndex]}<br/>
+                            ${labels[params.data[0]]}<br/>
+                            N/A (No participation)`;
+                }
                 return `${teams[params.seriesIndex]}<br/>
                         ${labels[params.data[0]]}<br/>
-                        Punkte: ${params.data[1]}`;
+                        Punkte: ${value}`;
             }
         },
         singleAxis: singleAxis,
