@@ -6,7 +6,7 @@ These should be kept in sync with the JavaScript ColorUtils definitions.
 # Theme colors - matching ColorUtils.THEME_COLORS
 THEME_COLORS = {
     # Primary colors
-    "primary": "#0a9dc7",           # Dark blue - navbar, card headers
+    "primary": "#1B8CA6",           # Dark blue - navbar, card headers
     "secondary": "#4aa8c2",         # Light blue - buttons, interactive elements
     "accent": "#7dcfe6",             # Lightest blue - highlights, accents
     
@@ -19,7 +19,7 @@ THEME_COLORS = {
     # Text colors
     "text_on_primary": "#ffffff",   # Text on primary background
     "text_on_secondary": "#ffffff",  # Text on secondary background
-    "text_on_light": "#0a9dc7",     # Text on light background
+    "text_on_light": "#1F77B4",     # Text on light background
     
     # Border colors
     "border": "#264653",             # Dark teal/green borders

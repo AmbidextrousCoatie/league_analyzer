@@ -331,6 +331,7 @@ class TeamPerformanceBlock {
         const weekLabels = labels.map((week, index) => `${weekLabel} ${index + 1}`);
 
         // Create scatter chart using existing function
+        const winPercentageLabel = typeof t === 'function' ? t('ui.win_percentage.win_percentage', 'Win %') : 'Win %';
         createScatterChartMultiAxis(
             chartData,
             Object.keys(chartData),
@@ -339,7 +340,8 @@ class TeamPerformanceBlock {
             weekLabels,
             {
                 minValue: 0,
-                maxValue: 100
+                maxValue: 100,
+                tooltipValueLabel: winPercentageLabel
             }
         );
     }
@@ -389,6 +391,7 @@ class TeamPerformanceBlock {
 
         // Create scatter chart using existing function (getTeamColor will check playerColorMap as fallback)
         // Normalize circle sizes: values 150-250 map to circle sizes 20-80
+        const pointsLabel = typeof t === 'function' ? t('pins', 'Punkte') : 'Punkte';
         createScatterChartMultiAxis(
             chartData,
             Object.keys(chartData),
@@ -397,7 +400,8 @@ class TeamPerformanceBlock {
             weekLabels,
             {
                 minValue: 160,
-                maxValue: 230
+                maxValue: 230,
+                tooltipValueLabel: pointsLabel
                 //minCircleSize: 20,
                 //maxCircleSize: 80
             }

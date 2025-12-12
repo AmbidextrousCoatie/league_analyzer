@@ -20,7 +20,8 @@
     // Theme colors - used throughout the application
     const THEME_COLORS = {
         // Primary colors
-        primary: "#0a9dc7",           // Dark blue - navbar, card headers
+        //primary: "#0a9dc7",           // Dark blue - navbar, card headers
+        primary: "#1B8CA6",           // Dark blue - navbar, card headers
         secondary: "#4aa8c2",         // Light blue - buttons, interactive elements
         accent: "#7dcfe6",             // Lightest blue - highlights, accents
         
@@ -33,7 +34,7 @@
         // Text colors
         textOnPrimary: "#ffffff",     // Text on primary background
         textOnSecondary: "#ffffff",   // Text on secondary background
-        textOnLight: "#0a9dc7",       // Text on light background
+        textOnLight: "#1F77B4",       // Text on light background
         
         // Border colors
         border: "#264653",             // Dark teal/green borders
@@ -62,7 +63,7 @@
     // Dark mode theme colors
     const THEME_COLORS_DARK = {
         // Primary colors (same as light mode)
-        primary: "#0a9dc7",
+        primary: "#1B8CA6",
         secondary: "#4aa8c2",
         accent: "#7dcfe6",
         
@@ -104,7 +105,7 @@
     // First color = base table background, second = accent stripe
     // This makes one of the stripe colors effectively the "default" color.
     //const DEFAULT_STRIPE_PALETTE = ["#ffffff", "#e9f0ff"];
-    const DEFAULT_STRIPE_PALETTE = ["#ffffff", "#999999"];
+    const DEFAULT_STRIPE_PALETTE = ["#ffffff", THEME_COLORS.primary];
 
     let currentPaletteName = "rainbowPastel";
     let currentPalette = TEAM_COLOR_PALETTES[currentPaletteName];
@@ -444,6 +445,7 @@
         SEMANTIC_COLOR_MAPPINGS,
         THEME_COLORS,
         THEME_COLORS_DARK,
+        DEFAULT_STRIPE_PALETTE,
         getCurrentPaletteName: () => currentPaletteName,
         getCurrentPalette: () => [...currentPalette],
         setPalette,

@@ -295,9 +295,12 @@ function createTableTabulator(tableId, data, options = {}) {
     // Apply CSS classes for striped column groups before building column definitions
     if (useStripedGroups && data.columns && hasGroupTitles) {
         ColorUtils.assignGroupStripeCss(data.columns);
+        // Use the DEFAULT_STRIPE_PALETTE from color-utils.js explicitly
+        const stripePalette = ColorUtils.DEFAULT_STRIPE_PALETTE || ["#ffffff", "#999999"];
         ColorUtils.injectStripeCss(data.columns.length, {
-            headerAlpha: isCompactLayout ? 0.55 : 0.4,
-            cellAlpha: 0.25
+            palette: stripePalette,
+            headerAlpha: isCompactLayout ? 0.3 : 0.2,
+            cellAlpha: 0.1
         });
     }
 
