@@ -119,6 +119,13 @@ class MatchDayBlock extends BaseContentBlock {
                         </div>
                         `}
                     
+                    <!-- Team vs Team Comparison Section (Full Width) -->
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <div id="team-vs-team-comparison-matchday"></div>
+                        </div>
+                    </div>
+
                     <!-- Individual Performance Section (Full Width) -->
                     <div class="row mt-4">
                         <div class="col-12">
@@ -129,13 +136,6 @@ class MatchDayBlock extends BaseContentBlock {
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Team vs Team Comparison Section (Full Width) -->
-                    <div class="row mt-4">
-                        <div class="col-12">
-                            <div id="team-vs-team-comparison-matchday"></div>
                         </div>
                     </div>
                 </div>

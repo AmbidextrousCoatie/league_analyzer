@@ -120,8 +120,15 @@ class LeagueSeasonOverviewBlock extends BaseContentBlock {
                             </div>
                         </div>
                     </div>
-
-                    <!-- 4th Row: Individual Averages (Full Width) -->
+                    
+                    <!-- 4th Row: Team vs Team Comparison Matrix (Full Width) -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div id="team-vs-team-comparison-inline"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- 5th Row: Individual Averages (Full Width) -->
                     <div class="row">
                         <div class="col-12">
                             <div id="individualAveragesCard">
@@ -131,13 +138,6 @@ class LeagueSeasonOverviewBlock extends BaseContentBlock {
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-
-                    <!-- 5th Row: Team vs Team Comparison Matrix (Full Width) -->
-                    <div class="row mb-4">
-                        <div class="col-12">
-                            <div id="team-vs-team-comparison-inline"></div>
                         </div>
                     </div>
                 </div>

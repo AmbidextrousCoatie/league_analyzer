@@ -150,7 +150,9 @@ class I18nService:
 
             # Common table headers
             "points": {"en": "Pts", "de": "Pkt."},
+            "points_long": {"en": "Points", "de": "Punkte"},
             "score": {"en": "Pins", "de": "Pins"},
+            "both": {"en": "Both", "de": "Beides"},
             "average": {"en": "Ø", "de": "Ø"},
             "position": {"en": "Pos", "de": "Pos"},
             "team": {"en": "Team", "de": "Team"},
@@ -159,6 +161,7 @@ class I18nService:
             "total": {"en": "Total", "de": "Gesamt"},
             "ranking": {"en": "Ranking", "de": "Rang"},
             "opponent": {"en": "Opponent", "de": "Gegner"},
+            "all_opponents": {"en": "All Opponents", "de": "Alle Gegner"},
             "round": {"en": "#", "de": "#"},
             "of": {"en": "of", "de": "von"},
             "results": {"en": "Results", "de": "Ergebnisse"},

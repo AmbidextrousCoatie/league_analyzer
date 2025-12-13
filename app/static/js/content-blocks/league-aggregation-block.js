@@ -166,12 +166,12 @@ class LeagueAggregationBlock extends BaseContentBlock {
 
     async loadPointsToWin(league) {
         try {
-            console.log(`DEBUG: loadPointsToWin called for league: ${league}`);
+            //console.log(`DEBUG: loadPointsToWin called for league: ${league}`);
             const url = `/league/get_points_to_win_history?league=${league}`;
-            console.log(`DEBUG: Fetching from: ${url}`);
+            //console.log(`DEBUG: Fetching from: ${url}`);
             
             const response = await fetchWithDatabase(url);
-            console.log(`DEBUG: Response status: ${response.status}, ok: ${response.ok}`);
+            //console.log(`DEBUG: Response status: ${response.status}, ok: ${response.ok}`);
             
             if (!response.ok) {
                 console.error(`DEBUG: Response not ok: ${response.status} ${response.statusText}`);
@@ -179,10 +179,10 @@ class LeagueAggregationBlock extends BaseContentBlock {
             }
             
             const data = await response.json();
-            console.log(`DEBUG: Points to win data received:`, data);
+            //console.log(`DEBUG: Points to win data received:`, data);
             return data;
         } catch (error) {
-            console.error('DEBUG: Error in loadPointsToWin:', error);
+            //console.error('DEBUG: Error in loadPointsToWin:', error);
             return null;
         }
     }
@@ -195,12 +195,12 @@ class LeagueAggregationBlock extends BaseContentBlock {
 
     async loadTopIndividuals(league) {
         try {
-            console.log(`DEBUG: loadTopIndividuals called for league: ${league}`);
+            //console.log(`DEBUG: loadTopIndividuals called for league: ${league}`);
             const url = `/league/get_top_individual_performances?league=${league}`;
-            console.log(`DEBUG: Fetching from: ${url}`);
+            c//onsole.log(`DEBUG: Fetching from: ${url}`);
             
             const response = await fetchWithDatabase(url);
-            console.log(`DEBUG: Response status: ${response.status}, ok: ${response.ok}`);
+            //console.log(`DEBUG: Response status: ${response.status}, ok: ${response.ok}`);
             
             if (!response.ok) {
                 console.error(`DEBUG: Response not ok: ${response.status} ${response.statusText}`);
@@ -210,8 +210,8 @@ class LeagueAggregationBlock extends BaseContentBlock {
             }
             
             const data = await response.json();
-            console.log(`DEBUG: Top individuals data received:`, data);
-            console.log(`DEBUG: Data structure - columns: ${data.columns ? data.columns.length : 'none'}, data: ${data.data ? data.data.length : 'none'} rows`);
+            //console.log(`DEBUG: Top individuals data received:`, data);
+            c//onsole.log(`DEBUG: Data structure - columns: ${data.columns ? data.columns.length : 'none'}, data: ${data.data ? data.data.length : 'none'} rows`);
             
             return data;
         } catch (error) {
@@ -222,12 +222,12 @@ class LeagueAggregationBlock extends BaseContentBlock {
 
     async loadRecordIndividualGames(league) {
         try {
-            console.log(`DEBUG: loadRecordIndividualGames called for league: ${league}`);
+            //console.log(`DEBUG: loadRecordIndividualGames called for league: ${league}`);
             const url = `/league/get_record_individual_games?league=${league}`;
-            console.log(`DEBUG: Fetching from: ${url}`);
+            //console.log(`DEBUG: Fetching from: ${url}`);
             
             const response = await fetchWithDatabase(url);
-            console.log(`DEBUG: Response status: ${response.status}, ok: ${response.ok}`);
+            //console.log(`DEBUG: Response status: ${response.status}, ok: ${response.ok}`);
             
             if (!response.ok) {
                 console.error(`DEBUG: Response not ok: ${response.status} ${response.statusText}`);
@@ -235,7 +235,7 @@ class LeagueAggregationBlock extends BaseContentBlock {
             }
             
             const data = await response.json();
-            console.log(`DEBUG: Record individual games data received:`, data);
+            //console.log(`DEBUG: Record individual games data received:`, data);
             return data;
         } catch (error) {
             console.error('DEBUG: Error in loadRecordIndividualGames:', error);
@@ -245,12 +245,12 @@ class LeagueAggregationBlock extends BaseContentBlock {
 
     async loadRecordTeamGames(league) {
         try {
-            console.log(`DEBUG: loadRecordTeamGames called for league: ${league}`);
+            //console.log(`DEBUG: loadRecordTeamGames called for league: ${league}`);
             const url = `/league/get_record_team_games?league=${league}`;
-            console.log(`DEBUG: Fetching from: ${url}`);
+            //console.log(`DEBUG: Fetching from: ${url}`);
             
             const response = await fetchWithDatabase(url);
-            console.log(`DEBUG: Response status: ${response.status}, ok: ${response.ok}`);
+            //console.log(`DEBUG: Response status: ${response.status}, ok: ${response.ok}`);
             
             if (!response.ok) {
                 console.error(`DEBUG: Response not ok: ${response.status} ${response.statusText}`);
@@ -258,7 +258,7 @@ class LeagueAggregationBlock extends BaseContentBlock {
             }
             
             const data = await response.json();
-            console.log(`DEBUG: Record team games data received:`, data);
+            //console.log(`DEBUG: Record team games data received:`, data);
             return data;
         } catch (error) {
             console.error('DEBUG: Error in loadRecordTeamGames:', error);

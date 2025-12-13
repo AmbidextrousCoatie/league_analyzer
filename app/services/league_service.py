@@ -3505,14 +3505,14 @@ class LeagueService:
                         field='avg_score', 
                         width='80px', 
                         align='center',
-                        tooltip=f'{i18n_service.get_text("average")} {i18n_service.get_text("score")} vs. all opponents'
+                        tooltip=f'{i18n_service.get_text("average")} {i18n_service.get_text("score")} vs. {i18n_service.get_text("all_opponents")}'
                     ),
                     Column(
                         title=i18n_service.get_text("points"), 
                         field='avg_points', 
                         width='80px', 
                         align='center',
-                        tooltip=f'{i18n_service.get_text("average")} {i18n_service.get_text("points")} vs. all opponents'
+                        tooltip=f'{i18n_service.get_text("average")} {i18n_service.get_text("points")} vs. {i18n_service.get_text("all_opponents")}'
                     )
                 ],
                 header_style={"fontWeight": "bold"}

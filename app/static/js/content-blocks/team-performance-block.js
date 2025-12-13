@@ -3,6 +3,8 @@ class TeamPerformanceBlock {
         this.containerId = 'team-performance';
         this.chartContainerId = 'team-performance-chart';
         this.container = document.getElementById(this.containerId);
+        this.currentFilter = 'both'; // 'points', 'score', 'both'
+        this.columnMetadata = null; // Store column info for filtering
     }
 
     shouldRender(state) {
@@ -195,6 +197,9 @@ class TeamPerformanceBlock {
                 }
             }
 
+            // Store column metadata for filtering
+            this.storeColumnMetadata(tableData);
+
             // Pass directly to createTableTabulator (like timetable)
             if (typeof createTableTabulator === 'function') {
                 createTableTabulator('team-performance-table', tableData, {
@@ -203,6 +208,12 @@ class TeamPerformanceBlock {
                     disableTeamColorUpdate: true // We handle player colors manually
                 });
             }
+
+            // Apply current filter after table is created
+            setTimeout(() => {
+                console.log('Applying default filter:', this.currentFilter, 'Column metadata:', this.columnMetadata);
+                this.applyFilter(this.currentFilter);
+            }, 200);
         } catch (error) {
             console.error('Error loading performance table:', error);
         }
@@ -406,6 +417,154 @@ class TeamPerformanceBlock {
                 //maxCircleSize: 80
             }
         );
+    }
+
+    storeColumnMetadata(tableData) {
+        // Extract all column fields and categorize them
+        this.columnMetadata = {
+            allFields: [],
+            pointsFields: [],
+            scoreFields: [],
+            otherFields: []
+        };
+
+        if (!tableData.columns) {
+            return;
+        }
+
+        // Flatten column structure to get all fields
+        const flattenColumns = (columns) => {
+            const fields = [];
+            columns.forEach((group) => {
+                if (group.columns && Array.isArray(group.columns)) {
+                    group.columns.forEach((col) => {
+                        if (col.field) {
+                            fields.push(col.field);
+                        }
+                    });
+                }
+            });
+            return fields;
+        };
+
+        const allFields = flattenColumns(tableData.columns);
+        this.columnMetadata.allFields = allFields;
+
+        // Categorize fields: points vs score
+        allFields.forEach((field) => {
+            const fieldLower = field.toLowerCase();
+            // Check for points first (to catch avg_points, etc.)
+            if (fieldLower.includes('points')) {
+                this.columnMetadata.pointsFields.push(field);
+            } else if (fieldLower.includes('score') || fieldLower.startsWith('week_')) {
+                // Score fields: anything with "score" or week columns (week_1, week_2, etc.)
+                this.columnMetadata.scoreFields.push(field);
+            } else {
+                // Other fields (player_name, player_initials, totals, etc.) - always show
+                this.columnMetadata.otherFields.push(field);
+            }
+        });
+    }
+
+    attachFilterListeners() {
+        // Use event delegation on document to catch events from dynamically created buttons
+        // Remove any existing listener first to avoid duplicates
+        if (this._filterListener) {
+            document.removeEventListener('change', this._filterListener);
+        }
+        
+        this._filterListener = (event) => {
+            if (event.target.name === 'performanceFilter') {
+                this.currentFilter = event.target.value;
+                console.log('Filter changed to:', this.currentFilter);
+                this.applyFilter(this.currentFilter);
+            }
+        };
+        
+        document.addEventListener('change', this._filterListener);
+        
+        // Wait for DOM to be ready, then verify buttons exist and set default
+        setTimeout(() => {
+            const defaultButton = document.getElementById('performanceFilterBoth');
+            const pointsButton = document.getElementById('performanceFilterPoints');
+            const scoreButton = document.getElementById('performanceFilterScore');
+            
+            console.log('🔍 Filter buttons check:', {
+                both: !!defaultButton,
+                points: !!pointsButton,
+                score: !!scoreButton,
+                container: this.container ? this.container.id : 'null'
+            });
+            
+            if (!defaultButton || !pointsButton || !scoreButton) {
+                console.warn('⚠️ Filter buttons not found in DOM!');
+                return;
+            }
+            
+            // Set default checked state
+            defaultButton.checked = true;
+            this.currentFilter = 'both';
+            
+            // Ensure visual state is correct
+            const labels = document.querySelectorAll('label[for^="performanceFilter"]');
+            labels.forEach(label => {
+                const inputId = label.getAttribute('for');
+                const input = document.getElementById(inputId);
+                if (input && input.checked) {
+                    label.classList.add('active');
+                } else {
+                    label.classList.remove('active');
+                }
+            });
+            
+            console.log('✅ Filter buttons initialized, default filter:', this.currentFilter);
+        }, 100);
+    }
+
+    applyFilter(filterType) {
+        const tableInstance = window['team-performance-tableInstance'];
+        if (!tableInstance || !this.columnMetadata) {
+            return;
+        }
+
+        const { pointsFields, scoreFields, otherFields } = this.columnMetadata;
+
+        // Determine which fields to show
+        let fieldsToShow = [];
+        let fieldsToHide = [];
+
+        if (filterType === 'points') {
+            fieldsToShow = [...pointsFields, ...otherFields];
+            fieldsToHide = scoreFields;
+        } else if (filterType === 'score') {
+            fieldsToShow = [...scoreFields, ...otherFields];
+            fieldsToHide = pointsFields;
+        } else {
+            // 'both' - show all
+            fieldsToShow = [...pointsFields, ...scoreFields, ...otherFields];
+            fieldsToHide = [];
+        }
+
+        // Apply show/hide to columns
+        try {
+            // Get all columns from Tabulator
+            const allColumns = tableInstance.getColumns();
+            
+            allColumns.forEach((column) => {
+                const field = column.getField();
+                if (!field) {
+                    return; // Skip group headers
+                }
+
+                if (fieldsToHide.includes(field)) {
+                    column.hide();
+                } else if (fieldsToShow.includes(field)) {
+                    column.show();
+                }
+            });
+        } catch (error) {
+            console.error('Error applying filter:', error);
+        }
     }
 
     renderError(message) {

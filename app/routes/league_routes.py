@@ -535,8 +535,8 @@ def get_translations():
                 key: i18n_service.get_text(key) 
                 for key in [
                     # Common table headers
-                    "points", "score", "average", "position", "team", "name", "week", "total",
-                    "ranking", "opponent", "round", "pins", "avg", "games", "high_game",
+                    "points", "points_long", "score", "both", "average", "position", "team", "name", "week", "total",
+                    "ranking", "opponent", "all_opponents", "round", "pins", "avg", "games", "high_game",
                     "location", "status", "date", "player", "season", "league",
                     
                     # Table titles and descriptions

@@ -81,12 +81,27 @@ function renderTeamVsTeamComparison(data, options) {
     const title = data.title || getText('team_vs_team_comparison_matrix', 'Team vs Team Comparison Matrix');
     const description = data.description || getText('ui.team_vs_team.description', 'Matrix showing team performance against each opponent');
 
+    // Translation labels for filter buttons
+    const pointsLabel = getText('points_long', 'Points');
+    const scoreLabel = getText('score', 'Score');
+    const bothLabel = getText('both', 'Both');
+
     // Create the team vs team comparison card
     container.innerHTML = `
         <div class="card">
-            <div class="card-header">
-                <${headerLevel}>${title}</${headerLevel}>
-                ${description ? `<p class="mb-0 text-muted small">${description}</p>` : ''}
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <div>
+                    <${headerLevel}>${title}</${headerLevel}>
+                    ${description ? `<p class="mb-0 text-muted small">${description}</p>` : ''}
+                </div>
+                <div class="btn-group" role="group" aria-label="Data filter">
+                    <input type="radio" class="btn-check" name="teamComparisonFilter" id="${tableId}FilterPoints" value="points" checked>
+                    <label class="btn btn-outline-primary btn-sm" for="${tableId}FilterPoints">${pointsLabel}</label>
+                    <input type="radio" class="btn-check" name="teamComparisonFilter" id="${tableId}FilterScore" value="score">
+                    <label class="btn btn-outline-primary btn-sm" for="${tableId}FilterScore">${scoreLabel}</label>
+                    <input type="radio" class="btn-check" name="teamComparisonFilter" id="${tableId}FilterBoth" value="both">
+                    <label class="btn btn-outline-primary btn-sm" for="${tableId}FilterBoth">${bothLabel}</label>
+                </div>
             </div>
             <div class="card-body">
                 <div id="${tableId}"></div>
@@ -127,6 +142,9 @@ function renderTeamVsTeamComparison(data, options) {
         </div>
     `;
 
+    // Store column metadata for filtering
+    const columnMetadata = extractColumnMetadata(data);
+    
     // Create table using Tabulator
     if (typeof createTableTabulator === 'function') {
         const tableOptions = {
@@ -141,6 +159,12 @@ function renderTeamVsTeamComparison(data, options) {
         }
         
         createTableTabulator(tableId, data, tableOptions);
+        
+        // Attach filter listeners and apply default filter after table is created
+        setTimeout(() => {
+            attachTeamComparisonFilterListeners(tableId, columnMetadata);
+            applyTeamComparisonFilter(tableId, 'points', columnMetadata);
+        }, 200);
     } else if (typeof createTableBootstrap3 === 'function') {
         // Fallback to Bootstrap
         createTableBootstrap3(tableId, data, {
@@ -150,6 +174,132 @@ function renderTeamVsTeamComparison(data, options) {
         });
     } else {
         console.error('Table creation function not available');
+    }
+}
+
+/**
+ * Extract column metadata for filtering
+ */
+function extractColumnMetadata(data) {
+    const metadata = {
+        allFields: [],
+        pointsFields: [],
+        scoreFields: [],
+        otherFields: []
+    };
+
+    if (!data.columns) {
+        return metadata;
+    }
+
+    // Flatten column structure to get all fields
+    const flattenColumns = (columns) => {
+        const fields = [];
+        columns.forEach((group) => {
+            if (group.columns && Array.isArray(group.columns)) {
+                group.columns.forEach((col) => {
+                    if (col.field) {
+                        fields.push(col.field);
+                    }
+                });
+            }
+        });
+        return fields;
+    };
+
+    const allFields = flattenColumns(data.columns);
+    metadata.allFields = allFields;
+
+    // Categorize fields: points vs score
+    allFields.forEach((field) => {
+        const fieldLower = field.toLowerCase();
+        // Check for points first (to catch avg_points, etc.)
+        if (fieldLower.includes('points')) {
+            metadata.pointsFields.push(field);
+        } else if (fieldLower.includes('score')) {
+            // Score fields: anything with "score"
+            metadata.scoreFields.push(field);
+        } else {
+            // Other fields (team name, position, etc.) - always show
+            metadata.otherFields.push(field);
+        }
+    });
+
+    return metadata;
+}
+
+/**
+ * Attach event listeners for filter buttons
+ */
+function attachTeamComparisonFilterListeners(tableId, columnMetadata) {
+    // Use event delegation on document to catch events from dynamically created buttons
+    const filterName = 'teamComparisonFilter';
+    
+    const filterListener = (event) => {
+        if (event.target.name === filterName && event.target.id.startsWith(tableId + 'Filter')) {
+            const filterType = event.target.value;
+            console.log(`Team comparison filter changed to: ${filterType} for table ${tableId}`);
+            applyTeamComparisonFilter(tableId, filterType, columnMetadata);
+        }
+    };
+    
+    document.addEventListener('change', filterListener);
+    
+    // Set default checked state visually
+    setTimeout(() => {
+        const defaultButton = document.getElementById(`${tableId}FilterPoints`);
+        if (defaultButton) {
+            defaultButton.checked = true;
+        }
+    }, 100);
+}
+
+/**
+ * Apply filter to team comparison table
+ */
+function applyTeamComparisonFilter(tableId, filterType, columnMetadata) {
+    const tableInstance = window[tableId + 'Instance'];
+    if (!tableInstance || !columnMetadata) {
+        return;
+    }
+
+    const { pointsFields, scoreFields, otherFields } = columnMetadata;
+
+    // Determine which fields to show
+    let fieldsToShow = [];
+    let fieldsToHide = [];
+
+    if (filterType === 'points') {
+        fieldsToShow = [...pointsFields, ...otherFields];
+        fieldsToHide = scoreFields;
+    } else if (filterType === 'score') {
+        fieldsToShow = [...scoreFields, ...otherFields];
+        fieldsToHide = pointsFields;
+    } else {
+        // 'both' - show all
+        fieldsToShow = [...pointsFields, ...scoreFields, ...otherFields];
+        fieldsToHide = [];
+    }
+
+    // Apply show/hide to columns
+    try {
+        // Get all columns from Tabulator
+        const allColumns = tableInstance.getColumns();
+        
+        allColumns.forEach((column) => {
+            const field = column.getField();
+            if (!field) {
+                return; // Skip group headers
+            }
+
+            if (fieldsToHide.includes(field)) {
+                column.hide();
+            } else if (fieldsToShow.includes(field)) {
+                column.show();
+            }
+        });
+    } catch (error) {
+        console.error('Error applying team comparison filter:', error);
     }
 }
 
