@@ -1,6 +1,7 @@
 from typing import List, Dict, Any, Optional, Union
 import datetime
 import pandas as pd
+  
 
 from data_access.adapters.data_adapter_factory import DataAdapterFactory, DataAdapterSelector
 from data_access.models.league_models import LeagueQuery, TeamSeasonPerformance, LeagueStandings, TeamWeeklyPerformance
@@ -20,6 +21,22 @@ from app.utils.league_utils import (
     apply_heat_map_to_columns
 )
 # from data_access.series_data import calculate_series_data, get_player_series_data, get_team_series_data
+
+class ColumnWidths:
+    """Class to store column widths for the league service"""
+    player = "120px"
+    team = "120px"
+    points = "70px"
+    pins = "70px"
+    average = "70px"
+    season = "90px"
+    league = "90px"
+    games = "70px"  
+    position = "60px"
+    week = "80px"
+    date = "120px"
+    misc = "80px"
+    location = "120px"
 
 
 class LeagueService:
@@ -136,20 +153,20 @@ class LeagueService:
                     frozen="left",
                     style={"backgroundColor": get_theme_color("background")},
                     columns=[
-                        Column(title=i18n_service.get_text("position"), field="team_position", width="60px", align="center", tooltip=i18n_service.get_text("position"), decimal_places=0),
-                        Column(title=i18n_service.get_text("team"), field="team_name", width="200px", align="left"),
-                        Column(title=i18n_service.get_text("pins"), field="team_pins", width="80px", align="center", decimal_places=0),
-                        Column(title=i18n_service.get_text("points"), field="team_points", width="80px", align="center", decimal_places=0)
+                        Column(title=i18n_service.get_text("position"), field="team_position", width=ColumnWidths.position, align="center", tooltip=i18n_service.get_text("position"), decimal_places=0),
+                        Column(title=i18n_service.get_text("team"), field="team_name", width=ColumnWidths.team, align="left"),
+                        Column(title=i18n_service.get_text("pins"), field="team_pins", width=ColumnWidths.pins, align="center", decimal_places=0),
+                        Column(title=i18n_service.get_text("points"), field="team_points", width=ColumnWidths.points, align="center", decimal_places=0)
                     ]
                 ),
                 ColumnGroup(
                     title=i18n_service.get_text("opponent"),
                     style={"backgroundColor": get_theme_color("surface_light")},
                     columns=[
-                        Column(title=i18n_service.get_text("points"), field="opponent_points", width="80px", align="center", decimal_places=0),
-                        Column(title=i18n_service.get_text("pins"), field="opponent_pins", width="80px", align="center", decimal_places=0),
-                        Column(title=i18n_service.get_text("position"), field="opponent_position", width="60px", align="center", tooltip=i18n_service.get_text("position"), decimal_places=0),
-                        Column(title=i18n_service.get_text("opponent"), field="opponent_name", width="200px", align="left")
+                        Column(title=i18n_service.get_text("points"), field="opponent_points", width=ColumnWidths.points, align="center", decimal_places=0),
+                        Column(title=i18n_service.get_text("pins"), field="opponent_pins", width=ColumnWidths.pins, align="center", decimal_places=0),
+                        Column(title=i18n_service.get_text("position"), field="opponent_position", width=ColumnWidths.position, align="center", tooltip=i18n_service.get_text("position"), decimal_places=0),
+                        Column(title=i18n_service.get_text("opponent"), field="opponent_name", width=ColumnWidths.team, align="left")
                     ]
                 )
             ]
@@ -365,18 +382,18 @@ class LeagueService:
                     frozen="left",
                     style={"backgroundColor": get_theme_color("background")},
                     columns=[
-                        Column(title=i18n_service.get_text("player"), field="player_name", width="200px", align="left"),
-                        Column(title=i18n_service.get_text("pins"), field="player_pins", width="80px", align="center", decimal_places=0),
-                        Column(title=i18n_service.get_text("points"), field="points", width="80px", align="center", decimal_places=0)
+                        Column(title=i18n_service.get_text("player"), field="player_name", width=ColumnWidths.player, align="left"),
+                        Column(title=i18n_service.get_text("pins"), field="player_pins", width=ColumnWidths.pins, align="center", decimal_places=0),
+                        Column(title=i18n_service.get_text("points"), field="points", width=ColumnWidths.points, align="center", decimal_places=0)
                     ]
                 ),
                 ColumnGroup(
                     title=opponent_name,  # Opposing team name
                     style={"backgroundColor": get_theme_color("surface_light")},
                     columns=[
-                        Column(title=i18n_service.get_text("points"), field="opponent_points", width="80px", align="center", decimal_places=0),
-                        Column(title=i18n_service.get_text("pins"), field="opponent_pins", width="80px", align="center", decimal_places=0),
-                        Column(title=i18n_service.get_text("player"), field="opponent_player_name", width="200px", align="left")
+                        Column(title=i18n_service.get_text("points"), field="opponent_points", width=ColumnWidths.points, align="center", decimal_places=0),
+                        Column(title=i18n_service.get_text("pins"), field="opponent_pins", width=ColumnWidths.pins, align="center", decimal_places=0),
+                        Column(title=i18n_service.get_text("player"), field="opponent_player_name", width=ColumnWidths.player, align="left")
                     ]
                 )
             ]
@@ -843,8 +860,8 @@ class LeagueService:
                     frozen="left",
                     style={"backgroundColor": get_theme_color("background")},
                     columns=[
-                        Column(title=i18n_service.get_text("position"), field="position", width="50px", align="center", decimal_places=0),
-                        Column(title=i18n_service.get_text("name"), field="name", width="200px", align="left")
+                        Column(title=i18n_service.get_text("position"), field="position", width=ColumnWidths.position, align="center", decimal_places=0),
+                        Column(title=i18n_service.get_text("name"), field="name", width=ColumnWidths.player, align="left")
                     ]
                 )
             ]
@@ -856,8 +873,8 @@ class LeagueService:
                     ColumnGroup(
                         title=opponent_name,
                         columns=[
-                            Column(title=i18n_service.get_text("pins"), field=f"game{game}_score", width="80px", align="center", decimal_places=0),
-                            Column(title=i18n_service.get_text("points"), field=f"game{game}_points", width="60px", align="center", decimal_places=0)
+                            Column(title=i18n_service.get_text("pins"), field=f"game{game}_score", width=ColumnWidths.pins, align="center", decimal_places=0),
+                            Column(title=i18n_service.get_text("points"), field=f"game{game}_points", width=ColumnWidths.points, align="center", decimal_places=0)
                         ]
                     )
                 )
@@ -869,9 +886,9 @@ class LeagueService:
                     style={"backgroundColor": get_theme_color("surface_alt")},
                     header_style={"fontWeight": "bold"},
                     columns=[
-                        Column(title=i18n_service.get_text("points"), field="total_points", width="80px", align="center", decimal_places=0),
-                        Column(title=i18n_service.get_text("score"), field="total_score", width="80px", align="center", decimal_places=0),
-                        Column(title=i18n_service.get_text("avg"), field="average", width="80px", align="center", decimal_places=1)
+                        Column(title=i18n_service.get_text("points"), field="total_points", width=ColumnWidths.points, align="center", decimal_places=0),
+                        Column(title=i18n_service.get_text("score"), field="total_score", width=ColumnWidths.pins, align="center", decimal_places=0),
+                        Column(title=i18n_service.get_text("avg"), field="average", width=ColumnWidths.average, align="center", decimal_places=1)
                     ]
                 )
             )
@@ -1537,37 +1554,25 @@ class LeagueService:
                             'avg': 0
                         }
             
-            # Sort teams based on context
-            if include_history:
-                # For history mode: sort by total accumulated points (descending), then by total accumulated score (descending)
-                sorted_teams = sorted(
-                    teams,
-                    key=lambda t: (
-                        team_data[t]['season_points'],
-                        team_data[t]['season_score']
-                    ),
-                    reverse=True
-                )
-            else:
-                # For single week: sort by points earned in the selected week (descending), then by score in the selected week (descending)
-                sorted_teams = sorted(
-                    teams,
-                    key=lambda t: (
-                        team_data[t]['weekly_data'].get(week, {}).get('points', 0),
-                        team_data[t]['weekly_data'].get(week, {}).get('score', 0)
-                    ),
-                    reverse=True
-                )
+            # Sort teams: first by season_points (descending), then by season_score (descending) as tiebreaker
+            # When points are equal, team with higher score (pins) should rank higher
+            sorted_teams = sorted(
+                teams,
+                key=lambda t: (
+                    float(team_data[t]['season_points'] or 0),
+                    float(team_data[t]['season_score'] or 0)
+                ),
+                reverse=True
+            )
             
             # Create column groups
             columns = [
                 ColumnGroup(
                     title=i18n_service.get_text("ranking"),
                     frozen="left",
-                    style={"backgroundColor": get_theme_color("background")},
                     columns=[
-                        Column(title="#", field="pos", width="50px", align="center", decimal_places=0),
-                        Column(title=i18n_service.get_text("team"), field="team", width="200px", align="left")
+                        Column(title="#", field="pos", width=ColumnWidths.position, align="center", decimal_places=0),
+                        Column(title=i18n_service.get_text("team"), field="team", width=ColumnWidths.team, align="left")
                     ]
                 )
             ]
@@ -1575,14 +1580,12 @@ class LeagueService:
             # Add totals column group first (after ranking) - matches data order
             columns.append(
                 ColumnGroup(
-                    title="Total",
-                    style={"backgroundColor": get_theme_color("surface_alt")},
-                    header_style={"fontWeight": "bold"},
+                    title=i18n_service.get_text("season"),
                     highlighted=True,  # Highlight the Total group
                     columns=[
-                        Column(title=i18n_service.get_text("points"), field="season_points", format="{:,}", width="75px", decimal_places=0),
-                        Column(title=i18n_service.get_text("pins"), field="season_score", format="{:,}", width="75px", decimal_places=0),
-                        Column(title=i18n_service.get_text("average"), field="season_avg", format="{:.1f}", width="75px", decimal_places=1)
+                        Column(title=i18n_service.get_text("points"), field="season_points", width=ColumnWidths.points, decimal_places=1, align="center"),
+                        Column(title=i18n_service.get_text("pins"), field="season_score", width=ColumnWidths.pins, decimal_places=0, align="center"),
+                        Column(title=i18n_service.get_text("average"), field="season_avg", width=ColumnWidths.average, decimal_places=1, align="center")
                     ]
                 )
             )
@@ -1593,9 +1596,9 @@ class LeagueService:
                     ColumnGroup(
                         title=f"{i18n_service.get_text('week')} {w}",
                         columns=[
-                            Column(title=i18n_service.get_text("points"), field=f"week{w}_points", format="{:.1f}", width="75px", decimal_places=1),
-                            Column(title=i18n_service.get_text("score"), field=f"week{w}_score", format="{:,}", width="75px", decimal_places=0),
-                            Column(title=i18n_service.get_text("average"), field=f"week{w}_avg", format="{:.1f}", width="75px", decimal_places=1)
+                            Column(title=i18n_service.get_text("points"), field=f"week{w}_points", width=ColumnWidths.points, decimal_places=1),
+                            Column(title=i18n_service.get_text("score"), field=f"week{w}_score", width=ColumnWidths.pins, decimal_places=0),
+                            Column(title=i18n_service.get_text("average"), field=f"week{w}_avg", width=ColumnWidths.average, decimal_places=1)
                         ]
                     )
                 )
@@ -1645,7 +1648,7 @@ class LeagueService:
                     "striped": True,
                     "hover": True,
                     "responsive": True,
-                    "compact": True,
+                    "compact": False,
                     "stripedColGroups": True
                 }
             )
@@ -1843,8 +1846,8 @@ class LeagueService:
                     title=i18n_service.get_text("match_info"),
                     style={"backgroundColor": get_theme_color("background")},
                     columns=[
-                        Column(title=i18n_service.get_text("round"), field="round_number", width="60px", align="center", decimal_places=0),
-                        Column(title=i18n_service.get_text("opponent"), field="opponent_name", width="120px", align="left"),
+                        Column(title=i18n_service.get_text("round"), field="round_number", width=ColumnWidths.games, align="center", decimal_places=0),
+                        Column(title=i18n_service.get_text("opponent"), field="opponent_name", width=ColumnWidths.team, align="left"),
                     ]
                 )
             ]
@@ -1854,9 +1857,9 @@ class LeagueService:
                 return ColumnGroup(
                     title=player,
                         columns=[
-                        Column(title=i18n_service.get_text("position"), field=f"{prefix}{player}_pos", width="50px", align="center", decimal_places=0),
-                        Column(title=i18n_service.get_text("score"), field=f"{prefix}{player}_score", width="80px", align="center", decimal_places=0),
-                        Column(title=i18n_service.get_text("points"), field=f"{prefix}{player}_points", width="60px", align="center", decimal_places=0),
+                        Column(title=i18n_service.get_text("position"), field=f"{prefix}{player}_pos", width=ColumnWidths.position, align="center", decimal_places=0),
+                        Column(title=i18n_service.get_text("score"), field=f"{prefix}{player}_score", width=ColumnWidths.pins, align="center", decimal_places=0),
+                        Column(title=i18n_service.get_text("points"), field=f"{prefix}{player}_points", width=ColumnWidths.points, align="center", decimal_places=0),
                     ]
                 )
 
@@ -1874,8 +1877,8 @@ class LeagueService:
                     style={"backgroundColor": get_theme_color("surface_alt")},
                     header_style={"fontWeight": "bold"},
                     columns=[
-                        Column(title=i18n_service.get_text("score"), field="team_score", width="80px", align="center", decimal_places=0),
-                        Column(title=i18n_service.get_text("points"), field="team_points", width="80px", align="center", decimal_places=0)
+                        Column(title=i18n_service.get_text("score"), field="team_score", width=ColumnWidths.pins, align="center", decimal_places=0),
+                        Column(title=i18n_service.get_text("points"), field="team_points", width=ColumnWidths.points, align="center", decimal_places=0)
                     ]
                 )
             )
@@ -2081,8 +2084,8 @@ class LeagueService:
             ColumnGroup(
                 title=i18n_service.get_text("match"),
                 columns=[
-                    Column(title=i18n_service.get_text("opponent"), field="opponent", width="120px", align="left", sortable=False),
-                    Column(title=i18n_service.get_text("total_points"), field="team_total_points", width="100px", align="center", sortable=False,
+                    Column(title=i18n_service.get_text("opponent"), field="opponent", width=ColumnWidths.player, align="left", sortable=False),
+                    Column(title=i18n_service.get_text("total_points"), field="team_total_points", width=ColumnWidths.points, align="center", sortable=False,
                            style={"fontWeight": "bold"}, decimal_places=0),
                 ]
                 #style={"borderRight": "2px solid #264653"}  # Vertical bar after Opponents group (same color as other borders)
@@ -2090,8 +2093,8 @@ class LeagueService:
             ColumnGroup(
                 title=team,
                 columns=[
-                    Column(title=i18n_service.get_text("pins"), field="team_score", width="80px", align="center", sortable=False, decimal_places=0),
-                    Column(title=i18n_service.get_text("points"), field="team_points", width="80px", align="center", sortable=False, decimal_places=0),
+                    Column(title=i18n_service.get_text("pins"), field="team_score", width=ColumnWidths.pins, align="center", sortable=False, decimal_places=0),
+                    Column(title=i18n_service.get_text("points"), field="team_points", width=ColumnWidths.points, align="center", sortable=False, decimal_places=0),
                       # Make Total Points column bold
                 ]
             )
@@ -2102,9 +2105,9 @@ class LeagueService:
                 ColumnGroup(
                     title=player_name,
                     columns=[
-                        Column(title=i18n_service.get_text("pins"), field=f"{player_info['identifier']}_score", width="80px", align="center", sortable=False, decimal_places=0),
-                        Column(title=i18n_service.get_text("points"), field=f"{player_info['identifier']}_points", width="50px", align="center", sortable=False, decimal_places=0),
-                        Column(title=i18n_service.get_text("position"), field=f"{player_info['identifier']}_pos", width="50px", align="center", sortable=False, decimal_places=0),
+                        Column(title=i18n_service.get_text("pins"), field=f"{player_info['identifier']}_score", width=ColumnWidths.pins, align="center", sortable=False, decimal_places=0),
+                        Column(title=i18n_service.get_text("points"), field=f"{player_info['identifier']}_points", width=ColumnWidths.points, align="center", sortable=False, decimal_places=0),
+                        Column(title=i18n_service.get_text("position"), field=f"{player_info['identifier']}_pos", width=ColumnWidths.position, align="center", sortable=False, decimal_places=0),
                         
                     ]
                 )
@@ -2327,10 +2330,10 @@ class LeagueService:
                 ColumnGroup(
                     title="",  # Empty title since it's shown in card header
                     columns=[
-                        Column(title=i18n_service.get_text("team"), field="team", width="180px", align="left"),
-                        Column(title=i18n_service.get_text("average"), field="average", width="90px", align="center", decimal_places=1),
-                        Column(title=i18n_service.get_text("season"), field="season", width="90px", align="center"),
-                        Column(title=i18n_service.get_text("league"), field="league", width="90px", align="left")
+                        Column(title=i18n_service.get_text("team"), field="team", width=ColumnWidths.team, align="left"),
+                        Column(title=i18n_service.get_text("average"), field="average", width=ColumnWidths.average, align="center", decimal_places=1),
+                        Column(title=i18n_service.get_text("season"), field="season", width=ColumnWidths.season, align="center"),
+                        Column(title=i18n_service.get_text("league"), field="league", width=ColumnWidths.league, align="left")
                     ]
                 )
             ]
@@ -2413,10 +2416,10 @@ class LeagueService:
             
             # Create table structure - can pass bare Columns directly, no need for ColumnGroup wrapper
             columns = [
-                Column(title=i18n_service.get_text("week"), field="week", width="100px", align="center", decimal_places=0),
-                Column(title=i18n_service.get_text("date"), field="date", width="120px", align="center"),
-                Column(title=i18n_service.get_text("location"), field="location", width="200px", align="left"),
-                Column(title=i18n_service.get_text("status"), field="status", width="150px", align="center")
+                Column(title=i18n_service.get_text("week"), field="week", width=ColumnWidths.week, align="center", decimal_places=0),
+                Column(title=i18n_service.get_text("date"), field="date", width=ColumnWidths.date, align="center"),
+                Column(title=i18n_service.get_text("location"), field="location", width=ColumnWidths.player, align="left"),
+                Column(title=i18n_service.get_text("status"), field="status", width=ColumnWidths.misc, align="center")
             ]
             
             return TableData(
@@ -2533,12 +2536,12 @@ class LeagueService:
             
             # Create table structure
             columns = [
-                Column(title=i18n_service.get_text("player"), field="player", width="180px", align="left"),
-                Column(title=i18n_service.get_text("team"), field="team", width="130px", align="left"),
-                Column(title=i18n_service.get_text("games"), field="games", width="70px", align="center", decimal_places=0),
-                Column(title=i18n_service.get_text("total_points"), field="total_points", width="100px", align="center", decimal_places=0),
-                Column(title=i18n_service.get_text("average"), field="average", width="90px", align="center", decimal_places=1),
-                Column(title=i18n_service.get_text("high_game"), field="high_game", width="90px", align="center", decimal_places=0)
+                Column(title=i18n_service.get_text("player"), field="player", width=ColumnWidths.player, align="left"),
+                Column(title=i18n_service.get_text("team"), field="team", width=ColumnWidths.team, align="left"),
+                Column(title=i18n_service.get_text("games"), field="games", width=ColumnWidths.misc, align="center", decimal_places=0),
+                Column(title=i18n_service.get_text("total_points"), field="total_points", width=ColumnWidths.points, align="center", decimal_places=0),
+                Column(title=i18n_service.get_text("average"), field="average", width=ColumnWidths.average, align="center", decimal_places=1),
+                Column(title=i18n_service.get_text("high_game"), field="high_game", width=ColumnWidths.pins, align="center", decimal_places=0)
             ]
                 
             
@@ -2625,11 +2628,11 @@ class LeagueService:
                 ColumnGroup(
                     title="",  # Empty title since it's shown in card header
                     columns=[
-                        Column(title=i18n_service.get_text("player"), field="player", width="180px", align="left"),
-                        Column(title=i18n_service.get_text("average"), field="average", width="90px", align="center", decimal_places=1),
-                        Column(title=i18n_service.get_text("season"), field="season", width="90px", align="center"),
-                        Column(title=i18n_service.get_text("league"), field="league", width="90px", align="left"),
-                        Column(title=i18n_service.get_text("team"), field="team", width="180px", align="left")                        
+                        Column(title=i18n_service.get_text("player"), field="player", width=ColumnWidths.player, align="left"),
+                        Column(title=i18n_service.get_text("average"), field="average", width=ColumnWidths.average, align="center", decimal_places=1),
+                        Column(title=i18n_service.get_text("season"), field="season", width=ColumnWidths.season, align="center"),
+                        Column(title=i18n_service.get_text("league"), field="league", width=ColumnWidths.league, align="left"),
+                        Column(title=i18n_service.get_text("team"), field="team", width=ColumnWidths.team, align="left")                        
                     ]
                 )
             ]
@@ -2694,12 +2697,12 @@ class LeagueService:
                 ColumnGroup(
                     title="",  # Empty title since it's shown in card header
                     columns=[
-                        Column(title=i18n_service.get_text("player"), field="player", width="180px", align="left"),
-                        Column(title=i18n_service.get_text("score"), field="score", width="90px", align="center", decimal_places=0),
-                        Column(title=i18n_service.get_text("season"), field="season", width="90px", align="center"),
-                        Column(title=i18n_service.get_text("league"), field="league", width="90px", align="left"),
-                        Column(title=i18n_service.get_text("team"), field="team", width="180px", align="left"),
-                        Column(title=i18n_service.get_text("week"), field="week", width="90px", align="center", decimal_places=0)
+                        Column(title=i18n_service.get_text("player"), field="player", width=ColumnWidths.player, align="left"),
+                        Column(title=i18n_service.get_text("score"), field="score", width=ColumnWidths.pins, align="center", decimal_places=0),
+                        Column(title=i18n_service.get_text("season"), field="season", width=ColumnWidths.season, align="center"),
+                        Column(title=i18n_service.get_text("league"), field="league", width=ColumnWidths.league, align="left"),
+                        Column(title=i18n_service.get_text("team"), field="team", width=ColumnWidths.team, align="left"),
+                        Column(title=i18n_service.get_text("week"), field="week", width=ColumnWidths.week, align="center", decimal_places=0)
                     ]
                 )
             ]
@@ -2758,11 +2761,11 @@ class LeagueService:
                 ColumnGroup(
                     title="",  # Empty title since it's shown in card header
                     columns=[
-                        Column(title=i18n_service.get_text("team"), field="team", width="180px", align="left"),
-                        Column(title=i18n_service.get_text("score"), field="score", width="90px", align="center", decimal_places=0),
-                        Column(title=i18n_service.get_text("season"), field="season", width="90px", align="center"),
-                        Column(title=i18n_service.get_text("league"), field="league", width="90px", align="left"),
-                        Column(title=i18n_service.get_text("week"), field="week", width="90px", align="center", decimal_places=0),
+                        Column(title=i18n_service.get_text("team"), field="team", width=ColumnWidths.team, align="left"), 
+                        Column(title=i18n_service.get_text("score"), field="score", width=ColumnWidths.pins, align="center", decimal_places=0),
+                        Column(title=i18n_service.get_text("season"), field="season", width=ColumnWidths.season, align="center"),
+                        Column(title=i18n_service.get_text("league"), field="league", width=ColumnWidths.league, align="left"),
+                        Column(title=i18n_service.get_text("week"), field="week", width=ColumnWidths.week, align="center", decimal_places=0),
                     ]
                         
                 )
@@ -3040,7 +3043,7 @@ class LeagueService:
                     title=i18n_service.get_text('player'),
                     columns=[
                         Column(title='', field='player_initials', width='50px', align='center'),
-                        Column(title=i18n_service.get_text('player'), field='player_name', width='180px', align="left")
+                        Column(title=i18n_service.get_text('player'), field='player_name', width='150px', align="left")
                     ]
                 )
             ]
@@ -3068,9 +3071,9 @@ class LeagueService:
             columns.append(ColumnGroup(
                 title=i18n_service.get_text('ui.win_percentage.totals'),
                 columns=[
-                    Column(title=i18n_service.get_text('ui.team_performance.total_score'), field='total_score', width='100px', align='center', decimal_places=0),
-                    Column(title=i18n_service.get_text('games'), field='total_games', width='80px', align='center', decimal_places=0),
-                    Column(title=i18n_service.get_text('ui.team_performance.avg_per_game'), field='avg_per_game', width='100px', align='center', decimal_places=1)
+                    Column(title=i18n_service.get_text('ui.team_performance.total_score'), field='total_score', width=ColumnWidths.pins, align='center', decimal_places=0),
+                    Column(title=i18n_service.get_text('games'), field='total_games', width=ColumnWidths.misc, align='center', decimal_places=0),
+                    Column(title=i18n_service.get_text('ui.team_performance.avg_per_game'), field='avg_per_game', width=ColumnWidths.average, align='center', decimal_places=1)
                 ]
             ))
             
@@ -3191,8 +3194,8 @@ class LeagueService:
                 ColumnGroup(
                     title=i18n_service.get_text('player'),
                     columns=[
-                        Column(title='', field='player_initials', width='50px', align='center'),
-                        Column(title=i18n_service.get_text('ui.win_percentage.player'), field='player_name', width='180px', align='left')
+                        Column(title='', field='player_initials', width=ColumnWidths.position, align='center'),
+                        Column(title=i18n_service.get_text('ui.win_percentage.player'), field='player_name', width=ColumnWidths.player, align='left')
                     ]
                 )
             ]
@@ -3204,7 +3207,7 @@ class LeagueService:
                     Column(
                         title=f"{idx + 1}",
                         field=f'week_{idx + 1}',
-                        width='80px',
+                        width=ColumnWidths.week,
                         align='center',
                         tooltip=f"{i18n_service.get_text('week')} {idx + 1}",
                         decimal_places=1  # Win percentages typically have 1 decimal place
@@ -3220,9 +3223,9 @@ class LeagueService:
             columns.append(ColumnGroup(
                 title=i18n_service.get_text('ui.win_percentage.totals'),
                 columns=[
-                    Column(title=i18n_service.get_text('ui.win_percentage.total_wins'), field='total_wins', width='100px', align='center', decimal_places=0),
-                    Column(title=i18n_service.get_text('ui.win_percentage.total_matches'), field='total_matches', width='100px', align='center', decimal_places=0),
-                    Column(title=i18n_service.get_text('ui.win_percentage.win_percentage'), field='win_percentage', width='80px', align='center', decimal_places=1)
+                    Column(title=i18n_service.get_text('ui.win_percentage.total_wins'), field='total_wins', width=ColumnWidths.games, align='center', decimal_places=0),
+                    Column(title=i18n_service.get_text('ui.win_percentage.total_matches'), field='total_matches', width=ColumnWidths.games, align='center', decimal_places=0),
+                    Column(title=i18n_service.get_text('ui.win_percentage.win_percentage'), field='win_percentage', width=ColumnWidths.average, align='center', decimal_places=1)
                 ]
             ))
             
@@ -3483,13 +3486,13 @@ class LeagueService:
                         Column(
                             title="#", 
                             field='pos', 
-                            width='50px', 
+                            width=ColumnWidths.position, 
                             align='center'
                         ),
                         Column(
                             title=f'{i18n_service.get_text("team")} ↓', 
                             field='team', 
-                            width='180px', 
+                            width=ColumnWidths.team, 
                             align='left'
                         )
                     ]
@@ -3503,14 +3506,14 @@ class LeagueService:
                     Column(
                         title=i18n_service.get_text("score"), 
                         field='avg_score', 
-                        width='80px', 
+                        width=ColumnWidths.pins, 
                         align='center',
                         tooltip=f'{i18n_service.get_text("average")} {i18n_service.get_text("score")} vs. {i18n_service.get_text("all_opponents")}'
                     ),
                     Column(
                         title=i18n_service.get_text("points"), 
                         field='avg_points', 
-                        width='80px', 
+                        width=ColumnWidths.points, 
                         align='center',
                         tooltip=f'{i18n_service.get_text("average")} {i18n_service.get_text("points")} vs. {i18n_service.get_text("all_opponents")}'
                     )
@@ -3526,14 +3529,14 @@ class LeagueService:
                         Column(
                             title=i18n_service.get_text("score"), 
                             field=f'{team}_score', 
-                            width='80px', 
+                            width=ColumnWidths.pins, 
                             align='center',
                             tooltip=f'{i18n_service.get_text("average")} {i18n_service.get_text("score")} vs. {team}'
                         ),
                         Column(
                             title=i18n_service.get_text("points"), 
                             field=f'{team}_points', 
-                            width='80px', 
+                            width=ColumnWidths.points, 
                             align='center',
                             tooltip=f'{i18n_service.get_text("average")} {i18n_service.get_text("points")} vs. {team}'
                         )
