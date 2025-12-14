@@ -662,27 +662,19 @@ function createTableTabulator(tableId, data, options = {}) {
                     columnDefinition.frozen = groupFrozenDirection;
                 }
 
-                // Column widths
-                let columnWidth = parseColumnWidth(column.width);
-                if (columnWidth === undefined) {
-                    if (groupIndex === 0) {
-                        columnWidth = 120;
-                    } else {
-                        columnWidth = 100;
-                    }
-                }
-
-                if (columnWidth !== undefined) {
-                    if (isCompactLayout) {
-                        columnDefinition.width = columnWidth;
-                        columnDefinition.minWidth = columnWidth;
-                        columnDefinition.widthGrow = 0;
-                    } else {
-                        columnDefinition.minWidth = columnWidth;
-                        columnDefinition.widthGrow = 1;
-                    }
-                } else if (isCompactLayout) {
+                // Column widths: simple approach based on compact flag
+                let columnWidth = parseColumnWidth(column.width) || 100;
+                
+                if (isCompactLayout) {
+                    // Compact mode: fit to content, don't grow beyond content needs
+                    columnDefinition.minWidth = columnWidth;
                     columnDefinition.widthGrow = 0;
+                } else {
+                    // Non-compact mode: expand columns proportionally based on widthGrow
+                    columnDefinition.minWidth = columnWidth;
+                    const isTextColumn = !isNumberColumn && !isStringNumber;
+                    const isTeamColumn = field && (field.includes('team') || field.includes('player') || field.includes('name'));
+                    columnDefinition.widthGrow = isTeamColumn ? 3 : (isTextColumn ? 2 : 1);
                 }
 
                 tabulatorColumns.push(columnDefinition);
@@ -872,39 +864,19 @@ function createTableTabulator(tableId, data, options = {}) {
                     cssClass: colCssClass || undefined
                 };
 
-                // Adjust column widths based on group
-                // First group (Rang/Position) should be wider, week/total groups should be compressed
-                let columnWidth = parseColumnWidth(column.width);
+                // Column widths: simple approach based on compact flag
+                let columnWidth = parseColumnWidth(column.width) || 100;
                 
-                if (columnWidth === undefined) {
-                    // Apply default widths based on group
-                    const groupTitle = (group.title || '').toLowerCase();
-                    const isWeekGroup = groupTitle.includes('week') || groupTitle.includes('woche');
-                    const isTotalGroup = groupTitle.includes('total') || groupTitle.includes('gesamt') || groupTitle.includes('summe');
-                    
-                    if (groupIndex === 0) {
-                        // First group (Rang) - make it wider
-                        columnWidth = 120;
-                    } else if (isWeekGroup || isTotalGroup) {
-                        // Week and Total groups - compress them
-                        columnWidth = 80;
-                    } else {
-                        // Default width for other groups
-                        columnWidth = 100;
-                    }
-                }
-
-                if (columnWidth !== undefined) {
-                    if (isCompactLayout) {
-                        columnDefinition.width = columnWidth;
-                        columnDefinition.minWidth = columnWidth;
-                        columnDefinition.widthGrow = 0;
-                    } else {
-                        columnDefinition.minWidth = columnWidth; // Set minimum width, allow expansion
-                        columnDefinition.widthGrow = 1; // Allow column to grow proportionally
-                    }
-                } else if (isCompactLayout) {
+                if (isCompactLayout) {
+                    // Compact mode: fit to content, don't grow beyond content needs
+                    columnDefinition.minWidth = columnWidth;
                     columnDefinition.widthGrow = 0;
+                } else {
+                    // Non-compact mode: expand columns proportionally based on widthGrow
+                    columnDefinition.minWidth = columnWidth;
+                    const isTextColumn = !isNumberColumn && !isStringNumber;
+                    const isTeamColumn = field && (field.includes('team') || field.includes('player') || field.includes('name'));
+                    columnDefinition.widthGrow = isTeamColumn ? 3 : (isTextColumn ? 2 : 1);
                 }
 
                 // Build CSS classes
@@ -1005,7 +977,7 @@ function createTableTabulator(tableId, data, options = {}) {
     const tabulatorOptions = {
         data: transformedData,
         columns: tabulatorColumns,
-        layout: isCompactLayout ? "fitData" : "fitColumns",
+        layout: isCompactLayout ? "fitData" : "fitColumns", // Compact: fit to content, Non-compact: fit to table width with widthGrow
         responsiveLayout: false,
         pagination: false,
         movableColumns: false,
