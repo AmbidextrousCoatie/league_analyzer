@@ -1,0 +1,538 @@
+<!-- Database Selector Component -->
+<div class="database-selector-container">
+    <div class="dropdown">
+        <button class="btn btn-primary dropdown-toggle" type="button" id="databaseSelectorDropdown" 
+                data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="bi bi-database-fill"></i> 
+            <span id="currentDatabaseText">Loading...</span>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="databaseSelectorDropdown">
+            <li><h6 class="dropdown-header">Select Data Source</h6></li>
+            <div id="databaseOptions">
+                <!-- Database options will be loaded here -->
+            </div>
+            <li><hr class="dropdown-divider"></li>
+            <li>
+                <a class="dropdown-item" href="#" id="refreshDatabaseBtn">
+                    <i class="bi bi-arrow-clockwise"></i> Refresh & Validate
+                </a>
+            </li>
+        </ul>
+    </div>
+</div>
+
+<style>
+.database-selector-container {
+    position: relative;
+}
+
+.database-selector-container .dropdown-menu {
+    min-width: 280px;
+    max-width: 350px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    border: 1px solid #dee2e6;
+}
+
+.database-selector-container .btn-primary {
+    background-color: var(--theme-primary, #0d6efd);
+    border-color: var(--theme-primary, #0d6efd);
+    color: white;
+    font-weight: 500;
+    padding: 8px 16px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+}
+
+.database-selector-container .btn-primary:hover {
+    background-color: var(--theme-secondary, #0b5ed7);
+    border-color: var(--theme-secondary, #0b5ed7);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+.database-selector-container .btn-primary:focus {
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+.database-option {
+    cursor: pointer;
+    padding: 12px 16px;
+    border-radius: 6px;
+    margin: 4px 8px;
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+}
+
+.database-option:hover {
+    background-color: var(--theme-background, #f8f9fa);
+    border-color: var(--theme-border-light, #dee2e6);
+    transform: translateX(2px);
+}
+
+.database-option.active {
+    background-color: #e3f2fd;
+    border-color: #2196f3;
+    font-weight: 500;
+    box-shadow: 0 2px 4px rgba(33, 150, 243, 0.1);
+}
+
+.database-option .database-name {
+    font-weight: 600;
+    color: #212529;
+    font-size: 0.95rem;
+}
+
+.database-option .database-description {
+    font-size: 0.85rem;
+    color: #6c757d;
+    margin-top: 4px;
+    line-height: 1.3;
+}
+
+.database-option .database-status {
+    font-size: 0.75rem;
+    padding: 3px 8px;
+    border-radius: 12px;
+    margin-left: 8px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.database-option .database-status.available {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.database-option .database-status.unavailable {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.database-option .database-status.default {
+    background-color: #cce5ff;
+    color: #004085;
+    border: 1px solid #b3d9ff;
+}
+
+.loading-spinner {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid #f3f3f3;
+    border-top: 2px solid #007bff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-right: 8px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Notification styling */
+.database-notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 9999;
+    min-width: 300px;
+    max-width: 400px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    border-radius: 8px;
+    border: none;
+}
+
+.database-notification.alert-success {
+    background-color: #d4edda;
+    border-left: 4px solid #28a745;
+}
+
+.database-notification.alert-danger {
+    background-color: #f8d7da;
+    border-left: 4px solid #dc3545;
+}
+
+.database-notification.alert-info {
+    background-color: #d1ecf1;
+    border-left: 4px solid #17a2b8;
+}
+</style>
+
+<script>
+class DatabaseSelector {
+    constructor() {
+        this.isLoading = false;
+        this.currentSource = null;
+        this.sourcesInfo = {};
+        this.init();
+    }
+
+    async init() {
+        await this.loadSourcesInfo();
+        this.setupEventListeners();
+        this.updateDisplay();
+    }
+
+    async loadSourcesInfo() {
+        try {
+            // Get current database from URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const currentDatabase = urlParams.get('database');
+            
+            // Build the URL with database parameter if present
+            let url = '/get-data-sources-info';
+            if (currentDatabase) {
+                url += `?database=${encodeURIComponent(currentDatabase)}`;
+            }
+            
+            const response = await fetch(url, {
+                headers: { 'Cache-Control': 'no-cache' }
+            });
+            const data = await response.json();
+            
+            console.log('Sources info response:', data);
+            
+            if (data.success) {
+                this.sourcesInfo = data.sources_info;
+                this.currentSource = data.current_source;
+                console.log('Loaded sources info:', this.sourcesInfo);
+                console.log('Current source:', this.currentSource);
+                this.renderOptions();
+            } else {
+                console.error('Failed to load sources info:', data.message);
+                this.showError('Failed to load database information');
+            }
+        } catch (error) {
+            console.error('Error loading sources info:', error);
+            this.showError('Network error loading database information');
+        }
+    }
+
+    renderOptions() {
+        const container = document.getElementById('databaseOptions');
+        if (!container) return;
+
+        if (!this.sourcesInfo || typeof this.sourcesInfo !== 'object') {
+            console.error('sourcesInfo is not available or invalid:', this.sourcesInfo);
+            container.innerHTML = '<li><div class="text-muted">Loading database options...</div></li>';
+            return;
+        }
+
+        const optionsHtml = Object.entries(this.sourcesInfo).map(([sourceId, info]) => {
+            const isActive = sourceId === this.currentSource;
+            const isDefault = info.is_default;
+            const statusClass = info.is_enabled ? 'available' : 'unavailable';
+            const statusText = info.is_enabled ? 'Available' : 'Unavailable';
+            
+            return `
+                <li>
+                    <div class="database-option ${isActive ? 'active' : ''}" 
+                         data-source="${sourceId}" 
+                         ${!info.is_enabled ? 'style="opacity: 0.5; cursor: not-allowed;"' : ''}>
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div class="flex-grow-1">
+                                <div class="database-name">${info.display_name}</div>
+                                <div class="database-description">${info.description}</div>
+                            </div>
+                            <span class="database-status ${statusClass}">
+                                ${isDefault ? 'Default' : statusText}
+                            </span>
+                        </div>
+                    </div>
+                </li>
+            `;
+        }).join('');
+
+        container.innerHTML = optionsHtml;
+    }
+
+    setupEventListeners() {
+        // Database option clicks
+        document.addEventListener('click', (e) => {
+            const option = e.target.closest('.database-option');
+            if (option && !option.style.opacity) {
+                const sourceId = option.dataset.source;
+                if (sourceId && sourceId !== this.currentSource) {
+                    this.switchDatabase(sourceId);
+                }
+            }
+        });
+
+        // Refresh button
+        const refreshBtn = document.getElementById('refreshDatabaseBtn');
+        if (refreshBtn) {
+            refreshBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.refreshDatabase();
+            });
+        }
+    }
+
+    async switchDatabase(sourceId) {
+        if (this.isLoading) {
+            console.log('Database switch already in progress');
+            return;
+        }
+
+        this.isLoading = true;
+        this.showLoadingState();
+
+        try {
+            console.log(`🔄 Switching database to: ${sourceId}`);
+            
+            // First, try to switch via AJAX to avoid page reload
+            const response = await fetch('/switch-database', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ database: sourceId })
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                console.log('✅ Database switched successfully via AJAX');
+                
+                // Update URL without page reload
+                const url = new URL(window.location);
+                url.searchParams.set('database', sourceId);
+                window.history.pushState({}, '', url.toString());
+                
+                // Update the display
+                this.currentSource = sourceId;
+                this.updateDisplay();
+                this.renderOptions();
+                
+                // Trigger a global event to notify other components
+                window.dispatchEvent(new CustomEvent('databaseChanged', { 
+                    detail: { database: sourceId } 
+                }));
+                
+                // Show success message
+                this.showSuccess(`Switched to ${this.sourcesInfo[sourceId]?.display_name || sourceId}`);
+                
+            } else {
+                console.warn('AJAX switch failed, falling back to page reload');
+                // Fallback to page reload if AJAX fails
+                const url = new URL(window.location);
+                url.searchParams.set('database', sourceId);
+                window.location.href = url.toString();
+            }
+            
+        } catch (error) {
+            console.error('Error switching database:', error);
+            console.log('Falling back to page reload method');
+            
+            // Fallback to page reload
+            const url = new URL(window.location);
+            url.searchParams.set('database', sourceId);
+            window.location.href = url.toString();
+        } finally {
+            this.isLoading = false;
+            this.hideLoadingState();
+        }
+    }
+
+    async refreshDynamicComponents() {
+        console.log('🔄 Refreshing dynamic components after database switch...');
+        
+        // Wait a moment for the server to fully process the database switch
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        // Trigger various component refresh methods
+        const refreshMethods = [
+            // League components
+            'updateSeasonButtons',
+            'updateLeagueButtons', 
+            'updateWeekButtons',
+            'updateTeamButtons',
+            'updateTableLeagueHistory',
+            'updateTableLeagueWeek',
+            'updateTableTeamDetails',
+            'updateChartsLeague',
+            
+            // Team components
+            'updateTeamSelect',
+            'updateSeasonButtons',
+            'updateWeeksData',
+            'updateTeamHistory',
+            'updateLeagueComparison',
+            'updateClutchAnalysis',
+            'updateConsistencyMetrics',
+            'updateSpecialMatches',
+            
+            // Player components
+            'loadPlayerStats',
+            'displayLifetimeStats',
+            'displaySeasonStats',
+            'updateTrendChart',
+            
+            // General refresh methods
+            'refreshCurrentData',
+            'handleDataSourceChange',
+            'updateContent',
+            'renderContent'
+        ];
+
+        // Try to call available refresh methods
+        for (const methodName of refreshMethods) {
+            try {
+                if (typeof window[methodName] === 'function') {
+                    console.log(`Calling ${methodName}...`);
+                    await window[methodName]();
+                }
+            } catch (error) {
+                console.warn(`Error calling ${methodName}:`, error);
+            }
+        }
+
+        // Trigger specific events for different page types
+        const currentPath = window.location.pathname;
+        
+        if (currentPath.includes('/league/')) {
+            this.triggerLeaguePageRefresh();
+        } else if (currentPath.includes('/team/')) {
+            this.triggerTeamPageRefresh();
+        } else if (currentPath.includes('/player/')) {
+            this.triggerPlayerPageRefresh();
+        }
+
+        // Force a page refresh if no dynamic methods are available
+        setTimeout(() => {
+            if (!this.hasActiveComponents()) {
+                console.log('No active components detected, refreshing page...');
+                window.location.reload();
+            }
+        }, 2000);
+    }
+
+    triggerLeaguePageRefresh() {
+        console.log('🔄 Triggering league page refresh...');
+        
+        // Trigger filter updates
+        const seasonInput = document.querySelector('input[name="season"]:checked');
+        const leagueInput = document.querySelector('input[name="league"]:checked');
+        const weekInput = document.querySelector('input[name="week"]:checked');
+        const teamInput = document.querySelector('input[name="team"]:checked');
+        
+        if (seasonInput) {
+            seasonInput.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+        if (leagueInput) {
+            leagueInput.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+        if (weekInput) {
+            weekInput.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+        if (teamInput) {
+            teamInput.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+    }
+
+    triggerTeamPageRefresh() {
+        console.log('🔄 Triggering team page refresh...');
+        
+        const teamSelect = document.getElementById('teamSelect');
+        if (teamSelect && teamSelect.value) {
+            teamSelect.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+    }
+
+    triggerPlayerPageRefresh() {
+        console.log('🔄 Triggering player page refresh...');
+        
+        const playerInput = document.getElementById('playerInput');
+        if (playerInput && playerInput.value) {
+            playerInput.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+    }
+
+    hasActiveComponents() {
+        // Check if there are any active content blocks or components
+        const contentBlocks = document.querySelectorAll('[id*="content"], [id*="table"], [id*="chart"]');
+        return contentBlocks.length > 0;
+    }
+
+    async refreshDatabase() {
+        if (this.isLoading) return;
+
+        this.isLoading = true;
+        const refreshBtn = document.getElementById('refreshDatabaseBtn');
+        const originalText = refreshBtn.innerHTML;
+        refreshBtn.innerHTML = '<span class="loading-spinner"></span> Refreshing...';
+        refreshBtn.disabled = true;
+
+        try {
+            await this.loadSourcesInfo();
+            this.updateDisplay();
+            this.showSuccess('Database information refreshed');
+        } catch (error) {
+            console.error('Error refreshing database:', error);
+            this.showError('Failed to refresh database information');
+        } finally {
+            this.isLoading = false;
+            refreshBtn.innerHTML = originalText;
+            refreshBtn.disabled = false;
+        }
+    }
+
+    updateDisplay() {
+        const textElement = document.getElementById('currentDatabaseText');
+        if (textElement && this.currentSource && this.sourcesInfo) {
+            const info = this.sourcesInfo[this.currentSource];
+            textElement.textContent = info ? info.display_name : 'Unknown';
+        } else if (textElement) {
+            textElement.textContent = 'Loading...';
+        }
+    }
+
+    showLoadingState() {
+        const textElement = document.getElementById('currentDatabaseText');
+        if (textElement) {
+            textElement.innerHTML = '<span class="loading-spinner"></span> Switching...';
+        }
+    }
+
+    hideLoadingState() {
+        this.updateDisplay();
+    }
+
+    showSuccess(message) {
+        this.showNotification(message, 'success');
+    }
+
+    showError(message) {
+        this.showNotification(message, 'error');
+    }
+
+    showNotification(message, type = 'info') {
+        const notification = document.createElement('div');
+        notification.className = `alert alert-${type === 'error' ? 'danger' : type === 'success' ? 'success' : 'info'} alert-dismissible fade show database-notification`;
+        notification.innerHTML = `
+            <div class="d-flex align-items-center">
+                <i class="bi bi-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-triangle' : 'info-circle'} me-2"></i>
+                <span>${message}</span>
+                <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button>
+            </div>
+        `;
+        
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.remove();
+            }
+        }, 5000);
+    }
+}
+
+// Initialize database selector when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    window.databaseSelector = new DatabaseSelector();
+});
+</script> 

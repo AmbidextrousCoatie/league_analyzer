@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vue.js Table Test - League Analyzer</title>
+    
+    <!-- Bootstrap CSS (keep existing styling) -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <style>
+        .table-container {
+            margin: 20px 0;
+        }
+        .loading {
+            text-align: center;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div id="app" class="container mt-4">
+        <h1>Vue.js Table Test</h1>
+        
+        <div class="card">
+            <div class="card-header">
+                <h3>League Standings Table</h3>
+            </div>
+            <div class="card-body">
+                {% raw %}
+                <!-- Loading state -->
+                <div v-if="loading" class="loading">
+                    <div class="spinner-border" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+                
+                <!-- Error state -->
+                <div v-if="error" class="alert alert-danger">
+                    {{ error }}
+                </div>
+                {% endraw %}
+                
+                {% raw %}
+                <!-- Table component -->
+                <data-table 
+                    v-if="!loading && !error && tableData"
+                    :data="tableData.data"
+                    :columns="tableData.columns"
+                    :title="tableData.title"
+                ></data-table>
+                
+                <!-- No data state -->
+                <div v-if="!loading && !error && !tableData" class="alert alert-info">
+                    No data available
+                </div>
+                {% endraw %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Vue.js 3 from CDN -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    
+    <script>
+        {% raw %}
+        const { createApp } = Vue;
+
+        // Data Table Component
+        const DataTable = {
+            props: {
+                data: {
+                    type: Array,
+                    required: true,
+                    default: () => []
+                },
+                columns: {
+                    type: Array,
+                    required: true,
+                    default: () => []
+                },
+                title: {
+                    type: String,
+                    default: ''
+                }
+            },
+            template: `
+                <div class="table-container">
+                    <h4 v-if="title">{{ title }}</h4>
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th v-for="col in columns" :key="col.field">
+                                        {{ col.title || col.field }}
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="(row, index) in data" :key="index">
+                                    <td v-for="col in columns" :key="col.field">
+                                        {{ formatCell(row[col.field], col) }}
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div v-if="data.length === 0" class="alert alert-info">
+                        No data to display
+                    </div>
+                </div>
+            `,
+            methods: {
+                formatCell(value, column) {
+                    if (value === null || value === undefined) {
+                        return '-';
+                    }
+                    
+                    // Handle decimal places
+                    if (column.decimal_places !== undefined && typeof value === 'number') {
+                        return value.toFixed(column.decimal_places);
+                    }
+                    
+                    return value;
+                }
+            }
+        };
+
+        // Main Vue App
+        createApp({
+            components: {
+                DataTable
+            },
+            data() {
+                return {
+                    loading: true,
+                    error: null,
+                    tableData: null
+                };
+            },
+            mounted() {
+                this.fetchTableData();
+            },
+            methods: {
+                async fetchTableData() {
+                    this.loading = true;
+                    this.error = null;
+                    
+                    try {
+                        const response = await fetch('/api/v1/test-table');
+                        
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        
+                        const data = await response.json();
+                        this.tableData = data;
+                    } catch (error) {
+                        console.error('Error fetching table data:', error);
+                        this.error = `Failed to load table data: ${error.message}`;
+                    } finally {
+                        this.loading = false;
+                    }
+                }
+            }
+        }).mount('#app');
+        {% endraw %}
+    </script>
+</body>
+</html>
+

@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>Tabulator Column Groups komplett eingefärbt</title>
+<link href="https://unpkg.com/tabulator-tables@5.5.2/dist/css/tabulator.min.css" rel="stylesheet">
+<script src="https://unpkg.com/tabulator-tables@5.5.2/dist/js/tabulator.min.js"></script>
+
+<style>
+/* CELL COLORS */
+.tabulator-cell.group-0 { background-color: #e8f3ff; }
+.tabulator-cell.group-1 { background-color: #eaffea; }
+.tabulator-cell.group-2 { background-color: #fff4e6; }
+
+/* COLUMN HEADERS (A1/A2/B1/B2/...) */
+.tabulator-col.group-0 .tabulator-col-title { background-color: #d8eaff !important; }
+.tabulator-col.group-1 .tabulator-col-title { background-color: #dbffdb !important; }
+.tabulator-col.group-2 .tabulator-col-title { background-color: #ffe9d6 !important; }
+
+/* COLUMN GROUP HEADERS */
+.tabulator-col-group.group-0 .tabulator-col-group-title { background-color: #cce0ff !important; }
+.tabulator-col-group.group-1 .tabulator-col-group-title { background-color: #d0ffd0 !important; }
+.tabulator-col-group.group-2 .tabulator-col-group-title { background-color: #ffe0c2 !important; }
+</style>
+</head>
+
+<body>
+
+<h2>Tabulator Column Groups: Alle Header eingefärbt</h2>
+<div id="example-table"></div>
+
+<script>
+// =============== DATA ==================
+let tableData = [
+    {a1: 1, a2: 2, b1: 3, b2: 4, c1: 5, c2: 6},
+    {a1: 7, a2: 8, b1: 9, b2: 10, c1: 11, c2: 12},
+    {a1: 13, a2: 14, b1: 15, b2: 16, c1: 17, c2: 18},
+];
+
+// =============== COLUMN GROUPS ==================
+let groups = [
+    { title: "Gruppe A", columns: [
+        {title: "A1", field: "a1"},
+        {title: "A2", field: "a2"},
+    ]},
+    { title: "Gruppe B", columns: [
+        {title: "B1", field: "b1"},
+        {title: "B2", field: "b2"},
+    ]},
+    { title: "Gruppe C", columns: [
+        {title: "C1", field: "c1"},
+        {title: "C2", field: "c2"},
+    ]},
+];
+
+// assign classes to cells + column headers
+function assignClasses(cols, idx) {
+    cols.forEach(col => {
+        if (col.columns) {
+            assignClasses(col.columns, idx);
+        } else {
+            col.cssClass = "group-" + idx;
+            col.headerClass = "group-" + idx;
+        }
+    });
+}
+
+// assign group IDs
+groups.forEach((g, i) => assignClasses(g.columns, i));
+
+// =============== TABLE ==================
+let table = new Tabulator("#example-table", {
+    data: tableData,
+    layout: "fitColumns",
+    columns: groups,
+});
+
+// =============== FIX GROUP HEADER CLASSES ==================
+table.on("tableBuilt", () => {
+    document.querySelectorAll(".tabulator-col-group").forEach((el, idx) => {
+        el.classList.add("group-" + idx);
+    });
+});
+</script>
+</body>
+</html>

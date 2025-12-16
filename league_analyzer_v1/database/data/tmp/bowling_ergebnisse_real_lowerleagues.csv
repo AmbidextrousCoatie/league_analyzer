@@ -1,0 +1,301 @@
+Season;Week;Date;League;Players per Team;Location;Round Number;Match Number;Team;Position;Player;Player ID;Opponent;Score;Points;Input Data;Computed Data
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;1;;Kings Club Bayreuth Land 1;0;Budjoso, Max;7228;RW Lichtenhof 69 Stein 2;225;1.0;True;False
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;2;;Kings Club Bayreuth Land 1;0;Budjoso, Max;7228;Castra Regina Regensburg 2;193;1.0;True;False
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;3;;Kings Club Bayreuth Land 1;0;Budjoso, Max;7228;Eintracht Lauf 1;256;1.0;True;False
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;4;;Kings Club Bayreuth Land 1;0;Budjoso, Max;7228;Donaubowler Regensburg 2;184;1.0;True;False
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;5;;Kings Club Bayreuth Land 1;0;Budjoso, Max;7228;Mainauenbowler Bayreuth Land 2;211;1.0;True;False
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;1;;Kings Club Bayreuth Land 1;1;Hübner, Patrick;25085;RW Lichtenhof 69 Stein 2;189;1.0;True;False
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;2;;Kings Club Bayreuth Land 1;1;Hübner, Patrick;25085;Castra Regina Regensburg 2;187;1.0;True;False
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;3;;Kings Club Bayreuth Land 1;1;Hübner, Patrick;25085;Eintracht Lauf 1;172;0.;True;False
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;4;;Kings Club Bayreuth Land 1;1;Hübner, Patrick;25085;Donaubowler Regensburg 2;165;1.0;True;False
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;5;;Kings Club Bayreuth Land 1;1;Hübner, Patrick;25085;Mainauenbowler Bayreuth Land 2;169;1.0;True;False
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;1;;Kings Club Bayreuth Land 1;2;Franke, Tobias;38275;RW Lichtenhof 69 Stein 2;189;1.0;True;False
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;2;;Kings Club Bayreuth Land 1;2;Franke, Tobias;38275;Castra Regina Regensburg 2;176;1.0;True;False
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;3;;Kings Club Bayreuth Land 1;2;Franke, Tobias;38275;Eintracht Lauf 1;168;0.;True;False
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;4;;Kings Club Bayreuth Land 1;2;Franke, Tobias;38275;Donaubowler Regensburg 2;159;1.0;True;False
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;5;;Kings Club Bayreuth Land 1;2;Franke, Tobias;38275;Mainauenbowler Bayreuth Land 2;223;1.0;True;False
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;1;;Kings Club Bayreuth Land 1;3;Schuster, Christian;7723;RW Lichtenhof 69 Stein 2;155;0.;True;False
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;2;;Kings Club Bayreuth Land 1;3;Schuster, Christian;7723;Castra Regina Regensburg 2;231;1.0;True;False
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;3;;Kings Club Bayreuth Land 1;3;Schuster, Christian;7723;Eintracht Lauf 1;184;1.0;True;False
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;4;;Kings Club Bayreuth Land 1;3;Schuster, Christian;7723;Donaubowler Regensburg 2;155;0.;True;False
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;5;;Kings Club Bayreuth Land 1;3;Schuster, Christian;7723;Mainauenbowler Bayreuth Land 2;210;1.0;True;False
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;1;;Kings Club Bayreuth Land 1;0;Team Total;0;RW Lichtenhof 69 Stein 2;758;3.0;False;True
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;2;;Kings Club Bayreuth Land 1;0;Team Total;0;Castra Regina Regensburg 2;787;3.0;False;True
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;3;;Kings Club Bayreuth Land 1;0;Team Total;0;Eintracht Lauf 1;780;0.;False;True
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;4;;Kings Club Bayreuth Land 1;0;Team Total;0;Donaubowler Regensburg 2;663;0.;False;True
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;5;;Kings Club Bayreuth Land 1;0;Team Total;0;Mainauenbowler Bayreuth Land 2;813;3.0;False;True
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;1;;RW Lichtenhof 69 Stein 2;0;Körber, Paul;7735;Kings Club Bayreuth Land 1;181;0.;True;False
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;2;;RW Lichtenhof 69 Stein 2;0;Körber, Paul;7735;Eintracht Lauf 1;168;0.;True;False
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;3;;RW Lichtenhof 69 Stein 2;0;Körber, Paul;7735;Mainauenbowler Bayreuth Land 2;246;1.0;True;False
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;4;;RW Lichtenhof 69 Stein 2;0;Körber, Paul;7735;Castra Regina Regensburg 2;156;0.0;True;False
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;5;;RW Lichtenhof 69 Stein 2;0;Körber, Paul;7735;Donaubowler Regensburg 2;169;1.0;True;False
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;1;;RW Lichtenhof 69 Stein 2;1;Rupertinger, Manfred;16641;Kings Club Bayreuth Land 1;171;0.0;True;False
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;2;;RW Lichtenhof 69 Stein 2;1;Rupertinger, Manfred;16641;Eintracht Lauf 1;193;1.0;True;False
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;3;;RW Lichtenhof 69 Stein 2;1;Rupertinger, Manfred;16641;Mainauenbowler Bayreuth Land 2;182;1.0;True;False
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;4;;RW Lichtenhof 69 Stein 2;1;Rupertinger, Manfred;16641;Castra Regina Regensburg 2;166;1.0;True;False
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;5;;RW Lichtenhof 69 Stein 2;1;Rupertinger, Manfred;16641;Donaubowler Regensburg 2;188;1.0;True;False
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;1;;RW Lichtenhof 69 Stein 2;2;Echtermeyer, Ralph;7965;Kings Club Bayreuth Land 1;161;0.0;True;False
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;2;;RW Lichtenhof 69 Stein 2;2;Echtermeyer, Ralph;7965;Eintracht Lauf 1;132;0.0;True;False
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;3;;RW Lichtenhof 69 Stein 2;2;Kotzerke, Marcel;38947;Mainauenbowler Bayreuth Land 2;206;1.0;True;False
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;4;;RW Lichtenhof 69 Stein 2;2;Kotzerke, Marcel;38947;Castra Regina Regensburg 2;159;1.0;True;False
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;5;;RW Lichtenhof 69 Stein 2;2;Kotzerke, Marcel;38947;Donaubowler Regensburg 2;181;1.0;True;False
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;1;;RW Lichtenhof 69 Stein 2;3;Stöhr, Jürgen;7738;Kings Club Bayreuth Land 1;163;1.0;True;False
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;2;;RW Lichtenhof 69 Stein 2;3;Stöhr, Jürgen;7738;Eintracht Lauf 1;161;0.0;True;False
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;3;;RW Lichtenhof 69 Stein 2;3;Stöhr, Jürgen;7738;Mainauenbowler Bayreuth Land 2;179;1.0;True;False
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;4;;RW Lichtenhof 69 Stein 2;3;Stöhr, Jürgen;7738;Castra Regina Regensburg 2;158;0.0;True;False
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;5;;RW Lichtenhof 69 Stein 2;3;Stöhr, Jürgen;7738;Donaubowler Regensburg 2;173;0.0;True;False
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;1;;RW Lichtenhof 69 Stein 2;0;Team Total;0;Kings Club Bayreuth Land 1;676;0.0;False;True
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;2;;RW Lichtenhof 69 Stein 2;0;Team Total;0;Eintracht Lauf 1;654;0.0;False;True
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;3;;RW Lichtenhof 69 Stein 2;0;Team Total;0;Mainauenbowler Bayreuth Land 2;813;3.0;False;True
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;4;;RW Lichtenhof 69 Stein 2;0;Team Total;0;Castra Regina Regensburg 2;639;0.0;False;True
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;5;;RW Lichtenhof 69 Stein 2;0;Team Total;0;Donaubowler Regensburg 2;711;3.0;False;True
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;1;;Eintracht Lauf 1;0;Lucic, Mirko;38711;Donaubowler Regensburg 2;170;1.0;True;False
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;2;;Eintracht Lauf 1;0;Lucic, Mirko;38711;RW Lichtenhof 69 Stein 2;205;1.0;True;False
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;3;;Eintracht Lauf 1;0;Lucic, Mirko;38711;Kings Club Bayreuth Land 1;226;0.0;True;False
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;4;;Eintracht Lauf 1;0;Lucic, Mirko;38711;Mainauenbowler Bayreuth Land 2;170;0.0;True;False
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;5;;Eintracht Lauf 1;0;Lucic, Mirko;38711;Castra Regina Regensburg 2;188;1.0;True;False
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;1;;Eintracht Lauf 1;1;Fourkiotis, Asterios;25555;Donaubowler Regensburg 2;200;0.5;True;False
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;2;;Eintracht Lauf 1;1;Fourkiotis, Asterios;25555;RW Lichtenhof 69 Stein 2;146;0.0;True;False
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;3;;Eintracht Lauf 1;1;Chambless, Juergen;16465;Kings Club Bayreuth Land 1;208;1.0;True;False
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;4;;Eintracht Lauf 1;1;Chambless, Juergen;16465;Mainauenbowler Bayreuth Land 2;180;1.0;True;False
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;5;;Eintracht Lauf 1;1;Chambless, Juergen;16465;Castra Regina Regensburg 2;145;1.0;True;False
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;1;;Eintracht Lauf 1;2;Tontsch, Heiko;38403;Donaubowler Regensburg ;179;1.0;True;False
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;2;;Eintracht Lauf 1;2;Tontsch, Heiko;38403;RW Lichtenhof 69 Stein 2;248;1.0;True;False
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;3;;Eintracht Lauf 1;2;Tontsch, Heiko;38403;Kings Club Bayreuth Land 1;200;1.0;True;False
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;4;;Eintracht Lauf 1;2;Tontsch, Heiko;38403;Mainauenbowler Bayreuth Land 2;211;1.0;True;False
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;5;;Eintracht Lauf 1;2;Tontsch, Heiko;38403;Castra Regina Regensburg 2;142;1.0;True;False
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;1;;Eintracht Lauf 1;3;Chambless, Juergen;16465;Donaubowler Regensburg 2;166;0.0;True;False
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;2;;Eintracht Lauf 1;3;Matejat, Bernd;16462;RW Lichtenhof 69 Stein 2;178;1.0;True;False
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;3;;Eintracht Lauf 1;3;Matejat, Bernd;16462;Kings Club Bayreuth Land 1;176;0.0;True;False
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;4;;Eintracht Lauf 1;3;Matejat, Bernd;16462;Mainauenbowler Bayreuth Land 2;167;0.0;True;False
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;5;;Eintracht Lauf 1;3;Matejat, Bernd;16462;Castra Regina Regensburg 2;161;1.0;True;False
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;1;;Eintracht Lauf 1;0;Team Total;0;Donaubowler Regensburg 2;715;0.0;False;True
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;2;;Eintracht Lauf 1;0;Team Total;0;RW Lichtenhof 69 Stein 2;777;3.0;False;True
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;3;;Eintracht Lauf 1;0;Team Total;0;Kings Club Bayreuth Land 1;810;3.0;False;True
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;4;;Eintracht Lauf 1;0;Team Total;0;Mainauenbowler Bayreuth Land 2;728;3.0;False;True
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;5;;Eintracht Lauf 1;0;Team Total;0;Castra Regina Regensburg 2;636;3.0;False;True
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;1;;Donaubowler Regensburg 2;0;Schneider, Tobias;25949;Eintracht Lauf 1;169;0.0;True;False
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;2;;Donaubowler Regensburg 2;0;Schneider, Tobias;25949;Mainauenbowler Bayreuth Land 2;182;1.0;True;False
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;3;;Donaubowler Regensburg 2;0;Schneider, Tobias;25949;Castra Regina Regensburg 2;144;0.0;True;False
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;4;;Donaubowler Regensburg 2;0;Schneider, Tobias;25949;Kings Club Bayreuth Land 1;178;0.0;True;False
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;5;;Donaubowler Regensburg 2;0;Schneider, Tobias;25949;RW Lichtenhof 69 Stein 2;157;0.0;True;False
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;1;;Donaubowler Regensburg 2;1;Holten, Peter;38763;Eintracht Lauf 1;200;0.5;True;False
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;2;;Donaubowler Regensburg 2;1;Holten, Peter;38763;Mainauenbowler Bayreuth Land 2;115;0.0;True;False
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;3;;Donaubowler Regensburg 2;1;Holten, Peter;38763;Castra Regina Regensburg 2;137;0.0;True;False
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;4;;Donaubowler Regensburg 2;1;Zorzi, Eduard Richard;38803;Kings Club Bayreuth Land 1;157;0.0;True;False
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;5;;Donaubowler Regensburg 2;1;Zorzi, Eduard Richard;38803;RW Lichtenhof 69 Stein 2;147;0.0;True;False
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;1;;Donaubowler Regensburg 2;2;Luu, Vinh Duc;25865;Eintracht Lauf 1;146;0.0;True;False
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;2;;Donaubowler Regensburg 2;2;Luu, Vinh Duc;25865;Mainauenbowler Bayreuth Land 2;142;0.0;True;False
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;3;;Donaubowler Regensburg 2;2;Luu, Vinh Duc;25865;Castra Regina Regensburg 2;157;0.0;True;False
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;4;;Donaubowler Regensburg 2;2;Luu, Vinh Duc;25865;Kings Club Bayreuth Land 1;146;0.0;True;False
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;5;;Donaubowler Regensburg 2;2;Holten, Peter;38763;RW Lichtenhof 69 Stein 2;125;0.0;True;False
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;1;;Donaubowler Regensburg 2;3;Radecker, Sebastian;38025;Eintracht Lauf 1;203;1.0;True;False
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;2;;Donaubowler Regensburg 2;3;Radecker, Sebastian;38025;Mainauenbowler Bayreuth Land 2;142;0.0;True;False
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;3;;Donaubowler Regensburg 2;3;Radecker, Sebastian;38025;Castra Regina Regensburg 2;141;0.0;True;False
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;4;;Donaubowler Regensburg 2;3;Radecker, Sebastian;38025;Kings Club Bayreuth Land 1;188;1.0;True;False
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;5;;Donaubowler Regensburg 2;3;Radecker, Sebastian;38025;RW Lichtenhof 69 Stein 2;200;1.0;True;False
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;1;;Donaubowler Regensburg 2;0;Team Total;0;Eintracht Lauf 1;718;3.0;False;True
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;2;;Donaubowler Regensburg 2;0;Team Total;0;Mainauenbowler Bayreuth Land 2;581;0.0;False;True
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;3;;Donaubowler Regensburg 2;0;Team Total;0;Castra Regina Regensburg 2;579;0.0;False;True
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;4;;Donaubowler Regensburg 2;0;Team Total;0;Kings Club Bayreuth Land 1;669;3.0;False;True
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;5;;Donaubowler Regensburg 2;0;Team Total;0;RW Lichtenhof 69 Stein 2;629;0.0;False;True
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;1;;Mainauenbowler Bayreuth Land 2;0;Semmling, Detlef;16453;Castra Regina Regensburg 2;157;0.0;True;False
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;2;;Mainauenbowler Bayreuth Land 2;0;Semmling, Detlef;16453;Donaubowler Regensburg 2;128;0.0;True;False
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;3;;Mainauenbowler Bayreuth Land 2;0;Semmling, Detlef;16453;RW Lichtenhof 69 Stein 2;155;0.0;True;False
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;4;;Mainauenbowler Bayreuth Land 2;0;Semmling, Detlef;16453;Eintracht Lauf 1;175;1.0;True;False
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;5;;Mainauenbowler Bayreuth Land 2;0;Semmling, Detlef;16453;Kings Club Bayreuth Land 1;172;0.0;True;False
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;1;;Mainauenbowler Bayreuth Land 2;1;Weiske, Marina;7154;Castra Regina Regensburg 2;214;1.0;True;False
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;2;;Mainauenbowler Bayreuth Land 2;1;Weiske, Marina;7154;Donaubowler Regensburg 2;140;1.0;True;False
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;3;;Mainauenbowler Bayreuth Land 2;1;Weiske, Marina;7154;RW Lichtenhof 69 Stein 2;146;0.0;True;False
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;4;;Mainauenbowler Bayreuth Land 2;1;Weiske, Marina;7154;Eintracht Lauf 1;140;0.0;True;False
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;5;;Mainauenbowler Bayreuth Land 2;1;Weiske, Marina;7154;Kings Club Bayreuth Land 1;143;0.0;True;False
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;1;;Mainauenbowler Bayreuth Land 2;2;Fiochetta, Anthony;7967;Castra Regina Regensburg 2;180;1.0;True;False
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;2;;Mainauenbowler Bayreuth Land 2;2;Fiochetta, Anthony;7967;Donaubowler Regensburg 2;153;1.0;True;False
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;3;;Mainauenbowler Bayreuth Land 2;2;Fiochetta, Anthony;7967;RW Lichtenhof 69 Stein 2;140;0.0;True;False
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;4;;Mainauenbowler Bayreuth Land 2;2;Fiochetta, Anthony;7967;Eintracht Lauf 1;156;0.0;True;False
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;5;;Mainauenbowler Bayreuth Land 2;2;Fiochetta, Anthony;7967;Kings Club Bayreuth Land 1;164;0.0;True;False
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;1;;Mainauenbowler Bayreuth Land 2;3;Hamfler, Wolfgang;7747;Castra Regina Regensburg 2;203;1.0;True;False
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;2;;Mainauenbowler Bayreuth Land 2;3;Hamfler, Wolfgang;7747;Donaubowler Regensburg 2;171;1.0;True;False
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;3;;Mainauenbowler Bayreuth Land 2;3;Hamfler, Wolfgang;7747;RW Lichtenhof 69 Stein 2;167;0.0;True;False
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;4;;Mainauenbowler Bayreuth Land 2;3;Hamfler, Wolfgang;7747;Eintracht Lauf 1;169;1.0;True;False
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;5;;Mainauenbowler Bayreuth Land 2;3;Hamfler, Wolfgang;7747;Kings Club Bayreuth Land 1;148;0.0;True;False
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;1;;Mainauenbowler Bayreuth Land 2;0;Team Total;0;Castra Regina Regensburg 2;754;3.0;False;True
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;2;;Mainauenbowler Bayreuth Land 2;0;Team Total;0;Donaubowler Regensburg 2;592;3.0;False;True
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;3;;Mainauenbowler Bayreuth Land 2;0;Team Total;0;RW Lichtenhof 69 Stein 2;608;0.0;False;True
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;4;;Mainauenbowler Bayreuth Land 2;0;Team Total;0;Eintracht Lauf 1;640;0.0;False;True
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;5;;Mainauenbowler Bayreuth Land 2;0;Team Total;0;Kings Club Bayreuth Land 1;627;0.0;False;True
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;1;;Castra Regina Regensburg 2;0;Simon, Steven;38571;Mainauenbowler Bayreuth Land 2;200;1.0;True;False
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;2;;Castra Regina Regensburg 2;0;Simon, Steven;38571;Kings Club Bayreuth Land 1;190;0.0;True;False
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;3;;Castra Regina Regensburg 2;0;Simon, Steven;38571;Donaubowler Regensburg 2;179;1.0;True;False
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;4;;Castra Regina Regensburg 2;0;Simon, Steven;38571;RW Lichtenhof 69 Stein 2;230;1.0;True;False
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;5;;Castra Regina Regensburg 2;0;Simon, Steven;38571;Eintracht Lauf 1;144;0.0;True;False
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;1;;Castra Regina Regensburg 2;1;Martin, Dennis;38870;Mainauenbowler Bayreuth Land 2;152;0.0;True;False
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;2;;Castra Regina Regensburg 2;1;Martin, Dennis;38870;Kings Club Bayreuth Land 1;157;0.0;True;False
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;3;;Castra Regina Regensburg 2;1;Martin, Dennis;38870;Donaubowler Regensburg 2;152;1.0;True;False
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;4;;Castra Regina Regensburg 2;1;Martin, Dennis;38870;RW Lichtenhof 69 Stein 2;154;0.0;True;False
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;5;;Castra Regina Regensburg 2;1;Martin, Dennis;38870;Eintracht Lauf 1;111;0.0;True;False
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;1;;Castra Regina Regensburg 2;2;Einert, Kevein;38144;Mainauenbowler Bayreuth Land 2;149;0.0;True;False
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;2;;Castra Regina Regensburg 2;2;Einert, Kevein;38144;Kings Club Bayreuth Land 1;155;0.0;True;False
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;3;;Castra Regina Regensburg 2;2;Gilch, Stefan;25895;Donaubowler Regensburg 2;164;1.0;True;False
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;4;;Castra Regina Regensburg 2;2;Gilch, Stefan;25895;RW Lichtenhof 69 Stein 2;148;0.0;True;False
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;5;;Castra Regina Regensburg 2;2;Gilch, Stefan;25895;Eintracht Lauf 1;133;0.0;True;False
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;1;;Castra Regina Regensburg 2;3;Humbs, Martin;38046;Mainauenbowler Bayreuth Land 2;190;0.0;True;False
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;2;;Castra Regina Regensburg 2;3;Humbs, Martin;38046;Kings Club Bayreuth Land 1;166;0.0;True;False
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;3;;Castra Regina Regensburg 2;3;Humbs, Martin;38046;Donaubowler Regensburg 2;182;1.0;True;False
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;4;;Castra Regina Regensburg 2;3;Humbs, Martin;38046;RW Lichtenhof 69 Stein 2;171;1.0;True;False
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;5;;Castra Regina Regensburg 2;3;Humbs, Martin;38046;Eintracht Lauf 1;154;0.0;True;False
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;1;;Castra Regina Regensburg 2;0;Team Total;0;Mainauenbowler Bayreuth Land 2;691;0.0;False;True
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;2;;Castra Regina Regensburg 2;0;Team Total;0;Kings Club Bayreuth Land 1;668;0.0;False;True
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;3;;Castra Regina Regensburg 2;0;Team Total;0;Donaubowler Regensburg 2;677;3.0;False;True
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;4;;Castra Regina Regensburg 2;0;Team Total;0;RW Lichtenhof 69 Stein 2;703;3.0;False;True
+25/26;1;2025-10-05;BZOL N1;4;Dettelbach Extreme Bowlingarena;5;;Castra Regina Regensburg 2;0;Team Total;0;Eintracht Lauf 1;542;0.0;False;True
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;1;;Albrecht Dürer 71 Stein;0;Kammermeier, Peter;7927;RW Lichtenhof 69 Stein 4;156;0.0;True;False
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;2;;Albrecht Dürer 71 Stein;0;Kammermeier, Peter;7927;Gute Laune Lauf 2;193;1.0;True;False
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;3;;Albrecht Dürer 71 Stein;0;Kammermeier, Peter;7927;Donaubowler Regensburg 3;170;0.0;True;False
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;4;;Albrecht Dürer 71 Stein;0;Kammermeier, Peter;7927;Kings Club Bayreuth Land 2;150;0.0;True;False
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;5;;Albrecht Dürer 71 Stein;0;Kammermeier, Peter;7927;Eintracht Lauf 3;169;1.0;True;False
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;1;;Albrecht Dürer 71 Stein;1;Fillbach, Karin;7930;RW Lichtenhof 69 Stein 4;166;1.0;True;False
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;2;;Albrecht Dürer 71 Stein;1;Fillbach, Karin;7930;Gute Laune Lauf 2;127;0.0;True;False
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;3;;Albrecht Dürer 71 Stein;1;Fillbach, Karin;7930;Donaubowler Regensburg 3;171;0.0;True;False
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;4;;Albrecht Dürer 71 Stein;1;Fillbach, Karin;7930;Kings Club Bayreuth Land 2;149;0.0;True;False
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;5;;Albrecht Dürer 71 Stein;1;Fillbach, Karin;7930;Eintracht Lauf 3;127;0.0;True;False
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;1;;Albrecht Dürer 71 Stein;2;Ebert, Holger;7928;RW Lichtenhof 69 Stein 4;172;0.0;True;False
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;2;;Albrecht Dürer 71 Stein;2;Ebert, Holger;7928;Gute Laune Lauf 2;123;0.0;True;False
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;3;;Albrecht Dürer 71 Stein;2;Ebert, Holger;7928;Donaubowler Regensburg 3;163;0.0;True;False
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;4;;Albrecht Dürer 71 Stein;2;Bürkler, Reinhard;7926;Kings Club Bayreuth Land 2;134;0.0;True;False
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;5;;Albrecht Dürer 71 Stein;2;Ebert, Holger;7928;Eintracht Lauf 3;164;0.0;True;False
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;1;;Albrecht Dürer 71 Stein;3;Kohl, Marcel;16977;RW Lichtenhof 69 Stein 4;178;0.0;True;False
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;2;;Albrecht Dürer 71 Stein;3;Kohl, Marcel;16977;Gute Laune Lauf 2;146;0.0;True;False
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;3;;Albrecht Dürer 71 Stein;3;Kohl, Marcel;16977;Donaubowler Regensburg 3;157;1.0;True;False
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;4;;Albrecht Dürer 71 Stein;3;Kohl, Marcel;16977;Kings Club Bayreuth Land 2;174;0.0;True;False
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;5;;Albrecht Dürer 71 Stein;3;Kohl, Marcel;16977;Eintracht Lauf 3;245;1.0;True;False
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;1;;Albrecht Dürer 71 Stein;0;Team Total;0;RW Lichtenhof 69 Stein 4;672;0.0;False;True
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;2;;Albrecht Dürer 71 Stein;0;Team Total;0;Gute Laune Lauf 2;589;0.0;False;True
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;3;;Albrecht Dürer 71 Stein;0;Team Total;0;Donaubowler Regensburg 3;661;0.0;False;True
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;4;;Albrecht Dürer 71 Stein;0;Team Total;0;Kings Club Bayreuth Land 2;607;0.0;False;True
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;5;;Albrecht Dürer 71 Stein;0;Team Total;0;Eintracht Lauf 3;705;0.0;False;True
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;1;;RW Lichtenhof 69 Stein 4;0;Chestnut, James;38184;Albrecht Dürer 71 Stein;182;1.0;True;False
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;2;;RW Lichtenhof 69 Stein 4;0;Chestnut, James;38184;Donaubowler Regensburg 3;166;0.0;True;False
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;3;;RW Lichtenhof 69 Stein 4;0;Chestnut, James;38184;Eintracht Lauf 3;167;0.0;True;False
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;4;;RW Lichtenhof 69 Stein 4;0;Chestnut, James;38184;Gute Laune Lauf 2;205;1.0;True;False
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;5;;RW Lichtenhof 69 Stein 4;0;Chestnut, James;38184;kings Club Bayreuth Land 2;191;1.0;True;False
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;1;;RW Lichtenhof 69 Stein 4;1;Birkner, Dieter;7947;Albrecht Dürer 71 Stein;140;0.0;True;False
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;2;;RW Lichtenhof 69 Stein 4;1;Schmitt, Jürgen Harry;7961;Donaubowler Regensburg 3;135;0.5;True;False
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;3;;RW Lichtenhof 69 Stein 4;1;Schmitt, Jürgen Harry;7961;Eintracht Lauf 3;119;0.0;True;False
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;4;;RW Lichtenhof 69 Stein 4;1;Birkner, Dieter;7947;Gute Laune Lauf 2;175;0.0;True;False
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;5;;RW Lichtenhof 69 Stein 4;1;Birkner, Dieter;7947;Kings Club Bayreuth Land 2;172;1.0;True;False
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;1;;RW Lichtenhof 69 Stein 4;2;Große, Christian;13166;Albrecht Dürer 71 Stein;211;1.0;True;False
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;2;;RW Lichtenhof 69 Stein 4;2;Große, Christian;13166;Donaubowler Regensburg 3;214;1.0;True;False
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;3;;RW Lichtenhof 69 Stein 4;2;Große, Christian;13166;Eintracht Lauf 3;147;0.0;True;False
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;4;;RW Lichtenhof 69 Stein 4;2;Große, Christian;13166;Gute Laune Lauf 2;185;1.0;True;False
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;5;;RW Lichtenhof 69 Stein 4;2;Große, Christian;13166;Kings Club Bayreuth Land 2;170;0.0;True;False
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;1;;RW Lichtenhof 69 Stein 4;3;Odorfer, René;16782;Albrecht Dürer 71 Stein;209;1.0;True;False
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;2;;RW Lichtenhof 69 Stein 4;3;Odorfer, René;16782;Donaubowler Regensburg 3;153;0.0;True;False
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;3;;RW Lichtenhof 69 Stein 4;3;Odorfer, René;16782;Eintracht Lauf 3;191;0.0;True;False
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;4;;RW Lichtenhof 69 Stein 4;3;Odorfer, René;16782;Gute Laune Lauf 2;258;1.0;True;False
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;5;;RW Lichtenhof 69 Stein 4;3;Odorfer, René;16782;Kings Club Bayreuth Land 2;169;1.0;True;False
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;1;;RW Lichtenhof 69 Stein 4;0;Team Total;0;Albrecht Dürer 71 Stein;742;3.0;False;True
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;2;;RW Lichtenhof 69 Stein 4;0;Team Total;0;Donaubowler Regensburg 3;668;0.0;False;True
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;3;;RW Lichtenhof 69 Stein 4;0;Team Total;0;Eintracht Lauf 3;624;0.0;False;True
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;4;;RW Lichtenhof 69 Stein 4;0;Team Total;0;Gute Laune Lauf 2;823;3.0;False;True
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;5;;RW Lichtenhof 69 Stein 4;0;Team Total;0;Kings Club Bayreuth Land 2;702;3.0;False;True
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;1;;Donaubowler Regensburg 3;0;Islinger, Markus;38946;Kings Club Bayreuth Land 2;173;1.0;True;False
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;2;;Donaubowler Regensburg 3;0;Islinger, Markus;38946;RW Lichtenhof 69 Stein 4;203;1.0;True;False
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;3;;Donaubowler Regensburg 3;0;Islinger, Markus;38946;Albrecht Dürer 71 Stein;203;1.0;True;False
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;4;;Donaubowler Regensburg 3;0;Islinger, Markus;38946;Eintracht Lauf 3;171;0.0;True;False
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;5;;Donaubowler Regensburg 3;0;Islinger, Markus;38946;Gute Laune Lauf 2;223;1.0;True;False
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;1;;Donaubowler Regensburg 3;1;Zorzi, Eduard Richard;38803;Kings Club Bayreuth Land 2;210;1.0;True;False
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;2;;Donaubowler Regensburg 3;1;Zorzi, Eduard Richard;38803;RW Lichtenhof 69 Stein 4;135;0.5;True;False
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;3;;Donaubowler Regensburg 3;1;Zorzi, Eduard Richard;38803;Albrecht Dürer 71 Stein;190;1.0;True;False
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;4;;Donaubowler Regensburg 3;1;Zorzi, Eduard Richard;38803;Eintracht Lauf 3;191;1.0;True;False
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;5;;Donaubowler Regensburg 3;1;Zorzi, Eduard Richard;38803;Gute Laune Lauf 2;182;0.0;True;False
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;1;;Donaubowler Regensburg 3;2;Keller, Paul;38965;Kings Club Bayreuth Land 2;181;1.0;True;False
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;2;;Donaubowler Regensburg 3;2;Keller, Paul;38965;RW Lichtenhof 69 Stein 4;189;0.0;True;False
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;3;;Donaubowler Regensburg 3;2;Keller, Paul;38965;Albrecht Dürer 71 Stein;171;1.0;True;False
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;4;;Donaubowler Regensburg 3;2;Keller, Paul;38965;Eintracht Lauf 3;159;0.0;True;False
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;5;;Donaubowler Regensburg 3;2;Keller, Paul;38965;Gute Laune Lauf 2;179;1.0;True;False
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;1;;Donaubowler Regensburg 3;3;Gfesser, Josef Peter;7091;Kings Club Bayreuth Land 2;181;1.0;True;False
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;2;;Donaubowler Regensburg 3;3;Gfesser, Josef Peter;7091;RW Lichtenhof 69 Stein 4;170;1.0;True;False
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;3;;Donaubowler Regensburg 3;3;Gfesser, Josef Peter;7091;Albrecht Dürer 71 Stein;149;0.0;True;False
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;4;;Donaubowler Regensburg 3;3;Gfesser, Josef Peter;7091;Eintracht Lauf 3;227;1.0;True;False
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;5;;Donaubowler Regensburg 3;3;Gfesser, Josef Peter;7091;Gute Laune Lauf 2;195;1.0;True;False
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;1;;Donaubowler Regensburg 3;0;Team Total;0;Kings Club Bayreuth Land 2;745;3.0;False;True
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;2;;Donaubowler Regensburg 3;0;Team Total;0;RW Lichtenhof 69 Stein 4;697;3.0;False;True
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;3;;Donaubowler Regensburg 3;0;Team Total;0;Albrecht Dürer 71 Stein;713;3.0;False;True
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;4;;Donaubowler Regensburg 3;0;Team Total;0;Eintracht Lauf 3;748;3.0;False;True
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;5;;Donaubowler Regensburg 3;0;Team Total;0;Gute Laune Lauf 2;779;3.0;False;True
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;1;;Kings Club Bayreuth Land 2;0;Hübner, Patrick;25085;Donaubowler Regensburg 3;161;0.0;True;False
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;2;;Kings Club Bayreuth Land 2;0;Hübner, Patrick;25085;Eintracht Lauf 3;217;1.0;True;False
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;3;;Kings Club Bayreuth Land 2;0;Hübner, Patrick;25085;Gute Laune Lauf 2;182;0.0;True;False
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;4;;Kings Club Bayreuth Land 2;0;Hübner, Patrick;25085;Albrecht Dürer 71 Stein;189;1.0;True;False
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;5;;Kings Club Bayreuth Land 2;0;Hübner, Patrick;25085;RW Lichtenhof 69 Stein 4;128;0.0;True;False
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;1;;Kings Club Bayreuth Land 2;1;Franke, Guido;7135;Donaubowler Regensburg 3;134;0.0;True;False
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;2;;Kings Club Bayreuth Land 2;1;Franke, Guido;7135;Eintracht Lauf 3;136;0.0;True;False
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;3;;Kings Club Bayreuth Land 2;1;Franke, Guido;7135;Gute Laune Lauf 2;157;0.0;True;False
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;4;;Kings Club Bayreuth Land 2;1;Franke, Guido;7135;Albrecht Dürer 71 Stein;155;1.0;True;False
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;5;;Kings Club Bayreuth Land 2;1;Franke, Guido;7135;RW Lichtenhof 69 Stein 4;165;0.0;True;False
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;1;;Kings Club Bayreuth Land 2;2;Leuchtenberger, Dominik;7131;Donaubowler Regensburg 3;177;0.0;True;False
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;2;;Kings Club Bayreuth Land 2;2;Leuchtenberger, Dominik;7131;Eintracht Lauf 3;149;0.0;True;False
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;3;;Kings Club Bayreuth Land 2;2;Leuchtenberger, Dominik;7131;Gute Laune Lauf 2;188;0.0;True;False
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;4;;Kings Club Bayreuth Land 2;2;Leuchtenberger, Dominik;7131;Albrecht Dürer 71 Stein;148;1.0;True;False
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;5;;Kings Club Bayreuth Land 2;2;Leuchtenberger, Dominik;7131;RW Lichtenhof 69 Stein 4;179;1.0;True;False
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;1;;Kings Club Bayreuth Land 2;3;Wülfert, Frank;7126;Donaubowler Regensburg 3;166;0.0;True;False
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;2;;Kings Club Bayreuth Land 2;3;Wülfert, Frank;7126;Eintracht Lauf 3;175;0.0;True;False
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;3;;Kings Club Bayreuth Land 2;3;Wülfert, Frank;7126;Gute Laune Lauf 2;215;1.0;True;False
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;4;;Kings Club Bayreuth Land 2;3;Wülfert, Frank;7126;Albrecht Dürer 71 Stein;194;1.0;True;False
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;5;;Kings Club Bayreuth Land 2;3;Wülfert, Frank;7126;RW Lichtenhof 69 Stein 4;137;0.0;True;False
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;1;;Kings Club Bayreuth Land 2;0;Team Total;0;Donaubowler Regensburg 3;638;0.0;False;True
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;2;;Kings Club Bayreuth Land 2;0;Team Total;0;Eintracht Lauf 3;677;0.0;False;True
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;3;;Kings Club Bayreuth Land 2;0;Team Total;0;Gute Laune Lauf 2;742;0.0;False;True
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;4;;Kings Club Bayreuth Land 2;0;Team Total;0;Albrecht Dürer 71 Stein;686;3.0;False;True
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;5;;Kings Club Bayreuth Land 2;0;Team Total;0;RW Lichtenhof 69 Stein 4;609;0.0;False;True
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;1;;Eintracht Lauf 3;0;Zankel, Jürgen;38639;Gute Laune Lauf 2;189;1.0;True;False
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;2;;Eintracht Lauf 3;0;Zankel, Jürgen;38639;Kings Club Bayreuth Land 2;169;0.0;True;False
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;3;;Eintracht Lauf 3;0;Zankel, Jürgen;38639;RW Lichtenhof 69 Stein 4;212;1.0;True;False
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;4;;Eintracht Lauf 3;0;Zankel, Jürgen;38639;Donaubowler Regensburg 3;180;1.0;True;False
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;5;;Eintracht Lauf 3;0;Zankel, Jürgen;38639;Albrecht Dürer 71 Stein;160;0.0;True;False
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;1;;Eintracht Lauf 3;1;Zyder, Daniel;38637;Gute Laune Lauf 2;179;0.0;True;False
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;2;;Eintracht Lauf 3;1;Zyder, Daniel;38637;Kings Club Bayreuth Land 2;165;1.0;True;False
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;3;;Eintracht Lauf 3;1;Zyder, Daniel;38637;RW Lichtenhof 69 Stein 4;157;1.0;True;False
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;4;;Eintracht Lauf 3;1;Zyder, Daniel;38637;Donaubowler Regensburg 3;135;0.0;True;False
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;5;;Eintracht Lauf 3;1;Zyder, Daniel;38637;Albrecht Dürer 71 Stein;197;1.0;True;False
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;1;;Eintracht Lauf 3;2;Tsioras, Ioannis;16471;Gute Laune Lauf 2;162;0.0;True;False
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;2;;Eintracht Lauf 3;2;Tsioras, Ioannis;16471;Kings Club Bayreuth Land 2;166;1.0;True;False
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;3;;Eintracht Lauf 3;2;Tsioras, Ioannis;16471;RW Lichtenhof 69 Stein 4;181;1.0;True;False
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;4;;Eintracht Lauf 3;2;Tsioras, Ioannis;16471;Donaubowler Regensburg 3;185;1.0;True;False
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;5;;Eintracht Lauf 3;2;Tsioras, Ioannis;16471;Albrecht Dürer 71 Stein;184;1.0;True;False
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;1;;Eintracht Lauf 3;3;Matejat, Bernd;16462;Gute Laune Lauf 2;203;1.0;True;False
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;2;;Eintracht Lauf 3;3;Matejat, Bernd;16462;Kings Club Bayreuth Land 2;196;1.0;True;False
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;3;;Eintracht Lauf 3;3;Matejat, Bernd;16462;RW Lichtenhof 69 Stein 4;215;1.0;True;False
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;4;;Eintracht Lauf 3;3;Matejat, Bernd;16462;Donaubowler Regensburg 3;183;0.0;True;False
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;5;;Eintracht Lauf 3;3;Matejat, Bernd;16462;Albrecht Dürer 71 Stein;176;0.0;True;False
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;1;;Eintracht Lauf 3;0;Team Total;0;Gute Laune Lauf 2;733;3.0;False;True
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;2;;Eintracht Lauf 3;0;Team Total;0;Kings Club Bayreuth Land 2;696;3.0;False;True
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;3;;Eintracht Lauf 3;0;Team Total;0;RW Lichtenhof 69 Stein 4;765;3.0;False;True
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;4;;Eintracht Lauf 3;0;Team Total;0;Donaubowler Regensburg 3;683;0.0;False;True
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;5;;Eintracht Lauf 3;0;Team Total;0;Albrecht Dürer 71 Stein;717;3.0;False;True
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;1;;Gute Laune Lauf 2;0;Schweinzer, Tim;38747;Eintracht Lauf 3;172;0;True;False
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;2;;Gute Laune Lauf 2;0;Schweinzer, Tim;38747;Albrecht Dürer 71 Stein;163;0;True;False
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;3;;Gute Laune Lauf 2;0;Schweinzer, Tim;38747;Kings Club Bayreuth Land 2;188;1;True;False
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;4;;Gute Laune Lauf 2;0;Schweinzer, Tim;38747;RW Lichtenhof 69 Stein 4;174;0;True;False
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;5;;Gute Laune Lauf 2;0;Schweinzer, Tim;38747;Donaubowler Regensburg 3;187;0;True;False
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;1;;Gute Laune Lauf 2;1;Benndorf, Simon;38746;Eintracht Lauf 3;185;1;True;False
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;2;;Gute Laune Lauf 2;1;Benndorf, Simon;38746;Albrecht Dürer 71 Stein;159;1;True;False
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;3;;Gute Laune Lauf 2;1;Benndorf, Simon;38746;Kings Club Bayreuth Land 2;203;1;True;False
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;4;;Gute Laune Lauf 2;1;Benndorf, Simon;38746;RW Lichtenhof 69 Stein 4;186;1;True;False
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;5;;Gute Laune Lauf 2;1;Benndorf, Simon;38746;Donaubowler Regensburg 3;204;1;True;False
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;1;;Gute Laune Lauf 2;2;Jurischka, René;38593;Eintracht Lauf 3;190;1;True;False
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;2;;Gute Laune Lauf 2;2;Jurischka, René;38593;Albrecht Dürer 71 Stein;164;1;True;False
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;3;;Gute Laune Lauf 2;2;Jurischka, René;38593;Kings Club Bayreuth Land 2;191;1;True;False
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;4;;Gute Laune Lauf 2;2;Jurischka, René;38593;RW Lichtenhof 69 Stein 4;173;0;True;False
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;5;;Gute Laune Lauf 2;2;Jurischka, René;38593;Donaubowler Regensburg 3;147;0;True;False
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;1;;Gute Laune Lauf 2;3;Krämer, Gisela;7753;Eintracht Lauf 3;180;0;True;False
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;2;;Gute Laune Lauf 2;3;Krämer, Gisela;7753;Albrecht Dürer 71 Stein;179;1;True;False
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;3;;Gute Laune Lauf 2;3;Krämer, Gisela;7753;Kings Club Bayreuth Land 2;173;0;True;False
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;4;;Gute Laune Lauf 2;3;Betz, Dominic;38998;RW Lichtenhof 69 Stein 4;171;0;True;False
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;5;;Gute Laune Lauf 2;3;Betz, Dominic;38998;Donaubowler Regensburg 3;143;0;True;False
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;1;;Gute Laune Lauf 2;0;Team Total;0;Eintracht Lauf 3;727;0;False;True
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;2;;Gute Laune Lauf 2;0;Team Total;0;Albrecht Dürer 71 Stein;665;3;False;True
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;3;;Gute Laune Lauf 2;0;Team Total;0;Kings Club Bayreuth Land 2;755;3;False;True
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;4;;Gute Laune Lauf 2;0;Team Total;0;RW Lichtenhof 69 Stein 4;704;0;False;True
+25/26;1;2025-10-12;BZL N2;4;Nürnberg West Bowling;5;;Gute Laune Lauf 2;0;Team Total;0;Donaubowler Regensburg 3;681;0;False;True
