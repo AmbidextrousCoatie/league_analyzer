@@ -5,3 +5,15 @@ Entities represent domain objects with identity and business logic.
 They have a lifecycle and can change over time.
 """
 
+from domain.entities.team import Team
+from domain.entities.player import Player
+from domain.entities.league import League
+from domain.entities.game import Game
+
+__all__ = [
+    'Team',
+    'Player',
+    'League',
+    'Game',
+]
+
