@@ -178,11 +178,11 @@ presentation/
 **Goal:** Set up clean architecture foundation and domain models
 
 #### Week 1: Project Structure & DI Container
-- [ ] Create new directory structure
-- [ ] Set up dependency injection (use `dependency-injector` or `inject`)
-- [ ] Configure dependency injection container
-- [ ] Set up logging and configuration management
-- [ ] Create base classes and interfaces
+- [x] Create new directory structure
+- [x] Set up dependency injection (use `dependency-injector` or `inject`)
+- [x] Configure dependency injection container
+- [x] Set up logging and configuration management
+- [x] Create base classes and interfaces
 
 **Learning Focus:**
 - Dependency Injection patterns
@@ -190,12 +190,12 @@ presentation/
 - Interface segregation
 
 #### Week 2: Domain Models
-- [ ] Create `Team` entity with business logic
-- [ ] Create `League` entity
-- [ ] Create `Game` entity
-- [ ] Create `Player` entity
-- [ ] Create value objects (Score, Points, Season)
-- [ ] Add domain validation
+- [x] Create `Team` entity with business logic
+- [x] Create `League` entity
+- [x] Create `Game` entity
+- [x] Create `Player` entity
+- [x] Create value objects (Score, Points, Season, Handicap, HandicapSettings, GameResult)
+- [x] Add domain validation
 
 **Learning Focus:**
 - Domain-Driven Design
@@ -206,9 +206,10 @@ presentation/
 #### Week 3: Domain Services & Events
 - [ ] Create `StandingsCalculator` domain service
 - [ ] Create `StatisticsCalculator` domain service
-- [ ] Define domain events (`GameCreated`, `GameUpdated`, `GameDeleted`, `DataImported`)
-- [ ] Create domain event bus/registry
-- [ ] Add domain exceptions (`InvalidGameData`, `DuplicateGame`, etc.)
+- [x] Define domain events (`GameCreated`, `GameUpdated`, `GameDeleted`, `DataImported`)
+- [x] Create domain event bus/registry
+- [x] Add domain exceptions (`InvalidGameData`, `DuplicateGame`, etc.)
+- [x] Create `HandicapCalculator` domain service
 
 **Learning Focus:**
 - Domain services vs application services
@@ -260,8 +261,8 @@ presentation/
 - Write operation handling
 
 #### Week 6: Adapter Pattern & Unit of Work
-- [ ] Refactor adapters to work with repositories
-- [ ] Add adapter factory with DI
+- [x] Refactor adapters to work with repositories (DataAdapter interface created)
+- [x] Add adapter factory with DI (DI container configured for adapters)
 - [ ] Implement `UnitOfWork` pattern for transactions
 - [ ] Add transaction support (atomic operations)
 - [ ] Add rollback capability

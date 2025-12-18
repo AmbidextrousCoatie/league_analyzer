@@ -30,6 +30,10 @@ This directory contains all documentation for League Analyzer v2.
 - **[FastAPI Deployment Guide](FASTAPI_DEPLOYMENT_GUIDE.md)** - Deployment instructions
 - **[Quick Start Guide](QUICK_START_GUIDE.md)** - Getting started guide
 
+### Dependency Injection
+- **[DI Learning Guide](DI_LEARNING_GUIDE.md)** - Complete DI tutorial and patterns
+- **[DI Adapter Implementation](DI_ADAPTER_IMPLEMENTATION.md)** - DI implementation for data adapters
+
 ## Implementation Progress
 
 ### Phase 1: Foundation & Domain Models

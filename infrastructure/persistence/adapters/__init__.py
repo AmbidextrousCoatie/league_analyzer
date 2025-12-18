@@ -1,6 +1,10 @@
 """
-Adapters
+Data Adapter Infrastructure
 
-Data adapters for different data sources (Pandas, SQLite, MySQL, etc.)
+Provides data adapter interfaces and implementations.
 """
 
+from infrastructure.persistence.adapters.data_adapter import DataAdapter
+from infrastructure.persistence.adapters.pandas_adapter import PandasDataAdapter
+
+__all__ = ["DataAdapter", "PandasDataAdapter"]
