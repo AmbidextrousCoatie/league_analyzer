@@ -1,13 +1,29 @@
 """
-Logging configuration.
+Logging configuration (deprecated).
 
-Sets up structured logging for the application.
+This module is deprecated. Use infrastructure.logging instead.
+
+For new code, use:
+    from infrastructure.logging import get_logger, setup_logging
 """
 
-import logging
-import sys
+import warnings
 from pathlib import Path
 from typing import Optional
+
+# Import from new location
+from infrastructure.logging.logger import (
+    get_logger as _get_logger,
+    setup_logging as _setup_logging,
+    Logger
+)
+
+warnings.warn(
+    "infrastructure.config.logging_config is deprecated. "
+    "Use infrastructure.logging instead.",
+    DeprecationWarning,
+    stacklevel=2
+)
 
 
 def setup_logging(
@@ -16,48 +32,25 @@ def setup_logging(
     format_string: Optional[str] = None
 ) -> None:
     """
-    Configure application logging.
+    Configure application logging (deprecated).
     
-    Args:
-        level: Logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
-        log_file: Optional path to log file
-        format_string: Optional custom format string
+    Use infrastructure.logging.setup_logging instead.
     """
-    log_level = getattr(logging, level.upper(), logging.INFO)
-    
-    if format_string is None:
-        format_string = (
-            "%(asctime)s - %(name)s - %(levelname)s - "
-            "%(filename)s:%(lineno)d - %(message)s"
-        )
-    
-    handlers = [logging.StreamHandler(sys.stdout)]
-    
-    if log_file:
-        log_file.parent.mkdir(parents=True, exist_ok=True)
-        handlers.append(logging.FileHandler(log_file))
-    
-    logging.basicConfig(
-        level=log_level,
-        format=format_string,
-        handlers=handlers,
-        datefmt="%Y-%m-%d %H:%M:%S"
+    enable_file = log_file is not None
+    _setup_logging(
+        level=level,
+        log_file=log_file,
+        format_string=format_string,
+        enable_console=True,
+        enable_file=enable_file
     )
-    
-    # Set specific logger levels
-    logging.getLogger("uvicorn").setLevel(logging.WARNING)
-    logging.getLogger("uvicorn.access").setLevel(logging.WARNING)
 
 
-def get_logger(name: str) -> logging.Logger:
+def get_logger(name: str) -> Logger:
     """
-    Get a logger instance.
+    Get a logger instance (deprecated).
     
-    Args:
-        name: Logger name (typically __name__)
-    
-    Returns:
-        Logger instance
+    Use infrastructure.logging.get_logger instead.
     """
-    return logging.getLogger(name)
+    return _get_logger(name)
 

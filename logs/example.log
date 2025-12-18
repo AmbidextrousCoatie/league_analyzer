@@ -1,0 +1,20 @@
+2025-12-18 12:18:37 - __main__ - INFO - logger.py:56 - ==================================================
+2025-12-18 12:18:37 - __main__ - INFO - logger.py:56 - Logging Example Started
+2025-12-18 12:18:37 - __main__ - INFO - logger.py:56 - ==================================================
+2025-12-18 12:18:37 - __main__ - DEBUG - logger.py:52 - Domain layer: Starting handicap calculation
+2025-12-18 12:18:37 - __main__ - INFO - logger.py:56 - Domain layer: Handicap calculated successfully
+2025-12-18 12:18:37 - __main__ - WARNING - logger.py:60 - Domain layer: Handicap exceeds maximum, capping at 50
+2025-12-18 12:18:37 - __main__ - INFO - logger.py:56 - Application layer: Processing CreateGame command
+2025-12-18 12:18:37 - __main__ - DEBUG - logger.py:52 - Application layer: Command validated, creating game
+2025-12-18 12:18:37 - __main__ - ERROR - logger.py:64 - Application layer: Failed to create game - validation error
+2025-12-18 12:18:37 - __main__ - DEBUG - logger.py:52 - Infrastructure layer: Connecting to database
+2025-12-18 12:18:37 - __main__ - INFO - logger.py:56 - Infrastructure layer: Database connection established
+2025-12-18 12:18:37 - __main__ - WARNING - logger.py:60 - Infrastructure layer: Database query took longer than expected
+2025-12-18 12:18:37 - __main__ - ERROR - logger.py:72 - Exception occurred during calculation
+Traceback (most recent call last):
+  File "C:\Users\cfell\OneDrive\Documents\001_repositories\league_analyzer\examples\logging_example.py", line 46, in example_exception_logging
+    result = 1 / 0
+ZeroDivisionError: division by zero
+2025-12-18 12:18:37 - __main__ - INFO - logger.py:56 - ==================================================
+2025-12-18 12:18:37 - __main__ - INFO - logger.py:56 - Logging Example Completed
+2025-12-18 12:18:37 - __main__ - INFO - logger.py:56 - ==================================================

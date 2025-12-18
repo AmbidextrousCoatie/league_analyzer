@@ -10,6 +10,7 @@ Run with:
 
 import sys
 import os
+from pathlib import Path
 
 # Add the project root directory to Python path (same as Flask wsgi.py)
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -18,7 +19,20 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from jinja2 import Environment, FileSystemLoader
-from pathlib import Path
+
+# Setup logging
+from infrastructure.logging import setup_logging, get_logger
+from infrastructure.config.settings import settings
+
+# Configure logging at startup
+log_file = Path(settings.log_file) if settings.log_file else None
+setup_logging(
+    level=settings.log_level,
+    log_file=log_file,
+    enable_file=bool(log_file)
+)
+
+logger = get_logger(__name__)
 
 # Create FastAPI application (equivalent to Flask's create_app())
 app = FastAPI(
@@ -28,6 +42,17 @@ app = FastAPI(
     docs_url="/docs",  # Swagger UI at /docs
     redoc_url="/redoc"  # ReDoc at /redoc
 )
+
+@app.on_event("startup")
+async def startup_event():
+    """Application startup event."""
+    logger.info("League Analyzer API starting up")
+    logger.info(f"Log level: {settings.log_level}")
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    """Application shutdown event."""
+    logger.info("League Analyzer API shutting down")
 
 # Mount static files from legacy v1 app (same as Flask)
 static_path = Path(__file__).parent / "league_analyzer_v1" / "app" / "static"
@@ -44,6 +69,7 @@ if templates_path.exists():
 @app.get("/")
 def hello_world():
     """Hello World endpoint - equivalent to Flask's index route"""
+    logger.info("Hello World endpoint accessed")
     return {
         "message": "Hello World! League Analyzer API is running.",
         "status": "ok",
