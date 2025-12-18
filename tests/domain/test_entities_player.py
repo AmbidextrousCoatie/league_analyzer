@@ -110,4 +110,44 @@ class TestPlayer:
         # Update handicap mid-season
         player.set_handicap(season, Handicap(25.0))
         assert player.get_handicap(season).value == 25.0
+    
+    def test_update_name(self):
+        """Test updating player name."""
+        player = Player(name="John Doe")
+        player.update_name("Jane Doe")
+        assert player.name == "Jane Doe"
+    
+    def test_update_name_empty_raises_error(self):
+        """Test that updating to empty name raises error."""
+        player = Player(name="John Doe")
+        with pytest.raises(ValueError, match="cannot be empty"):
+            player.update_name("")
+        with pytest.raises(ValueError, match="cannot be empty"):
+            player.update_name("   ")
+    
+    def test_player_equality(self):
+        """Test player equality based on ID."""
+        player1 = Player(name="John Doe")
+        player2 = Player(name="Jane Doe")
+        player3 = Player(name="John Doe")
+        player3.id = player1.id  # Same ID
+        
+        assert player1 == player3
+        assert player1 != player2
+        assert player1 != "not a player"
+    
+    def test_player_hash(self):
+        """Test player hashing."""
+        player1 = Player(name="John Doe")
+        player2 = Player(name="John Doe")
+        player2.id = player1.id
+        
+        assert hash(player1) == hash(player2)
+    
+    def test_player_repr(self):
+        """Test player string representation."""
+        player = Player(name="John Doe")
+        repr_str = repr(player)
+        assert "John Doe" in repr_str
+        assert str(player.id) in repr_str
 

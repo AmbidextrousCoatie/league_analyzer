@@ -73,6 +73,7 @@ class TestTeam:
         
         assert team1 == team3
         assert team1 != team2
+        assert team1 != "not a team"
     
     def test_team_hash(self):
         """Test team hashing."""
@@ -81,4 +82,11 @@ class TestTeam:
         team2.id = team1.id
         
         assert hash(team1) == hash(team2)
+    
+    def test_team_repr(self):
+        """Test team string representation."""
+        team = Team(name="Team Alpha")
+        repr_str = repr(team)
+        assert "Team Alpha" in repr_str
+        assert str(team.id) in repr_str
 

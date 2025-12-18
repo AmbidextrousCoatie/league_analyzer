@@ -208,4 +208,16 @@ class TestGame:
         
         with pytest.raises(InvalidGameData, match="must be positive"):
             game.update_week(-1)
+    
+    def test_create_game_negative_round_raises_error(self):
+        """Test that negative round number raises error."""
+        with pytest.raises(InvalidGameData, match="Round number must be positive"):
+            Game(
+                league_id=uuid4(),
+                season=Season("2024-25"),
+                week=1,
+                team_id=uuid4(),
+                opponent_team_id=uuid4(),
+                round_number=-1
+            )
 

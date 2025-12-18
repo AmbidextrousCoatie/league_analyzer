@@ -97,6 +97,14 @@ class TestScore:
         assert score1 == score3
         assert score1 != score2
     
+    def test_score_equality_with_non_score(self):
+        """Test that Score equality returns False for non-Score objects."""
+        score = Score(200.0)
+        assert score != "200.0"
+        assert score != 200.0
+        assert score != None
+        assert score != []
+    
     def test_score_to_float(self):
         """Test converting score to float."""
         score = Score(200.5)
