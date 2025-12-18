@@ -5,6 +5,7 @@
 ## Quick Links
 
 - 📋 [Development Manifesto](docs/DEVELOPMENT_MANIFESTO.md) - Core principles and practices
+- 📚 [Documentation Index](docs/README.md) - All documentation
 - 🏗️ [Architecture Design](docs/ARCHITECTURE_DESIGN.md) - System architecture
 - 🧪 [Testing Setup](docs/TESTING_SETUP.md) - Testing framework and practices
 - 📝 [Logging Strategy](docs/LOGGING_STRATEGY.md) - Logging guidelines

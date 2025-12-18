@@ -26196,29 +26196,382 @@ Updating the README and creating a summary:
 
 ---
 
-<tool-use data-tool-type="unknown" data-tool-name="write">
+<tool-use data-tool-type="write" data-tool-name="write">
+
+<details><summary>Tool use: **write** • Edit file: README.md</summary>
+
+**Chunk 1**
+Lines added: 94, lines removed: 1
+
+```diff
+@@ -1,1 +1,94 @@
+- # league_analyzer
++ # League Analyzer
++ 
++ &gt; **Development Manifesto**: All development follows our [Development Manifesto](docs/DEVELOPMENT_MANIFESTO.md). Read it before contributing.
++ 
++ ## Quick Links
++ 
++ - 📋 [Development Manifesto](docs/DEVELOPMENT_MANIFESTO.md) - Core principles and practices
++ - 🏗️ [Architecture Design](docs/ARCHITECTURE_DESIGN.md) - System architecture
++ - 🧪 [Testing Setup](docs/TESTING_SETUP.md) - Testing framework and practices
++ - 📝 [Logging Strategy](docs/LOGGING_STRATEGY.md) - Logging guidelines
++ - 🔄 [Refactoring Strategy](docs/REFACTORING_STRATEGY_REVISED.md) - Development plan
++ - 📖 [Contributing Guide](CONTRIBUTING.md) - How to contribute
++ 
++ ## Development Principles
++ 
++ - ✅ **Test-Driven Development (TDD)** - Write tests first
++ - ✅ **Clean Architecture** - Domain → Application → Infrastructure → Presentation
++ - ✅ **Domain-Driven Design (DDD)** - Rich domain models with business logic
++ - ✅ **CQRS** - Separate commands and queries
++ - ✅ **Dependency Injection** - No globals, no singletons
++ - ✅ **Logging Only** - NO &#96;print()&#96; statements
++ - ✅ **Type Hints** - Always use type annotations
++ - ✅ **100% Domain Coverage** - Critical business logic fully tested
++ 
++ See [Development Manifesto](docs/DEVELOPMENT_MANIFESTO.md) for complete guidelines.
++ 
++ ---
++ 
++ ## Project Overview
++ 
++ League Analyzer is a bowling league statistics and analytics application.
++ 
++ ### Current Status
++ 
++ - ✅ Phase 1: Foundation &amp; Domain Models (Complete)
++ - ✅ Test Framework Setup (159 tests, 76% coverage)
++ - ✅ Logging Infrastructure (Standard library, no dependencies)
++ - 🚧 Phase 2: Application Layer (In Progress)
++ 
++ ### Tech Stack
++ 
++ - **Backend**: FastAPI (Python)
++ - **Frontend**: Vue.js 3 + TypeScript (planned)
++ - **Testing**: pytest + pytest-cov
++ - **Architecture**: Clean Architecture + DDD + CQRS
++ 
++ ## Getting Started
++ 
++ ### Prerequisites
++ 
++ - Python 3.10+
++ - pip
++ 
++ ### Installation
++ 
++ &#96;&#96;&#96;bash
++ # Install dependencies
++ pip install -r requirements.txt
++ 
++ # Run tests
++ pytest
++ 
++ # Start development server
++ python main.py
++ &#96;&#96;&#96;
++ 
++ ## Project Structure
++ 
++ &#96;&#96;&#96;
++ league_analyzer/
++ ├── domain/              # Domain layer (business logic)
++ ├── application/         # Application layer (use cases)
++ ├── infrastructure/      # Infrastructure layer (external concerns)
++ ├── presentation/        # Presentation layer (API endpoints)
++ ├── tests/              # Test suite
++ └── docs/               # Documentation
++ &#96;&#96;&#96;
++ 
++ ## Development Workflow
++ 
++ 1. **Read the Manifesto**: [Development Manifesto](docs/DEVELOPMENT_MANIFESTO.md)
++ 2. **Write Tests First**: Follow TDD principles
++ 3. **Follow Architecture**: Domain → Application → Infrastructure → Presentation
++ 4. **Use Logging**: NO &#96;print()&#96; statements
++ 5. **Run Tests**: &#96;pytest&#96; must pass before committing
++ 
++ ## Contributing
++ 
++ See [CONTRIBUTING.md](CONTRIBUTING.md) for contribution guidelines.
++ 
++ ## License
++ 
++ [Your License Here]
++ 
+```
+
+</details>
+
+</tool-use>
+
+---
+
+<tool-use data-tool-type="write" data-tool-name="write">
+
+<details><summary>Tool use: **write** • Edit file: docs/MANIFESTO_SUMMARY.md</summary>
+
+**Chunk 1**
+Lines added: 64, lines removed: 1
+
+```diff
+@@ -1,1 +1,64 @@
+- 
++ # Development Manifesto - Summary
++ 
++ ## The Core Principles
++ 
++ ### 1. Architecture
++ - **Clean Architecture**: Domain → Application → Infrastructure → Presentation
++ - **Domain-Driven Design**: Rich domain models with business logic
++ - **CQRS**: Separate commands and queries
++ - **Dependency Injection**: No globals, no singletons
++ - **Event-Driven**: Use domain events for side effects
++ 
++ ### 2. Testing
++ - **TDD**: Write tests first (Red → Green → Refactor)
++ - **Coverage**: Domain 100%, Application 90%+, Infrastructure 80%+
++ - **All tests are regression tests**
++ 
++ ### 3. Logging
++ - **NO &#96;print()&#96; statements** - Use logging only
++ - **Multiple levels**: DEBUG, INFO, WARNING, ERROR, CRITICAL
++ - **Multiple channels**: Console and file
++ 
++ ### 4. Code Quality
++ - **Type hints**: Always use type annotations
++ - **Single Responsibility**: One reason to change
++ - **DRY**: Don't repeat yourself
++ - **KISS**: Keep it simple
++ 
++ ### 5. Development Workflow
++ - **Think before coding**: Understand the problem
++ - **Write tests first**: TDD approach
++ - **Run tests frequently**: After each change
++ - **Check before commit**: Tests pass, coverage met, no print()
++ 
++ ## The Absolute Rules
++ 
++ 1. ❌ **NO &#96;print()&#96;** → ✅ Use &#96;logger.info()&#96;
++ 2. ✅ **Write tests first** → TDD
++ 3. ✅ **Domain logic in domain** → Not in services
++ 4. ✅ **Dependencies inward** → Clean Architecture
++ 5. ✅ **Type hints always** → Every function
++ 6. ✅ **Validate input** → Never trust user input
++ 7. ✅ **Log exceptions** → Use &#96;logger.exception()&#96;
++ 8. ✅ **Tests before commit** → &#96;pytest&#96; must pass
++ 
++ ## Quick Checklist
++ 
++ Before committing:
++ - [ ] Tests pass (&#96;pytest&#96;)
++ - [ ] Coverage met (&#96;pytest --cov&#96;)
++ - [ ] No &#96;print()&#96; statements
++ - [ ] Logging in place
++ - [ ] Type hints added
++ - [ ] Domain logic in domain
++ - [ ] Dependencies injected
++ - [ ] Input validated
++ 
++ ## Resources
++ 
++ - **Full Manifesto**: [DEVELOPMENT_MANIFESTO.md](DEVELOPMENT_MANIFESTO.md)
++ - **Quick Reference**: [MANIFESTO_QUICK_REFERENCE.md](MANIFESTO_QUICK_REFERENCE.md)
++ - **Architecture**: [ARCHITECTURE_DESIGN.md](ARCHITECTURE_DESIGN.md)
++ - **Testing**: [TESTING_SETUP.md](TESTING_SETUP.md)
++ - **Logging**: [LOGGING_STRATEGY.md](LOGGING_STRATEGY.md)
++ 
+```
+
+</details>
+
+</tool-use>
+
+---
+
+
+
+---
+
+
+Created a Development Manifesto for the project. Summary:
+
+## Development Manifesto Created
+
+### Documents Created
+
+1. **`docs/DEVELOPMENT_MANIFESTO.md`** — Main manifesto
+   - 14 sections covering principles and practices
+   - Architecture, Testing, Logging, Code Quality, etc.
+   - Rules, guidelines, and best practices
+
+2. **`docs/MANIFESTO_QUICK_REFERENCE.md`** — Quick reference
+   - Absolute rules
+   - Quick checklist
+   - Common patterns
+
+3. **`docs/MANIFESTO_SUMMARY.md`** — Executive summary
+   - Core principles overview
+   - Quick checklist
+   - Links to detailed docs
+
+4. **`CONTRIBUTING.md`** — Contribution guide
+   - How to contribute
+   - Development process
+   - Code standards
+
+5. **`.gitmessage`** — Commit message template
+   - Standardized commit format
+   - Examples
+
+6. **Updated `README.md`** — Links to manifesto
+
+### Core Principles Documented
+
+#### 1. Architecture Principles
+- Clean Architecture (layered)
+- Domain-Driven Design (rich models)
+- CQRS (commands/queries separation)
+- Dependency Injection (no globals)
+- Event-Driven Architecture
+
+#### 2. Testing Principles
+- Test-Driven Development (TDD)
+- Coverage targets (Domain 100%, App 90%+, Infra 80%+)
+- Test organization and structure
+- Regression testing
+
+#### 3. Logging Principles
+- NO `print()` statements
+- Use logging infrastructure
+- Appropriate log levels
+- Best practices
+
+#### 4. Code Quality
+- Type hints always
+- Single Responsibility
+- DRY and KISS
+- Documentation standards
+
+#### 5. Development Workflow
+- Think before coding
+- Write tests first
+- Run tests frequently
+- Check before commit
+
+### The Absolute Rules
+
+1. ❌ NO `print()` → ✅ Use logging
+2. ✅ Write tests first → TDD
+3. ✅ Domain logic in domain → Not in services
+4. ✅ Dependencies inward → Clean Architecture
+5. ✅ Type hints always → Every function
+6. ✅ Validate input → Never trust user input
+7. ✅ Log exceptions → Use `logger.exception()`
+8. ✅ Tests before commit → `pytest` must pass
+
+### Quick Checklist
+
+Before committing:
+- [ ] Tests pass (`pytest`)
+- [ ] Coverage met (`pytest --cov`)
+- [ ] No `print()` statements
+- [ ] Logging in place
+- [ ] Type hints added
+- [ ] Domain logic in domain
+- [ ] Dependencies injected
+- [ ] Input validated
+
+### Integration
+
+- README links to manifesto
+- Contributing guide references manifesto
+- Commit template encourages good practices
+- Quick reference for daily use
+
+The manifesto codifies the principles we've been following and provides a clear guide for all future development. It emphasizes:
+- Quality over speed
+- Testing as a first-class citizen
+- Clean architecture
+- Maintainability
+- Developer experience
+
+All developers should read `docs/DEVELOPMENT_MANIFESTO.md` before contributing.
+
+---
+
+_**User (2025-12-18 10:57Z)**_
+
+fyi: i moved our Development planning documents from the legacy folder to ./docs
+
+---
+
+_**Agent (model default, mode Agent)**_
+
+
+
+---
+
+
+Checking the docs structure and updating references if needed:
+
+
+---
+
+<tool-use data-tool-type="generic" data-tool-name="list_dir">
 <details>
-<summary>Tool use: **write**</summary>
+            <summary>Tool use: **list_dir** • Listed directory, 0 results</summary>
+        
+No results found
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="generic" data-tool-name="list_dir">
+<details>
+            <summary>Tool use: **list_dir** • Listed directory, 0 results</summary>
+        
+No results found
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="search" data-tool-name="grep">
+<details>
+<summary>Tool use: **grep** • Grep for "league_analyzer_v1/docs" in "docs" • 0 matches</summary>
+
+Output mode: content
 
 
-Parameters:
+_No matches found_
 
-```json
-{
-  "relativeWorkspacePath": "README.md"
-}
-```
-Additional data:
+</details>
+</tool-use>
 
-```json
-{
-  "codeblockId": "74b2b319-2f95-4a1c-abd9-30cbe0b3d74a"
-}
-```
-User decision: **accepted**
+---
 
-Status: **loading**
+<tool-use data-tool-type="search" data-tool-name="grep">
+<details>
+<summary>Tool use: **grep** • Grep for "REFACTORING_STRATEGY" in "docs" • 1 match</summary>
 
+Output mode: content
+
+
+| File | Content | Line |
+|------|------|------|
+| `docs\DEVELOPMENT_MANIFESTO.md` | `- **Refactoring Plan**: `docs/REFACTORING_STRATEGY_REVISED.md`` | L396 |
+
+
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="read" data-tool-name="read_file">
+<details><summary>Tool use: **read_file** • Read file: docs/DEVELOPMENT_MANIFESTO.md</summary>
 
 </details>
 </tool-use>
@@ -26230,10 +26583,195 @@ Status: **loading**
 ---
 
 
+Verifying documentation structure and creating a docs index for easy navigation:
+
+
+---
+
+<tool-use data-tool-type="write" data-tool-name="write">
+
+<details><summary>Tool use: **write** • Edit file: docs/README.md</summary>
+
+**Chunk 1**
+Lines added: 71, lines removed: 1
+
+```diff
+@@ -1,1 +1,71 @@
+- 
++ # Documentation Index
++ 
++ This directory contains all documentation for League Analyzer v2.
++ 
++ ## Core Documentation
++ 
++ ### Development Principles
++ - **[Development Manifesto](DEVELOPMENT_MANIFESTO.md)** - Core principles, practices, and standards
++ - **[Manifesto Quick Reference](MANIFESTO_QUICK_REFERENCE.md)** - Quick checklist and common patterns
++ - **[Manifesto Summary](MANIFESTO_SUMMARY.md)** - Executive summary
++ 
++ ### Architecture &amp; Design
++ - **[Architecture Design](ARCHITECTURE_DESIGN.md)** - System architecture (Clean Architecture, DDD, CQRS)
++ - **[Architecture Review](ARCHITECTURE_REVIEW.md)** - Initial architecture analysis of v1
++ 
++ ### Development Planning
++ - **[Refactoring Strategy (Revised)](REFACTORING_STRATEGY_REVISED.md)** - Phased refactoring plan
++ - **[Scope Analysis](SCOPE_ANALYSIS.md)** - Current and desired scope
++ - **[Tech Stack Analysis](TECH_STACK_ANALYSIS.md)** - Technology choices and rationale
++ 
++ ### Testing
++ - **[Testing Setup](TESTING_SETUP.md)** - Testing framework and practices
++ - **[Test Coverage Gaps](TEST_COVERAGE_GAPS.md)** - Coverage analysis and gaps
++ 
++ ### Logging
++ - **[Logging Strategy](LOGGING_STRATEGY.md)** - Logging guidelines and best practices
++ - **[Logging Quick Reference](LOGGING_QUICK_REFERENCE.md)** - Quick reference guide
++ 
++ ### Deployment &amp; Setup
++ - **[FastAPI Deployment Guide](FASTAPI_DEPLOYMENT_GUIDE.md)** - Deployment instructions
++ - **[Quick Start Guide](QUICK_START_GUIDE.md)** - Getting started guide
++ 
++ ## Implementation Progress
++ 
++ ### Phase 1: Foundation &amp; Domain Models
++ - **[Phase 1 Week 1 Complete](PHASE1_WEEK1_COMPLETE.md)** - Project structure and DI setup
++ - **[Phase 1 Week 2 Complete](going_modern/PHASE1_WEEK2_COMPLETE.md)** - Domain models implementation
++ - **[Handicap Feature](going_modern/HANDICAP_FEATURE.md)** - Handicap implementation
++ - **[Handicap Calculation Enhancement](going_modern/HANDICAP_CALCULATION_ENHANCEMENT.md)** - Enhanced handicap features
++ 
++ ## Documentation Structure
++ 
++ &#96;&#96;&#96;
++ docs/
++ ├── README.md (this file)
++ ├── DEVELOPMENT_MANIFESTO.md
++ ├── ARCHITECTURE_DESIGN.md
++ ├── REFACTORING_STRATEGY_REVISED.md
++ ├── TESTING_SETUP.md
++ ├── LOGGING_STRATEGY.md
++ └── going_modern/
++     └── (implementation progress docs)
++ &#96;&#96;&#96;
++ 
++ ## Quick Links
++ 
++ - **Start Here**: [Development Manifesto](DEVELOPMENT_MANIFESTO.md)
++ - **Architecture**: [Architecture Design](ARCHITECTURE_DESIGN.md)
++ - **Testing**: [Testing Setup](TESTING_SETUP.md)
++ - **Logging**: [Logging Strategy](LOGGING_STRATEGY.md)
++ - **Planning**: [Refactoring Strategy](REFACTORING_STRATEGY_REVISED.md)
++ 
++ ## Contributing
++ 
++ When adding new documentation:
++ 
++ 1. Place in appropriate directory (&#96;docs/&#96; for general docs, &#96;docs/going_modern/&#96; for implementation progress)
++ 2. Update this index
++ 3. Link from relevant documents
++ 4. Follow documentation standards (clear, concise, examples)
++ 
+```
+
+</details>
+
+</tool-use>
+
+---
+
+<tool-use data-tool-type="read" data-tool-name="read_file">
+<details><summary>Tool use: **read_file** • Read file: README.md</summary>
+
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="write" data-tool-name="search_replace">
+
+<details><summary>Tool use: **search_replace** • Edit file: README.md</summary>
+
+**Chunk 1**
+Lines added: 1, lines removed: undefined
+
+```diff
+@@ -6,4 +6,5 @@
+  
+  - 📋 [Development Manifesto](docs/DEVELOPMENT_MANIFESTO.md) - Core principles and practices
++ - 📚 [Documentation Index](docs/README.md) - All documentation
+  - 🏗️ [Architecture Design](docs/ARCHITECTURE_DESIGN.md) - System architecture
+  - 🧪 [Testing Setup](docs/TESTING_SETUP.md) - Testing framework and practices
+```
+
+</details>
+
+</tool-use>
+
+---
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_cmd">
+<details><summary>Tool use: **run_terminal_cmd** • Run command: python -c "import os; docs = [f for f in os.listdir('docs') if f.endswith('.md')]; print(f'Found {len(docs)} markdown files in docs/'); print('\\n'.join(sorted(docs)))"</summary>
+
+```bash
+python -c "import os; docs = [f for f in os.listdir('docs') if f.endswith('.md')]; print(f'Found {len(docs)} markdown files in docs/'); print('\\n'.join(sorted(docs)))"
+```
+
+```
+Found 16 markdown files in docs/
+ARCHITECTURE_DESIGN.md\nARCHITECTURE_REVIEW.md\nDEVELOPMENT_MANIFESTO.md\nFASTAPI_DEPLOYMENT_GUIDE.md\nLOGGING_QUICK_REFERENCE.md\nLOGGING_STRATEGY.md\nMANIFESTO_QUICK_REFERENCE.md\nMANIFESTO_SUMMARY.md\nPHASE1_WEEK1_COMPLETE.md\nQUICK_START_GUIDE.md\nREADME.md\nREFACTORING_STRATEGY_REVISED.md\nSCOPE_ANALYSIS.md\nTECH_STACK_ANALYSIS.md\nTESTING_SETUP.md\nTEST_COVERAGE_GAPS.md
+
+```
+</details>
+</tool-use>
 
 ---
 
 
+
+---
+
+
+Documentation is consolidated. Created a documentation index and updated references.
+
+## Documentation Structure Updated
+
+### Created `docs/README.md`
+- Documentation index with all docs organized by category
+- Quick links to important documents
+- Structure overview
+
+### Updated Main `README.md`
+- Added link to Documentation Index
+- All references point to `docs/` (no legacy folder references)
+
+### Current Documentation Structure
+
+```
+docs/
+├── README.md (NEW - Documentation Index)
+├── DEVELOPMENT_MANIFESTO.md
+├── ARCHITECTURE_DESIGN.md
+├── REFACTORING_STRATEGY_REVISED.md
+├── SCOPE_ANALYSIS.md
+├── TECH_STACK_ANALYSIS.md
+├── TESTING_SETUP.md
+├── TEST_COVERAGE_GAPS.md
+├── LOGGING_STRATEGY.md
+├── LOGGING_QUICK_REFERENCE.md
+├── FASTAPI_DEPLOYMENT_GUIDE.md
+├── QUICK_START_GUIDE.md
+├── PHASE1_WEEK1_COMPLETE.md
+└── going_modern/
+    ├── PHASE1_WEEK2_COMPLETE.md
+    ├── HANDICAP_FEATURE.md
+    └── HANDICAP_CALCULATION_ENHANCEMENT.md
+```
+
+### All References Verified
+
+- ✅ `DEVELOPMENT_MANIFESTO.md` references point to `docs/REFACTORING_STRATEGY_REVISED.md`
+- ✅ No references to `league_analyzer_v1/docs` in main docs
+- ✅ Main README links updated
+
+The documentation is now centralized in `docs/` with a clear index for navigation. All development planning documents are accessible from the main documentation index.
 
 ---
 
