@@ -28,7 +28,7 @@ class TestStandingsCalculator:
         team2 = Team(id=uuid4(), name="Team B")
         
         # Create league
-        league = League(id=uuid4(), name="Test League", season=Season("2024-25"))
+        league = League(id=uuid4(), name="Test League", level=3)
         league.add_team(team1)
         league.add_team(team2)
         
@@ -124,7 +124,7 @@ class TestStandingsCalculator:
         team1 = Team(id=uuid4(), name="Team A")
         team2 = Team(id=uuid4(), name="Team B")
         
-        league = League(id=uuid4(), name="Test League", season=Season("2024-25"))
+        league = League(id=uuid4(), name="Test League", level=3)
         league.add_team(team1)
         league.add_team(team2)
         
@@ -236,7 +236,7 @@ class TestStandingsCalculator:
         team1 = Team(id=uuid4(), name="Team A")
         team2 = Team(id=uuid4(), name="Team B")
         
-        league = League(id=uuid4(), name="Test League", season=Season("2024-25"))
+        league = League(id=uuid4(), name="Test League", level=3)
         
         # Both teams have 2 points, but Team 1 has higher total score
         game1 = Game(

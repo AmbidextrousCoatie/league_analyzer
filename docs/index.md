@@ -44,6 +44,8 @@ This documentation provides everything you need to understand, develop, and main
 - [Data Schema Analysis](planning/DATA_SCHEMA_ANALYSIS.md) - Database schema analysis and design discussion
 - [Domain Scopes & Lifecycle](planning/DOMAIN_SCOPES_AND_LIFECYCLE.md) - Domain scopes and lifecycle phases
 - [Domain Decisions Summary](planning/DOMAIN_DECISIONS_SUMMARY.md) - Key design decisions for Phase 2
+- [Storage Scalability Analysis](planning/STORAGE_SCALABILITY_ANALYSIS.md) - CSV scalability and migration strategy
+- [Repository Migration Design](planning/REPOSITORY_MIGRATION_DESIGN.md) - Repository pattern for easy CSV→SQL migration
 
 ### 📈 [Project Management](pm/)
 - [Current Status](pm/CURRENT_STATUS.md) - **Current project status and next steps**

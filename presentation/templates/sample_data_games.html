@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            padding: 40px;
+        }
+        h1 { color: #333; margin-bottom: 30px; }
+        .nav { margin-bottom: 30px; padding-bottom: 20px; border-bottom: 2px solid #e9ecef; }
+        .nav a { color: #667eea; text-decoration: none; margin-right: 20px; }
+        .nav a:hover { text-decoration: underline; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e9ecef;
+        }
+        th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #333;
+        }
+        tr:hover { background: #f8f9fa; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="nav">
+            <a href="/sample-data">← Back to Sample Data</a>
+        </div>
+        <h1>🎮 Games</h1>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Event ID</th>
+                    <th>Team ID</th>
+                    <th>Opponent Team ID</th>
+                    <th>Match #</th>
+                    <th>Round #</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for game in games %}
+                <tr>
+                    <td><code>{{ game.id }}</code></td>
+                    <td><code>{{ game.event_id or '-' }}</code></td>
+                    <td><code>{{ game.team_id or '-' }}</code></td>
+                    <td><code>{{ game.opponent_team_id or '-' }}</code></td>
+                    <td><strong>{{ game.match_number }}</strong></td>
+                    <td>{{ game.round_number }}</td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="6" style="text-align: center; color: #666; padding: 40px;">
+                        No games found. Run <code>scripts/seed_sample_data.py</code> to create sample data.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>
+

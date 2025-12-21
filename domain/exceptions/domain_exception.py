@@ -33,3 +33,7 @@ class InvalidTeamOperation(DomainException):
     """Raised when a team operation violates business rules."""
     pass
 
+
+class EntityNotFoundError(DomainException):
+    """Raised when an entity is not found in the repository."""
+    pass

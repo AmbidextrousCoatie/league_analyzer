@@ -135,6 +135,17 @@ def test_table_data():
 from presentation.api.temp_demo_routes import router as temp_demo_router
 app.include_router(temp_demo_router)
 
+# Import sample_data_routes - register BEFORE other routes to ensure it's included
+try:
+    from presentation.api.sample_data_routes import router as sample_data_router
+    app.include_router(sample_data_router)
+    logger.info(f"Sample data router registered: {len(sample_data_router.routes)} routes")
+    logger.info(f"Sample data router prefix: {sample_data_router.prefix}")
+    logger.info(f"Sample data router tags: {sample_data_router.tags}")
+except Exception as e:
+    logger.error(f"FAILED to register sample_data_router: {e}", exc_info=True)
+    raise
+
 # Demo page route
 @app.get("/demo", response_class=HTMLResponse)
 def demo_page(request: Request):
@@ -157,13 +168,23 @@ def demo_links_page(request: Request):
 if __name__ == '__main__':
     import uvicorn
     
+    # Log all registered routes at startup
+    logger.info("=" * 60)
+    logger.info("REGISTERED ROUTES:")
+    for route in app.routes:
+        if hasattr(route, 'path'):
+            methods = getattr(route, 'methods', set())
+            methods_str = ', '.join(sorted(methods)) if methods else 'N/A'
+            logger.info(f"  {route.path:50} [{methods_str}]")
+    logger.info("=" * 60)
+    
     # Run with auto-reload (same as Flask's debug=True)
     uvicorn.run(
         "main:app",  # Import path to FastAPI app
         host="127.0.0.1",
         port=5000,  # Same port as Flask
         reload=True,  # Auto-reload on code changes (like Flask's debug=True)
-        reload_dirs=["./app", "./domain", "./application"],  # Watch these directories
+        reload_dirs=["./app", "./domain", "./application", "./presentation"],  # Watch these directories
         log_level="info"
     )
 

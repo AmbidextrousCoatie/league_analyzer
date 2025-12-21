@@ -109,7 +109,7 @@ def sample_player():
 @pytest.fixture
 def sample_league(sample_season):
     """Fixture for a valid League entity."""
-    return League(name="Test League", season=sample_season)
+    return League(name="Test League", abbreviation="TEST", level=3)
 
 
 @pytest.fixture

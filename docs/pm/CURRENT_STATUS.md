@@ -42,20 +42,49 @@
 
 ## 🚧 Current Phase: Phase 2 - Infrastructure Layer
 
-### Week 4: Repository Interfaces (CURRENT FOCUS)
+### Week 4: Repository Interfaces - **✅ COMPLETE**
 
 **Goal:** Define repository interfaces for data access (read + write operations)
 
+**Completed:**
+- ✅ `BaseRepository` interface (common CRUD operations)
+- ✅ `LeagueRepository` interface
+- ✅ `TeamRepository` interface  
+- ✅ `PlayerRepository` interface
+- ✅ `GameRepository` interface
+- ✅ `EventRepository` interface
+- ✅ `TeamSeasonRepository` interface
+- ✅ `LeagueSeasonRepository` interface
+
+**All interfaces are storage-agnostic and ready for CSV implementation (Week 5).**
+
+### Week 5: CSV Repository Implementations (CURRENT FOCUS)
+
+**Goal:** Implement CSV repositories using Pandas DataFrames  
+**Approach:** Test-Driven Development (TDD)
+
+**Status:** 🔴 RED Phase - Tests Written, Implementation Pending
+
+**TDD Progress:**
+- ✅ **EventRepository Tests** - 14 comprehensive tests written
+- ⏳ **EventRepository Implementation** - Next step
+- ⏳ **Other Repository Tests** - To be written following TDD
+- ⏳ **Other Repository Implementations** - After tests
+
 **What We Need to Do:**
 
-1. **Define Repository Interfaces** for all domain entities:
-   - `LeagueRepository` interface
-   - `TeamRepository` interface  
-   - `PlayerRepository` interface
-   - `GameRepository` interface
-   - `EventRepository` interface (NEW)
-   - `TeamSeasonRepository` interface (NEW)
-   - `LeagueSeasonRepository` interface (NEW)
+1. **TDD: Write Tests First** (In Progress)
+   - ✅ EventRepository tests complete
+   - ⏳ Write tests for remaining repositories
+
+2. **TDD: Implement to Pass Tests** (Next)
+   - ⏳ Create CSV mapper layer
+   - ⏳ Implement CSV repositories
+   - ⏳ Extend DataAdapter for write operations
+
+3. **TDD: Refactor** (After Green)
+   - ⏳ Improve code quality
+   - ⏳ Optimize performance
 
 2. **Extend Base Repository** with:
    - Query specifications (filtering, sorting)

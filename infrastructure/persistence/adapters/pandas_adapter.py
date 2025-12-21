@@ -100,4 +100,262 @@ class PandasDataAdapter(DataAdapter):
         
         logger.debug(f"Found {len(filtered)} rows for game {game_id}")
         return filtered
+    
+    def get_event_data(self) -> pd.DataFrame:
+        """
+        Get all event data from event.csv.
+        
+        Returns:
+            DataFrame with all event data
+        """
+        # If data_path is event.csv itself, use it directly
+        if self.data_path.name == "event.csv":
+            event_path = self.data_path
+        elif self.data_path.is_dir():
+            # If data_path is a directory, look for event.csv inside it
+            event_path = self.data_path / "event.csv"
+        else:
+            # Otherwise, look for event.csv in the same directory
+            event_path = self.data_path.parent / "event.csv"
+        
+        if not event_path.exists():
+            logger.warning(f"Event file not found: {event_path}, returning empty DataFrame")
+            return pd.DataFrame(columns=[
+                'id', 'league_season_id', 'event_type', 'league_week', 'tournament_stage',
+                'date', 'venue_id', 'oil_pattern_id', 'status', 'disqualification_reason', 'notes'
+            ])
+        
+        logger.debug(f"Loading event data from {event_path}")
+        df = pd.read_csv(event_path)
+        logger.info(f"Loaded {len(df)} events from {event_path}")
+        return df
+    
+    def save_event_data(self, df: pd.DataFrame) -> None:
+        """
+        Save event data to event.csv.
+        
+        Args:
+            df: DataFrame with event data to save
+        """
+        # If data_path is event.csv itself, use it directly
+        if self.data_path.name == "event.csv":
+            event_path = self.data_path
+        elif self.data_path.is_dir():
+            # If data_path is a directory, save to event.csv inside it
+            event_path = self.data_path / "event.csv"
+        else:
+            # Otherwise, save to event.csv in the same directory
+            event_path = self.data_path.parent / "event.csv"
+        
+        logger.debug(f"Saving {len(df)} events to {event_path}")
+        df.to_csv(event_path, index=False)
+        logger.info(f"Saved {len(df)} events to {event_path}")
+        # Invalidate cache if exists
+        if hasattr(self, '_event_data'):
+            self._event_data = None
+    
+    def get_league_season_data(self) -> pd.DataFrame:
+        """
+        Get all league season data from league_season.csv.
+        
+        Returns:
+            DataFrame with all league season data
+        """
+        league_season_path = (self.data_path / "league_season.csv") if self.data_path.is_dir() else (self.data_path.parent / "league_season.csv")
+        if not league_season_path.exists():
+            logger.warning(f"League season file not found: {league_season_path}, returning empty DataFrame")
+            return pd.DataFrame(columns=[
+                'id', 'league_id', 'season', 'scoring_system_id',
+                'number_of_teams', 'players_per_team'
+            ])
+        
+        logger.debug(f"Loading league season data from {league_season_path}")
+        df = pd.read_csv(league_season_path)
+        logger.info(f"Loaded {len(df)} league seasons from {league_season_path}")
+        return df
+    
+    def save_league_season_data(self, df: pd.DataFrame) -> None:
+        """
+        Save league season data to league_season.csv.
+        
+        Args:
+            df: DataFrame with league season data to save
+        """
+        league_season_path = (self.data_path / "league_season.csv") if self.data_path.is_dir() else (self.data_path.parent / "league_season.csv")
+        logger.debug(f"Saving {len(df)} league seasons to {league_season_path}")
+        df.to_csv(league_season_path, index=False)
+        logger.info(f"Saved {len(df)} league seasons to {league_season_path}")
+        # Invalidate cache if exists
+        if hasattr(self, '_league_season_data'):
+            self._league_season_data = None
+    
+    def get_team_season_data(self) -> pd.DataFrame:
+        """
+        Get all team season data from team_season.csv.
+        
+        Returns:
+            DataFrame with all team season data
+        """
+        team_season_path = (self.data_path / "team_season.csv") if self.data_path.is_dir() else (self.data_path.parent / "team_season.csv")
+        if not team_season_path.exists():
+            logger.warning(f"Team season file not found: {team_season_path}, returning empty DataFrame")
+            return pd.DataFrame(columns=[
+                'id', 'league_season_id', 'club_id', 'team_number', 'vacancy_status'
+            ])
+        
+        logger.debug(f"Loading team season data from {team_season_path}")
+        df = pd.read_csv(team_season_path)
+        logger.info(f"Loaded {len(df)} team seasons from {team_season_path}")
+        return df
+    
+    def save_team_season_data(self, df: pd.DataFrame) -> None:
+        """
+        Save team season data to team_season.csv.
+        
+        Args:
+            df: DataFrame with team season data to save
+        """
+        team_season_path = (self.data_path / "team_season.csv") if self.data_path.is_dir() else (self.data_path.parent / "team_season.csv")
+        logger.debug(f"Saving {len(df)} team seasons to {team_season_path}")
+        df.to_csv(team_season_path, index=False)
+        logger.info(f"Saved {len(df)} team seasons to {team_season_path}")
+        # Invalidate cache if exists
+        if hasattr(self, '_team_season_data'):
+            self._team_season_data = None
+    
+    def get_game_data(self) -> pd.DataFrame:
+        """
+        Get all game data from game.csv.
+        
+        Returns:
+            DataFrame with all game data
+        """
+        game_path = (self.data_path / "game.csv") if self.data_path.is_dir() else (self.data_path.parent / "game.csv")
+        if not game_path.exists():
+            logger.warning(f"Game file not found: {game_path}, returning empty DataFrame")
+            return pd.DataFrame(columns=[
+                'id', 'event_id', 'team_season_id', 'match_number', 'round_number'
+            ])
+        
+        logger.debug(f"Loading game data from {game_path}")
+        df = pd.read_csv(game_path)
+        logger.info(f"Loaded {len(df)} games from {game_path}")
+        return df
+    
+    def save_game_data(self, df: pd.DataFrame) -> None:
+        """
+        Save game data to game.csv.
+        
+        Args:
+            df: DataFrame with game data to save
+        """
+        game_path = (self.data_path / "game.csv") if self.data_path.is_dir() else (self.data_path.parent / "game.csv")
+        logger.debug(f"Saving {len(df)} games to {game_path}")
+        df.to_csv(game_path, index=False)
+        logger.info(f"Saved {len(df)} games to {game_path}")
+        # Invalidate cache if exists
+        if hasattr(self, '_game_data'):
+            self._game_data = None
+    
+    def get_player_data(self) -> pd.DataFrame:
+        """
+        Get all player data from player.csv.
+        
+        Returns:
+            DataFrame with all player data
+        """
+        player_path = (self.data_path / "player.csv") if self.data_path.is_dir() else (self.data_path.parent / "player.csv")
+        if not player_path.exists():
+            logger.warning(f"Player file not found: {player_path}, returning empty DataFrame")
+            return pd.DataFrame(columns=[
+                'id', 'given_name', 'family_name', 'full_name', 'club_id'
+            ])
+        
+        logger.debug(f"Loading player data from {player_path}")
+        df = pd.read_csv(player_path)
+        logger.info(f"Loaded {len(df)} players from {player_path}")
+        return df
+    
+    def save_player_data(self, df: pd.DataFrame) -> None:
+        """
+        Save player data to player.csv.
+        
+        Args:
+            df: DataFrame with player data to save
+        """
+        player_path = (self.data_path / "player.csv") if self.data_path.is_dir() else (self.data_path.parent / "player.csv")
+        logger.debug(f"Saving {len(df)} players to {player_path}")
+        df.to_csv(player_path, index=False)
+        logger.info(f"Saved {len(df)} players to {player_path}")
+        # Invalidate cache if exists
+        if hasattr(self, '_player_data'):
+            self._player_data = None
+    
+    def get_league_data(self) -> pd.DataFrame:
+        """
+        Get all league data from league.csv.
+        
+        Returns:
+            DataFrame with all league data
+        """
+        league_path = (self.data_path / "league.csv") if self.data_path.is_dir() else (self.data_path.parent / "league.csv")
+        if not league_path.exists():
+            logger.warning(f"League file not found: {league_path}, returning empty DataFrame")
+            return pd.DataFrame(columns=[
+                'id', 'name', 'short_name'
+            ])
+        
+        logger.debug(f"Loading league data from {league_path}")
+        df = pd.read_csv(league_path)
+        logger.info(f"Loaded {len(df)} leagues from {league_path}")
+        return df
+    
+    def save_league_data(self, df: pd.DataFrame) -> None:
+        """
+        Save league data to league.csv.
+        
+        Args:
+            df: DataFrame with league data to save
+        """
+        league_path = (self.data_path / "league.csv") if self.data_path.is_dir() else (self.data_path.parent / "league.csv")
+        logger.debug(f"Saving {len(df)} leagues to {league_path}")
+        df.to_csv(league_path, index=False)
+        logger.info(f"Saved {len(df)} leagues to {league_path}")
+        # Invalidate cache if exists
+        if hasattr(self, '_league_data'):
+            self._league_data = None
+    
+    def get_team_data(self) -> pd.DataFrame:
+        """
+        Get all team data from team.csv.
+        
+        Returns:
+            DataFrame with all team data
+        """
+        team_path = (self.data_path / "team.csv") if self.data_path.is_dir() else (self.data_path.parent / "team.csv")
+        if not team_path.exists():
+            logger.warning(f"Team file not found: {team_path}, returning empty DataFrame")
+            return pd.DataFrame(columns=[
+                'id', 'club_id', 'team_number', 'name', 'league_id'
+            ])
+        
+        logger.debug(f"Loading team data from {team_path}")
+        df = pd.read_csv(team_path)
+        logger.info(f"Loaded {len(df)} teams from {team_path}")
+        return df
+    
+    def save_team_data(self, df: pd.DataFrame) -> None:
+        """
+        Save team data to team.csv.
+        
+        Args:
+            df: DataFrame with team data to save
+        """
+        team_path = (self.data_path / "team.csv") if self.data_path.is_dir() else (self.data_path.parent / "team.csv")
+        logger.debug(f"Saving {len(df)} teams to {team_path}")
+        df.to_csv(team_path, index=False)
+        logger.info(f"Saved {len(df)} teams to {team_path}")
+        # Invalidate cache if exists
+        if hasattr(self, '_team_data'):
+            self._team_data = None
 
