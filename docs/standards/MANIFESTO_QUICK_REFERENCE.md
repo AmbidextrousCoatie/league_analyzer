@@ -10,6 +10,7 @@
 6. ✅ **Validate input** → Never trust user input
 7. ✅ **Log exceptions** → Use `logger.exception()`
 8. ✅ **Tests before commit** → `pytest` must pass
+9. ✅ **DO NOT touch legacy code** → Never modify `league_analyzer_v1/` directory
 
 ## Quick Checklist
 
@@ -21,6 +22,7 @@
 - [ ] Domain logic in domain
 - [ ] Dependencies injected
 - [ ] Input validated
+- [ ] No changes to `league_analyzer_v1/` directory
 
 ## Common Patterns
 

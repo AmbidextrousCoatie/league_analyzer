@@ -101,11 +101,25 @@ async def list_league_seasons():
     """List all league seasons."""
     repos = _get_repositories()
     league_seasons = await repos['league_season'].get_all()
+    leagues = await repos['league'].get_all()
+    
+    # Create a mapping of league_id to league name/abbreviation
+    league_map = {league.id: league for league in leagues}
+    
+    # Enrich league seasons with league information
+    enriched_seasons = []
+    for ls in league_seasons:
+        league = league_map.get(ls.league_id)
+        enriched_seasons.append({
+            'league_season': ls,
+            'league_name': league.name if league else 'Unknown',
+            'league_abbreviation': league.abbreviation if league else str(ls.league_id)[:8]
+        })
     
     template = env.get_template("sample_data_league_seasons.html")
     return HTMLResponse(content=template.render(
         title="League Seasons",
-        league_seasons=league_seasons
+        enriched_seasons=enriched_seasons
     ))
 
 

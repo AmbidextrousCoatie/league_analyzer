@@ -59,8 +59,7 @@
         <table>
             <thead>
                 <tr>
-                    <th>ID</th>
-                    <th>League ID</th>
+                    <th>League</th>
                     <th>Season</th>
                     <th>Scoring System</th>
                     <th>Teams</th>
@@ -68,18 +67,17 @@
                 </tr>
             </thead>
             <tbody>
-                {% for ls in league_seasons %}
+                {% for item in enriched_seasons %}
                 <tr>
-                    <td><code>{{ ls.id }}</code></td>
-                    <td><code>{{ ls.league_id }}</code></td>
-                    <td><span class="badge">{{ ls.season }}</span></td>
-                    <td>{{ ls.scoring_system_id }}</td>
-                    <td>{{ ls.number_of_teams or '-' }}</td>
-                    <td>{{ ls.players_per_team or '-' }}</td>
+                    <td><strong>{{ item.league_name }}</strong> <span style="color: #666; font-size: 0.9em;">({{ item.league_abbreviation }})</span></td>
+                    <td><span class="badge">{{ item.league_season.season }}</span></td>
+                    <td>{{ item.league_season.scoring_system_id }}</td>
+                    <td>{{ item.league_season.number_of_teams or '-' }}</td>
+                    <td>{{ item.league_season.players_per_team or '-' }}</td>
                 </tr>
                 {% else %}
                 <tr>
-                    <td colspan="6" style="text-align: center; color: #666; padding: 40px;">
+                    <td colspan="5" style="text-align: center; color: #666; padding: 40px;">
                         No league seasons found. Run <code>scripts/seed_sample_data.py</code> to create sample data.
                     </td>
                 </tr>

@@ -32,8 +32,8 @@ def create_demo_data() -> Dict:
     # Create season
     season = Season("2024-25")
     
-    # Create league
-    league = League(name="Demo League", season=season)
+    # Create league (using abbreviation and level instead of season)
+    league = League(name="Demo League", abbreviation="Demo", level=3)
     
     # Create teams
     team1 = Team(name="Team Alpha", league_id=league.id)

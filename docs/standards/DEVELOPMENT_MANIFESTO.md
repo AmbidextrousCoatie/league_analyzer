@@ -358,6 +358,7 @@ logger.exception("Exception with traceback")
 6. ✅ **Validate input** - Always
 7. ✅ **Log exceptions** - Always
 8. ✅ **Run tests before commit** - Always
+9. ✅ **DO NOT touch legacy code** - Never modify `league_analyzer_v1/` directory
 
 ### The Guidelines
 
@@ -385,6 +386,7 @@ Before committing code, ensure:
 - [ ] Dependencies injected (no globals)
 - [ ] Input validated
 - [ ] Exceptions handled and logged
+- [ ] No changes to `league_analyzer_v1/` directory
 
 ---
 

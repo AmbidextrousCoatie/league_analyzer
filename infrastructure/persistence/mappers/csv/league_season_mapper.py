@@ -5,6 +5,7 @@ Converts between LeagueSeason domain entity and Pandas DataFrame rows.
 """
 
 import pandas as pd
+import re
 from uuid import UUID
 from typing import Optional
 from domain.entities.league_season import LeagueSeason
@@ -17,6 +18,44 @@ class PandasLeagueSeasonMapper:
     
     Handles bidirectional conversion between domain entities and CSV storage.
     """
+    
+    @staticmethod
+    def _normalize_season(season_str: str) -> str:
+        """
+        Normalize season string to YYYY-YY or YYYY/YY format.
+        
+        Handles both full format (2024-25) and short format (24/25, 25/26).
+        
+        Args:
+            season_str: Season string in any format
+            
+        Returns:
+            Normalized season string in YYYY-YY format
+        """
+        season_str = str(season_str).strip()
+        
+        # If already in full format (YYYY-YY or YYYY/YY), return as-is
+        if re.match(r'^\d{4}[-/]\d{2}$', season_str):
+            return season_str.replace('/', '-')  # Normalize to use dash
+        
+        # Handle short format (YY/YY or YY-YY)
+        if re.match(r'^\d{2}[-/]\d{2}$', season_str):
+            parts = season_str.split('/') if '/' in season_str else season_str.split('-')
+            if len(parts) == 2:
+                start_short = int(parts[0])
+                end_short = int(parts[1])
+                
+                # Determine century: if start is >= 50, assume 1900s, else 2000s
+                # But for recent data (2020s), we'll assume 2000s
+                if start_short >= 50:
+                    start_year = 1900 + start_short
+                else:
+                    start_year = 2000 + start_short
+                
+                return f"{start_year}-{end_short:02d}"
+        
+        # If it doesn't match expected patterns, return as-is (will be validated by Season)
+        return season_str
     
     @staticmethod
     def to_domain(row: pd.Series) -> LeagueSeason:
@@ -43,9 +82,10 @@ class PandasLeagueSeasonMapper:
             namespace = UUID('6ba7b810-9dad-11d1-80b4-00c04fd430c8')  # DNS namespace
             league_id = UUID(namespace.hex[:12] + hashlib.md5(league_id_str.encode()).hexdigest()[:20])
         
-        # Handle season
+        # Handle season - normalize format if needed
         season_str = str(row['season'])
-        season = Season(season_str)
+        normalized_season_str = PandasLeagueSeasonMapper._normalize_season(season_str)
+        season = Season(normalized_season_str)
         
         # Handle optional fields
         number_of_teams = int(row['number_of_teams']) if pd.notna(row.get('number_of_teams')) else None
