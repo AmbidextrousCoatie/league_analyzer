@@ -29,12 +29,15 @@ class Game:
     
     Games represent a match between two teams in a league.
     Games contain results for each player.
+    Games belong to an Event (league week/day).
     """
     id: UUID = field(default_factory=uuid4)
+    event_id: Optional[UUID] = field(default=None)  # Link to Event entity
     league_id: UUID = field(default=None)
     season: Season = field(default=None)
     week: int = field(default=0)
     round_number: int = field(default=1)
+    match_number: int = field(default=0)  # Match number within event
     date: datetime = field(default_factory=datetime.utcnow)
     team_id: UUID = field(default=None)
     opponent_team_id: UUID = field(default=None)
@@ -98,7 +101,8 @@ class Game:
         player_id: UUID, 
         new_scratch_score: float, 
         new_points: float,
-        handicap: Optional['Handicap'] = None
+        handicap: Optional['Handicap'] = None,
+        is_disqualified: Optional[bool] = None
     ) -> None:
         """
         Update a game result for a player.
@@ -108,6 +112,7 @@ class Game:
             new_scratch_score: New scratch score value (actual pins)
             new_points: New points value
             handicap: Optional handicap to apply (if None, keeps existing handicap)
+            is_disqualified: Optional disqualification flag (if None, keeps existing)
         
         Raises:
             InvalidGameData: If result not found
@@ -125,13 +130,20 @@ class Game:
         # Use provided handicap or keep existing
         updated_handicap = handicap if handicap is not None else result.handicap
         
+        # Use provided disqualification flag or keep existing
+        updated_disqualified = (
+            is_disqualified if is_disqualified is not None 
+            else result.is_disqualified
+        )
+        
         new_result = GameResult(
             player_id=result.player_id,
             position=result.position,
             scratch_score=Score(new_scratch_score),
             points=Points(new_points),
             handicap=updated_handicap,
-            is_team_total=result.is_team_total
+            is_team_total=result.is_team_total,
+            is_disqualified=updated_disqualified
         )
         
         # Replace the result
@@ -261,11 +273,36 @@ class Game:
         """Hash based on ID."""
         return hash(self.id)
     
+    def update_match_number(self, match_number: int) -> None:
+        """
+        Update match number.
+        
+        Args:
+            match_number: Match number (must be non-negative)
+        
+        Raises:
+            InvalidGameData: If match number is negative
+        """
+        if match_number < 0:
+            raise InvalidGameData(f"Match number must be non-negative, got: {match_number}")
+        self.match_number = match_number
+        self.updated_at = datetime.utcnow()
+    
+    def assign_to_event(self, event_id: UUID) -> None:
+        """
+        Assign game to an event.
+        
+        Args:
+            event_id: UUID of the event
+        """
+        self.event_id = event_id
+        self.updated_at = datetime.utcnow()
+    
     def __repr__(self) -> str:
         """String representation."""
         return (
-            f"Game(id={self.id}, league_id={self.league_id}, "
-            f"season={self.season}, week={self.week}, "
+            f"Game(id={self.id}, event_id={self.event_id}, league_id={self.league_id}, "
+            f"season={self.season}, week={self.week}, match_number={self.match_number}, "
             f"team_id={self.team_id}, opponent_team_id={self.opponent_team_id}, "
             f"results={len(self.results)})"
         )

@@ -20,10 +20,12 @@ class Player:
     Player entity with business logic.
     
     Players have identity (id) and can be assigned to teams.
+    Players belong to a club (for eligibility checking).
     """
     id: UUID = field(default_factory=uuid4)
     name: str = ""
-    team_id: Optional[UUID] = field(default=None)
+    club_id: Optional[UUID] = field(default=None)  # Club association (from external DB)
+    team_id: Optional[UUID] = field(default=None)  # Current team assignment
     created_at: datetime = field(default_factory=datetime.utcnow)
     updated_at: datetime = field(default_factory=datetime.utcnow)
     _handicaps: Dict[str, Handicap] = field(default_factory=dict, init=False, repr=False)
@@ -127,7 +129,29 @@ class Player:
         """Hash based on ID."""
         return hash(self.id)
     
+    def assign_to_club(self, club_id: UUID) -> None:
+        """
+        Assign player to a club.
+        
+        Args:
+            club_id: UUID of the club
+        """
+        self.club_id = club_id
+        self.updated_at = datetime.utcnow()
+    
+    def remove_from_club(self) -> None:
+        """Remove player from their current club."""
+        self.club_id = None
+        self.updated_at = datetime.utcnow()
+    
+    def belongs_to_club(self) -> bool:
+        """Check if player belongs to a club."""
+        return self.club_id is not None
+    
     def __repr__(self) -> str:
         """String representation."""
-        return f"Player(id={self.id}, name='{self.name}', team_id={self.team_id})"
+        return (
+            f"Player(id={self.id}, name='{self.name}', "
+            f"club_id={self.club_id}, team_id={self.team_id})"
+        )
 

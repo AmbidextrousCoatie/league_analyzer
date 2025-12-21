@@ -41,8 +41,12 @@ This documentation provides everything you need to understand, develop, and main
 - [Refactoring Strategy](planning/REFACTORING_STRATEGY_REVISED.md) - Refactoring plan
 - [Scope Analysis](planning/SCOPE_ANALYSIS.md) - Project scope analysis
 - [Tech Stack Analysis](planning/TECH_STACK_ANALYSIS.md) - Technology stack analysis
+- [Data Schema Analysis](planning/DATA_SCHEMA_ANALYSIS.md) - Database schema analysis and design discussion
+- [Domain Scopes & Lifecycle](planning/DOMAIN_SCOPES_AND_LIFECYCLE.md) - Domain scopes and lifecycle phases
+- [Domain Decisions Summary](planning/DOMAIN_DECISIONS_SUMMARY.md) - Key design decisions for Phase 2
 
 ### 📈 [Project Management](pm/)
+- [Current Status](pm/CURRENT_STATUS.md) - **Current project status and next steps**
 - [Phase 1 Progress](pm/PHASE1_PROGRESS.md) - Phase 1 completion status
 - [Phase 1 Week 1 Complete](pm/PHASE1_WEEK1_COMPLETE.md) - Week 1 completion summary
 - [Phase 1 Week 2 Complete](pm/PHASE1_WEEK2_COMPLETE.md) - Week 2 completion summary

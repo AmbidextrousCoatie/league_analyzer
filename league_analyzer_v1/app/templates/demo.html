@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phase 1 Demo - Domain Services</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<nav class="navbar navbar-dark bg-primary mb-4">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="/">League Analyzer - Phase 1 Demo</a>
+        <div>
+            <a href="/demo" class="text-white me-3">Demo</a>
+            <a href="/demo-links" class="text-white me-3">All Links</a>
+            <a href="/docs" class="text-white">API Docs</a>
+        </div>
+    </div>
+</nav>
+<div class="container-fluid mt-4">
+<div class="container-fluid mt-4">
+    <div class="alert alert-warning" role="alert">
+        <h4 class="alert-heading">⚠️ TEMPORARY DEMO PAGE</h4>
+        <p>This page demonstrates Phase 1 domain services working with test data.</p>
+        <p><strong>These endpoints are temporary and will be removed when Phase 2 (Application Layer) is implemented.</strong></p>
+        <hr>
+        <p class="mb-0">
+            Endpoints: <code>/api/temp/demo/*</code> | 
+            <a href="/demo-links" class="alert-link">View All Links</a>
+        </p>
+    </div>
+
+    <div class="row">
+        <!-- Standings Section -->
+        <div class="col-md-12 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h3>League Standings</h3>
+                    <small class="text-muted">Using StandingsCalculator domain service</small>
+                </div>
+                <div class="card-body">
+                    <div id="standings-loading" class="text-center">
+                        <div class="spinner-border" role="status">
+                            <span class="sr-only">Loading...</span>
+                        </div>
+                    </div>
+                    <div id="standings-content" style="display: none;">
+                        <h5 id="standings-league-name"></h5>
+                        <p class="text-muted" id="standings-season"></p>
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover" id="standings-table">
+                                <thead class="thead-dark">
+                                    <tr>
+                                        <th>Position</th>
+                                        <th>Team</th>
+                                        <th>Total Points</th>
+                                        <th>Total Score</th>
+                                        <th>Average Score</th>
+                                        <th>Weekly Performances</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="standings-tbody">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div id="standings-error" class="alert alert-danger" style="display: none;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Team Statistics Section -->
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h4>Team Statistics</h4>
+                    <small class="text-muted">Using StatisticsCalculator domain service</small>
+                </div>
+                <div class="card-body">
+                    <div class="form-group">
+                        <label for="team-select">Select Team:</label>
+                        <select class="form-control" id="team-select">
+                            <option value="">-- Select a team --</option>
+                            <option value="Team Alpha">Team Alpha</option>
+                            <option value="Team Beta">Team Beta</option>
+                            <option value="Team Gamma">Team Gamma</option>
+                        </select>
+                    </div>
+                    <div id="team-stats-loading" class="text-center" style="display: none;">
+                        <div class="spinner-border spinner-border-sm" role="status">
+                            <span class="sr-only">Loading...</span>
+                        </div>
+                    </div>
+                    <div id="team-stats-content" style="display: none;">
+                        <h5 id="team-stats-name"></h5>
+                        <table class="table table-sm">
+                            <tr>
+                                <th>Total Score:</th>
+                                <td id="team-total-score"></td>
+                            </tr>
+                            <tr>
+                                <th>Total Points:</th>
+                                <td id="team-total-points"></td>
+                            </tr>
+                            <tr>
+                                <th>Games Played:</th>
+                                <td id="team-games-played"></td>
+                            </tr>
+                            <tr>
+                                <th>Average Score:</th>
+                                <td id="team-average-score"></td>
+                            </tr>
+                            <tr>
+                                <th>Best Score:</th>
+                                <td id="team-best-score"></td>
+                            </tr>
+                            <tr>
+                                <th>Worst Score:</th>
+                                <td id="team-worst-score"></td>
+                            </tr>
+                        </table>
+                        <h6>Weekly Performances:</h6>
+                        <div id="team-weekly-performances"></div>
+                    </div>
+                    <div id="team-stats-error" class="alert alert-danger" style="display: none;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Player Statistics Section -->
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h4>Player Statistics</h4>
+                    <small class="text-muted">Using StatisticsCalculator domain service</small>
+                </div>
+                <div class="card-body">
+                    <div class="form-group">
+                        <label for="player-select">Select Player:</label>
+                        <select class="form-control" id="player-select">
+                            <option value="">-- Select a player --</option>
+                            <option value="Player 1A">Player 1A</option>
+                            <option value="Player 2A">Player 2A</option>
+                            <option value="Player 3A">Player 3A</option>
+                            <option value="Player 4A">Player 4A</option>
+                            <option value="Player 1B">Player 1B</option>
+                            <option value="Player 2B">Player 2B</option>
+                            <option value="Player 3B">Player 3B</option>
+                            <option value="Player 4B">Player 4B</option>
+                            <option value="Player 1C">Player 1C</option>
+                            <option value="Player 2C">Player 2C</option>
+                            <option value="Player 3C">Player 3C</option>
+                            <option value="Player 4C">Player 4C</option>
+                        </select>
+                    </div>
+                    <div id="player-stats-loading" class="text-center" style="display: none;">
+                        <div class="spinner-border spinner-border-sm" role="status">
+                            <span class="sr-only">Loading...</span>
+                        </div>
+                    </div>
+                    <div id="player-stats-content" style="display: none;">
+                        <h5 id="player-stats-name"></h5>
+                        <table class="table table-sm">
+                            <tr>
+                                <th>Total Score:</th>
+                                <td id="player-total-score"></td>
+                            </tr>
+                            <tr>
+                                <th>Total Points:</th>
+                                <td id="player-total-points"></td>
+                            </tr>
+                            <tr>
+                                <th>Games Played:</th>
+                                <td id="player-games-played"></td>
+                            </tr>
+                            <tr>
+                                <th>Average Score:</th>
+                                <td id="player-average-score"></td>
+                            </tr>
+                            <tr>
+                                <th>Best Score:</th>
+                                <td id="player-best-score"></td>
+                            </tr>
+                            <tr>
+                                <th>Worst Score:</th>
+                                <td id="player-worst-score"></td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div id="player-stats-error" class="alert alert-danger" style="display: none;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Load standings on page load
+document.addEventListener('DOMContentLoaded', function() {
+    loadStandings();
+    
+    // Setup team select handler
+    document.getElementById('team-select').addEventListener('change', function() {
+        const teamName = this.value;
+        if (teamName) {
+            loadTeamStatistics(teamName);
+        } else {
+            hideTeamStats();
+        }
+    });
+    
+    // Setup player select handler
+    document.getElementById('player-select').addEventListener('change', function() {
+        const playerName = this.value;
+        if (playerName) {
+            loadPlayerStatistics(playerName);
+        } else {
+            hidePlayerStats();
+        }
+    });
+});
+
+function loadStandings() {
+    fetch('/api/temp/demo/standings')
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('standings-loading').style.display = 'none';
+            
+            if (data.error) {
+                document.getElementById('standings-error').textContent = data.error;
+                document.getElementById('standings-error').style.display = 'block';
+                return;
+            }
+            
+            document.getElementById('standings-league-name').textContent = data.league_name;
+            document.getElementById('standings-season').textContent = `Season: ${data.season}`;
+            
+            const tbody = document.getElementById('standings-tbody');
+            tbody.innerHTML = '';
+            
+            data.standings.forEach(standing => {
+                const row = document.createElement('tr');
+                const weeklyPerf = standing.weekly_performances.map(wp => 
+                    `Week ${wp.week}: ${wp.score} pts (${wp.points} pts)`
+                ).join('<br>');
+                
+                row.innerHTML = `
+                    <td><strong>${standing.position}</strong></td>
+                    <td>${standing.team_name}</td>
+                    <td>${standing.total_points}</td>
+                    <td>${standing.total_score}</td>
+                    <td>${standing.average_score}</td>
+                    <td><small>${weeklyPerf}</small></td>
+                `;
+                tbody.appendChild(row);
+            });
+            
+            document.getElementById('standings-content').style.display = 'block';
+        })
+        .catch(error => {
+            document.getElementById('standings-loading').style.display = 'none';
+            document.getElementById('standings-error').textContent = 'Error loading standings: ' + error.message;
+            document.getElementById('standings-error').style.display = 'block';
+        });
+}
+
+function loadTeamStatistics(teamName) {
+    const loadingEl = document.getElementById('team-stats-loading');
+    const contentEl = document.getElementById('team-stats-content');
+    const errorEl = document.getElementById('team-stats-error');
+    
+    loadingEl.style.display = 'block';
+    contentEl.style.display = 'none';
+    errorEl.style.display = 'none';
+    
+    fetch(`/api/temp/demo/team-statistics/${encodeURIComponent(teamName)}`)
+        .then(response => response.json())
+        .then(data => {
+            loadingEl.style.display = 'none';
+            
+            if (data.error) {
+                errorEl.textContent = data.error;
+                errorEl.style.display = 'block';
+                return;
+            }
+            
+            document.getElementById('team-stats-name').textContent = data.team_name;
+            document.getElementById('team-total-score').textContent = data.total_score;
+            document.getElementById('team-total-points').textContent = data.total_points;
+            document.getElementById('team-games-played').textContent = data.games_played;
+            document.getElementById('team-average-score').textContent = data.average_score;
+            document.getElementById('team-best-score').textContent = data.best_score;
+            document.getElementById('team-worst-score').textContent = data.worst_score;
+            
+            const weeklyDiv = document.getElementById('team-weekly-performances');
+            weeklyDiv.innerHTML = '<ul class="list-group list-group-flush">';
+            data.weekly_performances.forEach(wp => {
+                const li = document.createElement('li');
+                li.className = 'list-group-item';
+                li.textContent = `Week ${wp.week}: ${wp.total_score} pts, ${wp.total_points} points (${wp.games} games)`;
+                weeklyDiv.appendChild(li);
+            });
+            weeklyDiv.innerHTML += '</ul>';
+            
+            contentEl.style.display = 'block';
+        })
+        .catch(error => {
+            loadingEl.style.display = 'none';
+            errorEl.textContent = 'Error loading team statistics: ' + error.message;
+            errorEl.style.display = 'block';
+        });
+}
+
+function loadPlayerStatistics(playerName) {
+    const loadingEl = document.getElementById('player-stats-loading');
+    const contentEl = document.getElementById('player-stats-content');
+    const errorEl = document.getElementById('player-stats-error');
+    
+    loadingEl.style.display = 'block';
+    contentEl.style.display = 'none';
+    errorEl.style.display = 'none';
+    
+    fetch(`/api/temp/demo/player-statistics/${encodeURIComponent(playerName)}`)
+        .then(response => response.json())
+        .then(data => {
+            loadingEl.style.display = 'none';
+            
+            if (data.error) {
+                errorEl.textContent = data.error;
+                errorEl.style.display = 'block';
+                return;
+            }
+            
+            document.getElementById('player-stats-name').textContent = data.player_name;
+            document.getElementById('player-total-score').textContent = data.total_score;
+            document.getElementById('player-total-points').textContent = data.total_points;
+            document.getElementById('player-games-played').textContent = data.games_played;
+            document.getElementById('player-average-score').textContent = data.average_score;
+            document.getElementById('player-best-score').textContent = data.best_score;
+            document.getElementById('player-worst-score').textContent = data.worst_score;
+            
+            contentEl.style.display = 'block';
+        })
+        .catch(error => {
+            loadingEl.style.display = 'none';
+            errorEl.textContent = 'Error loading player statistics: ' + error.message;
+            errorEl.style.display = 'block';
+        });
+}
+
+function hideTeamStats() {
+    document.getElementById('team-stats-content').style.display = 'none';
+    document.getElementById('team-stats-error').style.display = 'none';
+}
+
+function hidePlayerStats() {
+    document.getElementById('player-stats-content').style.display = 'none';
+    document.getElementById('player-stats-error').style.display = 'none';
+}
+</script>
+</div>
+</body>
+</html>
+

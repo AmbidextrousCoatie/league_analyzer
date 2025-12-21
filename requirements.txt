@@ -1,0 +1,22 @@
+# FastAPI and Server
+fastapi>=0.104.0
+uvicorn[standard]>=0.24.0
+
+# Templating
+jinja2>=3.1.2
+
+# Configuration and Settings
+pydantic>=2.5.0
+pydantic-settings>=2.1.0
+
+# Dependency Injection
+dependency-injector>=4.41.0
+
+# Testing (optional, for development)
+pytest>=7.4.0
+pytest-cov>=4.1.0
+pytest-mock>=3.12.0
+
+# Data Processing (if using pandas adapters)
+pandas>=2.1.0
+

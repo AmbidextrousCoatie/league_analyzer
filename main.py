@@ -127,6 +127,32 @@ def test_table_data():
         ]
     }
 
+# ============================================================================
+# TEMPORARY DEMO ROUTES - CAN BE REMOVED AFTER PHASE 1
+# ============================================================================
+# These routes demonstrate domain services working with test data.
+# TODO: Remove when Phase 2 (Application Layer) is implemented.
+from presentation.api.temp_demo_routes import router as temp_demo_router
+app.include_router(temp_demo_router)
+
+# Demo page route
+@app.get("/demo", response_class=HTMLResponse)
+def demo_page(request: Request):
+    """TEMPORARY: Demo page showing domain services in action"""
+    if jinja_env:
+        template = jinja_env.get_template("demo.html")
+        return HTMLResponse(content=template.render())
+    return HTMLResponse(content="<h1>Templates directory not found</h1>")
+
+# Demo links page route
+@app.get("/demo-links", response_class=HTMLResponse)
+def demo_links_page(request: Request):
+    """TEMPORARY: Page with all demo endpoint links"""
+    if jinja_env:
+        template = jinja_env.get_template("demo_links.html")
+        return HTMLResponse(content=template.render())
+    return HTMLResponse(content="<h1>Templates directory not found</h1>")
+
 # Run development server (equivalent to Flask's app.run(debug=True))
 if __name__ == '__main__':
     import uvicorn

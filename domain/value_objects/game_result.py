@@ -31,6 +31,7 @@ class GameResult:
     - handicap_score: The total score with handicap applied (scratch + handicap)
     - points: Points earned for the team
     - is_team_total: Whether this is a team total row
+    - is_disqualified: Whether this result is disqualified
     
     Note: handicap_score is calculated from scratch_score + handicap if handicap is provided.
     If handicap is None, handicap_score equals scratch_score.
@@ -41,6 +42,7 @@ class GameResult:
     points: Points
     handicap: Optional[Handicap] = None
     is_team_total: bool = False
+    is_disqualified: bool = False
     
     def __post_init__(self):
         """Validate game result invariants."""
@@ -114,16 +116,18 @@ class GameResult:
             self.scratch_score == other.scratch_score and
             self.handicap == other.handicap and
             self.points == other.points and
-            self.is_team_total == other.is_team_total
+            self.is_team_total == other.is_team_total and
+            self.is_disqualified == other.is_disqualified
         )
     
     def __repr__(self) -> str:
         """String representation."""
         handicap_str = f", handicap={self.handicap}" if self.handicap else ""
+        disqualified_str = ", DISQUALIFIED" if self.is_disqualified else ""
         return (
             f"GameResult(player_id={self.player_id}, position={self.position}, "
             f"scratch_score={self.scratch_score}{handicap_str}, "
             f"handicap_score={self.handicap_score}, points={self.points}, "
-            f"is_team_total={self.is_team_total})"
+            f"is_team_total={self.is_team_total}{disqualified_str})"
         )
 

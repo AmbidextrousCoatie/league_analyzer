@@ -204,8 +204,8 @@ presentation/
 - Domain invariants
 
 #### Week 3: Domain Services & Events
-- [ ] Create `StandingsCalculator` domain service
-- [ ] Create `StatisticsCalculator` domain service
+- [x] Create `StandingsCalculator` domain service
+- [x] Create `StatisticsCalculator` domain service
 - [x] Define domain events (`GameCreated`, `GameUpdated`, `GameDeleted`, `DataImported`)
 - [x] Create domain event bus/registry
 - [x] Add domain exceptions (`InvalidGameData`, `DuplicateGame`, etc.)
