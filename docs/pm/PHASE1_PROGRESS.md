@@ -93,11 +93,11 @@ Phase 1: Foundation & Domain Models (Weeks 1-3) is **mostly complete**. Here's w
 - `tests/domain/` - Comprehensive domain tests (159 tests)
 
 ### Documentation
-- `docs/DI_LEARNING_GUIDE.md` - DI tutorial
-- `docs/DI_ADAPTER_IMPLEMENTATION.md` - DI implementation guide
-- `docs/DEVELOPMENT_MANIFESTO.md` - Development principles
-- `docs/TESTING_SETUP.md` - Testing guide
-- `docs/LOGGING_STRATEGY.md` - Logging guide
+- `docs/features/DI/DI_LEARNING_GUIDE.md` - DI tutorial
+- `docs/features/DI/DI_ADAPTER_IMPLEMENTATION.md` - DI implementation guide
+- `docs/standards/DEVELOPMENT_MANIFESTO.md` - Development principles
+- `docs/guides/TESTING_SETUP.md` - Testing guide
+- `docs/features/logging/LOGGING_STRATEGY.md` - Logging guide
 
 ## Statistics
 

@@ -170,6 +170,6 @@ pandas_adapter = container.data_adapter()
 ## See Also
 
 - [DI Learning Guide](DI_LEARNING_GUIDE.md) - Complete DI tutorial
-- [Development Manifesto](DEVELOPMENT_MANIFESTO.md) - Development principles
-- [Refactoring Strategy](REFACTORING_STRATEGY_REVISED.md) - Overall plan
+- [Development Manifesto](../../standards/DEVELOPMENT_MANIFESTO.md) - Development principles
+- [Refactoring Strategy](../../planning/REFACTORING_STRATEGY_REVISED.md) - Overall plan
 

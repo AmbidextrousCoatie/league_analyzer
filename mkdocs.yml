@@ -1,0 +1,105 @@
+site_name: League Analyzer v2 Documentation
+site_description: Complete documentation for League Analyzer v2
+site_author: League Analyzer Team
+
+repo_url: https://github.com/yourusername/league_analyzer
+repo_name: league_analyzer
+
+theme:
+  name: material
+  palette:
+    - scheme: default
+      primary: blue
+      accent: blue
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: blue
+      accent: blue
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - search.suggest
+    - search.highlight
+    - content.code.annotate
+
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - admonition
+  - pymdownx.details
+  - pymdownx.tabbed:
+      alternate_style: true
+  - tables
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          paths: [.]
+          options:
+            show_source: true
+            show_root_heading: true
+            show_root_toc_entry: true
+            show_root_full_path: false
+            show_object_full_path: false
+            show_category_heading: true
+            show_if_no_docstring: false
+            separate_signature: true
+            docstring_style: google
+
+nav:
+  - Home: docs/index.md
+  - Architecture:
+    - Overview: docs/architecture/overview.md
+    - Architecture Design: docs/architecture/ARCHITECTURE_DESIGN.md
+    - Architecture Review: docs/architecture/ARCHITECTURE_REVIEW.md
+  - Standards:
+    - Development Manifesto: docs/standards/DEVELOPMENT_MANIFESTO.md
+    - Manifesto Quick Reference: docs/standards/MANIFESTO_QUICK_REFERENCE.md
+    - Manifesto Summary: docs/standards/MANIFESTO_SUMMARY.md
+  - Guides:
+    - Quick Start Guide: docs/guides/QUICK_START_GUIDE.md
+    - Testing Setup: docs/guides/TESTING_SETUP.md
+    - Test Coverage Gaps: docs/guides/TEST_COVERAGE_GAPS.md
+  - Features:
+    - Dependency Injection:
+      - DI Learning Guide: docs/features/DI/DI_LEARNING_GUIDE.md
+      - DI Implementation: docs/features/DI/DI_ADAPTER_IMPLEMENTATION.md
+    - Logging:
+      - Logging Strategy: docs/features/logging/LOGGING_STRATEGY.md
+      - Logging Quick Reference: docs/features/logging/LOGGING_QUICK_REFERENCE.md
+    - FastAPI:
+      - FastAPI Deployment: docs/features/fastAPI/FASTAPI_DEPLOYMENT_GUIDE.md
+    - Handicap:
+      - Handicap Feature: docs/features/handicap/HANDICAP_FEATURE.md
+      - Handicap Calculation Enhancement: docs/features/handicap/HANDICAP_CALCULATION_ENHANCEMENT.md
+  - Planning:
+    - Refactoring Strategy: docs/planning/REFACTORING_STRATEGY_REVISED.md
+    - Scope Analysis: docs/planning/SCOPE_ANALYSIS.md
+    - Tech Stack Analysis: docs/planning/TECH_STACK_ANALYSIS.md
+  - Documentation:
+    - Documentation Strategy: docs/documentation/DOCUMENTATION_STRATEGY.md
+    - Documentation Recommendation: docs/documentation/DOCUMENTATION_RECOMMENDATION.md
+    - Docstring Template: docs/documentation/DOCSTRING_TEMPLATE.md
+  - Project Management:
+    - Phase 1 Progress: docs/pm/PHASE1_PROGRESS.md
+    - Phase 1 Week 1 Complete: docs/pm/PHASE1_WEEK1_COMPLETE.md
+    - Phase 1 Week 2 Complete: docs/pm/PHASE1_WEEK2_COMPLETE.md
+  - Decisions:
+    - 004: Documentation Strategy: docs/decisions/004-documentation-strategy.md
+
