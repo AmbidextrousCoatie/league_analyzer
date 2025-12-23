@@ -1,19 +1,20 @@
-id,name, short_name
-1,Albrecht Dürer 71 Stein, AD Stein
-2,BC Comet Nürnberg, BC Comet
-3,BC EMAX Unterföhring, BC EMAX
-4,BK München, BK München
-5,Bajuwaren München, Bajuwaren
-6,Bowlinghaus Bamberg, Bowlinghaus
-7,Castra Regina Regensburg, Castra Regina
-8,Donaubowler Regensburg, Donaubowler
-9,Eintracht Lauf, Eintracht
-10,Gute Laune Lauf, Gute Laune
-11,High Roller Rosenheim, High Roller
-12,Kings Club Bayreuth Land, Kings Club
-13,Mainauenbowler Bayreuth Land, Mainauenbowler
-14,RW Lichtenhof 69 Stein, Lichtenhof
-15,SG DJK Rimpar, Rimpar
-16,SG Rottendorf, Rottendorf
-17,Schanzer Ingolstadt, Schanzer
-18,Werdenfels, Werdenfels
+id,name, short_name,short_name,home_alley_id,address
+1,Albrecht Dürer 71 Stein, AD Stein,,,
+2,BC Comet Nürnberg, BC Comet,,,
+3,BC EMAX Unterföhring, BC EMAX,,,
+4,BK München, BK München,,,
+5,Bajuwaren München, Bajuwaren,,,
+6,Bowlinghaus Bamberg, Bowlinghaus,,,
+7,Castra Regina Regensburg, Castra Regina,,,
+8,Donaubowler Regensburg, Donaubowler,,,
+9,Eintracht Lauf, Eintracht,,,
+10,Gute Laune Lauf, Gute Laune,,,
+11,High Roller Rosenheim, High Roller,,,
+12,Kings Club Bayreuth Land, Kings Club,,,
+13,Mainauenbowler Bayreuth Land, Mainauenbowler,,,
+14,RW Lichtenhof 69 Stein, Lichtenhof,,,
+15,SG DJK Rimpar, Rimpar,,,
+16,SG Rottendorf, Rottendorf,,,
+17,Schanzer Ingolstadt, Schanzer,,,
+18,Werdenfels, Werdenfels,,,
+16c842da-319c-4cc5-a8c5-75c669d7d70b,Sample Bowling Club,,SBC,,"123 Main St, Sample City"

@@ -100,6 +100,24 @@
         <h1>🎳 Sample Data - CRUD Operations Demo</h1>
         <p class="subtitle">Data created using CSV repository CRUD operations</p>
         
+        <div style="margin-bottom: 30px; padding: 20px; background: #f0f4ff; border-radius: 8px; border-left: 4px solid #667eea;">
+            <h3 style="color: #333; margin-bottom: 10px;">📦 Seed Sample Data</h3>
+            <p style="color: #666; margin-bottom: 15px;">
+                Create sample data (clubs, leagues, teams, players, events, games) using the seed script.
+            </p>
+            <button id="seedBtn" onclick="seedData()" style="
+                background: #667eea;
+                color: white;
+                border: none;
+                padding: 10px 20px;
+                border-radius: 6px;
+                cursor: pointer;
+                font-size: 1em;
+                font-weight: 600;
+            ">Run Seed Script</button>
+            <div id="seedStatus" style="margin-top: 10px; display: none;"></div>
+        </div>
+        
         <div class="grid">
             <a href="/sample-data/leagues" class="card">
                 <h2>🏆 Leagues</h2>
@@ -115,7 +133,7 @@
             
             <a href="/sample-data/teams" class="card">
                 <h2>👥 Teams</h2>
-                <p>View all teams</p>
+                <p>View all club squads (teams)</p>
                 <span class="badge">View →</span>
             </a>
             
@@ -158,6 +176,46 @@
             </ul>
         </div>
     </div>
+    
+    <script>
+        async function seedData() {
+            const btn = document.getElementById('seedBtn');
+            const status = document.getElementById('seedStatus');
+            
+            btn.disabled = true;
+            btn.textContent = 'Seeding...';
+            status.style.display = 'block';
+            status.innerHTML = '<p style="color: #667eea;">⏳ Seeding data, please wait...</p>';
+            
+            try {
+                const response = await fetch('/sample-data/seed', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    status.innerHTML = `
+                        <p style="color: #28a745; font-weight: 600;">✓ ${data.message}</p>
+                        <p style="color: #666; font-size: 0.9em;">Data saved to: ${data.data_path}</p>
+                        <p style="color: #666; font-size: 0.9em; margin-top: 10px;">
+                            <a href="/sample-data" style="color: #667eea;">Refresh page to see new data</a>
+                        </p>
+                    `;
+                    btn.textContent = 'Seed Complete';
+                } else {
+                    throw new Error(data.detail || 'Unknown error');
+                }
+            } catch (error) {
+                status.innerHTML = `<p style="color: #dc3545;">✗ Error: ${error.message}</p>`;
+                btn.textContent = 'Try Again';
+                btn.disabled = false;
+            }
+        }
+    </script>
 </body>
 </html>
 

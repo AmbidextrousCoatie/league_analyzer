@@ -58,7 +58,9 @@ class PandasTeamRepository(TeamRepository):
         if row.empty:
             return None
         
-        return self._mapper.to_domain(row.iloc[0])
+        team = self._mapper.to_domain(row.iloc[0])
+        # Return None if team is invalid (missing club_id)
+        return team if team is not None else None
     
     async def get_all(self) -> List[Team]:
         """Get all teams from CSV."""
@@ -66,7 +68,13 @@ class PandasTeamRepository(TeamRepository):
         if df.empty:
             return []
         
-        return [self._mapper.to_domain(row) for _, row in df.iterrows()]
+        # Filter out None values (teams without club_id - legacy data)
+        teams = []
+        for _, row in df.iterrows():
+            team = self._mapper.to_domain(row)
+            if team is not None:
+                teams.append(team)
+        return teams
     
     async def get_by_club(
         self,
@@ -78,19 +86,12 @@ class PandasTeamRepository(TeamRepository):
             return []
         
         filtered = df[df['club_id'] == str(club_id)]
-        return [self._mapper.to_domain(row) for _, row in filtered.iterrows()]
-    
-    async def get_by_league(
-        self,
-        league_id: UUID
-    ) -> List[Team]:
-        """Get teams for a league from CSV."""
-        df = self._load_data()
-        if df.empty:
-            return []
-        
-        filtered = df[df['league_id'] == str(league_id)]
-        return [self._mapper.to_domain(row) for _, row in filtered.iterrows()]
+        teams = []
+        for _, row in filtered.iterrows():
+            team = self._mapper.to_domain(row)
+            if team is not None:
+                teams.append(team)
+        return teams
     
     async def find_by_name(
         self,
@@ -102,7 +103,12 @@ class PandasTeamRepository(TeamRepository):
             return []
         
         filtered = df[df['name'].str.contains(name, case=False, na=False)]
-        return [self._mapper.to_domain(row) for _, row in filtered.iterrows()]
+        teams = []
+        for _, row in filtered.iterrows():
+            team = self._mapper.to_domain(row)
+            if team is not None:
+                teams.append(team)
+        return teams
     
     async def add(self, team: Team) -> Team:
         """Add team to CSV file."""

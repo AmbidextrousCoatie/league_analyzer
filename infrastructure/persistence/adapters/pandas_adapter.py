@@ -358,4 +358,38 @@ class PandasDataAdapter(DataAdapter):
         # Invalidate cache if exists
         if hasattr(self, '_team_data'):
             self._team_data = None
+    
+    def get_club_data(self) -> pd.DataFrame:
+        """
+        Get all club data from club.csv.
+        
+        Returns:
+            DataFrame with all club data
+        """
+        club_path = (self.data_path / "club.csv") if self.data_path.is_dir() else (self.data_path.parent / "club.csv")
+        if not club_path.exists():
+            logger.warning(f"Club file not found: {club_path}, returning empty DataFrame")
+            return pd.DataFrame(columns=[
+                'id', 'name', 'short_name', 'home_alley_id', 'address'
+            ])
+        
+        logger.debug(f"Loading club data from {club_path}")
+        df = pd.read_csv(club_path)
+        logger.info(f"Loaded {len(df)} clubs from {club_path}")
+        return df
+    
+    def save_club_data(self, df: pd.DataFrame) -> None:
+        """
+        Save club data to club.csv.
+        
+        Args:
+            df: DataFrame with club data to save
+        """
+        club_path = (self.data_path / "club.csv") if self.data_path.is_dir() else (self.data_path.parent / "club.csv")
+        logger.debug(f"Saving {len(df)} clubs to {club_path}")
+        df.to_csv(club_path, index=False)
+        logger.info(f"Saved {len(df)} clubs to {club_path}")
+        # Invalidate cache if exists
+        if hasattr(self, '_club_data'):
+            self._club_data = None
 

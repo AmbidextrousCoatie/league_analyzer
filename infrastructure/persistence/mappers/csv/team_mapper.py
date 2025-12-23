@@ -18,7 +18,7 @@ class PandasTeamMapper:
     """
     
     @staticmethod
-    def to_domain(row: pd.Series) -> Team:
+    def to_domain(row: pd.Series) -> Optional[Team]:
         """
         Convert DataFrame row to Team entity.
         
@@ -29,35 +29,64 @@ class PandasTeamMapper:
             Team domain entity
         """
         # Handle UUID conversion
-        team_id = UUID(row['id']) if isinstance(row['id'], str) and len(row['id']) > 10 else row['id']
-        club_id = UUID(row['club_id']) if pd.notna(row.get('club_id')) and isinstance(row['club_id'], str) and len(str(row['club_id'])) > 10 else (row.get('club_id') if pd.notna(row.get('club_id')) else None)
+        team_id_str = str(row['id'])
+        try:
+            team_id = UUID(team_id_str) if len(team_id_str) > 10 else UUID(int(team_id_str))
+        except (ValueError, AttributeError):
+            from uuid import uuid4
+            team_id = uuid4()
         
-        # Handle optional fields
+        # Handle club_id - required for Team entity
+        club_id = None
+        club_id_raw = row.get('club_id')
+        
+        # Check if club_id exists and is not empty/NaN
+        # Empty CSV fields can be read as empty strings, NaN, or None
+        # Be explicit: check for None, NaN, empty string, or whitespace-only string
+        if (club_id_raw is not None and 
+            pd.notna(club_id_raw) and 
+            str(club_id_raw).strip()):
+            club_id_str = str(club_id_raw).strip()
+            # Only process if string is not empty and not a special value
+            if club_id_str and club_id_str.lower() not in ('nan', 'none', ''):
+                try:
+                    club_id = UUID(club_id_str) if len(club_id_str) > 10 else UUID(int(club_id_str))
+                except (ValueError, AttributeError):
+                    club_id = None
+        
+        # Skip teams without club_id (legacy data) - return None BEFORE creating Team entity
+        # This prevents Team.__post_init__ from raising InvalidTeamData
+        if club_id is None:
+            from infrastructure.logging import get_logger
+            logger = get_logger(__name__)
+            logger.warning(f"Skipping team {team_id} - missing or invalid club_id (legacy data)")
+            return None
+        
+        # Handle team_number - required, default to 1
         team_number = int(row['team_number']) if pd.notna(row.get('team_number')) else 1
+        
+        # Handle name - generate if missing
         name = row.get('name', '')
-        if not name and team_number:
+        if not name or not name.strip():
             name = f"Team {team_number}"
-        if not name:
-            name = "Team"
         
-        # Handle league_id - CSV may not have it, but Team entity needs it
-        league_id = None
-        if pd.notna(row.get('league_id')):
-            league_id_str = str(row['league_id'])
-            try:
-                league_id = UUID(league_id_str) if len(league_id_str) > 10 else None
-            except (ValueError, AttributeError):
-                league_id = None
-        
-        # Team entity has: id, name, league_id
-        team = Team(
-            id=team_id,
-            name=name
-        )
-        if league_id:
-            team.league_id = league_id
-        
-        return team
+        # Team entity has: id, name, club_id, team_number
+        # Wrap in try-except to catch any validation errors from Team entity
+        # (e.g., if club_id is None, Team.__post_init__ will raise InvalidTeamData)
+        try:
+            team = Team(
+                id=team_id,
+                name=name.strip(),
+                club_id=club_id,
+                team_number=team_number
+            )
+            return team
+        except Exception as e:
+            # If Team entity validation fails (e.g., InvalidTeamData), log and return None
+            from infrastructure.logging import get_logger
+            logger = get_logger(__name__)
+            logger.warning(f"Skipping team {team_id} - validation error: {e}")
+            return None
     
     @staticmethod
     def to_dataframe(team: Team) -> pd.Series:
@@ -70,13 +99,12 @@ class PandasTeamMapper:
         Returns:
             Pandas Series representing a row for team.csv
         """
-        # Team entity has: id, name, league_id
-        # CSV has: id, club_id, team_number, name, league_id
+        # Team entity has: id, name, club_id, team_number
+        # CSV has: id, club_id, team_number, name
         return pd.Series({
             'id': str(team.id),
-            'club_id': None,  # Would need to be set separately
-            'team_number': 1,  # Default
-            'name': team.name,
-            'league_id': str(team.league_id) if team.league_id else None
+            'club_id': str(team.club_id) if team.club_id else None,
+            'team_number': team.team_number,
+            'name': team.name
         })
 

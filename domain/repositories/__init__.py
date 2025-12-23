@@ -13,6 +13,7 @@ from domain.repositories.game_repository import GameRepository
 from domain.repositories.event_repository import EventRepository
 from domain.repositories.team_season_repository import TeamSeasonRepository
 from domain.repositories.league_season_repository import LeagueSeasonRepository
+from domain.repositories.club_repository import ClubRepository
 
 __all__ = [
     'BaseRepository',
@@ -23,5 +24,6 @@ __all__ = [
     'EventRepository',
     'TeamSeasonRepository',
     'LeagueSeasonRepository',
+    'ClubRepository',
 ]
 

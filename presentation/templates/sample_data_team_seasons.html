@@ -59,26 +59,39 @@
             <a href="/sample-data">← Back to Sample Data</a>
         </div>
         <h1>🏅 Team Seasons</h1>
+        <p style="color: #666; margin-bottom: 20px;">
+            Team participation in league seasons. Teams can ascend/descend between league levels over time.
+        </p>
         <table>
             <thead>
                 <tr>
-                    <th>ID</th>
-                    <th>League Season ID</th>
-                    <th>Club ID</th>
-                    <th>Team Number</th>
-                    <th>Vacancy Status</th>
+                    <th>Club</th>
+                    <th>Squad</th>
+                    <th>League</th>
+                    <th>Season</th>
+                    <th>Status</th>
                 </tr>
             </thead>
             <tbody>
-                {% for ts in team_seasons %}
+                {% for item in enriched_seasons %}
                 <tr>
-                    <td><code>{{ ts.id }}</code></td>
-                    <td><code>{{ ts.league_season_id }}</code></td>
-                    <td><code>{{ ts.club_id }}</code></td>
-                    <td><strong>{{ ts.team_number }}</strong></td>
                     <td>
-                        <span class="badge {{ ts.vacancy_status.value }}">
-                            {{ ts.vacancy_status.value }}
+                        <strong>{{ item.club_name }}</strong>
+                        {% if item.club_short_name %}
+                        <span style="color: #666; font-size: 0.9em;">({{ item.club_short_name }})</span>
+                        {% endif %}
+                    </td>
+                    <td><strong>Team {{ item.team_number }}</strong></td>
+                    <td>
+                        {{ item.league_name }}
+                        {% if item.league_abbreviation %}
+                        <span style="color: #666; font-size: 0.9em;">({{ item.league_abbreviation }})</span>
+                        {% endif %}
+                    </td>
+                    <td><span class="badge">{{ item.season }}</span></td>
+                    <td>
+                        <span class="badge {{ item.vacancy_status.value }}">
+                            {{ item.vacancy_status.value }}
                         </span>
                     </td>
                 </tr>

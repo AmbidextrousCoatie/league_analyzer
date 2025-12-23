@@ -12,6 +12,7 @@ from domain.entities.game import Game
 from domain.entities.event import Event
 from domain.entities.team_season import TeamSeason
 from domain.entities.league_season import LeagueSeason
+from domain.entities.club import Club
 
 __all__ = [
     'Team',
@@ -21,5 +22,6 @@ __all__ = [
     'Event',
     'TeamSeason',
     'LeagueSeason',
+    'Club',
 ]
 

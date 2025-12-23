@@ -4,3 +4,4 @@ id,league_id,season,scoring_system_id,number_of_teams,players_per_team
 3,BayL,24/25,liga_bayern_2pt,10,4
 4,BayL,25/26,liga_bayern_3pt,10,4
 61e6f4de-b495-4019-9e35-580975048ecd,60dfc2c7-fc8f-44c1-96c8-02c589966024,2024-25,sample_scoring,8,4
+29cddac8-4eb6-46d1-92ff-9024580a2be9,fe4ad2c9-dfbe-44e8-8f67-e3f9cc91e6b9,2024-25,sample_scoring,8,4

@@ -5,7 +5,7 @@ FastAPI routes for displaying sample data created via CRUD operations.
 """
 
 from fastapi import APIRouter, HTTPException
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, JSONResponse
 from infrastructure.logging import get_logger
 
 logger = get_logger(__name__)
@@ -27,6 +27,7 @@ from infrastructure.persistence.mappers.csv.game_mapper import PandasGameMapper
 from infrastructure.persistence.mappers.csv.player_mapper import PandasPlayerMapper
 from infrastructure.persistence.mappers.csv.league_mapper import PandasLeagueMapper
 from infrastructure.persistence.mappers.csv.team_mapper import PandasTeamMapper
+from infrastructure.persistence.mappers.csv.club_mapper import PandasClubMapper
 from infrastructure.persistence.repositories.csv.event_repository import PandasEventRepository
 from infrastructure.persistence.repositories.csv.league_season_repository import PandasLeagueSeasonRepository
 from infrastructure.persistence.repositories.csv.team_season_repository import PandasTeamSeasonRepository
@@ -34,6 +35,7 @@ from infrastructure.persistence.repositories.csv.game_repository import PandasGa
 from infrastructure.persistence.repositories.csv.player_repository import PandasPlayerRepository
 from infrastructure.persistence.repositories.csv.league_repository import PandasLeagueRepository
 from infrastructure.persistence.repositories.csv.team_repository import PandasTeamRepository
+from infrastructure.persistence.repositories.csv.club_repository import PandasClubRepository
 from jinja2 import Environment, FileSystemLoader
 
 router = APIRouter(prefix="/sample-data", tags=["sample-data"])
@@ -44,6 +46,16 @@ env = Environment(loader=FileSystemLoader(str(_template_dir)))
 
 # Initialize repositories - use sample data CSV files
 _data_path = Path(__file__).parent.parent.parent / "sample_data" / "relational_csv"
+
+# Import seed function
+import sys
+_seed_script_path = Path(__file__).parent.parent.parent / "scripts" / "seed_sample_data.py"
+if _seed_script_path.exists():
+    # Add scripts directory to path for imports
+    sys.path.insert(0, str(_seed_script_path.parent.parent))
+    from scripts.seed_sample_data import seed_sample_data
+else:
+    seed_sample_data = None
 
 def _get_repositories():
     """Get initialized repositories."""
@@ -57,7 +69,8 @@ def _get_repositories():
         'game': PandasGameRepository(adapter, PandasGameMapper()),
         'player': PandasPlayerRepository(adapter, PandasPlayerMapper()),
         'league': PandasLeagueRepository(adapter, PandasLeagueMapper()),
-        'team': PandasTeamRepository(adapter, PandasTeamMapper())
+        'team': PandasTeamRepository(adapter, PandasTeamMapper()),
+        'club': PandasClubRepository(adapter, PandasClubMapper())
     }
 
 
@@ -72,6 +85,35 @@ async def sample_data_index():
         logger = get_logger(__name__)
         logger.error(f"Error in sample_data_index: {e}", exc_info=True)
         return HTMLResponse(content=f"<h1>Error</h1><p>{str(e)}</p>", status_code=500)
+
+
+@router.post("/seed", response_class=JSONResponse)
+async def seed_data():
+    """
+    Trigger seed script to create sample data.
+    This endpoint runs the seed_sample_data script and returns the results.
+    """
+    if seed_sample_data is None:
+        raise HTTPException(
+            status_code=500,
+            detail="Seed script not found. Cannot seed data."
+        )
+    
+    try:
+        logger.info("Starting seed data operation...")
+        await seed_sample_data()
+        logger.info("Seed data operation completed successfully")
+        return JSONResponse(content={
+            "status": "success",
+            "message": "Sample data seeded successfully",
+            "data_path": str(_data_path)
+        })
+    except Exception as e:
+        logger.error(f"Error seeding data: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error seeding data: {str(e)}"
+        )
 
 
 @router.get("/leagues", response_class=HTMLResponse)
@@ -125,27 +167,80 @@ async def list_league_seasons():
 
 @router.get("/teams", response_class=HTMLResponse)
 async def list_teams():
-    """List all teams."""
+    """List all teams (club squads)."""
     repos = _get_repositories()
     teams = await repos['team'].get_all()
+    clubs = await repos['club'].get_all()
+    
+    # Create mapping for quick lookup
+    club_map = {club.id: club for club in clubs}
+    
+    # Enrich teams with club information
+    enriched_teams = []
+    for team in teams:
+        club = club_map.get(team.club_id)
+        enriched_teams.append({
+            'team': team,
+            'club_name': club.name if club else 'Unknown',
+            'club_short_name': club.short_name if club else None
+        })
+    
+    # Sort by club name, then team number
+    enriched_teams.sort(key=lambda x: (
+        x['club_name'],
+        x['team'].team_number
+    ))
     
     template = env.get_template("sample_data_teams.html")
     return HTMLResponse(content=template.render(
         title="Teams",
-        teams=teams
+        enriched_teams=enriched_teams
     ))
 
 
 @router.get("/team-seasons", response_class=HTMLResponse)
 async def list_team_seasons():
-    """List all team seasons."""
+    """List all team seasons (team participation in league seasons)."""
     repos = _get_repositories()
     team_seasons = await repos['team_season'].get_all()
+    clubs = await repos['club'].get_all()
+    league_seasons = await repos['league_season'].get_all()
+    leagues = await repos['league'].get_all()
+    
+    # Create mappings for quick lookup
+    club_map = {club.id: club for club in clubs}
+    league_season_map = {ls.id: ls for ls in league_seasons}
+    league_map = {league.id: league for league in leagues}
+    
+    # Enrich team seasons with club, league, and season information
+    enriched_seasons = []
+    for ts in team_seasons:
+        club = club_map.get(ts.club_id)
+        league_season = league_season_map.get(ts.league_season_id)
+        league = league_map.get(league_season.league_id) if league_season else None
+        
+        enriched_seasons.append({
+            'team_season': ts,
+            'club_name': club.name if club else 'Unknown',
+            'club_short_name': club.short_name if club else None,
+            'league_name': league.name if league else 'Unknown',
+            'league_abbreviation': league.abbreviation if league else None,
+            'season': str(league_season.season) if league_season else 'Unknown',
+            'team_number': ts.team_number,
+            'vacancy_status': ts.vacancy_status
+        })
+    
+    # Sort by club name, then team number, then season
+    enriched_seasons.sort(key=lambda x: (
+        x['club_name'],
+        x['team_number'],
+        x['season']
+    ))
     
     template = env.get_template("sample_data_team_seasons.html")
     return HTMLResponse(content=template.render(
         title="Team Seasons",
-        team_seasons=team_seasons
+        enriched_seasons=enriched_seasons
     ))
 
 
@@ -235,7 +330,8 @@ async def api_teams() -> List[Dict[str, Any]]:
         {
             "id": str(team.id),
             "name": team.name,
-            "league_id": str(team.league_id) if team.league_id else None
+            "club_id": str(team.club_id) if team.club_id else None,
+            "team_number": team.team_number
         }
         for team in teams
     ]

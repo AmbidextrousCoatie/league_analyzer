@@ -40,6 +40,17 @@
             color: #333;
         }
         tr:hover { background: #f8f9fa; }
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.85em;
+            background: #667eea;
+            color: white;
+        }
+        .badge.active { background: #28a745; }
+        .badge.vacant { background: #ffc107; color: #333; }
+        .badge.forfeit { background: #dc3545; }
     </style>
 </head>
 <body>
@@ -48,20 +59,28 @@
             <a href="/sample-data">← Back to Sample Data</a>
         </div>
         <h1>👥 Teams</h1>
+        <p style="color: #666; margin-bottom: 20px;">
+            Club squads (teams). Each club can have multiple teams (Team 1, Team 2, etc.).
+        </p>
         <table>
             <thead>
                 <tr>
-                    <th>ID</th>
-                    <th>Name</th>
-                    <th>League ID</th>
+                    <th>Club</th>
+                    <th>Team Name</th>
+                    <th>Squad Number</th>
                 </tr>
             </thead>
             <tbody>
-                {% for team in teams %}
+                {% for item in enriched_teams %}
                 <tr>
-                    <td><code>{{ team.id }}</code></td>
-                    <td><strong>{{ team.name }}</strong></td>
-                    <td><code>{{ team.league_id or '-' }}</code></td>
+                    <td>
+                        <strong>{{ item.club_name }}</strong>
+                        {% if item.club_short_name %}
+                        <span style="color: #666; font-size: 0.9em;">({{ item.club_short_name }})</span>
+                        {% endif %}
+                    </td>
+                    <td><strong>{{ item.team.name }}</strong></td>
+                    <td><strong>Team {{ item.team.team_number }}</strong></td>
                 </tr>
                 {% else %}
                 <tr>
