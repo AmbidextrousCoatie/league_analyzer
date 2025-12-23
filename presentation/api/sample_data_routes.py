@@ -362,6 +362,7 @@ async def api_players() -> List[Dict[str, Any]]:
     return [
         {
             "id": str(player.id),
+            "dbu_id": player.dbu_id,
             "name": player.name,
             "club_id": str(player.club_id) if player.club_id else None
         }

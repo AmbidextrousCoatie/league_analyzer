@@ -28,8 +28,40 @@ class PandasPlayerMapper:
         Returns:
             Player domain entity
         """
-        # Handle UUID conversion
-        player_id = UUID(row['id']) if isinstance(row['id'], str) and len(row['id']) > 10 else row['id']
+        from uuid import uuid4
+        
+        # Handle ID conversion
+        # Legacy CSV files have numeric DBU IDs in the 'id' column (e.g., 16896, 7724)
+        # New format has UUIDs in 'id' and DBU IDs in 'dbu_id'
+        raw_id = row.get('id')
+        dbu_id = None
+        
+        # Check if dbu_id column exists (new format)
+        if pd.notna(row.get('dbu_id')):
+            # New format: id is UUID, dbu_id contains legacy ID
+            dbu_id = str(row.get('dbu_id')).strip()
+            try:
+                player_id = UUID(str(raw_id))
+            except (ValueError, AttributeError, TypeError):
+                # Fallback: generate new UUID if id is invalid
+                player_id = uuid4()
+        else:
+            # Legacy format: id column contains DBU ID (numeric string)
+            # Check if it's a numeric string (legacy DBU ID)
+            raw_id_str = str(raw_id).strip() if pd.notna(raw_id) else ''
+            is_legacy_id = raw_id_str.isdigit() or (len(raw_id_str) < 10 and raw_id_str and not '-' in raw_id_str)
+            
+            if is_legacy_id:
+                # Legacy ID found - store in dbu_id and generate new UUID
+                dbu_id = raw_id_str
+                player_id = uuid4()
+            else:
+                # Try to parse as UUID (might be already migrated)
+                try:
+                    player_id = UUID(raw_id_str) if len(raw_id_str) > 10 else uuid4()
+                except (ValueError, AttributeError, TypeError):
+                    # Generate new UUID if parsing fails
+                    player_id = uuid4()
         
         # Handle optional club_id
         club_id = None
@@ -50,6 +82,7 @@ class PandasPlayerMapper:
         return Player(
             id=player_id,
             name=full_name or 'Unknown',
+            dbu_id=dbu_id,
             club_id=club_id
         )
     
@@ -70,7 +103,8 @@ class PandasPlayerMapper:
         family_name = name_parts[1] if len(name_parts) > 1 else ''
         
         return pd.Series({
-            'id': str(player.id),
+            'id': str(player.id),  # UUID
+            'dbu_id': player.dbu_id,  # Legacy DBU ID (if exists)
             'given_name': given_name,
             'family_name': family_name,
             'full_name': player.name,

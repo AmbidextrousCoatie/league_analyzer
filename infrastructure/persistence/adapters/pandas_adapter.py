@@ -268,7 +268,7 @@ class PandasDataAdapter(DataAdapter):
         if not player_path.exists():
             logger.warning(f"Player file not found: {player_path}, returning empty DataFrame")
             return pd.DataFrame(columns=[
-                'id', 'given_name', 'family_name', 'full_name', 'club_id'
+                'id', 'dbu_id', 'given_name', 'family_name', 'full_name', 'club_id'
             ])
         
         logger.debug(f"Loading player data from {player_path}")

@@ -21,9 +21,11 @@ class Player:
     
     Players have identity (id) and can be assigned to teams.
     Players belong to a club (for eligibility checking).
+    Legacy players from external DB have their original ID stored in dbu_id.
     """
     id: UUID = field(default_factory=uuid4)
     name: str = ""
+    dbu_id: Optional[str] = field(default=None)  # Legacy ID from external DB (DBU)
     club_id: Optional[UUID] = field(default=None)  # Club association (from external DB)
     team_id: Optional[UUID] = field(default=None)  # Current team assignment
     created_at: datetime = field(default_factory=datetime.utcnow)
@@ -152,6 +154,6 @@ class Player:
         """String representation."""
         return (
             f"Player(id={self.id}, name='{self.name}', "
-            f"club_id={self.club_id}, team_id={self.team_id})"
+            f"dbu_id={self.dbu_id}, club_id={self.club_id}, team_id={self.team_id})"
         )
 
