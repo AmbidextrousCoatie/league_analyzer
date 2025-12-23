@@ -31562,3 +31562,363 @@ The next time you load players from CSV, legacy IDs will be preserved in the `db
 
 ---
 
+_**User (2025-12-23 20:50Z)**_
+
+the events anedpoint creates problems:
+@Python: main (12-95) 
+looks similar to the issue we got earlier on
+
+---
+
+_**Agent (model composer-1, mode Agent)**_
+
+
+
+---
+
+
+The events endpoint has the same issue: legacy numeric IDs are being parsed as UUIDs. Checking the event mapper and entity to apply the same fix:
+
+
+---
+
+<tool-use data-tool-type="read" data-tool-name="read_file">
+<details><summary>Tool use: **read_file** • Read file: infrastructure/persistence/mappers/csv/event_mapper.py</summary>
+
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="read" data-tool-name="read_file">
+<details><summary>Tool use: **read_file** • Read file: domain/entities/event.py</summary>
+
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="search" data-tool-name="grep">
+<details>
+<summary>Tool use: **grep** • Grep for "event.*id|id.*event" in "presentation/templates/sample_data_events.html" • 3 matches</summary>
+
+Output mode: content
+
+
+| File | Content | Line |
+|------|------|------|
+| `presentation/templates/sample_data_events.html` | `<td><code>\{{ event.id \}}</code></td>` | L77 |
+| `presentation/templates/sample_data_events.html` | `<td><code>\{{ event.league_season_id \}}</code></td>` | L78 |
+| `presentation/templates/sample_data_events.html` | `<td>\{{ event.venue_id or '-' \}}</td>` | L82 |
+
+
+</details>
+</tool-use>
+
+---
+
+
+
+---
+
+
+Fixing the event mapper to handle legacy numeric IDs, similar to players:
+
+
+---
+
+<tool-use data-tool-type="write" data-tool-name="search_replace">
+
+<details><summary>Tool use: **search_replace** • Edit file: domain/entities/event.py</summary>
+
+**Chunk 1**
+Lines added: 2, lines removed: undefined
+
+```diff
+@@ -27,6 +27,8 @@
+      Events represent a league week/day where multiple matches occur.
+      Events have a lifecycle state and can contain multiple games.
++     Legacy events from external DB have their original ID stored in dbu_id.
+      """
+      id: UUID = field(default_factory=uuid4)
++     dbu_id: Optional[str] = field(default=None)  # Legacy ID from external DB (DBU)
+      league_season_id: UUID = field(default=None)
+      event_type: str = "league"  # "league", "tournament", etc.
+```
+
+</details>
+
+</tool-use>
+
+---
+
+<tool-use data-tool-type="write" data-tool-name="search_replace">
+
+<details><summary>Tool use: **search_replace** • Edit file: domain/entities/event.py</summary>
+
+**Chunk 1**
+Lines added: 1, lines removed: 1
+
+```diff
+@@ -148,5 +148,5 @@
+          """String representation."""
+          return (
+-             f"Event(id={self.id}, league_season_id={self.league_season_id}, "
++             f"Event(id={self.id}, dbu_id={self.dbu_id}, league_season_id={self.league_season_id}, "
+              f"event_type='{self.event_type}', league_week={self.league_week}, "
+              f"date={self.date}, status={self.status})"
+```
+
+</details>
+
+</tool-use>
+
+---
+
+<tool-use data-tool-type="write" data-tool-name="search_replace">
+
+<details><summary>Tool use: **search_replace** • Edit file: infrastructure/persistence/mappers/csv/event_mapper.py</summary>
+
+**Chunk 1**
+Lines added: 44, lines removed: 3
+
+```diff
+@@ -31,7 +31,48 @@
+              Event domain entity
+          """
+-         # Handle UUID conversion
+-         event_id = UUID(row['id']) if isinstance(row['id'], str) else row['id']
+-         league_season_id = UUID(row['league_season_id']) if isinstance(row['league_season_id'], str) else row['league_season_id']
++         from uuid import uuid4
++         
++         # Handle ID conversion - similar to player mapper
++         # Legacy CSV files have numeric DBU IDs in the 'id' column
++         # New format has UUIDs in 'id' and DBU IDs in 'dbu_id'
++         raw_id = row.get('id')
++         dbu_id = None
++         
++         # Check if dbu_id column exists (new format)
++         if pd.notna(row.get('dbu_id')):
++             # New format: id is UUID, dbu_id contains legacy ID
++             dbu_id = str(row.get('dbu_id')).strip()
++             try:
++                 event_id = UUID(str(raw_id))
++             except (ValueError, AttributeError, TypeError):
++                 # Fallback: generate new UUID if id is invalid
++                 event_id = uuid4()
++         else:
++             # Legacy format: id column contains DBU ID (numeric string)
++             raw_id_str = str(raw_id).strip() if pd.notna(raw_id) else ''
++             is_legacy_id = raw_id_str.isdigit() or (len(raw_id_str) &lt; 10 and raw_id_str and not '-' in raw_id_str)
++             
++             if is_legacy_id:
++                 # Legacy ID found - store in dbu_id and generate new UUID
++                 dbu_id = raw_id_str
++                 event_id = uuid4()
++             else:
++                 # Try to parse as UUID (might be already migrated)
++                 try:
++                     event_id = UUID(raw_id_str) if len(raw_id_str) &gt; 10 else uuid4()
++                 except (ValueError, AttributeError, TypeError):
++                     # Generate new UUID if parsing fails
++                     event_id = uuid4()
++         
++         # Handle league_season_id - also needs UUID conversion with legacy handling
++         raw_league_season_id = row.get('league_season_id')
++         if pd.notna(raw_league_season_id):
++             raw_ls_id_str = str(raw_league_season_id).strip()
++             try:
++                 league_season_id = UUID(raw_ls_id_str) if len(raw_ls_id_str) &gt; 10 else None
++             except (ValueError, AttributeError, TypeError):
++                 league_season_id = None
++         else:
++             league_season_id = None
+          
+          # Handle date conversion
+```
+
+</details>
+
+</tool-use>
+
+---
+
+<tool-use data-tool-type="write" data-tool-name="search_replace">
+
+<details><summary>Tool use: **search_replace** • Edit file: infrastructure/persistence/mappers/csv/event_mapper.py</summary>
+
+**Chunk 1**
+Lines added: 1, lines removed: undefined
+
+```diff
+@@ -102,4 +102,5 @@
+          return Event(
+              id=event_id,
++             dbu_id=dbu_id,
+              league_season_id=league_season_id,
+              event_type=row['event_type'],
+```
+
+</details>
+
+</tool-use>
+
+---
+
+<tool-use data-tool-type="write" data-tool-name="search_replace">
+
+<details><summary>Tool use: **search_replace** • Edit file: infrastructure/persistence/mappers/csv/event_mapper.py</summary>
+
+**Chunk 1**
+Lines added: 2, lines removed: 1
+
+```diff
+@@ -127,5 +127,6 @@
+          """
+          return pd.Series({
+-             'id': str(event.id),
++             'id': str(event.id),  # UUID
++             'dbu_id': event.dbu_id,  # Legacy DBU ID (if exists)
+              'league_season_id': str(event.league_season_id),
+              'event_type': event.event_type,
+```
+
+</details>
+
+</tool-use>
+
+---
+
+<tool-use data-tool-type="search" data-tool-name="grep">
+<details>
+<summary>Tool use: **grep** • Grep for "get_event_data|save_event_data|event\.csv" in "infrastructure/persistence/adapters/pandas_adapter.py" • 16 matches</summary>
+
+Output mode: content
+
+
+| File | Content | Line |
+|------|------|------|
+| `infrastructure/persistence/adapters/pandas_adapter.py` | `def get_event_data(self) -> pd.DataFrame:` | L104 |
+| `infrastructure/persistence/adapters/pandas_adapter.py` | `Get all event data from event.csv.` | L106 |
+| `infrastructure/persistence/adapters/pandas_adapter.py` | `# If data_path is event.csv itself, use it directly` | L111 |
+| `infrastructure/persistence/adapters/pandas_adapter.py` | `if self.data_path.name == "event.csv":` | L112 |
+| `infrastructure/persistence/adapters/pandas_adapter.py` | `# If data_path is a directory, look for event.csv inside it` | L115 |
+| `infrastructure/persistence/adapters/pandas_adapter.py` | `event_path = self.data_path / "event.csv"` | L116 |
+| `infrastructure/persistence/adapters/pandas_adapter.py` | `# Otherwise, look for event.csv in the same directory` | L118 |
+| `infrastructure/persistence/adapters/pandas_adapter.py` | `event_path = self.data_path.parent / "event.csv"` | L119 |
+| `infrastructure/persistence/adapters/pandas_adapter.py` | `def save_event_data(self, df: pd.DataFrame) -> None:` | L133 |
+| `infrastructure/persistence/adapters/pandas_adapter.py` | `Save event data to event.csv.` | L135 |
+| `infrastructure/persistence/adapters/pandas_adapter.py` | `# If data_path is event.csv itself, use it directly` | L140 |
+| `infrastructure/persistence/adapters/pandas_adapter.py` | `if self.data_path.name == "event.csv":` | L141 |
+| `infrastructure/persistence/adapters/pandas_adapter.py` | `# If data_path is a directory, save to event.csv inside it` | L144 |
+| `infrastructure/persistence/adapters/pandas_adapter.py` | `event_path = self.data_path / "event.csv"` | L145 |
+| `infrastructure/persistence/adapters/pandas_adapter.py` | `# Otherwise, save to event.csv in the same directory` | L147 |
+| `infrastructure/persistence/adapters/pandas_adapter.py` | `event_path = self.data_path.parent / "event.csv"` | L148 |
+
+
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="read" data-tool-name="read_file">
+<details><summary>Tool use: **read_file** • Read file: infrastructure/persistence/adapters/pandas_adapter.py</summary>
+
+</details>
+</tool-use>
+
+---
+
+
+
+---
+
+
+Updating the event data adapter to include `dbu_id`:
+
+
+---
+
+<tool-use data-tool-type="read" data-tool-name="read_file">
+<details><summary>Tool use: **read_file** • Read file: infrastructure/persistence/adapters/pandas_adapter.py</summary>
+
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="write" data-tool-name="search_replace">
+
+<details><summary>Tool use: **search_replace** • Edit file: infrastructure/persistence/adapters/pandas_adapter.py</summary>
+
+**Chunk 1**
+Lines added: 1, lines removed: 1
+
+```diff
+@@ -122,5 +122,5 @@
+              logger.warning(f"Event file not found: {event_path}, returning empty DataFrame")
+              return pd.DataFrame(columns=[
+-                 'id', 'league_season_id', 'event_type', 'league_week', 'tournament_stage',
++                 'id', 'dbu_id', 'league_season_id', 'event_type', 'league_week', 'tournament_stage',
+                  'date', 'venue_id', 'oil_pattern_id', 'status', 'disqualification_reason', 'notes'
+              ])
+```
+
+</details>
+
+</tool-use>
+
+---
+
+<tool-use data-tool-type="generic" data-tool-name="read_lints">
+<details>
+          <summary>Tool use: **read_lints** • Read lints for 3 files</summary>
+      
+Lint paths:
+
+- `domain/entities/event.py`
+- `infrastructure/persistence/mappers/csv/event_mapper.py`
+- `infrastructure/persistence/adapters/pandas_adapter.py`
+
+Lint results
+
+
+**No lint errors found**
+</details>
+</tool-use>
+
+---
+
+
+
+---
+
+
+Fixed the event mapper to handle legacy numeric IDs, similar to players. Changes:
+
+## Changes Made:
+
+1. **Event Entity** (`domain/entities/event.py`):
+   - Added `dbu_id: Optional[str]` to store legacy DBU IDs
+
+2. **Event Mapper** (`infrastructure/persistence/mappers/csv/event_mapper.py`):
+   - **Reading from CSV**:
+     - If `dbu_id` column exists: use it and parse `id` as UUID
+     - If `id` is numeric (legacy): store it in `dbu_id` and generate a new UUID for `id`
+     - Otherwise: try to parse `id` as UUID
+   - Also improved `league_season_id` handling to gracefully handle invalid UUIDs
+   - **Writing to CSV**: writes UUID to `id` and legacy DBU ID to `dbu_id`
+
+3. **CSV Adapter** (`infrastructure/persistence/adapters/pandas_adapter.py`):
+   - Added `dbu_id` to the column list for event.csv
+
+The events endpoint should now work correctly. The mapper will:
+- Detect legacy numeric IDs (e.g., `123`, `456`) in the CSV `id` column
+- Store them in `dbu_id`
+- Generate new UUIDs for the `id` field
+- Handle both legacy and new formats seamlessly
+
+This matches the approach used for players. The events page should load without errors.
+
+---
+

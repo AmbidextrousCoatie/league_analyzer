@@ -121,7 +121,7 @@ class PandasDataAdapter(DataAdapter):
         if not event_path.exists():
             logger.warning(f"Event file not found: {event_path}, returning empty DataFrame")
             return pd.DataFrame(columns=[
-                'id', 'league_season_id', 'event_type', 'league_week', 'tournament_stage',
+                'id', 'dbu_id', 'league_season_id', 'event_type', 'league_week', 'tournament_stage',
                 'date', 'venue_id', 'oil_pattern_id', 'status', 'disqualification_reason', 'notes'
             ])
         

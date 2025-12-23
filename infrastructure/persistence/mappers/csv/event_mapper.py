@@ -30,9 +30,50 @@ class PandasEventMapper:
         Returns:
             Event domain entity
         """
-        # Handle UUID conversion
-        event_id = UUID(row['id']) if isinstance(row['id'], str) else row['id']
-        league_season_id = UUID(row['league_season_id']) if isinstance(row['league_season_id'], str) else row['league_season_id']
+        from uuid import uuid4
+        
+        # Handle ID conversion - similar to player mapper
+        # Legacy CSV files have numeric DBU IDs in the 'id' column
+        # New format has UUIDs in 'id' and DBU IDs in 'dbu_id'
+        raw_id = row.get('id')
+        dbu_id = None
+        
+        # Check if dbu_id column exists (new format)
+        if pd.notna(row.get('dbu_id')):
+            # New format: id is UUID, dbu_id contains legacy ID
+            dbu_id = str(row.get('dbu_id')).strip()
+            try:
+                event_id = UUID(str(raw_id))
+            except (ValueError, AttributeError, TypeError):
+                # Fallback: generate new UUID if id is invalid
+                event_id = uuid4()
+        else:
+            # Legacy format: id column contains DBU ID (numeric string)
+            raw_id_str = str(raw_id).strip() if pd.notna(raw_id) else ''
+            is_legacy_id = raw_id_str.isdigit() or (len(raw_id_str) < 10 and raw_id_str and not '-' in raw_id_str)
+            
+            if is_legacy_id:
+                # Legacy ID found - store in dbu_id and generate new UUID
+                dbu_id = raw_id_str
+                event_id = uuid4()
+            else:
+                # Try to parse as UUID (might be already migrated)
+                try:
+                    event_id = UUID(raw_id_str) if len(raw_id_str) > 10 else uuid4()
+                except (ValueError, AttributeError, TypeError):
+                    # Generate new UUID if parsing fails
+                    event_id = uuid4()
+        
+        # Handle league_season_id - also needs UUID conversion with legacy handling
+        raw_league_season_id = row.get('league_season_id')
+        if pd.notna(raw_league_season_id):
+            raw_ls_id_str = str(raw_league_season_id).strip()
+            try:
+                league_season_id = UUID(raw_ls_id_str) if len(raw_ls_id_str) > 10 else None
+            except (ValueError, AttributeError, TypeError):
+                league_season_id = None
+        else:
+            league_season_id = None
         
         # Handle date conversion
         if isinstance(row['date'], str):
@@ -60,6 +101,7 @@ class PandasEventMapper:
         
         return Event(
             id=event_id,
+            dbu_id=dbu_id,
             league_season_id=league_season_id,
             event_type=row['event_type'],
             league_week=league_week,
@@ -84,7 +126,8 @@ class PandasEventMapper:
             Pandas Series representing a row for event.csv
         """
         return pd.Series({
-            'id': str(event.id),
+            'id': str(event.id),  # UUID
+            'dbu_id': event.dbu_id,  # Legacy DBU ID (if exists)
             'league_season_id': str(event.league_season_id),
             'event_type': event.event_type,
             'league_week': event.league_week,

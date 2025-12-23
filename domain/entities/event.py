@@ -26,8 +26,10 @@ class Event:
     
     Events represent a league week/day where multiple matches occur.
     Events have a lifecycle state and can contain multiple games.
+    Legacy events from external DB have their original ID stored in dbu_id.
     """
     id: UUID = field(default_factory=uuid4)
+    dbu_id: Optional[str] = field(default=None)  # Legacy ID from external DB (DBU)
     league_season_id: UUID = field(default=None)
     event_type: str = "league"  # "league", "tournament", etc.
     league_week: Optional[int] = field(default=None)
@@ -145,7 +147,7 @@ class Event:
     def __repr__(self) -> str:
         """String representation."""
         return (
-            f"Event(id={self.id}, league_season_id={self.league_season_id}, "
+            f"Event(id={self.id}, dbu_id={self.dbu_id}, league_season_id={self.league_season_id}, "
             f"event_type='{self.event_type}', league_week={self.league_week}, "
             f"date={self.date}, status={self.status})"
         )
