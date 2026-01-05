@@ -20,13 +20,12 @@ class Player:
     Player entity with business logic.
     
     Players have identity (id) and can be assigned to teams.
-    Players belong to a club (for eligibility checking).
+    Club memberships are tracked via the club_player table.
     Legacy players from external DB have their original ID stored in dbu_id.
     """
     id: UUID = field(default_factory=uuid4)
     name: str = ""
     dbu_id: Optional[str] = field(default=None)  # Legacy ID from external DB (DBU)
-    club_id: Optional[UUID] = field(default=None)  # Club association (from external DB)
     team_id: Optional[UUID] = field(default=None)  # Current team assignment
     created_at: datetime = field(default_factory=datetime.utcnow)
     updated_at: datetime = field(default_factory=datetime.utcnow)
@@ -131,29 +130,10 @@ class Player:
         """Hash based on ID."""
         return hash(self.id)
     
-    def assign_to_club(self, club_id: UUID) -> None:
-        """
-        Assign player to a club.
-        
-        Args:
-            club_id: UUID of the club
-        """
-        self.club_id = club_id
-        self.updated_at = datetime.utcnow()
-    
-    def remove_from_club(self) -> None:
-        """Remove player from their current club."""
-        self.club_id = None
-        self.updated_at = datetime.utcnow()
-    
-    def belongs_to_club(self) -> bool:
-        """Check if player belongs to a club."""
-        return self.club_id is not None
-    
     def __repr__(self) -> str:
         """String representation."""
         return (
             f"Player(id={self.id}, name='{self.name}', "
-            f"dbu_id={self.dbu_id}, club_id={self.club_id}, team_id={self.team_id})"
+            f"dbu_id={self.dbu_id}, team_id={self.team_id})"
         )
 

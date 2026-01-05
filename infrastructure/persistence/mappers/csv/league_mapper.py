@@ -27,37 +27,40 @@ class PandasLeagueMapper:
         Returns:
             League domain entity
         """
-        # Handle UUID conversion - CSV may have string IDs
-        # CSV has 'id' as string like "BayL", need to handle both UUID and string IDs
+        # Handle UUID conversion - CSV should have UUID in 'id' column
         league_id_str = str(row['id'])
-        abbreviation = league_id_str  # CSV 'id' column contains the abbreviation
         
         try:
-            league_id = UUID(league_id_str) if len(league_id_str) > 10 else None
-            if league_id is None:
-                # Generate deterministic UUID from string ID (abbreviation)
-                import hashlib
-                namespace = UUID('6ba7b810-9dad-11d1-80b4-00c04fd430c8')
-                league_id = UUID(namespace.hex[:12] + hashlib.md5(league_id_str.encode()).hexdigest()[:20])
+            league_id = UUID(league_id_str)
         except (ValueError, AttributeError):
+            # Legacy data: if id is not a UUID (e.g., abbreviation), generate UUID
+            # This handles migration from old format
             import hashlib
             namespace = UUID('6ba7b810-9dad-11d1-80b4-00c04fd430c8')
             league_id = UUID(namespace.hex[:12] + hashlib.md5(league_id_str.encode()).hexdigest()[:20])
         
-        # CSV has 'long_name', map to 'name'
-        name = row.get('long_name', row.get('name', ''))
+        # Get name (full name)
+        name = str(row.get('name', '')).strip()
+        if not name:
+            # Fallback to long_name for legacy data
+            name = str(row.get('long_name', '')).strip()
         
-        # Always derive level from abbreviation to ensure correctness
-        # (CSV may have incorrect level values, so we override with correct mapping)
-        from domain.entities.league import get_league_level, LEAGUE_LEVELS
-        if abbreviation in LEAGUE_LEVELS:
-            # Known abbreviation - use correct level from mapping
-            level = get_league_level(abbreviation)
+        # Get abbreviation (short name)
+        abbreviation = str(row.get('abbreviation', '')).strip()
+        if not abbreviation:
+            # Legacy data: if abbreviation not found, try using id (if it's not a UUID)
+            if len(league_id_str) <= 10:
+                abbreviation = league_id_str
+        
+        # Get level
+        csv_level = row.get('level', None)
+        if csv_level is not None and not pd.isna(csv_level):
+            level = int(csv_level)
         else:
-            # Unknown abbreviation - fall back to CSV level if available
-            csv_level = row.get('level', None)
-            if csv_level is not None and not pd.isna(csv_level):
-                level = int(csv_level)
+            # Derive level from abbreviation if available
+            from domain.entities.league import get_league_level
+            if abbreviation:
+                level = get_league_level(abbreviation)
             else:
                 level = 7  # Default to lowest level
         
@@ -80,9 +83,9 @@ class PandasLeagueMapper:
             Pandas Series representing a row for league.csv
         """
         return pd.Series({
-            'id': league.abbreviation if league.abbreviation else str(league.id),  # Use abbreviation as CSV id
-            'long_name': league.name,  # Map name to long_name for CSV
-            'name': league.name,  # Also include name for compatibility
-            'level': league.level  # Include level
+            'id': str(league.id),  # UUID as id
+            'name': league.name,  # Full name
+            'abbreviation': league.abbreviation if league.abbreviation else '',  # Abbreviation (short name)
+            'level': league.level  # Level
         })
 

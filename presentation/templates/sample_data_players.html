@@ -54,7 +54,6 @@
                     <th>ID</th>
                     <th>ID DBU</th>
                     <th>Name</th>
-                    <th>Club ID</th>
                 </tr>
             </thead>
             <tbody>
@@ -63,11 +62,10 @@
                     <td><code>{{ player.id }}</code></td>
                     <td><code>{{ player.dbu_id or '-' }}</code></td>
                     <td><strong>{{ player.name }}</strong></td>
-                    <td><code>{{ player.club_id or '-' }}</code></td>
                 </tr>
                 {% else %}
                 <tr>
-                    <td colspan="4" style="text-align: center; color: #666; padding: 40px;">
+                    <td colspan="3" style="text-align: center; color: #666; padding: 40px;">
                         No players found. Run <code>scripts/seed_sample_data.py</code> to create sample data.
                     </td>
                 </tr>

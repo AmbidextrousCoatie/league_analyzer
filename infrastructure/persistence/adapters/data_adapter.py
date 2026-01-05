@@ -33,20 +33,6 @@ class DataAdapter(ABC):
         pass
     
     @abstractmethod
-    def get_team_data(self, team_id: str, season: Optional[str] = None) -> pd.DataFrame:
-        """
-        Get team data.
-        
-        Args:
-            team_id: Team identifier
-            season: Optional season filter
-        
-        Returns:
-            DataFrame with team data
-        """
-        pass
-    
-    @abstractmethod
     def get_player_data(self, player_id: str, season: Optional[str] = None) -> pd.DataFrame:
         """
         Get player data.
@@ -199,24 +185,3 @@ class DataAdapter(ABC):
         """
         pass
     
-    # Team-specific methods for write operations
-    @abstractmethod
-    def get_team_data(self) -> pd.DataFrame:
-        """
-        Get all team data.
-        
-        Returns:
-            DataFrame with all team data
-        """
-        pass
-    
-    @abstractmethod
-    def save_team_data(self, df: pd.DataFrame) -> None:
-        """
-        Save team data to storage.
-        
-        Args:
-            df: DataFrame with team data to save
-        """
-        pass
-

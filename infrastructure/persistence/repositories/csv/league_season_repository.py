@@ -125,7 +125,7 @@ class PandasLeagueSeasonRepository(LeagueSeasonRepository):
         # Append new row
         df = pd.concat([df, new_row.to_frame().T], ignore_index=True)
         self._save_data(df)
-        logger.info(f"Added league season {league_season.id} to CSV")
+        logger.debug(f"Added league season {league_season.id} to CSV")
         return league_season
     
     async def update(self, league_season: LeagueSeason) -> LeagueSeason:

@@ -136,7 +136,7 @@ class PandasPlayerRepository(PlayerRepository):
         # Append new row
         df = pd.concat([df, new_row.to_frame().T], ignore_index=True)
         self._save_data(df)
-        logger.info(f"Added player {player.id} to CSV")
+        logger.debug(f"Added player {player.id} to CSV")
         return player
     
     async def update(self, player: Player) -> Player:

@@ -42,7 +42,7 @@ class PandasDataAdapter(DataAdapter):
         if self._data is None:
             logger.debug(f"Loading data from {self.data_path}")
             self._data = pd.read_csv(self.data_path)
-            logger.info(f"Loaded {len(self._data)} rows from {self.data_path}")
+            logger.debug(f"Loaded {len(self._data)} rows from {self.data_path}")
         return self._data
     
     def get_league_data(self, league_id: str, season: Optional[str] = None) -> pd.DataFrame:
@@ -127,7 +127,7 @@ class PandasDataAdapter(DataAdapter):
         
         logger.debug(f"Loading event data from {event_path}")
         df = pd.read_csv(event_path)
-        logger.info(f"Loaded {len(df)} events from {event_path}")
+        logger.debug(f"Loaded {len(df)} events from {event_path}")
         return df
     
     def save_event_data(self, df: pd.DataFrame) -> None:
@@ -149,7 +149,7 @@ class PandasDataAdapter(DataAdapter):
         
         logger.debug(f"Saving {len(df)} events to {event_path}")
         df.to_csv(event_path, index=False)
-        logger.info(f"Saved {len(df)} events to {event_path}")
+        logger.debug(f"Saved {len(df)} events to {event_path}")
         # Invalidate cache if exists
         if hasattr(self, '_event_data'):
             self._event_data = None
@@ -171,7 +171,7 @@ class PandasDataAdapter(DataAdapter):
         
         logger.debug(f"Loading league season data from {league_season_path}")
         df = pd.read_csv(league_season_path)
-        logger.info(f"Loaded {len(df)} league seasons from {league_season_path}")
+        logger.debug(f"Loaded {len(df)} league seasons from {league_season_path}")
         return df
     
     def save_league_season_data(self, df: pd.DataFrame) -> None:
@@ -184,7 +184,7 @@ class PandasDataAdapter(DataAdapter):
         league_season_path = (self.data_path / "league_season.csv") if self.data_path.is_dir() else (self.data_path.parent / "league_season.csv")
         logger.debug(f"Saving {len(df)} league seasons to {league_season_path}")
         df.to_csv(league_season_path, index=False)
-        logger.info(f"Saved {len(df)} league seasons to {league_season_path}")
+        logger.debug(f"Saved {len(df)} league seasons to {league_season_path}")
         # Invalidate cache if exists
         if hasattr(self, '_league_season_data'):
             self._league_season_data = None
@@ -205,7 +205,7 @@ class PandasDataAdapter(DataAdapter):
         
         logger.debug(f"Loading team season data from {team_season_path}")
         df = pd.read_csv(team_season_path)
-        logger.info(f"Loaded {len(df)} team seasons from {team_season_path}")
+        logger.debug(f"Loaded {len(df)} team seasons from {team_season_path}")
         return df
     
     def save_team_season_data(self, df: pd.DataFrame) -> None:
@@ -218,7 +218,7 @@ class PandasDataAdapter(DataAdapter):
         team_season_path = (self.data_path / "team_season.csv") if self.data_path.is_dir() else (self.data_path.parent / "team_season.csv")
         logger.debug(f"Saving {len(df)} team seasons to {team_season_path}")
         df.to_csv(team_season_path, index=False)
-        logger.info(f"Saved {len(df)} team seasons to {team_season_path}")
+        logger.debug(f"Saved {len(df)} team seasons to {team_season_path}")
         # Invalidate cache if exists
         if hasattr(self, '_team_season_data'):
             self._team_season_data = None
@@ -234,12 +234,14 @@ class PandasDataAdapter(DataAdapter):
         if not game_path.exists():
             logger.warning(f"Game file not found: {game_path}, returning empty DataFrame")
             return pd.DataFrame(columns=[
-                'id', 'event_id', 'team_season_id', 'match_number', 'round_number'
+                'id', 'event_id', 'player_id', 'team_season_id', 'position',
+                'match_number', 'round_number', 'score', 'points',
+                'opponent_id', 'opponent_team_season_id', 'handicap', 'is_disqualified'
             ])
         
         logger.debug(f"Loading game data from {game_path}")
         df = pd.read_csv(game_path)
-        logger.info(f"Loaded {len(df)} games from {game_path}")
+        #logger.info(f"Loaded {len(df)} games from {game_path}")
         return df
     
     def save_game_data(self, df: pd.DataFrame) -> None:
@@ -250,9 +252,9 @@ class PandasDataAdapter(DataAdapter):
             df: DataFrame with game data to save
         """
         game_path = (self.data_path / "game.csv") if self.data_path.is_dir() else (self.data_path.parent / "game.csv")
-        logger.debug(f"Saving {len(df)} games to {game_path}")
+        #logger.debug(f"Saving {len(df)} games to {game_path}")
         df.to_csv(game_path, index=False)
-        logger.info(f"Saved {len(df)} games to {game_path}")
+        #logger.info(f"Saved {len(df)} games to {game_path}")
         # Invalidate cache if exists
         if hasattr(self, '_game_data'):
             self._game_data = None
@@ -268,12 +270,12 @@ class PandasDataAdapter(DataAdapter):
         if not player_path.exists():
             logger.warning(f"Player file not found: {player_path}, returning empty DataFrame")
             return pd.DataFrame(columns=[
-                'id', 'dbu_id', 'given_name', 'family_name', 'full_name', 'club_id'
+                'id', 'dbu_id', 'given_name', 'family_name', 'full_name'
             ])
         
         logger.debug(f"Loading player data from {player_path}")
         df = pd.read_csv(player_path)
-        logger.info(f"Loaded {len(df)} players from {player_path}")
+        logger.debug(f"Loaded {len(df)} players from {player_path}")
         return df
     
     def save_player_data(self, df: pd.DataFrame) -> None:
@@ -286,7 +288,7 @@ class PandasDataAdapter(DataAdapter):
         player_path = (self.data_path / "player.csv") if self.data_path.is_dir() else (self.data_path.parent / "player.csv")
         logger.debug(f"Saving {len(df)} players to {player_path}")
         df.to_csv(player_path, index=False)
-        logger.info(f"Saved {len(df)} players to {player_path}")
+        logger.debug(f"Saved {len(df)} players to {player_path}")
         # Invalidate cache if exists
         if hasattr(self, '_player_data'):
             self._player_data = None
@@ -302,12 +304,12 @@ class PandasDataAdapter(DataAdapter):
         if not league_path.exists():
             logger.warning(f"League file not found: {league_path}, returning empty DataFrame")
             return pd.DataFrame(columns=[
-                'id', 'name', 'short_name'
+                'id', 'name', 'abbreviation', 'level'
             ])
         
         logger.debug(f"Loading league data from {league_path}")
         df = pd.read_csv(league_path)
-        logger.info(f"Loaded {len(df)} leagues from {league_path}")
+        logger.debug(f"Loaded {len(df)} leagues from {league_path}")
         return df
     
     def save_league_data(self, df: pd.DataFrame) -> None:
@@ -320,44 +322,10 @@ class PandasDataAdapter(DataAdapter):
         league_path = (self.data_path / "league.csv") if self.data_path.is_dir() else (self.data_path.parent / "league.csv")
         logger.debug(f"Saving {len(df)} leagues to {league_path}")
         df.to_csv(league_path, index=False)
-        logger.info(f"Saved {len(df)} leagues to {league_path}")
+        logger.debug(f"Saved {len(df)} leagues to {league_path}")
         # Invalidate cache if exists
         if hasattr(self, '_league_data'):
             self._league_data = None
-    
-    def get_team_data(self) -> pd.DataFrame:
-        """
-        Get all team data from team.csv.
-        
-        Returns:
-            DataFrame with all team data
-        """
-        team_path = (self.data_path / "team.csv") if self.data_path.is_dir() else (self.data_path.parent / "team.csv")
-        if not team_path.exists():
-            logger.warning(f"Team file not found: {team_path}, returning empty DataFrame")
-            return pd.DataFrame(columns=[
-                'id', 'club_id', 'team_number', 'name', 'league_id'
-            ])
-        
-        logger.debug(f"Loading team data from {team_path}")
-        df = pd.read_csv(team_path)
-        logger.info(f"Loaded {len(df)} teams from {team_path}")
-        return df
-    
-    def save_team_data(self, df: pd.DataFrame) -> None:
-        """
-        Save team data to team.csv.
-        
-        Args:
-            df: DataFrame with team data to save
-        """
-        team_path = (self.data_path / "team.csv") if self.data_path.is_dir() else (self.data_path.parent / "team.csv")
-        logger.debug(f"Saving {len(df)} teams to {team_path}")
-        df.to_csv(team_path, index=False)
-        logger.info(f"Saved {len(df)} teams to {team_path}")
-        # Invalidate cache if exists
-        if hasattr(self, '_team_data'):
-            self._team_data = None
     
     def get_club_data(self) -> pd.DataFrame:
         """
@@ -375,7 +343,7 @@ class PandasDataAdapter(DataAdapter):
         
         logger.debug(f"Loading club data from {club_path}")
         df = pd.read_csv(club_path)
-        logger.info(f"Loaded {len(df)} clubs from {club_path}")
+        logger.debug(f"Loaded {len(df)} clubs from {club_path}")
         return df
     
     def save_club_data(self, df: pd.DataFrame) -> None:
@@ -388,8 +356,78 @@ class PandasDataAdapter(DataAdapter):
         club_path = (self.data_path / "club.csv") if self.data_path.is_dir() else (self.data_path.parent / "club.csv")
         logger.debug(f"Saving {len(df)} clubs to {club_path}")
         df.to_csv(club_path, index=False)
-        logger.info(f"Saved {len(df)} clubs to {club_path}")
+        logger.debug(f"Saved {len(df)} clubs to {club_path}")
         # Invalidate cache if exists
         if hasattr(self, '_club_data'):
             self._club_data = None
+    
+    def get_scoring_system_data(self) -> pd.DataFrame:
+        """
+        Get all scoring system data from scoring_system.csv.
+        
+        Returns:
+            DataFrame with all scoring system data
+        """
+        scoring_system_path = (self.data_path / "scoring_system.csv") if self.data_path.is_dir() else (self.data_path.parent / "scoring_system.csv")
+        if not scoring_system_path.exists():
+            logger.warning(f"Scoring system file not found: {scoring_system_path}, returning empty DataFrame")
+            return pd.DataFrame(columns=[
+                'id', 'name', 'points_per_individual_match_win', 'points_per_individual_match_tie',
+                'points_per_individual_match_loss', 'points_per_team_match_win', 'points_per_team_match_tie',
+                'points_per_team_match_loss', 'allow_ties'
+            ])
+        
+        logger.debug(f"Loading scoring system data from {scoring_system_path}")
+        df = pd.read_csv(scoring_system_path)
+        logger.debug(f"Loaded {len(df)} scoring systems from {scoring_system_path}")
+        return df
+    
+    def save_scoring_system_data(self, df: pd.DataFrame) -> None:
+        """
+        Save scoring system data to scoring_system.csv.
+        
+        Args:
+            df: DataFrame with scoring system data to save
+        """
+        scoring_system_path = (self.data_path / "scoring_system.csv") if self.data_path.is_dir() else (self.data_path.parent / "scoring_system.csv")
+        logger.debug(f"Saving {len(df)} scoring systems to {scoring_system_path}")
+        df.to_csv(scoring_system_path, index=False)
+        logger.debug(f"Saved {len(df)} scoring systems to {scoring_system_path}")
+        # Invalidate cache if exists
+        if hasattr(self, '_scoring_system_data'):
+            self._scoring_system_data = None
+    
+    def get_club_player_data(self) -> pd.DataFrame:
+        """
+        Get all club player data from club_player.csv.
+        
+        Returns:
+            DataFrame with all club player data
+        """
+        club_player_path = (self.data_path / "club_player.csv") if self.data_path.is_dir() else (self.data_path.parent / "club_player.csv")
+        if not club_player_path.exists():
+            logger.warning(f"Club player file not found: {club_player_path}, returning empty DataFrame")
+            return pd.DataFrame(columns=[
+                'id', 'club_id', 'player_id', 'date_entry', 'date_exit'
+            ])
+        
+        logger.debug(f"Loading club player data from {club_player_path}")
+        df = pd.read_csv(club_player_path)
+        logger.debug(f"Loaded {len(df)} club player relationships from {club_player_path}")
+        return df
+    
+    def save_club_player_data(self, df: pd.DataFrame) -> None:
+        """
+        Save club player data to club_player.csv.
+        
+        Args:
+            df: DataFrame with club player data to save
+        """
+        club_player_path = (self.data_path / "club_player.csv") if self.data_path.is_dir() else (self.data_path.parent / "club_player.csv")
+        logger.debug(f"Saving {len(df)} club player relationships to {club_player_path}")
+        df.to_csv(club_player_path, index=False)
+        logger.debug(f"Saved {len(df)} club player relationships to {club_player_path}")
+        # Invalidate cache if exists
+        if hasattr(self, '_club_player_data'):
+            self._club_player_data = None
 

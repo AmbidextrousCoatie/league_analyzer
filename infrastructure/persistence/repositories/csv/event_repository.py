@@ -142,7 +142,7 @@ class PandasEventRepository(EventRepository):
         # Append new row
         df = pd.concat([df, new_row.to_frame().T], ignore_index=True)
         self._save_data(df)
-        logger.info(f"Added event {event.id} to CSV")
+        logger.debug(f"Added event {event.id} to CSV")
         return event
     
     async def update(self, event: Event) -> Event:

@@ -93,7 +93,7 @@ class PandasClubRepository(ClubRepository):
         # Append new row
         df = pd.concat([df, new_row.to_frame().T], ignore_index=True)
         self._save_data(df)
-        logger.info(f"Added club {club.id} to CSV")
+        logger.debug(f"Added club {club.id} to CSV")
         return club
     
     async def update(self, club: Club) -> Club:

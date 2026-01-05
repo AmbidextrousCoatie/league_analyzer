@@ -1,8 +1,4 @@
 id,league_id,season,scoring_system_id,number_of_teams,players_per_team
-1,BZL N2,25/26,liga_bayern_3pt,6,4
-2,BZOL N1,25/26,liga_bayern_3pt,6,4
-3,BayL,24/25,liga_bayern_2pt,10,4
-4,BayL,25/26,liga_bayern_3pt,10,4
-61e6f4de-b495-4019-9e35-580975048ecd,60dfc2c7-fc8f-44c1-96c8-02c589966024,2024-25,sample_scoring,8,4
-29cddac8-4eb6-46d1-92ff-9024580a2be9,fe4ad2c9-dfbe-44e8-8f67-e3f9cc91e6b9,2024-25,sample_scoring,8,4
-5a9b3046-141a-4851-827f-9767833a6389,f1287854-549c-4e48-8f98-f0e639d90711,2024-25,sample_scoring,8,4
+f1b2172d-8331-4712-8376-d760f4abddaf,61466822-3dc0-4c18-8086-4ad75ca349fd,2025-26,32a16b65-addb-45cc-890c-0f90b365d8aa,6,4
+746f9902-3552-4b4d-bca7-4163a83d0af6,727923ef-bc88-488c-a10b-1248efaf95c6,2025-26,32a16b65-addb-45cc-890c-0f90b365d8aa,6,4
+548612e8-aba5-4cc6-b2ad-683e6e20f909,f4f882c6-7f1b-48ea-ba79-c8312f349a27,2025-26,32a16b65-addb-45cc-890c-0f90b365d8aa,10,4

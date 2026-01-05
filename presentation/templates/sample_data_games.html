@@ -13,7 +13,7 @@
             padding: 20px;
         }
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
             background: white;
             border-radius: 12px;
@@ -28,9 +28,10 @@
             width: 100%;
             border-collapse: collapse;
             margin-top: 20px;
+            font-size: 14px;
         }
         th, td {
-            padding: 12px;
+            padding: 10px;
             text-align: left;
             border-bottom: 1px solid #e9ecef;
         }
@@ -38,8 +39,28 @@
             background: #f8f9fa;
             font-weight: 600;
             color: #333;
+            position: sticky;
+            top: 0;
         }
         tr:hover { background: #f8f9fa; }
+        code {
+            font-size: 11px;
+            background: #f1f3f5;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        .badge-win { background: #d4edda; color: #155724; }
+        .badge-tie { background: #fff3cd; color: #856404; }
+        .badge-loss { background: #f8d7da; color: #721c24; }
+        .badge-dq { background: #dc3545; color: white; }
     </style>
 </head>
 <body>
@@ -48,31 +69,44 @@
             <a href="/sample-data">← Back to Sample Data</a>
         </div>
         <h1>🎮 Games</h1>
+        <p style="color: #666; margin-bottom: 20px;">
+            Each row represents a single player's game result in a match.
+        </p>
         <table>
             <thead>
                 <tr>
                     <th>ID</th>
-                    <th>Event ID</th>
-                    <th>Team ID</th>
-                    <th>Opponent Team ID</th>
-                    <th>Match #</th>
-                    <th>Round #</th>
+                    <th>Match ID</th>
+                    <th>Player ID</th>
+                    <th>Team Season ID</th>
+                    <th>Position</th>
+                    <th>Score</th>
+                    <th>Handicap</th>
+                    <th>Status</th>
                 </tr>
             </thead>
             <tbody>
                 {% for game in games %}
                 <tr>
                     <td><code>{{ game.id }}</code></td>
-                    <td><code>{{ game.event_id or '-' }}</code></td>
-                    <td><code>{{ game.team_id or '-' }}</code></td>
-                    <td><code>{{ game.opponent_team_id or '-' }}</code></td>
-                    <td><strong>{{ game.match_number }}</strong></td>
-                    <td>{{ game.round_number }}</td>
+                    <td><code>{{ game.match_id or '-' }}</code></td>
+                    <td><code>{{ game.player_id or '-' }}</code></td>
+                    <td><code>{{ game.team_season_id or '-' }}</code></td>
+                    <td><strong>{{ game.position }}</strong></td>
+                    <td><strong>{{ game.score }}</strong></td>
+                    <td>{{ game.handicap or '-' }}</td>
+                    <td>
+                        {% if game.is_disqualified %}
+                            <span class="badge badge-dq">DQ</span>
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
                 </tr>
                 {% else %}
                 <tr>
-                    <td colspan="6" style="text-align: center; color: #666; padding: 40px;">
-                        No games found. Run <code>scripts/seed_sample_data.py</code> to create sample data.
+                    <td colspan="8" style="text-align: center; color: #666; padding: 40px;">
+                        No game results found. Run <code>scripts/seed_sample_data.py</code> to create sample data.
                     </td>
                 </tr>
                 {% endfor %}
@@ -81,4 +115,3 @@
     </div>
 </body>
 </html>
-

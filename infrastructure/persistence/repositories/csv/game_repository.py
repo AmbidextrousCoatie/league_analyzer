@@ -67,7 +67,12 @@ class PandasGameRepository(GameRepository):
         if df.empty:
             return []
         
-        return [self._mapper.to_domain(row) for _, row in df.iterrows()]
+        games = []
+        for _, row in df.iterrows():
+            game = self._mapper.to_domain(row)
+            if game is not None:  # Filter out None values from invalid rows
+                games.append(game)
+        return games
     
     async def get_by_event(
         self,
@@ -79,7 +84,12 @@ class PandasGameRepository(GameRepository):
             return []
         
         filtered = df[df['event_id'] == str(event_id)]
-        return [self._mapper.to_domain(row) for _, row in filtered.iterrows()]
+        games = []
+        for _, row in filtered.iterrows():
+            game = self._mapper.to_domain(row)
+            if game is not None:
+                games.append(game)
+        return games
     
     async def get_by_team_season(
         self,
@@ -91,7 +101,12 @@ class PandasGameRepository(GameRepository):
             return []
         
         filtered = df[df['team_season_id'] == str(team_season_id)]
-        return [self._mapper.to_domain(row) for _, row in filtered.iterrows()]
+        games = []
+        for _, row in filtered.iterrows():
+            game = self._mapper.to_domain(row)
+            if game is not None:
+                games.append(game)
+        return games
     
     async def get_by_event_and_match(
         self,
@@ -107,7 +122,12 @@ class PandasGameRepository(GameRepository):
             (df['event_id'] == str(event_id)) &
             (df['match_number'] == match_number)
         ]
-        return [self._mapper.to_domain(row) for _, row in filtered.iterrows()]
+        games = []
+        for _, row in filtered.iterrows():
+            game = self._mapper.to_domain(row)
+            if game is not None:
+                games.append(game)
+        return games
     
     async def get_by_league(
         self,
@@ -140,9 +160,14 @@ class PandasGameRepository(GameRepository):
             return []
         
         # Filter by team_season_id (which represents the team in a season)
-        # Note: CSV uses team_season_id, but Game entity uses team_id/opponent_team_id
+        # Note: team_id parameter is treated as team_season_id
         filtered = df[df['team_season_id'] == str(team_id)]
-        return [self._mapper.to_domain(row) for _, row in filtered.iterrows()]
+        games = []
+        for _, row in filtered.iterrows():
+            game = self._mapper.to_domain(row)
+            if game is not None:
+                games.append(game)
+        return games
     
     async def get_by_date_range(
         self,
@@ -168,7 +193,7 @@ class PandasGameRepository(GameRepository):
         # Append new row
         df = pd.concat([df, new_row.to_frame().T], ignore_index=True)
         self._save_data(df)
-        logger.info(f"Added game {game.id} to CSV")
+        #logger.info(f"Added game {game.id} to CSV")
         return game
     
     async def update(self, game: Game) -> Game:

@@ -41,10 +41,12 @@ class PandasClubMapper:
         if not name or not name.strip():
             raise ValueError(f"Club {club_id} must have a name")
         
-        # Handle optional fields
-        short_name = row.get('short_name', None)
+        # Handle optional fields - check both 'short_name' and ' short_name' (legacy CSV has leading space)
+        short_name = row.get('short_name') or row.get(' short_name')
         if pd.notna(short_name):
-            short_name = str(short_name).strip() if short_name else None
+            short_name = str(short_name).strip() if short_name and str(short_name).strip() else None
+        else:
+            short_name = None
         
         # Handle home_alley_id - optional UUID
         home_alley_id = None

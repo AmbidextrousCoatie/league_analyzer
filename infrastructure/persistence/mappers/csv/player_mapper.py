@@ -63,15 +63,6 @@ class PandasPlayerMapper:
                     # Generate new UUID if parsing fails
                     player_id = uuid4()
         
-        # Handle optional club_id
-        club_id = None
-        if pd.notna(row.get('club_id')):
-            club_id_str = str(row['club_id'])
-            try:
-                club_id = UUID(club_id_str) if len(club_id_str) > 10 else None
-            except (ValueError, AttributeError):
-                club_id = None
-        
         # Build name from CSV fields (given_name, family_name, full_name)
         full_name = row.get('full_name', '')
         if not full_name and (row.get('given_name') or row.get('family_name')):
@@ -82,8 +73,7 @@ class PandasPlayerMapper:
         return Player(
             id=player_id,
             name=full_name or 'Unknown',
-            dbu_id=dbu_id,
-            club_id=club_id
+            dbu_id=dbu_id
         )
     
     @staticmethod
@@ -107,7 +97,6 @@ class PandasPlayerMapper:
             'dbu_id': player.dbu_id,  # Legacy DBU ID (if exists)
             'given_name': given_name,
             'family_name': family_name,
-            'full_name': player.name,
-            'club_id': str(player.club_id) if player.club_id else None
+            'full_name': player.name
         })
 

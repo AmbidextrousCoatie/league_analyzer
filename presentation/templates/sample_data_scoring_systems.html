@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            padding: 40px;
+        }
+        h1 { color: #333; margin-bottom: 30px; }
+        .nav { margin-bottom: 30px; padding-bottom: 20px; border-bottom: 2px solid #e9ecef; }
+        .nav a { color: #667eea; text-decoration: none; margin-right: 20px; }
+        .nav a:hover { text-decoration: underline; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e9ecef;
+        }
+        th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #333;
+        }
+        tr:hover { background: #f8f9fa; }
+        .badge {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+        .badge.true {
+            background: #28a745;
+        }
+        .badge.false {
+            background: #dc3545;
+        }
+        code {
+            background: #f8f9fa;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="nav">
+            <a href="/sample-data">← Back to Sample Data</a>
+        </div>
+        <h1>⚖️ Scoring Systems</h1>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Individual Win</th>
+                    <th>Individual Tie</th>
+                    <th>Individual Loss</th>
+                    <th>Team Win</th>
+                    <th>Team Tie</th>
+                    <th>Team Loss</th>
+                    <th>Allow Ties</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for ss in scoring_systems %}
+                <tr>
+                    <td><code>{{ ss.id }}</code></td>
+                    <td><strong>{{ ss.name }}</strong></td>
+                    <td>{{ ss.points_per_individual_match_win }}</td>
+                    <td>{{ ss.points_per_individual_match_tie }}</td>
+                    <td>{{ ss.points_per_individual_match_loss }}</td>
+                    <td>{{ ss.points_per_team_match_win }}</td>
+                    <td>{{ ss.points_per_team_match_tie }}</td>
+                    <td>{{ ss.points_per_team_match_loss }}</td>
+                    <td>
+                        <span class="badge {{ ss.allow_ties|lower }}">
+                            {{ 'Yes' if ss.allow_ties else 'No' }}
+                        </span>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="9" style="text-align: center; color: #666; padding: 40px;">
+                        No scoring systems found. Run <code>scripts/seed_sample_data.py</code> to create sample data.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>
+

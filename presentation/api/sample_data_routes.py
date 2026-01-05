@@ -18,7 +18,6 @@ from domain.entities.team_season import TeamSeason
 from domain.entities.event import Event
 from domain.entities.game import Game
 from domain.entities.player import Player
-from domain.entities.team import Team
 from infrastructure.persistence.adapters.pandas_adapter import PandasDataAdapter
 from infrastructure.persistence.mappers.csv.event_mapper import PandasEventMapper
 from infrastructure.persistence.mappers.csv.league_season_mapper import PandasLeagueSeasonMapper
@@ -26,16 +25,18 @@ from infrastructure.persistence.mappers.csv.team_season_mapper import PandasTeam
 from infrastructure.persistence.mappers.csv.game_mapper import PandasGameMapper
 from infrastructure.persistence.mappers.csv.player_mapper import PandasPlayerMapper
 from infrastructure.persistence.mappers.csv.league_mapper import PandasLeagueMapper
-from infrastructure.persistence.mappers.csv.team_mapper import PandasTeamMapper
 from infrastructure.persistence.mappers.csv.club_mapper import PandasClubMapper
+from infrastructure.persistence.mappers.csv.scoring_system_mapper import PandasScoringSystemMapper
 from infrastructure.persistence.repositories.csv.event_repository import PandasEventRepository
 from infrastructure.persistence.repositories.csv.league_season_repository import PandasLeagueSeasonRepository
 from infrastructure.persistence.repositories.csv.team_season_repository import PandasTeamSeasonRepository
 from infrastructure.persistence.repositories.csv.game_repository import PandasGameRepository
 from infrastructure.persistence.repositories.csv.player_repository import PandasPlayerRepository
 from infrastructure.persistence.repositories.csv.league_repository import PandasLeagueRepository
-from infrastructure.persistence.repositories.csv.team_repository import PandasTeamRepository
 from infrastructure.persistence.repositories.csv.club_repository import PandasClubRepository
+from infrastructure.persistence.repositories.csv.scoring_system_repository import PandasScoringSystemRepository
+from infrastructure.persistence.repositories.csv.club_player_repository import PandasClubPlayerRepository
+from infrastructure.persistence.mappers.csv.club_player_mapper import PandasClubPlayerMapper
 from jinja2 import Environment, FileSystemLoader
 
 router = APIRouter(prefix="/sample-data", tags=["sample-data"])
@@ -69,8 +70,9 @@ def _get_repositories():
         'game': PandasGameRepository(adapter, PandasGameMapper()),
         'player': PandasPlayerRepository(adapter, PandasPlayerMapper()),
         'league': PandasLeagueRepository(adapter, PandasLeagueMapper()),
-        'team': PandasTeamRepository(adapter, PandasTeamMapper()),
-        'club': PandasClubRepository(adapter, PandasClubMapper())
+        'club': PandasClubRepository(adapter, PandasClubMapper()),
+        'scoring_system': PandasScoringSystemRepository(adapter, PandasScoringSystemMapper()),
+        'club_player': PandasClubPlayerRepository(adapter, PandasClubPlayerMapper())
     }
 
 
@@ -113,6 +115,75 @@ async def seed_data():
         raise HTTPException(
             status_code=500,
             detail=f"Error seeding data: {str(e)}"
+        )
+
+
+@router.post("/validate", response_class=JSONResponse)
+async def validate_data_endpoint():
+    """
+    Validate sample data without fixing issues.
+    Returns validation results.
+    """
+    try:
+        from scripts.validate_sample_data import validate_data
+        
+        logger.info("Starting data validation...")
+        is_valid, issues = validate_data(_data_path)
+        logger.info(f"Data validation completed. Valid: {is_valid}, Issues: {len(issues)}")
+        
+        return JSONResponse(content={
+            "status": "success",
+            "is_valid": is_valid,
+            "issues": issues,
+            "issue_count": len(issues),
+            "message": "Validation completed successfully" if is_valid else f"Found {len(issues)} issues"
+        })
+    except Exception as e:
+        logger.error(f"Error validating data: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error validating data: {str(e)}"
+        )
+
+
+@router.post("/validate-fix", response_class=JSONResponse)
+async def validate_and_fix_data_endpoint():
+    """
+    Validate sample data and fix issues automatically.
+    Returns validation results and fixes applied.
+    """
+    try:
+        from scripts.validate_sample_data import validate_data, sanitize_data
+        
+        logger.info("Starting data validation and fix...")
+        
+        # First validate
+        is_valid, issues = validate_data(_data_path)
+        
+        # Then fix
+        fixes = sanitize_data(_data_path, fix_issues=True)
+        
+        # Re-validate after fixes
+        is_valid_after, issues_after = validate_data(_data_path)
+        
+        logger.info(f"Data validation and fix completed. Valid before: {is_valid}, Valid after: {is_valid_after}")
+        
+        return JSONResponse(content={
+            "status": "success",
+            "is_valid_before": is_valid,
+            "is_valid_after": is_valid_after,
+            "issues_before": issues,
+            "issues_after": issues_after,
+            "issue_count_before": len(issues),
+            "issue_count_after": len(issues_after),
+            "fixes_applied": fixes,
+            "message": f"Fixed {sum(fixes.values())} issues. Validation {'passed' if is_valid_after else 'still has issues'}."
+        })
+    except Exception as e:
+        logger.error(f"Error validating/fixing data: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error validating/fixing data: {str(e)}"
         )
 
 
@@ -165,36 +236,74 @@ async def list_league_seasons():
     ))
 
 
-@router.get("/teams", response_class=HTMLResponse)
-async def list_teams():
-    """List all teams (club squads)."""
+@router.get("/scoring-systems", response_class=HTMLResponse)
+async def list_scoring_systems():
+    """List all scoring systems."""
     repos = _get_repositories()
-    teams = await repos['team'].get_all()
+    scoring_systems = await repos['scoring_system'].get_all()
+    
+    # Sort by name
+    scoring_systems = sorted(scoring_systems, key=lambda ss: ss.name)
+    
+    template = env.get_template("sample_data_scoring_systems.html")
+    return HTMLResponse(content=template.render(
+        title="Scoring Systems",
+        scoring_systems=scoring_systems
+    ))
+
+
+@router.get("/clubs", response_class=HTMLResponse)
+async def list_clubs():
+    """List all clubs."""
+    repos = _get_repositories()
     clubs = await repos['club'].get_all()
     
-    # Create mapping for quick lookup
-    club_map = {club.id: club for club in clubs}
+    # Sort by name
+    clubs = sorted(clubs, key=lambda c: c.name)
     
-    # Enrich teams with club information
-    enriched_teams = []
-    for team in teams:
-        club = club_map.get(team.club_id)
-        enriched_teams.append({
-            'team': team,
+    template = env.get_template("sample_data_clubs.html")
+    return HTMLResponse(content=template.render(
+        title="Clubs",
+        clubs=clubs
+    ))
+
+
+@router.get("/club-players", response_class=HTMLResponse)
+async def list_club_players():
+    """List all club-player relationships."""
+    repos = _get_repositories()
+    club_players = await repos['club_player'].get_all()
+    clubs = await repos['club'].get_all()
+    players = await repos['player'].get_all()
+    
+    # Create mappings for quick lookup
+    club_map = {club.id: club for club in clubs}
+    player_map = {player.id: player for player in players}
+    
+    # Enrich club players with club and player information
+    enriched_relationships = []
+    for cp in club_players:
+        club = club_map.get(cp.club_id)
+        player = player_map.get(cp.player_id)
+        
+        enriched_relationships.append({
+            'club_player': cp,
             'club_name': club.name if club else 'Unknown',
-            'club_short_name': club.short_name if club else None
+            'club_short_name': club.short_name if club else None,
+            'player_name': player.name if player else 'Unknown',
+            'player_dbu_id': player.dbu_id if player else None
         })
     
-    # Sort by club name, then team number
-    enriched_teams.sort(key=lambda x: (
+    # Sort by club name, then player name
+    enriched_relationships.sort(key=lambda x: (
         x['club_name'],
-        x['team'].team_number
+        x['player_name']
     ))
     
-    template = env.get_template("sample_data_teams.html")
+    template = env.get_template("sample_data_club_players.html")
     return HTMLResponse(content=template.render(
-        title="Teams",
-        enriched_teams=enriched_teams
+        title="Club-Player Relationships",
+        relationships=enriched_relationships
     ))
 
 
@@ -272,14 +381,32 @@ async def list_events():
 
 @router.get("/games", response_class=HTMLResponse)
 async def list_games():
-    """List all games."""
-    repos = _get_repositories()
-    games = await repos['game'].get_all()
+    """List all game results (new data model)."""
+    import pandas as pd
+    from uuid import UUID
+    
+    # Read game_result.csv directly (repositories not implemented yet)
+    game_result_path = _data_path / "game_result.csv"
+    game_results = []
+    
+    if game_result_path.exists():
+        df = pd.read_csv(game_result_path)
+        for _, row in df.iterrows():
+            game_results.append({
+                'id': row['id'],
+                'match_id': row['match_id'],
+                'player_id': row['player_id'],
+                'team_season_id': row['team_season_id'],
+                'position': int(row['position']),
+                'score': int(row['score']),  # Scores are integers
+                'handicap': row['handicap'] if pd.notna(row['handicap']) and str(row['handicap']).strip() else None,
+                'is_disqualified': bool(row['is_disqualified']) if pd.notna(row['is_disqualified']) else False
+            })
     
     template = env.get_template("sample_data_games.html")
     return HTMLResponse(content=template.render(
-        title="Games",
-        games=games
+        title="Game Results",
+        games=game_results
     ))
 
 
@@ -321,22 +448,6 @@ async def api_league_seasons() -> List[Dict[str, Any]]:
     ]
 
 
-@router.get("/api/teams")
-async def api_teams() -> List[Dict[str, Any]]:
-    """API endpoint for teams."""
-    repos = _get_repositories()
-    teams = await repos['team'].get_all()
-    return [
-        {
-            "id": str(team.id),
-            "name": team.name,
-            "club_id": str(team.club_id) if team.club_id else None,
-            "team_number": team.team_number
-        }
-        for team in teams
-    ]
-
-
 @router.get("/api/team-seasons")
 async def api_team_seasons() -> List[Dict[str, Any]]:
     """API endpoint for team seasons."""
@@ -354,6 +465,23 @@ async def api_team_seasons() -> List[Dict[str, Any]]:
     ]
 
 
+@router.get("/api/clubs")
+async def api_clubs() -> List[Dict[str, Any]]:
+    """API endpoint for clubs."""
+    repos = _get_repositories()
+    clubs = await repos['club'].get_all()
+    return [
+        {
+            "id": str(club.id),
+            "name": club.name,
+            "short_name": club.short_name,
+            "home_alley_id": str(club.home_alley_id) if club.home_alley_id else None,
+            "address": club.address
+        }
+        for club in clubs
+    ]
+
+
 @router.get("/api/players")
 async def api_players() -> List[Dict[str, Any]]:
     """API endpoint for players."""
@@ -363,8 +491,7 @@ async def api_players() -> List[Dict[str, Any]]:
         {
             "id": str(player.id),
             "dbu_id": player.dbu_id,
-            "name": player.name,
-            "club_id": str(player.club_id) if player.club_id else None
+            "name": player.name
         }
         for player in players
     ]
@@ -391,18 +518,199 @@ async def api_events() -> List[Dict[str, Any]]:
 
 @router.get("/api/games")
 async def api_games() -> List[Dict[str, Any]]:
-    """API endpoint for games."""
-    repos = _get_repositories()
-    games = await repos['game'].get_all()
-    return [
-        {
-            "id": str(game.id),
-            "event_id": str(game.event_id) if game.event_id else None,
-            "team_id": str(game.team_id) if game.team_id else None,
-            "opponent_team_id": str(game.opponent_team_id) if game.opponent_team_id else None,
-            "match_number": game.match_number,
-            "round_number": game.round_number
-        }
-        for game in games
-    ]
+    """API endpoint for game results (new data model)."""
+    import pandas as pd
+    
+    # Read game_result.csv directly (repositories not implemented yet)
+    game_result_path = _data_path / "game_result.csv"
+    game_results = []
+    
+    if game_result_path.exists():
+        df = pd.read_csv(game_result_path)
+        for _, row in df.iterrows():
+            game_results.append({
+                "id": row['id'],
+                "match_id": row['match_id'],
+                "player_id": row['player_id'],
+                "team_season_id": row['team_season_id'],
+                "position": int(row['position']),
+                "score": int(row['score']),  # Scores are integers
+                "handicap": row['handicap'] if pd.notna(row['handicap']) and str(row['handicap']).strip() else None,
+                "is_disqualified": bool(row['is_disqualified']) if pd.notna(row['is_disqualified']) else False
+            })
+    
+    return game_results
+
+
+@router.get("/match-detail", response_class=HTMLResponse)
+async def match_detail():
+    """Show detailed information for a randomly selected match."""
+    import pandas as pd
+    import random
+    
+    # Load all CSV files
+    match_path = _data_path / "match.csv"
+    game_result_path = _data_path / "game_result.csv"
+    position_comparison_path = _data_path / "position_comparison.csv"
+    match_scoring_path = _data_path / "match_scoring.csv"
+    event_path = _data_path / "event.csv"
+    league_season_path = _data_path / "league_season.csv"
+    league_path = _data_path / "league.csv"
+    team_season_path = _data_path / "team_season.csv"
+    club_path = _data_path / "club.csv"
+    player_path = _data_path / "player.csv"
+    
+    if not match_path.exists():
+        return HTMLResponse(content="<h1>No matches found</h1><p>Run seed script first.</p>")
+    
+    # Load data
+    df_matches = pd.read_csv(match_path)
+    df_game_results = pd.read_csv(game_result_path) if game_result_path.exists() else pd.DataFrame()
+    df_position_comparisons = pd.read_csv(position_comparison_path) if position_comparison_path.exists() else pd.DataFrame()
+    df_match_scoring = pd.read_csv(match_scoring_path) if match_scoring_path.exists() else pd.DataFrame()
+    df_events = pd.read_csv(event_path) if event_path.exists() else pd.DataFrame()
+    df_league_seasons = pd.read_csv(league_season_path) if league_season_path.exists() else pd.DataFrame()
+    df_leagues = pd.read_csv(league_path) if league_path.exists() else pd.DataFrame()
+    df_team_seasons = pd.read_csv(team_season_path) if team_season_path.exists() else pd.DataFrame()
+    df_clubs = pd.read_csv(club_path) if club_path.exists() else pd.DataFrame()
+    df_players = pd.read_csv(player_path) if player_path.exists() else pd.DataFrame()
+    
+    # Select random match
+    if df_matches.empty:
+        return HTMLResponse(content="<h1>No matches found</h1>")
+    
+    random_match = df_matches.sample(n=1).iloc[0]
+    match_id = random_match['id']
+    
+    # Get match data
+    event_id = random_match['event_id']
+    round_number = int(random_match['round_number'])
+    match_number = int(random_match['match_number'])
+    team1_id = random_match['team1_team_season_id']
+    team2_id = random_match['team2_team_season_id']
+    team1_total = int(random_match['team1_total_score'])
+    team2_total = int(random_match['team2_total_score'])
+    
+    # Get event info
+    event_row = df_events[df_events['id'] == event_id] if not df_events.empty else pd.DataFrame()
+    league_season_id = event_row.iloc[0]['league_season_id'] if not event_row.empty and 'league_season_id' in event_row.columns else None
+    league_week = int(event_row.iloc[0]['league_week']) if not event_row.empty and 'league_week' in event_row.columns and pd.notna(event_row.iloc[0].get('league_week')) else None
+    
+    # Get league season info
+    league_season_row = df_league_seasons[df_league_seasons['id'] == league_season_id] if league_season_id and not df_league_seasons.empty else pd.DataFrame()
+    league_id = league_season_row.iloc[0]['league_id'] if not league_season_row.empty and 'league_id' in league_season_row.columns else None
+    season_str = league_season_row.iloc[0]['season'] if not league_season_row.empty and 'season' in league_season_row.columns else None
+    
+    # Get league info
+    league_row = df_leagues[df_leagues['id'] == league_id] if league_id and not df_leagues.empty else pd.DataFrame()
+    league_name = league_row.iloc[0]['name'] if not league_row.empty and 'name' in league_row.columns else 'Unknown League'
+    league_abbr = league_row.iloc[0]['abbreviation'] if not league_row.empty and 'abbreviation' in league_row.columns else None
+    
+    # Get team season info
+    team1_row = df_team_seasons[df_team_seasons['id'] == team1_id] if not df_team_seasons.empty else pd.DataFrame()
+    team2_row = df_team_seasons[df_team_seasons['id'] == team2_id] if not df_team_seasons.empty else pd.DataFrame()
+    
+    team1_club_id = team1_row.iloc[0]['club_id'] if not team1_row.empty and 'club_id' in team1_row.columns else None
+    team1_number = int(team1_row.iloc[0]['team_number']) if not team1_row.empty and 'team_number' in team1_row.columns and pd.notna(team1_row.iloc[0].get('team_number')) else None
+    
+    team2_club_id = team2_row.iloc[0]['club_id'] if not team2_row.empty and 'club_id' in team2_row.columns else None
+    team2_number = int(team2_row.iloc[0]['team_number']) if not team2_row.empty and 'team_number' in team2_row.columns and pd.notna(team2_row.iloc[0].get('team_number')) else None
+    
+    # Get club names
+    club1_row = df_clubs[df_clubs['id'] == team1_club_id] if team1_club_id and not df_clubs.empty else pd.DataFrame()
+    club2_row = df_clubs[df_clubs['id'] == team2_club_id] if team2_club_id and not df_clubs.empty else pd.DataFrame()
+    
+    club1_name = club1_row.iloc[0]['name'] if not club1_row.empty and 'name' in club1_row.columns else 'Unknown Club'
+    club2_name = club2_row.iloc[0]['name'] if not club2_row.empty and 'name' in club2_row.columns else 'Unknown Club'
+    
+    team1_name = f"{club1_name} {team1_number}" if team1_number else club1_name
+    team2_name = f"{club2_name} {team2_number}" if team2_number else club2_name
+    
+    # Get game results for this match
+    match_game_results = df_game_results[df_game_results['match_id'] == match_id]
+    
+    # Get position comparisons
+    match_comparisons = df_position_comparisons[df_position_comparisons['match_id'] == match_id] if not df_position_comparisons.empty else pd.DataFrame()
+    
+    # Get match scoring
+    match_scoring_row = df_match_scoring[df_match_scoring['match_id'] == match_id] if not df_match_scoring.empty else pd.DataFrame()
+    team1_individual_points = float(match_scoring_row.iloc[0]['team1_individual_points']) if not match_scoring_row.empty and 'team1_individual_points' in match_scoring_row.columns else 0.0
+    team2_individual_points = float(match_scoring_row.iloc[0]['team2_individual_points']) if not match_scoring_row.empty and 'team2_individual_points' in match_scoring_row.columns else 0.0
+    team1_match_points = float(match_scoring_row.iloc[0]['team1_match_points']) if not match_scoring_row.empty and 'team1_match_points' in match_scoring_row.columns else 0.0
+    team2_match_points = float(match_scoring_row.iloc[0]['team2_match_points']) if not match_scoring_row.empty and 'team2_match_points' in match_scoring_row.columns else 0.0
+    
+    # Build position-by-position data
+    position_data = []
+    for position in range(4):  # Positions 0-3
+        # Get comparison for this position
+        comp_row = match_comparisons[match_comparisons['position'] == position] if not match_comparisons.empty else pd.DataFrame()
+        
+        if not comp_row.empty and 'team1_player_id' in comp_row.columns:
+            team1_player_id = comp_row.iloc[0]['team1_player_id']
+            team2_player_id = comp_row.iloc[0]['team2_player_id']
+            team1_score = int(comp_row.iloc[0]['team1_score']) if 'team1_score' in comp_row.columns else 0
+            team2_score = int(comp_row.iloc[0]['team2_score']) if 'team2_score' in comp_row.columns else 0
+            outcome = comp_row.iloc[0]['outcome'] if 'outcome' in comp_row.columns else None
+            
+            # Get player names
+            player1_row = df_players[df_players['id'] == team1_player_id] if not df_players.empty else pd.DataFrame()
+            player2_row = df_players[df_players['id'] == team2_player_id] if not df_players.empty else pd.DataFrame()
+            
+            # Player CSV has 'full_name' column, not 'name'
+            player1_name = player1_row.iloc[0]['full_name'] if not player1_row.empty and 'full_name' in player1_row.columns else 'Unknown Player'
+            player2_name = player2_row.iloc[0]['full_name'] if not player2_row.empty and 'full_name' in player2_row.columns else 'Unknown Player'
+            
+            # Determine points gained
+            if outcome == 'team1_win':
+                team1_points = 1.0
+                team2_points = 0.0
+            elif outcome == 'team2_win':
+                team1_points = 0.0
+                team2_points = 1.0
+            else:  # tie
+                team1_points = 0.5
+                team2_points = 0.5
+            
+            position_data.append({
+                'position': position,
+                'team1_player': player1_name,
+                'team2_player': player2_name,
+                'team1_score': team1_score,
+                'team2_score': team2_score,
+                'team1_points': team1_points,
+                'team2_points': team2_points,
+                'outcome': outcome
+            })
+        else:
+            # No comparison found for this position
+            position_data.append({
+                'position': position,
+                'team1_player': '-',
+                'team2_player': '-',
+                'team1_score': 0,
+                'team2_score': 0,
+                'team1_points': 0.0,
+                'team2_points': 0.0,
+                'outcome': None
+            })
+    
+    template = env.get_template("sample_data_match_detail.html")
+    return HTMLResponse(content=template.render(
+        title="Match Detail",
+        season=season_str or 'Unknown',
+        league_name=league_name,
+        league_abbr=league_abbr,
+        league_week=league_week,
+        round_number=round_number,
+        match_number=match_number,
+        team1_name=team1_name,
+        team2_name=team2_name,
+        team1_total=team1_total,
+        team2_total=team2_total,
+        team1_individual_points=team1_individual_points,
+        team2_individual_points=team2_individual_points,
+        team1_match_points=team1_match_points,
+        team2_match_points=team2_match_points,
+        position_data=position_data
+    ))
 
