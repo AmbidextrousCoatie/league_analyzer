@@ -1,5 +1,11 @@
 """
 Tests for StandingsCalculator domain service.
+
+NOTE: These tests may fail because StandingsCalculator uses the old Game API
+(league_id, season, week, team_id, opponent_team_id, results), but the Game entity has been
+refactored to use a new API (event_id, player_id, team_season_id, match_number, round_number, score, points).
+
+The tests are kept to document expected behavior and will help guide the domain service update.
 """
 
 import pytest
@@ -23,85 +29,73 @@ class TestStandingsCalculator:
     
     def test_calculate_standings_single_week(self):
         """Test calculating standings for a single week."""
-        # Create teams
-        team1 = Team(id=uuid4(), name="Team A")
-        team2 = Team(id=uuid4(), name="Team B")
+        # Create teams (with club_id as required by new Team model)
+        club_id = uuid4()
+        team1 = Team(id=uuid4(), name="Team A", club_id=club_id)
+        team2 = Team(id=uuid4(), name="Team B", club_id=club_id)
         
-        # Create league
+        # Create league (teams don't need to be added to league for calculator)
         league = League(id=uuid4(), name="Test League", level=3)
-        league.add_team(team1)
-        league.add_team(team2)
         
-        # Create games for week 1
-        game1 = Game(
-            id=uuid4(),
-            league_id=league.id,
-            season=Season("2024-25"),
-            week=1,
-            team_id=team1.id,
-            opponent_team_id=team2.id
-        )
+        # Create event and team seasons for the new Game API
+        event_id = uuid4()
+        team1_season_id = uuid4()
+        team2_season_id = uuid4()
         
-        # Team 1 scores: 180, 190, 200, 210 = 780 total, 2 points (win)
-        game1.add_result(GameResult(
-            player_id=uuid4(),
-            position=1,
-            scratch_score=Score(180),
-            points=Points(0.5)
-        ))
-        game1.add_result(GameResult(
-            player_id=uuid4(),
-            position=2,
-            scratch_score=Score(190),
-            points=Points(0.5)
-        ))
-        game1.add_result(GameResult(
-            player_id=uuid4(),
-            position=3,
-            scratch_score=Score(200),
-            points=Points(0.5)
-        ))
-        game1.add_result(GameResult(
-            player_id=uuid4(),
-            position=4,
-            scratch_score=Score(210),
-            points=Points(0.5)
-        ))
+        # Create games for week 1 - new Game API: one Game per player
+        # Team 1 players: scores 180, 190, 200, 210 = 780 total, 2 points (win)
+        team1_player_ids = [uuid4() for _ in range(4)]
+        team1_scores = [180, 190, 200, 210]
+        team1_games = [
+            Game(
+                id=uuid4(),
+                event_id=event_id,
+                player_id=pid,
+                team_season_id=team1_season_id,
+                position=i,
+                match_number=1,
+                round_number=1,
+                score=float(score),
+                points=0.5
+            )
+            for i, (pid, score) in enumerate(zip(team1_player_ids, team1_scores))
+        ]
         
-        # Team 2 scores: 170, 180, 190, 200 = 740 total, 0 points (loss)
-        game1.add_result(GameResult(
-            player_id=uuid4(),
-            position=1,
-            scratch_score=Score(170),
-            points=Points(0)
-        ))
-        game1.add_result(GameResult(
-            player_id=uuid4(),
-            position=2,
-            scratch_score=Score(180),
-            points=Points(0)
-        ))
-        game1.add_result(GameResult(
-            player_id=uuid4(),
-            position=3,
-            scratch_score=Score(190),
-            points=Points(0)
-        ))
-        game1.add_result(GameResult(
-            player_id=uuid4(),
-            position=4,
-            scratch_score=Score(200),
-            points=Points(0)
-        ))
+        # Team 2 players: scores 170, 180, 190, 200 = 740 total, 0 points (loss)
+        team2_player_ids = [uuid4() for _ in range(4)]
+        team2_scores = [170, 180, 190, 200]
+        team2_games = [
+            Game(
+                id=uuid4(),
+                event_id=event_id,
+                player_id=pid,
+                team_season_id=team2_season_id,
+                position=i,
+                match_number=1,
+                round_number=1,
+                score=float(score),
+                points=0.0
+            )
+            for i, (pid, score) in enumerate(zip(team2_player_ids, team2_scores))
+        ]
         
-        games = [game1]
+        games = team1_games + team2_games
         teams = {team1.id: team1, team2.id: team2}
         league_season_id = uuid4()
+        
+        # Create mappings for new Game API
+        team_season_to_team = {
+            team1_season_id: team1.id,
+            team2_season_id: team2.id
+        }
+        event_to_week = {event_id: 1}
         
         standings = StandingsCalculator.calculate_standings(
             games=games,
             teams=teams,
-            league_season_id=league_season_id
+            league_season_id=league_season_id,
+            team_season_to_team=team_season_to_team,
+            event_to_week=event_to_week
         )
         
         assert isinstance(standings, Standings)
@@ -121,72 +115,102 @@ class TestStandingsCalculator:
     
     def test_calculate_standings_multiple_weeks(self):
         """Test calculating standings across multiple weeks."""
-        team1 = Team(id=uuid4(), name="Team A")
-        team2 = Team(id=uuid4(), name="Team B")
+        club_id = uuid4()
+        team1 = Team(id=uuid4(), name="Team A", club_id=club_id)
+        team2 = Team(id=uuid4(), name="Team B", club_id=club_id)
         
         league = League(id=uuid4(), name="Test League", level=3)
-        league.add_team(team1)
-        league.add_team(team2)
+        
+        # Create events and team seasons
+        event1_id = uuid4()
+        event2_id = uuid4()
+        team1_season_id = uuid4()
+        team2_season_id = uuid4()
         
         games = []
         
         # Week 1: Team 1 wins (2 points, 780 score)
-        game1 = Game(
-            id=uuid4(),
-            league_id=league.id,
-            season=Season("2024-25"),
-            week=1,
-            team_id=team1.id,
-            opponent_team_id=team2.id
-        )
-        for i, score in enumerate([180, 190, 200, 210], 1):
-            game1.add_result(GameResult(
-                player_id=uuid4(),
+        # Team 1 players: 180, 190, 200, 210
+        team1_week1_player_ids = [uuid4() for _ in range(4)]
+        team1_week1_scores = [180, 190, 200, 210]
+        for i, (pid, score) in enumerate(zip(team1_week1_player_ids, team1_week1_scores)):
+            games.append(Game(
+                id=uuid4(),
+                event_id=event1_id,
+                player_id=pid,
+                team_season_id=team1_season_id,
                 position=i,
-                scratch_score=Score(score),
-                points=Points(0.5)
+                match_number=1,
+                round_number=1,
+                score=float(score),
+                points=0.5
             ))
-        for i, score in enumerate([170, 180, 190, 200], 1):
-            game1.add_result(GameResult(
-                player_id=uuid4(),
+        
+        # Team 2 players: 170, 180, 190, 200
+        team2_week1_player_ids = [uuid4() for _ in range(4)]
+        team2_week1_scores = [170, 180, 190, 200]
+        for i, (pid, score) in enumerate(zip(team2_week1_player_ids, team2_week1_scores)):
+            games.append(Game(
+                id=uuid4(),
+                event_id=event1_id,
+                player_id=pid,
+                team_season_id=team2_season_id,
                 position=i,
-                scratch_score=Score(score),
-                points=Points(0)
+                match_number=1,
+                round_number=1,
+                score=float(score),
+                points=0.0
             ))
-        games.append(game1)
         
         # Week 2: Team 2 wins (2 points, 800 score)
-        game2 = Game(
-            id=uuid4(),
-            league_id=league.id,
-            season=Season("2024-25"),
-            week=2,
-            team_id=team1.id,
-            opponent_team_id=team2.id
-        )
-        for i, score in enumerate([160, 170, 180, 190], 1):
-            game2.add_result(GameResult(
-                player_id=uuid4(),
+        # Team 1 players: 160, 170, 180, 190
+        team1_week2_player_ids = [uuid4() for _ in range(4)]
+        team1_week2_scores = [160, 170, 180, 190]
+        for i, (pid, score) in enumerate(zip(team1_week2_player_ids, team1_week2_scores)):
+            games.append(Game(
+                id=uuid4(),
+                event_id=event2_id,
+                player_id=pid,
+                team_season_id=team1_season_id,
                 position=i,
-                scratch_score=Score(score),
-                points=Points(0)
+                match_number=1,
+                round_number=1,
+                score=float(score),
+                points=0.0
             ))
-        for i, score in enumerate([200, 210, 190, 200], 1):
-            game2.add_result(GameResult(
-                player_id=uuid4(),
+        
+        # Team 2 players: 200, 210, 190, 200
+        team2_week2_player_ids = [uuid4() for _ in range(4)]
+        team2_week2_scores = [200, 210, 190, 200]
+        for i, (pid, score) in enumerate(zip(team2_week2_player_ids, team2_week2_scores)):
+            games.append(Game(
+                id=uuid4(),
+                event_id=event2_id,
+                player_id=pid,
+                team_season_id=team2_season_id,
                 position=i,
-                scratch_score=Score(score),
-                points=Points(0.5)
+                match_number=1,
+                round_number=1,
+                score=float(score),
+                points=0.5
             ))
-        games.append(game2)
         
         teams = {team1.id: team1, team2.id: team2}
         league_season_id = uuid4()
         
+        # Create mappings for new Game API
+        team_season_to_team = {
+            team1_season_id: team1.id,
+            team2_season_id: team2.id
+        }
+        event_to_week = {event1_id: 1, event2_id: 2}
+        
         standings = StandingsCalculator.calculate_standings(
             games=games,
             teams=teams,
-            league_season_id=league_season_id
+            league_season_id=league_season_id,
+            team_season_to_team=team_season_to_team,
+            event_to_week=event_to_week
         )
         
         assert isinstance(standings, Standings)
@@ -211,8 +235,9 @@ class TestStandingsCalculator:
     
     def test_calculate_standings_empty_games(self):
         """Test calculating standings with no games."""
-        team1 = Team(id=uuid4(), name="Team A")
-        team2 = Team(id=uuid4(), name="Team B")
+        club_id = uuid4()
+        team1 = Team(id=uuid4(), name="Team A", club_id=club_id)
+        team2 = Team(id=uuid4(), name="Team B", club_id=club_id)
         
         teams = {team1.id: team1, team2.id: team2}
         league_season_id = uuid4()
@@ -233,45 +258,71 @@ class TestStandingsCalculator:
     
     def test_calculate_standings_tie_breaker(self):
         """Test that standings use score as tie-breaker when points are equal."""
-        team1 = Team(id=uuid4(), name="Team A")
-        team2 = Team(id=uuid4(), name="Team B")
+        club_id = uuid4()
+        team1 = Team(id=uuid4(), name="Team A", club_id=club_id)
+        team2 = Team(id=uuid4(), name="Team B", club_id=club_id)
         
         league = League(id=uuid4(), name="Test League", level=3)
         
-        # Both teams have 2 points, but Team 1 has higher total score
-        game1 = Game(
-            id=uuid4(),
-            league_id=league.id,
-            season=Season("2024-25"),
-            week=1,
-            team_id=team1.id,
-            opponent_team_id=team2.id
-        )
-        # Team 1: 800 total
-        for i, score in enumerate([200, 200, 200, 200], 1):
-            game1.add_result(GameResult(
-                player_id=uuid4(),
-                position=i,
-                scratch_score=Score(score),
-                points=Points(0.5)
-            ))
-        # Team 2: 700 total
-        for i, score in enumerate([175, 175, 175, 175], 1):
-            game1.add_result(GameResult(
-                player_id=uuid4(),
-                position=i,
-                scratch_score=Score(score),
-                points=Points(0)
-            ))
+        # Create event and team seasons
+        event_id = uuid4()
+        team1_season_id = uuid4()
+        team2_season_id = uuid4()
         
-        games = [game1]
+        # Both teams have 2 points, but Team 1 has higher total score
+        # Team 1: 800 total (200, 200, 200, 200)
+        team1_player_ids = [uuid4() for _ in range(4)]
+        team1_scores = [200, 200, 200, 200]
+        team1_games = [
+            Game(
+                id=uuid4(),
+                event_id=event_id,
+                player_id=pid,
+                team_season_id=team1_season_id,
+                position=i,
+                match_number=1,
+                round_number=1,
+                score=float(score),
+                points=0.5
+            )
+            for i, (pid, score) in enumerate(zip(team1_player_ids, team1_scores))
+        ]
+        
+        # Team 2: 700 total (175, 175, 175, 175)
+        team2_player_ids = [uuid4() for _ in range(4)]
+        team2_scores = [175, 175, 175, 175]
+        team2_games = [
+            Game(
+                id=uuid4(),
+                event_id=event_id,
+                player_id=pid,
+                team_season_id=team2_season_id,
+                position=i,
+                match_number=1,
+                round_number=1,
+                score=float(score),
+                points=0.0
+            )
+            for i, (pid, score) in enumerate(zip(team2_player_ids, team2_scores))
+        ]
+        
+        games = team1_games + team2_games
         teams = {team1.id: team1, team2.id: team2}
         league_season_id = uuid4()
+        
+        # Create mappings for new Game API
+        team_season_to_team = {
+            team1_season_id: team1.id,
+            team2_season_id: team2.id
+        }
+        event_to_week = {event_id: 1}
         
         standings = StandingsCalculator.calculate_standings(
             games=games,
             teams=teams,
-            league_season_id=league_season_id
+            league_season_id=league_season_id,
+            team_season_to_team=team_season_to_team,
+            event_to_week=event_to_week
         )
         
         # Team 1 should be first (same points, higher score)

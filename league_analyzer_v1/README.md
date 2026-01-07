@@ -27,7 +27,7 @@ flask run
 
 ## Migration Notes
 
-This application is being migrated to a new clean architecture (see root `README_NEW_ARCHITECTURE.md`).
+This application is being migrated to a new clean architecture (see `docs/architecture/README_NEW_ARCHITECTURE.md`).
 
 The new architecture uses:
 - FastAPI instead of Flask

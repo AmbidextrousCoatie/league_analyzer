@@ -94,17 +94,21 @@ class StandingsCalculator:
         league_season_id: UUID,
         up_to_week: Optional[int] = None,
         player_to_team: Optional[Dict[UUID, UUID]] = None,
+        team_season_to_team: Optional[Dict[UUID, UUID]] = None,
+        event_to_week: Optional[Dict[UUID, int]] = None,
         status: StandingsStatus = StandingsStatus.PROVISIONAL
     ) -> Standings:
         """
         Calculate standings for teams in a league season.
         
         Args:
-            games: List of Game entities
+            games: List of Game entities (new API: one Game per player)
             teams: Dictionary mapping team_id to Team entities
             league_season_id: UUID of the league season
             up_to_week: Optional week number to calculate standings up to (None = all weeks)
-            player_to_team: Optional dictionary mapping player_id to team_id
+            player_to_team: Optional dictionary mapping player_id to team_id (deprecated, use team_season_to_team)
+            team_season_to_team: Optional dictionary mapping team_season_id to team_id (required for new Game API)
+            event_to_week: Optional dictionary mapping event_id to week number (for weekly performance tracking)
             status: Publication status of standings (default: PROVISIONAL)
         
         Returns:
@@ -120,13 +124,6 @@ class StandingsCalculator:
                 status=status
             )
         
-        # Filter games by league and optional week
-        # Note: We'll need to filter by league_season_id once Game has that link
-        league_games = [
-            game for game in games
-            if (up_to_week is None or game.week <= up_to_week)
-        ]
-        
         # Initialize standings for all teams
         team_standings: Dict[UUID, TeamStanding] = {}
         for team_id, team in teams.items():
@@ -135,10 +132,51 @@ class StandingsCalculator:
                 team_name=team.name
             )
         
-        # Process each game
-        for game in league_games:
-            StandingsCalculator._process_game(
-                game, team_standings, teams, player_to_team
+        # Group games by event_id and team_season_id
+        # New Game API: each Game represents one player, so we need to aggregate
+        from collections import defaultdict
+        event_team_games: Dict[tuple[UUID, UUID], List[Game]] = defaultdict(list)
+        
+        for game in games:
+            if game.team_season_id is None:
+                continue
+            # Filter by week if specified (requires event_to_week mapping)
+            if up_to_week is not None and event_to_week:
+                week = event_to_week.get(game.event_id)
+                if week is None or week > up_to_week:
+                    continue
+            event_team_games[(game.event_id, game.team_season_id)].append(game)
+        
+        # Process each event-team combination
+        for (event_id, team_season_id), team_games in event_team_games.items():
+            # Map team_season_id to team_id
+            if team_season_to_team:
+                team_id = team_season_to_team.get(team_season_id)
+            else:
+                # Fallback: try to find team_id from teams dict (won't work with new API)
+                team_id = None
+            
+            if team_id is None or team_id not in team_standings:
+                # Skip if we can't map team_season_id to team_id
+                continue
+            
+            # Sum scores and points for this team in this event
+            total_score = sum(game.score for game in team_games)
+            total_points = sum(game.points for game in team_games)
+            
+            # Get week number for weekly performance
+            week = 1  # Default
+            if event_to_week:
+                week = event_to_week.get(event_id, 1)
+            
+            # Update standings
+            standing = team_standings[team_id]
+            standing.total_score += total_score
+            standing.total_points += total_points
+            
+            # Update weekly performance
+            StandingsCalculator._update_weekly_performance(
+                standing, week, total_score, total_points
             )
         
         # Calculate averages and sort by position
@@ -162,106 +200,6 @@ class StandingsCalculator:
             status=status
         )
     
-    @staticmethod
-    def _process_game(
-        game: Game,
-        standings: Dict[UUID, TeamStanding],
-        teams: Dict[UUID, Team],
-        player_to_team: Optional[Dict[UUID, UUID]] = None
-    ) -> None:
-        """
-        Process a single game and update standings.
-        
-        Args:
-            game: Game entity to process
-            standings: Dictionary of team standings to update
-            teams: Dictionary of teams
-            player_to_team: Optional dictionary mapping player_id to team_id
-        """
-        if game.team_id not in standings or game.opponent_team_id not in standings:
-            # Skip games with teams not in the standings
-            return
-        
-        # Calculate team scores and points from game results
-        team1_score, team1_points = StandingsCalculator._calculate_team_totals(
-            game, game.team_id, player_to_team
-        )
-        team2_score, team2_points = StandingsCalculator._calculate_team_totals(
-            game, game.opponent_team_id, player_to_team
-        )
-        
-        # Update team 1 standings
-        team1_standing = standings[game.team_id]
-        team1_standing.total_score += team1_score
-        team1_standing.total_points += team1_points
-        
-        # Update or create weekly performance for team 1
-        StandingsCalculator._update_weekly_performance(
-            team1_standing, game.week, team1_score, team1_points
-        )
-        
-        # Update team 2 standings
-        team2_standing = standings[game.opponent_team_id]
-        team2_standing.total_score += team2_score
-        team2_standing.total_points += team2_points
-        
-        # Update or create weekly performance for team 2
-        StandingsCalculator._update_weekly_performance(
-            team2_standing, game.week, team2_score, team2_points
-        )
-    
-    @staticmethod
-    def _calculate_team_totals(
-        game: Game,
-        team_id: UUID,
-        player_to_team: Optional[Dict[UUID, UUID]] = None
-    ) -> tuple[float, float]:
-        """
-        Calculate total score and points for a team in a game.
-        
-        Args:
-            game: Game entity
-            team_id: UUID of the team
-            player_to_team: Optional dictionary mapping player_id to team_id
-        
-        Returns:
-            Tuple of (total_score, total_points)
-        """
-        total_score = 0.0
-        total_points = 0.0
-        
-        # If we have player-to-team mapping, use it
-        if player_to_team:
-            for result in game.results:
-                if result.is_team_total:
-                    continue
-                
-                player_team_id = player_to_team.get(result.player_id)
-                if player_team_id == team_id:
-                    total_score += float(result.score)
-                    total_points += float(result.points)
-        else:
-            # Fallback: assume results are ordered by team
-            # First half are team1, second half are team2
-            # This is a simplification for Phase 1
-            players_per_team = len([r for r in game.results if not r.is_team_total]) // 2
-            
-            if game.team_id == team_id:
-                # First half of results
-                team_results = game.results[:players_per_team]
-            elif game.opponent_team_id == team_id:
-                # Second half of results
-                team_results = game.results[players_per_team:players_per_team * 2]
-            else:
-                return 0.0, 0.0
-            
-            # Sum scores and points (excluding team totals)
-            for result in team_results:
-                if not result.is_team_total:
-                    total_score += float(result.score)
-                    total_points += float(result.points)
-        
-        return total_score, total_points
     
     @staticmethod
     def _update_weekly_performance(

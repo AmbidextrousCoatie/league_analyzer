@@ -293,6 +293,40 @@ class PandasDataAdapter(DataAdapter):
         if hasattr(self, '_player_data'):
             self._player_data = None
     
+    def get_team_data(self) -> pd.DataFrame:
+        """
+        Get all team data from team.csv.
+        
+        Returns:
+            DataFrame with all team data
+        """
+        team_path = (self.data_path / "team.csv") if self.data_path.is_dir() else (self.data_path.parent / "team.csv")
+        logger.debug(f"Loading team data from {team_path}")
+        
+        if not team_path.exists():
+            logger.debug(f"Team file not found at {team_path}, returning empty DataFrame")
+            return pd.DataFrame(columns=['id', 'name', 'club_id', 'team_number', 'created_at', 'updated_at'])
+        
+        try:
+            df = pd.read_csv(team_path)
+            logger.debug(f"Loaded {len(df)} teams from {team_path}")
+            return df
+        except Exception as e:
+            logger.error(f"Error loading team data from {team_path}: {e}")
+            return pd.DataFrame(columns=['id', 'name', 'club_id', 'team_number', 'created_at', 'updated_at'])
+    
+    def save_team_data(self, df: pd.DataFrame) -> None:
+        """
+        Save team data to team.csv.
+        
+        Args:
+            df: DataFrame with team data to save
+        """
+        team_path = (self.data_path / "team.csv") if self.data_path.is_dir() else (self.data_path.parent / "team.csv")
+        logger.debug(f"Saving {len(df)} teams to {team_path}")
+        df.to_csv(team_path, index=False)
+        logger.debug(f"Saved {len(df)} teams to {team_path}")
+    
     def get_league_data(self) -> pd.DataFrame:
         """
         Get all league data from league.csv.
@@ -430,4 +464,136 @@ class PandasDataAdapter(DataAdapter):
         # Invalidate cache if exists
         if hasattr(self, '_club_player_data'):
             self._club_player_data = None
+    
+    def get_match_data(self) -> pd.DataFrame:
+        """
+        Get all match data from match.csv.
+        
+        Returns:
+            DataFrame with all match data
+        """
+        match_path = (self.data_path / "match.csv") if self.data_path.is_dir() else (self.data_path.parent / "match.csv")
+        if not match_path.exists():
+            logger.warning(f"Match file not found: {match_path}, returning empty DataFrame")
+            return pd.DataFrame(columns=[
+                'id', 'event_id', 'round_number', 'match_number',
+                'team1_team_season_id', 'team2_team_season_id',
+                'team1_total_score', 'team2_total_score',
+                'status', 'created_at', 'updated_at'
+            ])
+        
+        logger.debug(f"Loading match data from {match_path}")
+        df = pd.read_csv(match_path)
+        logger.debug(f"Loaded {len(df)} matches from {match_path}")
+        return df
+    
+    def save_match_data(self, df: pd.DataFrame) -> None:
+        """
+        Save match data to match.csv.
+        
+        Args:
+            df: DataFrame with match data to save
+        """
+        match_path = (self.data_path / "match.csv") if self.data_path.is_dir() else (self.data_path.parent / "match.csv")
+        logger.debug(f"Saving {len(df)} matches to {match_path}")
+        df.to_csv(match_path, index=False)
+        logger.debug(f"Saved {len(df)} matches to {match_path}")
+    
+    def get_game_result_data(self) -> pd.DataFrame:
+        """
+        Get all game result data from game_result.csv.
+        
+        Returns:
+            DataFrame with all game result data
+        """
+        game_result_path = (self.data_path / "game_result.csv") if self.data_path.is_dir() else (self.data_path.parent / "game_result.csv")
+        if not game_result_path.exists():
+            logger.warning(f"Game result file not found: {game_result_path}, returning empty DataFrame")
+            return pd.DataFrame(columns=[
+                'id', 'match_id', 'player_id', 'team_season_id', 'position',
+                'score', 'handicap', 'is_disqualified', 'created_at', 'updated_at'
+            ])
+        
+        logger.debug(f"Loading game result data from {game_result_path}")
+        df = pd.read_csv(game_result_path)
+        logger.debug(f"Loaded {len(df)} game results from {game_result_path}")
+        return df
+    
+    def save_game_result_data(self, df: pd.DataFrame) -> None:
+        """
+        Save game result data to game_result.csv.
+        
+        Args:
+            df: DataFrame with game result data to save
+        """
+        game_result_path = (self.data_path / "game_result.csv") if self.data_path.is_dir() else (self.data_path.parent / "game_result.csv")
+        logger.debug(f"Saving {len(df)} game results to {game_result_path}")
+        df.to_csv(game_result_path, index=False)
+        logger.debug(f"Saved {len(df)} game results to {game_result_path}")
+    
+    def get_position_comparison_data(self) -> pd.DataFrame:
+        """
+        Get all position comparison data from position_comparison.csv.
+        
+        Returns:
+            DataFrame with all position comparison data
+        """
+        comparison_path = (self.data_path / "position_comparison.csv") if self.data_path.is_dir() else (self.data_path.parent / "position_comparison.csv")
+        if not comparison_path.exists():
+            logger.warning(f"Position comparison file not found: {comparison_path}, returning empty DataFrame")
+            return pd.DataFrame(columns=[
+                'id', 'match_id', 'position', 'team1_player_id', 'team2_player_id',
+                'team1_score', 'team2_score', 'outcome', 'created_at', 'updated_at'
+            ])
+        
+        logger.debug(f"Loading position comparison data from {comparison_path}")
+        df = pd.read_csv(comparison_path)
+        logger.debug(f"Loaded {len(df)} position comparisons from {comparison_path}")
+        return df
+    
+    def save_position_comparison_data(self, df: pd.DataFrame) -> None:
+        """
+        Save position comparison data to position_comparison.csv.
+        
+        Args:
+            df: DataFrame with position comparison data to save
+        """
+        comparison_path = (self.data_path / "position_comparison.csv") if self.data_path.is_dir() else (self.data_path.parent / "position_comparison.csv")
+        logger.debug(f"Saving {len(df)} position comparisons to {comparison_path}")
+        df.to_csv(comparison_path, index=False)
+        logger.debug(f"Saved {len(df)} position comparisons to {comparison_path}")
+    
+    def get_match_scoring_data(self) -> pd.DataFrame:
+        """
+        Get all match scoring data from match_scoring.csv.
+        
+        Returns:
+            DataFrame with all match scoring data
+        """
+        scoring_path = (self.data_path / "match_scoring.csv") if self.data_path.is_dir() else (self.data_path.parent / "match_scoring.csv")
+        if not scoring_path.exists():
+            logger.warning(f"Match scoring file not found: {scoring_path}, returning empty DataFrame")
+            return pd.DataFrame(columns=[
+                'id', 'match_id', 'scoring_system_id',
+                'team1_individual_points', 'team2_individual_points',
+                'team1_match_points', 'team2_match_points',
+                'computed_at', 'created_at', 'updated_at'
+            ])
+        
+        logger.debug(f"Loading match scoring data from {scoring_path}")
+        df = pd.read_csv(scoring_path)
+        logger.debug(f"Loaded {len(df)} match scorings from {scoring_path}")
+        return df
+    
+    def save_match_scoring_data(self, df: pd.DataFrame) -> None:
+        """
+        Save match scoring data to match_scoring.csv.
+        
+        Args:
+            df: DataFrame with match scoring data to save
+        """
+        scoring_path = (self.data_path / "match_scoring.csv") if self.data_path.is_dir() else (self.data_path.parent / "match_scoring.csv")
+        logger.debug(f"Saving {len(df)} match scorings to {scoring_path}")
+        df.to_csv(scoring_path, index=False)
+        logger.debug(f"Saved {len(df)} match scorings to {scoring_path}")
 

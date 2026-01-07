@@ -7,6 +7,7 @@ Following TDD: These tests are written BEFORE implementation.
 import pytest
 import pandas as pd
 from uuid import UUID, uuid4
+from datetime import datetime
 from domain.entities.game import Game
 from domain.repositories.game_repository import GameRepository
 from domain.value_objects.game_result import GameResult
@@ -22,30 +23,28 @@ class TestPandasGameRepository:
         return uuid4()
     
     @pytest.fixture
+    def player_id(self):
+        """Fixture for player ID."""
+        return uuid4()
+    
+    @pytest.fixture
     def team_season_id(self):
         """Fixture for team season ID."""
         return uuid4()
     
     @pytest.fixture
-    def team_id(self):
-        """Fixture for team ID."""
-        return uuid4()
-    
-    @pytest.fixture
-    def opponent_team_id(self):
-        """Fixture for opponent team ID."""
-        return uuid4()
-    
-    @pytest.fixture
-    def sample_game(self, event_id, team_id, opponent_team_id):
+    def sample_game(self, event_id, player_id, team_season_id):
         """Fixture for sample game."""
         return Game(
             id=uuid4(),
             event_id=event_id,
-            team_id=team_id,
-            opponent_team_id=opponent_team_id,
+            player_id=player_id,
+            team_season_id=team_season_id,
+            position=1,
             match_number=1,
-            round_number=1
+            round_number=1,
+            score=200.0,
+            points=2.0
         )
     
     @pytest.fixture
@@ -53,7 +52,10 @@ class TestPandasGameRepository:
         """Create a temporary game.csv file for testing."""
         csv_file = tmp_path / "game.csv"
         df = pd.DataFrame(columns=[
-            'id', 'event_id', 'team_season_id', 'match_number', 'round_number'
+            'id', 'event_id', 'player_id', 'team_season_id', 'position',
+            'match_number', 'round_number', 'score', 'points',
+            'opponent_id', 'opponent_team_season_id', 'handicap', 'is_disqualified',
+            'created_at', 'updated_at'
         ])
         df.to_csv(csv_file, index=False)
         return csv_file
@@ -100,23 +102,31 @@ class TestPandasGameRepository:
         self,
         game_repository: GameRepository,
         event_id: UUID,
-        team_id: UUID,
-        opponent_team_id: UUID
+        player_id: UUID,
+        team_season_id: UUID
     ):
         """Test getting all games."""
         g1 = Game(
             id=uuid4(),
             event_id=event_id,
-            team_id=team_id,
-            opponent_team_id=opponent_team_id,
-            match_number=1
+            player_id=player_id,
+            team_season_id=team_season_id,
+            position=0,
+            match_number=1,
+            round_number=1,
+            score=200.0,
+            points=2.0
         )
         g2 = Game(
             id=uuid4(),
             event_id=event_id,
-            team_id=team_id,
-            opponent_team_id=opponent_team_id,
-            match_number=2
+            player_id=player_id,
+            team_season_id=team_season_id,
+            position=0,
+            match_number=2,
+            round_number=1,
+            score=180.0,
+            points=0.0
         )
         await game_repository.add(g1)
         await game_repository.add(g2)
@@ -140,7 +150,9 @@ class TestPandasGameRepository:
     ):
         """Test updating an existing game."""
         await game_repository.add(sample_game)
-        sample_game.update_match_number(2)
+        # Update match_number directly (Game doesn't have update_match_number method)
+        sample_game.match_number = 2
+        sample_game.updated_at = datetime.utcnow()
         result = await game_repository.update(sample_game)
         assert result.match_number == 2
     
@@ -167,24 +179,32 @@ class TestPandasGameRepository:
         self,
         game_repository: GameRepository,
         event_id: UUID,
-        team_id: UUID,
-        opponent_team_id: UUID
+        player_id: UUID,
+        team_season_id: UUID
     ):
         """Test getting games by event."""
         g1 = Game(
             id=uuid4(),
             event_id=event_id,
-            team_id=team_id,
-            opponent_team_id=opponent_team_id,
-            match_number=1
+            player_id=player_id,
+            team_season_id=team_season_id,
+            position=0,
+            match_number=1,
+            round_number=1,
+            score=200.0,
+            points=2.0
         )
         other_event_id = uuid4()
         g2 = Game(
             id=uuid4(),
             event_id=other_event_id,
-            team_id=team_id,
-            opponent_team_id=opponent_team_id,
-            match_number=1
+            player_id=player_id,
+            team_season_id=team_season_id,
+            position=0,
+            match_number=1,
+            round_number=1,
+            score=180.0,
+            points=0.0
         )
         await game_repository.add(g1)
         await game_repository.add(g2)
@@ -196,45 +216,57 @@ class TestPandasGameRepository:
         self,
         game_repository: GameRepository,
         event_id: UUID,
-        team_id: UUID,
-        opponent_team_id: UUID
+        player_id: UUID,
+        team_season_id: UUID
     ):
-        """Test getting games by team."""
+        """Test getting games by team season."""
         g1 = Game(
             id=uuid4(),
             event_id=event_id,
-            team_id=team_id,
-            opponent_team_id=opponent_team_id,
-            match_number=1
+            player_id=player_id,
+            team_season_id=team_season_id,
+            position=0,
+            match_number=1,
+            round_number=1,
+            score=200.0,
+            points=2.0
         )
-        other_team_id = uuid4()
+        other_team_season_id = uuid4()
         g2 = Game(
             id=uuid4(),
             event_id=event_id,
-            team_id=other_team_id,
-            opponent_team_id=opponent_team_id,
-            match_number=1
+            player_id=player_id,
+            team_season_id=other_team_season_id,
+            position=0,
+            match_number=1,
+            round_number=1,
+            score=180.0,
+            points=0.0
         )
         await game_repository.add(g1)
         await game_repository.add(g2)
-        results = await game_repository.get_by_team(team_id)
+        results = await game_repository.get_by_team_season(team_season_id)
         assert len(results) >= 1
-        assert any(g.team_id == team_id or g.opponent_team_id == team_id for g in results)
+        assert any(g.team_season_id == team_season_id for g in results)
     
     async def test_get_by_event_and_match_returns_filtered_games(
         self,
         game_repository: GameRepository,
         event_id: UUID,
-        team_id: UUID,
-        opponent_team_id: UUID
+        player_id: UUID,
+        team_season_id: UUID
     ):
         """Test getting games by event and match number."""
         g1 = Game(
             id=uuid4(),
             event_id=event_id,
-            team_id=team_id,
-            opponent_team_id=opponent_team_id,
-            match_number=1
+            player_id=player_id,
+            team_season_id=team_season_id,
+            position=0,
+            match_number=1,
+            round_number=1,
+            score=200.0,
+            points=2.0
         )
         await game_repository.add(g1)
         results = await game_repository.get_by_event_and_match(event_id, 1)

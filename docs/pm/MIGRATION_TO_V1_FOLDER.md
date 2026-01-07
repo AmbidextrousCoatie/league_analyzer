@@ -47,9 +47,9 @@ All pre-existing legacy content has been moved to `league_analyzer_v1/` folder, 
 
 ### Documentation:
 - `README.md` - Main project README
-- `README_NEW_ARCHITECTURE.md` - New architecture documentation
-- `README_FASTAPI.md` - FastAPI setup guide
-- `README_VUE_SETUP.md` - Vue.js setup guide
+- `docs/architecture/README_NEW_ARCHITECTURE.md` - New architecture documentation
+- `docs/features/fastAPI/README_FASTAPI.md` - FastAPI setup guide
+- `docs/features/README_VUE_SETUP.md` - Vue.js setup guide
 - `LICENSE` - License file
 
 ## Changes Made

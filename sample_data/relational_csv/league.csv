@@ -1,17 +1,17 @@
 id,name,abbreviation,level
-f4f882c6-7f1b-48ea-ba79-c8312f349a27,Bayernliga,BayL,1
-86e65440-d54e-4bce-b515-16ce81fb64e2,Landesliga Nord 1,LL N1,2
-fec0475e-68fa-451f-910b-ad1a60caa7f0,Landesliga Nord 2,LL N2,2
-7a4a10f7-8bd3-4b24-ac61-b3d48018c9ad,Landesliga Süd,LL S,2
-727923ef-bc88-488c-a10b-1248efaf95c6,Bezirksoberliga Nord 1,BZOL N1,3
-1fa0acb3-0a9a-4af0-b5d7-a77cf553a63b,Bezirksoberliga Nord 2,BZOL N2,3
-025ea609-b82b-4fde-929e-d86fec7911e7,Bezirksoberliga Süd 1,BZOL S1,3
-c5c01bdc-4cb4-4b7b-8ed0-8117c06ff2fe,Bezirksoberliga Süd 2,BZOL S2,3
-f68ddf76-ca85-4973-ac12-7be89e466a80,Bezirksliga Nord 1,BZL N1,4
-61466822-3dc0-4c18-8086-4ad75ca349fd,Bezirksliga Nord 2,BZL N2,4
-0f8919b1-88fd-4f3a-a173-d731286aacbc,Bezirksliga Süd 1,BZL S1,4
-7e4fb49d-4ef1-47f7-92e3-668711bb8928,Bezirksliga Süd 2,BZL S2,4
-1d95f15c-df6a-4707-82b0-97ff28fafbb7,Kreisliga Nord 1,KL N1,5
-50347e36-1f8d-49aa-8b5a-94a0856ed927,Kreisliga Nord 2,KL N2,5
-a831f2fa-1f7e-4e77-8b06-b3278196479c,Kreisliga Süd 1,KL S1,5
-a8e98090-38db-4e0f-8393-27ef3b67985b,Kreisliga Süd 2,KL S2,5
+9c43fe03-d551-4c53-b230-7e7d8c98940e,Bayernliga,BayL,1
+6e2ca82d-580d-4cc1-a9ef-214321724c00,Landesliga Nord 1,LL N1,2
+4f005795-8f1f-4857-9c7f-52fd1f9c7c57,Landesliga Nord 2,LL N2,2
+702a3e69-e199-496e-9b0c-4e2b5f7ee4e0,Landesliga Süd,LL S,2
+f8b2fbf7-9fea-4991-aab6-752392cfad09,Bezirksoberliga Nord 1,BZOL N1,3
+907efa2e-6ef2-42e5-b3b1-e12e0a7edaa4,Bezirksoberliga Nord 2,BZOL N2,3
+b2afff76-f123-4f51-b212-cf307416812b,Bezirksoberliga Süd 1,BZOL S1,3
+9a4058f0-e89b-40ce-9b79-de2751d24c9d,Bezirksoberliga Süd 2,BZOL S2,3
+0ce73b5f-9435-47c6-af25-7588075c8947,Bezirksliga Nord 1,BZL N1,4
+1d815119-ab07-471a-aae4-02809ebe961f,Bezirksliga Nord 2,BZL N2,4
+6bb3d4fa-144c-451b-81c5-1508269f2fef,Bezirksliga Süd 1,BZL S1,4
+e535e596-debb-4bb1-a402-82d402ea5837,Bezirksliga Süd 2,BZL S2,4
+a222c6db-2333-4a7a-9650-df901954e200,Kreisliga Nord 1,KL N1,5
+f1593ab9-b206-42d4-b83f-023737f7483b,Kreisliga Nord 2,KL N2,5
+2b338fe1-b1d0-421d-b0ac-ee6bed0b5db5,Kreisliga Süd 1,KL S1,5
+7260e4a2-8edb-4ad5-b3b9-7682a02a953c,Kreisliga Süd 2,KL S2,5

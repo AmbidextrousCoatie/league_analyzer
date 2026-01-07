@@ -2,6 +2,7 @@
 Tests for PandasTeamRepository (CSV implementation).
 
 Following TDD: These tests are written BEFORE implementation.
+They should fail initially, then pass after implementation.
 """
 
 import pytest
@@ -25,7 +26,8 @@ class TestPandasTeamRepository:
         """Fixture for sample team."""
         return Team(
             id=uuid4(),
-            name="Team 1"
+            name="Team 1",
+            club_id=uuid4()  # Required by new Team model
         )
     
     @pytest.fixture
@@ -33,7 +35,7 @@ class TestPandasTeamRepository:
         """Create a temporary team.csv file for testing."""
         csv_file = tmp_path / "team.csv"
         df = pd.DataFrame(columns=[
-            'id', 'club_id', 'team_number', 'name', 'league_id'
+            'id', 'club_id', 'team_number', 'name', 'created_at', 'updated_at'
         ])
         df.to_csv(csv_file, index=False)
         return csv_file
@@ -85,11 +87,13 @@ class TestPandasTeamRepository:
         """Test getting all teams."""
         t1 = Team(
             id=uuid4(),
-            name="Team 1"
+            name="Team 1",
+            club_id=club_id
         )
         t2 = Team(
             id=uuid4(),
-            name="Team 2"
+            name="Team 2",
+            club_id=club_id
         )
         await team_repository.add(t1)
         await team_repository.add(t2)
@@ -142,19 +146,20 @@ class TestPandasTeamRepository:
         club_id: UUID
     ):
         """Test getting teams by club."""
-        league_id = uuid4()
         t1 = Team(
             id=uuid4(),
-            name="Team 1"
+            name="Team 1",
+            club_id=club_id
         )
-        t1.assign_to_league(league_id)
         t2 = Team(
             id=uuid4(),
-            name="Team 2"
+            name="Team 2",
+            club_id=club_id
         )
         await team_repository.add(t1)
         await team_repository.add(t2)
-        results = await team_repository.get_by_league(league_id)
-        assert len(results) >= 1
-        assert any(t.league_id == league_id for t in results)
+        results = await team_repository.get_by_club(club_id)
+        assert len(results) >= 2
+        assert any(t.club_id == club_id and t.name == "Team 1" for t in results)
+        assert any(t.club_id == club_id and t.name == "Team 2" for t in results)
 

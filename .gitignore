@@ -1,53 +1,38 @@
-tests/__pycache__/__init__.cpython-310.pyc
-tests/data_access/__pycache__/__init__.cpython-310.pyc
-tests/data_access/__pycache__/test_pd_dataframes.cpython-310-pytest-8.3.4.pyc
-.idea/league_analyzer.iml
-.idea/misc.xml
-.idea/modules.xml
-.idea/vcs.xml
-.idea/inspectionProfiles/profiles_settings.xml
-.vscode/settings.json
-business_logic/__pycache__/*
-data_access/__pycache__/*
-database/__pycache__/*
-html/__pycache__/*
-99_deprecated/html/__pycache__/*
-app/__pycache__/*
-app/routes/__pycache__/*
-app/services/__pycache__/*
-business_logic/__pycache__/*
-data_access/__pycache__/*
-app/services/__pycache__/league_service.cpython-310.pyc
-app/models/__pycache__/*
-*.pyc
-*__pycache__*
-database/data/tmp/*
-database/relational_csv/new/*
-app/routes/__pycache__/league_routes.cpython-312.pyc
-setup_venv.ps1
-app/templates/funsies.html
-2025_BYL_M-1.xlsx
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
 
-docs/ARCHITECTURE_REVIEW.md
-docs/BUTTON_CONSTRAINT_FIXES.md
-docs/BUTTON_POPULATION_FIXES.md
-docs/BUTTON_SYSTEM_FIXES.md
-docs/BUTTON_SYSTEM_MIGRATION_SUMMARY.md
-docs/CENTRALIZED_BUTTON_SYSTEM.md
-docs/CONTENT_REFRESH_DEBUGGING.md
-docs/DATABASE_SWITCHING_FIX.md
-docs/LANGUAGE_SELECTOR_IMPLEMENTATION.md
-docs/LEAGUE_SELECTION_FIXES.md
-docs/LEAGUE_SERVICE_I18N_IMPLEMENTATION.md
-docs/REFACTORING_STRATEGY.md
-docs/SEASON_ONLY_VIEW_IMPLEMENTATION.md
-docs/TEAM_API_500_ERRORS_FIX.md
-docs/TEAM_DROPDOWN_FIX.md
-docs/TEAM_VS_TEAM_COLORED_CIRCLES_FIX.md
-docs/TEAM_VS_TEAM_DESCRIPTION_I18N.md
-docs/TEAM_VS_TEAM_TABLE_FIXES.md
-docs/TOURNAMENT_IMPLEMENTATION_PLAN.md
-docs/TRIGGER_GROUP_DETECTION_FIX.md
-docs/WEEKS_AND_CONTENT_FIXES.md
-database/data/TEST_ERRORS_SUMMARY.md
-database/relational_csv/README.md
+# Virtual environments
+venv/
+env/
+ENV/
+.venv
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Test baseline and results (regression testing)
+.test_baseline.json
+.test_results.json
+.pytest_report.json
+
+# Coverage reports (keep HTML reports in test_reports/htmlcov)
+.coverage
+.coverage.*
+htmlcov/
+*.cover
+
+# Environment variables
+.env
+.env.local
+
+# OS
+.DS_Store
+Thumbs.db

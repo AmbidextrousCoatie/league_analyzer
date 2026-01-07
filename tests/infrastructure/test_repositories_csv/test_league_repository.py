@@ -18,11 +18,10 @@ class TestPandasLeagueRepository:
     @pytest.fixture
     def sample_league(self):
         """Fixture for sample league."""
-        from domain.value_objects.season import Season
         return League(
             id=uuid4(),
             name="Test League",
-            season=Season("2024-25")
+            level=3
         )
     
     @pytest.fixture
@@ -30,7 +29,8 @@ class TestPandasLeagueRepository:
         """Create a temporary league.csv file for testing."""
         csv_file = tmp_path / "league.csv"
         df = pd.DataFrame(columns=[
-            'id', 'name', 'short_name'
+            'id', 'name', 'level', 'abbreviation', 'handicap_settings',
+            'created_at', 'updated_at'
         ])
         df.to_csv(csv_file, index=False)
         return csv_file
@@ -79,16 +79,15 @@ class TestPandasLeagueRepository:
         league_repository: LeagueRepository
     ):
         """Test getting all leagues."""
-        from domain.value_objects.season import Season
         l1 = League(
             id=uuid4(),
             name="League 1",
-            season=Season("2024-25")
+            level=3
         )
         l2 = League(
             id=uuid4(),
             name="League 2",
-            season=Season("2024-25")
+            level=3
         )
         await league_repository.add(l1)
         await league_repository.add(l2)
@@ -140,11 +139,10 @@ class TestPandasLeagueRepository:
         league_repository: LeagueRepository
     ):
         """Test getting leagues by name."""
-        from domain.value_objects.season import Season
         l1 = League(
             id=uuid4(),
             name="Test League",
-            season=Season("2024-25")
+            level=3
         )
         await league_repository.add(l1)
         results = await league_repository.get_by_name("Test League")

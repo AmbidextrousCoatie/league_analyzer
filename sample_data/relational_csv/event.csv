@@ -1,5 +1,5 @@
 id,dbu_id,league_season_id,event_type,league_week,tournament_stage,date,venue_id,oil_pattern_id,status,disqualification_reason,notes
-0a8ab453-1a9e-441e-ac24-8bd0ba4cf26d,1,f1b2172d-8331-4712-8376-d760f4abddaf,league,1,,2025-10-12T00:00:00,WestBowling,,completed,,
-b8329f83-beb6-4e36-a982-f9471ade74ce,2,746f9902-3552-4b4d-bca7-4163a83d0af6,league,1,,2025-10-05T00:00:00,Dettelbach,,completed,,
-a7581d8f-e710-46cd-90ff-7dff0e649b34,9,548612e8-aba5-4cc6-b2ad-683e6e20f909,league,1,,2025-10-04T00:00:00,SuperBowl,,completed,,
-33eef438-8793-43cb-8d4e-9e1ac55a338c,10,548612e8-aba5-4cc6-b2ad-683e6e20f909,league,2,,2025-10-18T00:00:00,Dreambowl,,completed,,
+e5498e96-14fd-4908-ab07-78097dd38470,1,8d1bea2f-a988-42d1-995e-9f6c6a8abf77,league,1,,2025-10-12T00:00:00,WestBowling,,completed,,
+c88f4d35-4a2d-4cc1-a3b5-2315f9e10f99,2,0ba04f0d-3c47-46d0-965a-6c827f1d124d,league,1,,2025-10-05T00:00:00,Dettelbach,,completed,,
+d78a460c-409f-404f-a44e-4fd69fa59b0e,9,6ed8a6e5-b526-4760-9564-11c1ad6805e2,league,1,,2025-10-04T00:00:00,SuperBowl,,completed,,
+cd30809b-56e8-4823-9fd2-e35365755110,10,6ed8a6e5-b526-4760-9564-11c1ad6805e2,league,2,,2025-10-18T00:00:00,Dreambowl,,completed,,

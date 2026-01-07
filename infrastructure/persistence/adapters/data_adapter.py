@@ -164,6 +164,27 @@ class DataAdapter(ABC):
         """
         pass
     
+    # Team-specific methods for write operations
+    @abstractmethod
+    def get_team_data(self) -> pd.DataFrame:
+        """
+        Get all team data.
+        
+        Returns:
+            DataFrame with all team data
+        """
+        pass
+    
+    @abstractmethod
+    def save_team_data(self, df: pd.DataFrame) -> None:
+        """
+        Save team data to storage.
+        
+        Args:
+            df: DataFrame with team data to save
+        """
+        pass
+    
     # League-specific methods for write operations
     @abstractmethod
     def get_league_data(self) -> pd.DataFrame:
@@ -182,6 +203,90 @@ class DataAdapter(ABC):
         
         Args:
             df: DataFrame with league data to save
+        """
+        pass
+    
+    # Match-specific methods for write operations
+    @abstractmethod
+    def get_match_data(self) -> pd.DataFrame:
+        """
+        Get all match data.
+        
+        Returns:
+            DataFrame with all match data
+        """
+        pass
+    
+    @abstractmethod
+    def save_match_data(self, df: pd.DataFrame) -> None:
+        """
+        Save match data to storage.
+        
+        Args:
+            df: DataFrame with match data to save
+        """
+        pass
+    
+    # GameResult-specific methods for write operations
+    @abstractmethod
+    def get_game_result_data(self) -> pd.DataFrame:
+        """
+        Get all game result data.
+        
+        Returns:
+            DataFrame with all game result data
+        """
+        pass
+    
+    @abstractmethod
+    def save_game_result_data(self, df: pd.DataFrame) -> None:
+        """
+        Save game result data to storage.
+        
+        Args:
+            df: DataFrame with game result data to save
+        """
+        pass
+    
+    # PositionComparison-specific methods for write operations
+    @abstractmethod
+    def get_position_comparison_data(self) -> pd.DataFrame:
+        """
+        Get all position comparison data.
+        
+        Returns:
+            DataFrame with all position comparison data
+        """
+        pass
+    
+    @abstractmethod
+    def save_position_comparison_data(self, df: pd.DataFrame) -> None:
+        """
+        Save position comparison data to storage.
+        
+        Args:
+            df: DataFrame with position comparison data to save
+        """
+        pass
+    
+    # MatchScoring-specific methods for write operations
+    @abstractmethod
+    def get_match_scoring_data(self) -> pd.DataFrame:
+        """
+        Get all match scoring data.
+        
+        Returns:
+            DataFrame with all match scoring data
+        """
+        pass
+    
+    @abstractmethod
+    def save_match_scoring_data(self, df: pd.DataFrame) -> None:
+        """
+        Save match scoring data to storage.
+        
+        Args:
+            df: DataFrame with match scoring data to save
         """
         pass
     

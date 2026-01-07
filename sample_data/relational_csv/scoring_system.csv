@@ -1,3 +1,3 @@
 id,name,points_per_individual_match_win,points_per_individual_match_tie,points_per_individual_match_loss,points_per_team_match_win,points_per_team_match_tie,points_per_team_match_loss,allow_ties
-e17f89af-4fce-45d2-aeab-08b72dde8a5e,Liga Bayern 2pt,1.0,0.5,0.0,2.0,1.0,0.0,True
-32a16b65-addb-45cc-890c-0f90b365d8aa,Liga Bayern 3pt,1.0,0.5,0.0,3.0,1.5,0.0,True
+21fca702-0879-434b-9ac1-993c527bf071,Liga Bayern 2pt,1.0,0.5,0.0,2.0,1.0,0.0,True
+e3dd8d6d-a5c0-4cfc-ac64-ddcb13e9e19a,Liga Bayern 3pt,1.0,0.5,0.0,3.0,1.5,0.0,True

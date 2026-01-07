@@ -178,7 +178,7 @@ All architecture/refactoring documentation is in `docs/going_modern/` directory:
 
 **Root level:**
 - `main.py` - FastAPI entry point (working, hello world tested)
-- `README_FASTAPI.md` - Quick start guide
+- `docs/features/fastAPI/README_FASTAPI.md` - Quick start guide
 - `docs/CONVERSATION_SUMMARY.md` - This summary document
 
 ---
@@ -217,7 +217,7 @@ All architecture/refactoring documentation is in `docs/going_modern/` directory:
 
 ### Files Created
 - `main.py` - FastAPI entry point
-- `README_FASTAPI.md` - Quick start guide
+- `docs/features/fastAPI/README_FASTAPI.md` - Quick start guide
 - `docs/CONVERSATION_SUMMARY.md` - This file
 
 ### Old System

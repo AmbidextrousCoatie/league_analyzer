@@ -96,20 +96,26 @@ class PandasScoringSystemRepository(ScoringSystemRepository):
     async def update(self, scoring_system: ScoringSystem) -> ScoringSystem:
         """Update an existing scoring system."""
         df = self._load_data()
-        
+
         if df.empty:
             raise ValueError(f"Scoring system {scoring_system.id} not found")
-        
+
         # Find and update row
-        mask = df['id'] == str(scoring_system.id)
+        mask = df["id"] == str(scoring_system.id)
         if not mask.any():
             raise ValueError(f"Scoring system {scoring_system.id} not found")
-        
+
         updated_row = self._mapper.to_dataframe(scoring_system)
-        df.loc[mask] = updated_row
+        # Assign column-by-column to avoid dtype and length issues
+        for col in df.columns:
+            if col in updated_row.index:
+                df.loc[mask, col] = updated_row[col]
+
         self._save_data(df)
-        
-        logger.info(f"Updated scoring system: {scoring_system.name} ({scoring_system.id})")
+
+        logger.info(
+            f"Updated scoring system: {scoring_system.name} ({scoring_system.id})"
+        )
         return scoring_system
     
     async def delete(self, scoring_system_id: UUID) -> bool:

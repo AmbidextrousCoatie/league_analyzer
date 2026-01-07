@@ -42,6 +42,10 @@ from infrastructure.persistence.mappers.csv.player_mapper import PandasPlayerMap
 from infrastructure.persistence.mappers.csv.league_mapper import PandasLeagueMapper
 from infrastructure.persistence.mappers.csv.club_mapper import PandasClubMapper
 from infrastructure.persistence.mappers.csv.scoring_system_mapper import PandasScoringSystemMapper
+from infrastructure.persistence.mappers.csv.match_mapper import PandasMatchMapper
+from infrastructure.persistence.mappers.csv.game_result_mapper import PandasGameResultMapper
+from infrastructure.persistence.mappers.csv.position_comparison_mapper import PandasPositionComparisonMapper
+from infrastructure.persistence.mappers.csv.match_scoring_mapper import PandasMatchScoringMapper
 from infrastructure.persistence.mappers.csv.club_player_mapper import PandasClubPlayerMapper
 from infrastructure.persistence.repositories.csv.event_repository import PandasEventRepository
 from infrastructure.persistence.repositories.csv.league_season_repository import PandasLeagueSeasonRepository
@@ -51,20 +55,28 @@ from infrastructure.persistence.repositories.csv.player_repository import Pandas
 from infrastructure.persistence.repositories.csv.league_repository import PandasLeagueRepository
 from infrastructure.persistence.repositories.csv.club_repository import PandasClubRepository
 from infrastructure.persistence.repositories.csv.scoring_system_repository import PandasScoringSystemRepository
+from infrastructure.persistence.repositories.csv.match_repository import PandasMatchRepository
+from infrastructure.persistence.repositories.csv.game_result_repository import PandasGameResultRepository
+from infrastructure.persistence.repositories.csv.position_comparison_repository import PandasPositionComparisonRepository
+from infrastructure.persistence.repositories.csv.match_scoring_repository import PandasMatchScoringRepository
 from infrastructure.persistence.repositories.csv.club_player_repository import PandasClubPlayerRepository
+from infrastructure.logging import get_logger
+
+# Initialize logger
+logger = get_logger(__name__)
 
 
 async def seed_sample_data():
     """Transform legacy CSV data to new format with UUIDs."""
-    print("=" * 70)
-    print("Seeding Sample Data from Legacy CSV Files")
-    print("=" * 70)
-    print()
+    logger.info("=" * 70)
+    logger.info("Seeding Sample Data from Legacy CSV Files")
+    logger.info("=" * 70)
+    logger.info("")
     
     # Filter: Only process league season 25/26
     TARGET_SEASON = "25/26"
-    print(f"[FILTER] Restricting data generation to league season: {TARGET_SEASON}")
-    print()
+    logger.info(f"[FILTER] Restricting data generation to league season: {TARGET_SEASON}")
+    logger.info("")
     
     # Paths
     legacy_path = Path("league_analyzer_v1/database/relational_csv")
@@ -72,13 +84,13 @@ async def seed_sample_data():
     output_path.mkdir(parents=True, exist_ok=True)
     
     # Clear existing data - delete all CSV files in output directory
-    print("Clearing existing data...")
+    logger.info("Clearing existing data...")
     csv_files = list(output_path.glob("*.csv"))
     for csv_file in csv_files:
         csv_file.unlink()
-        print(f"   [DELETED] {csv_file.name}")
-    print(f"   [OK] Cleared {len(csv_files)} existing CSV files")
-    print()
+        logger.debug(f"   [DELETED] {csv_file.name}")
+    logger.info(f"   [OK] Cleared {len(csv_files)} existing CSV files")
+    logger.info("")
     
     # Create adapter for output
     adapter = PandasDataAdapter(output_path)
@@ -91,6 +103,10 @@ async def seed_sample_data():
     league_mapper = PandasLeagueMapper()
     club_mapper = PandasClubMapper()
     scoring_system_mapper = PandasScoringSystemMapper()
+    match_mapper = PandasMatchMapper()
+    game_result_mapper = PandasGameResultMapper()
+    position_comparison_mapper = PandasPositionComparisonMapper()
+    match_scoring_mapper = PandasMatchScoringMapper()
     
     event_repo = PandasEventRepository(adapter, event_mapper)
     league_season_repo = PandasLeagueSeasonRepository(adapter, league_season_mapper)
@@ -99,6 +115,10 @@ async def seed_sample_data():
     league_repo = PandasLeagueRepository(adapter, league_mapper)
     club_repo = PandasClubRepository(adapter, club_mapper)
     scoring_system_repo = PandasScoringSystemRepository(adapter, scoring_system_mapper)
+    match_repo = PandasMatchRepository(adapter, match_mapper)
+    game_result_repo = PandasGameResultRepository(adapter, game_result_mapper)
+    position_comparison_repo = PandasPositionComparisonRepository(adapter, position_comparison_mapper)
+    match_scoring_repo = PandasMatchScoringRepository(adapter, match_scoring_mapper)
     club_player_mapper = PandasClubPlayerMapper()
     club_player_repo = PandasClubPlayerRepository(adapter, club_player_mapper)
     
@@ -111,11 +131,11 @@ async def seed_sample_data():
     player_id_map = {}  # legacy_id -> UUID
     team_season_id_map = {}  # legacy_id -> UUID
     
-    print("Loading legacy data...")
-    print("-" * 70)
+    logger.info("Loading legacy data...")
+    logger.info("-" * 70)
     
     # 0. Load and transform Scoring Systems (needed for League Seasons)
-    print("0. Processing Scoring Systems...")
+    logger.info("0. Processing Scoring Systems...")
     legacy_scoring_system_path = legacy_path / "scoring_system.csv"
     if legacy_scoring_system_path.exists():
         df_scoring_systems = pd.read_csv(legacy_scoring_system_path)
@@ -153,12 +173,12 @@ async def seed_sample_data():
             scoring_system_id_map[legacy_id] = scoring_system.id
             scoring_systems_created += 1
             #print(f"   [OK] Created ScoringSystem: {scoring_system.name}")
-        print(f"   [SUMMARY] Created {scoring_systems_created} scoring systems")
+        logger.info(f"   [SUMMARY] Created {scoring_systems_created} scoring systems")
     else:
-        print(f"   [SKIP] Scoring system file not found: {legacy_scoring_system_path}")
+        logger.warning(f"   [SKIP] Scoring system file not found: {legacy_scoring_system_path}")
     
     # 1. Load and transform Leagues
-    print("\n1. Processing Leagues...")
+    logger.info("\n1. Processing Leagues...")
     legacy_league_path = legacy_path / "league.csv"
     if legacy_league_path.exists():
         df_leagues = pd.read_csv(legacy_league_path)
@@ -196,12 +216,12 @@ async def seed_sample_data():
             league_id_map[legacy_id] = league.id
             leagues_created += 1
             #print(f"   [OK] Created League: {league.name} ({league.abbreviation}, Level: {league.level})")
-        print(f"   [SUMMARY] Created {leagues_created} leagues")
+        logger.info(f"   [SUMMARY] Created {leagues_created} leagues")
     else:
-        print(f"   [SKIP] League file not found: {legacy_league_path}")
+        logger.warning(f"   [SKIP] League file not found: {legacy_league_path}")
     
     # 2. Load and transform Clubs
-    print("\n2. Processing Clubs...")
+    logger.info("\n2. Processing Clubs...")
     legacy_club_path = legacy_path / "club.csv"
     if legacy_club_path.exists():
         df_clubs = pd.read_csv(legacy_club_path)
@@ -231,12 +251,12 @@ async def seed_sample_data():
             club_id_map[legacy_id] = club.id
             clubs_created += 1
             #print(f"   [OK] Created Club: {club.name} ({club.short_name or 'N/A'})")
-        print(f"   [SUMMARY] Created {clubs_created} clubs")
+        logger.info(f"   [SUMMARY] Created {clubs_created} clubs")
     else:
-        print(f"   [SKIP] Club file not found: {legacy_club_path}")
+        logger.warning(f"   [SKIP] Club file not found: {legacy_club_path}")
     
     # 3. Load and transform Players
-    print("\n3. Processing Players...")
+    logger.info("\n3. Processing Players...")
     legacy_player_path = legacy_path / "player.csv"
     if legacy_player_path.exists():
         df_players = pd.read_csv(legacy_player_path)
@@ -265,18 +285,18 @@ async def seed_sample_data():
             player_id_map[legacy_id] = player.id
             players_created += 1
             if players_created % 20 == 0:
-                print(f"   [PROGRESS] Processed {players_created} players...")
-        print(f"   [SUMMARY] Created {players_created} players")
+                logger.debug(f"   [PROGRESS] Processed {players_created} players...")
+        logger.info(f"   [SUMMARY] Created {players_created} players")
     else:
-        print(f"   [SKIP] Player file not found: {legacy_player_path}")
+        logger.warning(f"   [SKIP] Player file not found: {legacy_player_path}")
     
     # 3.5. Process Club-Player relationships from bowling results
-    print("\n3.5. Processing Club-Player Relationships...")
+    logger.info("\n3.5. Processing Club-Player Relationships...")
     legacy_bowling_results_path = Path("league_analyzer_v1/database/data/bowling_ergebnisse_reconstructed_clean.csv")
     if legacy_bowling_results_path.exists():
-        print("   [INFO] Loading bowling results data...")
+        logger.info("   [INFO] Loading bowling results data...")
         df_bowling = pd.read_csv(legacy_bowling_results_path, sep=';')
-        print(f"   [INFO] Loaded {len(df_bowling)} bowling result rows")
+        logger.info(f"   [INFO] Loaded {len(df_bowling)} bowling result rows")
         
         # Get all players and clubs for mapping
         all_players = await player_repo.get_all()
@@ -331,7 +351,7 @@ async def seed_sample_data():
             (df_bowling['Player'] != 'Team Total')
         ].copy()
         
-        print(f"   [INFO] Found {len(df_player_rows)} player game rows")
+        logger.info(f"   [INFO] Found {len(df_player_rows)} player game rows")
         
         # Group by player ID and club to find date ranges
         club_players_created = 0
@@ -422,14 +442,14 @@ async def seed_sample_data():
                     club_player = await club_player_repo.add(club_player)
                     club_players_created += 1
                 except Exception as e:
-                    print(f"   [WARN] Failed to create ClubPlayer for player {player_dbu_id} and club {club_id}: {e}")
+                    logger.warning(f"   [WARN] Failed to create ClubPlayer for player {player_dbu_id} and club {club_id}: {e}")
         
-        print(f"   [SUMMARY] Created {club_players_created} club-player relationships")
+        logger.info(f"   [SUMMARY] Created {club_players_created} club-player relationships")
     else:
-        print(f"   [SKIP] Bowling results file not found: {legacy_bowling_results_path}")
+        logger.warning(f"   [SKIP] Bowling results file not found: {legacy_bowling_results_path}")
     
     # 4. Load and transform League Seasons
-    print("\n4. Processing League Seasons...")
+    logger.info("\n4. Processing League Seasons...")
     legacy_league_season_path = legacy_path / "league_season.csv"
     if legacy_league_season_path.exists():
         df_league_seasons = pd.read_csv(legacy_league_season_path)
@@ -452,13 +472,13 @@ async def seed_sample_data():
             # Get league UUID
             league_id = league_id_map.get(legacy_league_id)
             if not league_id:
-                print(f"   [WARN] League {legacy_league_id} not found for league season {legacy_id}")
+                logger.warning(f"   [WARN] League {legacy_league_id} not found for league season {legacy_id}")
                 continue
             
             # Get scoring system UUID
             scoring_system_uuid = scoring_system_id_map.get(legacy_scoring_system_id)
             if not scoring_system_uuid:
-                print(f"   [ERROR] Scoring system {legacy_scoring_system_id} not found for league season {legacy_id}. Skipping.")
+                logger.error(f"   [ERROR] Scoring system {legacy_scoring_system_id} not found for league season {legacy_id}. Skipping.")
                 continue
             scoring_system_id = str(scoring_system_uuid)
             
@@ -488,7 +508,7 @@ async def seed_sample_data():
             try:
                 season = Season(normalized_season_str)
             except Exception as e:
-                print(f"   [WARN] Invalid season '{season_str}' (normalized to '{normalized_season_str}') for league season {legacy_id}: {e}")
+                logger.warning(f"   [WARN] Invalid season '{season_str}' (normalized to '{normalized_season_str}') for league season {legacy_id}: {e}")
                 continue
             
             league_season = LeagueSeason(
@@ -502,13 +522,13 @@ async def seed_sample_data():
             league_season = await league_season_repo.add(league_season)
             league_season_id_map[legacy_id] = league_season.id
             league_seasons_created += 1
-            #print(f"   [OK] Created LeagueSeason: {season_str} for {legacy_league_id}")
-        print(f"   [SUMMARY] Created {league_seasons_created} league seasons")
+            #logger.debug(f"   [OK] Created LeagueSeason: {season_str} for {legacy_league_id}")
+        logger.info(f"   [SUMMARY] Created {league_seasons_created} league seasons")
     else:
-        print(f"   [SKIP] League season file not found: {legacy_league_season_path}")
+        logger.warning(f"   [SKIP] League season file not found: {legacy_league_season_path}")
     
     # 5. Load and transform Team Seasons
-    print("\n5. Processing Team Seasons...")
+    logger.info("\n5. Processing Team Seasons...")
     legacy_team_season_path = legacy_path / "team_season.csv"
     if legacy_team_season_path.exists():
         df_team_seasons = pd.read_csv(legacy_team_season_path)
@@ -535,10 +555,10 @@ async def seed_sample_data():
             club_id = club_id_map.get(legacy_club_id)
             
             if not league_season_id:
-                print(f"   [WARN] League season {legacy_league_season_id} not found for team season {legacy_id}")
+                logger.warning(f"   [WARN] League season {legacy_league_season_id} not found for team season {legacy_id}")
                 continue
             if not club_id:
-                print(f"   [WARN] Club {legacy_club_id} not found for team season {legacy_id}")
+                logger.warning(f"   [WARN] Club {legacy_club_id} not found for team season {legacy_id}")
                 continue
             
             team_season = TeamSeason(
@@ -551,13 +571,13 @@ async def seed_sample_data():
             team_season = await team_season_repo.add(team_season)
             team_season_id_map[legacy_id] = team_season.id
             team_seasons_created += 1
-            #print(f"   [OK] Created TeamSeason: Club {legacy_club_id} Team {team_number}")
-        print(f"   [SUMMARY] Created {team_seasons_created} team seasons")
+            #logger.debug(f"   [OK] Created TeamSeason: Club {legacy_club_id} Team {team_number}")
+        logger.info(f"   [SUMMARY] Created {team_seasons_created} team seasons")
     else:
-        print(f"   [SKIP] Team season file not found: {legacy_team_season_path}")
+        logger.warning(f"   [SKIP] Team season file not found: {legacy_team_season_path}")
     
     # 6. Load and transform Events
-    print("\n7. Processing Events...")
+    logger.info("\n7. Processing Events...")
     legacy_event_path = legacy_path / "event.csv"
     if legacy_event_path.exists():
         df_events = pd.read_csv(legacy_event_path)
@@ -589,7 +609,7 @@ async def seed_sample_data():
             # Get league season UUID
             league_season_id = league_season_id_map.get(legacy_league_season_id)
             if not league_season_id:
-                print(f"   [WARN] League season {legacy_league_season_id} not found for event {legacy_id}")
+                logger.warning(f"   [WARN] League season {legacy_league_season_id} not found for event {legacy_id}")
                 continue
             
             # Parse date
@@ -623,21 +643,21 @@ async def seed_sample_data():
             event = await event_repo.add(event)
             event_id_map[legacy_id] = event.id
             events_created += 1
-            #print(f"   [OK] Created Event: {event_type} Week {league_week or 'N/A'}")
-        print(f"   [SUMMARY] Created {events_created} events")
+            #logger.debug(f"   [OK] Created Event: {event_type} Week {league_week or 'N/A'}")
+        logger.info(f"   [SUMMARY] Created {events_created} events")
     else:
-        print(f"   [SKIP] Event file not found: {legacy_event_path}")
+        logger.warning(f"   [SKIP] Event file not found: {legacy_event_path}")
     
     # 7. Load and transform Games to new data model (Match, GameResult, PositionComparison, MatchScoring)
-    print("\n8. Processing Games (New Data Model)...")
+    logger.info("\n8. Processing Games (New Data Model)...")
     legacy_game_path = legacy_path / "new" / "game_result_new.csv"
     if legacy_game_path.exists():
-        print("   [INFO] Loading game data...")
+        logger.info("   [INFO] Loading game data...")
         df_games = pd.read_csv(legacy_game_path)
-        print(f"   [INFO] Loaded {len(df_games)} game rows")
+        logger.info(f"   [INFO] Loaded {len(df_games)} game rows")
         
         # Cache all data upfront to avoid repeated get_all() calls
-        print("   [INFO] Caching repository data...")
+        logger.info("   [INFO] Caching repository data...")
         all_events = await event_repo.get_all()
         all_players = await player_repo.get_all()
         all_league_seasons = await league_season_repo.get_all()
@@ -648,7 +668,7 @@ async def seed_sample_data():
         league_season_map = {ls.id: ls for ls in all_league_seasons}
         scoring_system_map = {str(ss.id): ss for ss in all_scoring_systems}  # Map by string ID
         
-        print("   [INFO] Processing game rows and grouping into matches...")
+        logger.info("   [INFO] Processing game rows and grouping into matches...")
         
         # Step 1: Collect raw game data and group by match
         from collections import defaultdict
@@ -658,7 +678,7 @@ async def seed_sample_data():
         for _, row in df_games.iterrows():
             row_count += 1
             if row_count % 100 == 0:
-                print(f"   [PROGRESS] Processing row {row_count}/{len(df_games)}...")
+                logger.debug(f"   [PROGRESS] Processing row {row_count}/{len(df_games)}...")
                 await asyncio.sleep(0)  # Yield control
             
             legacy_event_id = str(row['event_id']).strip()
@@ -710,7 +730,7 @@ async def seed_sample_data():
                 'legacy_team_season_id': legacy_team_season_id
             })
         
-        print(f"   [INFO] Grouped into {len(match_data)} matches")
+        logger.info(f"   [INFO] Grouped into {len(match_data)} matches")
         
         # Step 2: Create Match entities and GameResult entities
         matches = []
@@ -817,11 +837,11 @@ async def seed_sample_data():
                         )
                         game_results.append(game_result)
             else:
-                print(f"   [WARN] Match (event={event_id}, round={round_number}, match={match_number}) "
+                logger.warning(f"   [WARN] Match (event={event_id}, round={round_number}, match={match_number}) "
                       f"has {len(team_ids)} teams, expected 2 or even number. Skipping.")
                 continue
         
-        print(f"   [SUMMARY] Created {len(matches)} matches and {len(game_results)} game results")
+        logger.info(f"   [SUMMARY] Created {len(matches)} matches and {len(game_results)} game results")
         
         # Step 3: Create PositionComparison entities
         position_comparisons = []
@@ -870,7 +890,7 @@ async def seed_sample_data():
                     
                     position_comparisons.append(comparison)
         
-        print(f"   [SUMMARY] Created {len(position_comparisons)} position comparisons")
+        logger.info(f"   [SUMMARY] Created {len(position_comparisons)} position comparisons")
         
         # Step 4: Create MatchScoring entities
         match_scorings = []
@@ -879,13 +899,13 @@ async def seed_sample_data():
             # Get the event to find its league_season
             event = event_map.get(match.event_id)
             if not event:
-                print(f"   [WARN] Event {match.event_id} not found for match {match.id}. Skipping match scoring.")
+                logger.warning(f"   [WARN] Event {match.event_id} not found for match {match.id}. Skipping match scoring.")
                 continue
             
             # Get league season to find scoring system
             league_season = league_season_map.get(event.league_season_id)
             if not league_season:
-                print(f"   [WARN] League season {event.league_season_id} not found for event {event.id}. Skipping match scoring.")
+                logger.warning(f"   [WARN] League season {event.league_season_id} not found for event {event.id}. Skipping match scoring.")
                 continue
             
             # Get scoring system ID from league season
@@ -893,7 +913,7 @@ async def seed_sample_data():
             scoring_system = scoring_system_map.get(scoring_system_id_str)
             
             if not scoring_system:
-                print(f"   [WARN] Scoring system {scoring_system_id_str} not found for league season {league_season.id}. Using defaults.")
+                logger.warning(f"   [WARN] Scoring system {scoring_system_id_str} not found for league season {league_season.id}. Using defaults.")
                 # Use defaults (3pt system for 25/26)
                 points_per_win = 3.0
                 points_per_tie = 1.5
@@ -945,120 +965,79 @@ async def seed_sample_data():
             
             match_scorings.append(scoring)
         
-        print(f"   [SUMMARY] Created {len(match_scorings)} match scorings")
+        logger.info(f"   [SUMMARY] Created {len(match_scorings)} match scorings")
         
-        # Step 5: Save to CSV files (since repositories don't exist yet)
-        print("   [INFO] Saving to CSV files...")
+        # Step 5: Save to CSV files using repositories
+        logger.info("   [INFO] Saving to CSV files using repositories...")
         
-        # Save matches
-        matches_data = []
+        # Save matches using repository
+        logger.info("   [INFO] Saving matches...")
+        matches_saved = 0
         for match in matches:
-            matches_data.append({
-                'id': str(match.id),
-                'event_id': str(match.event_id),
-                'round_number': match.round_number,
-                'match_number': match.match_number,
-                'team1_team_season_id': str(match.team1_team_season_id),
-                'team2_team_season_id': str(match.team2_team_season_id),
-                'team1_total_score': int(match.team1_total_score),
-                'team2_total_score': int(match.team2_total_score),
-                'status': match.status.value,
-                'created_at': match.created_at.isoformat(),
-                'updated_at': match.updated_at.isoformat()
-            })
+            try:
+                await match_repo.add(match)
+                matches_saved += 1
+            except Exception as e:
+                logger.error(f"   [ERROR] Failed to save match {match.id}: {e}")
+        logger.info(f"   [SAVED] {matches_saved} matches")
         
-        matches_df = pd.DataFrame(matches_data)
-        matches_csv_path = output_path / "match.csv"
-        matches_df.to_csv(matches_csv_path, index=False)
-        print(f"   [SAVED] {matches_csv_path.name} ({len(matches_data)} rows)")
-        
-        # Save game results
-        game_results_data = []
+        # Save game results using repository
+        logger.info("   [INFO] Saving game results...")
+        game_results_saved = 0
         for gr in game_results:
-            game_results_data.append({
-                'id': str(gr.id),
-                'match_id': str(gr.match_id),
-                'player_id': str(gr.player_id),
-                'team_season_id': str(gr.team_season_id),
-                'position': gr.position,
-                'score': int(gr.score),
-                'handicap': gr.handicap if gr.handicap is not None else '',
-                'is_disqualified': gr.is_disqualified,
-                'created_at': gr.created_at.isoformat(),
-                'updated_at': gr.updated_at.isoformat()
-            })
+            try:
+                await game_result_repo.add(gr)
+                game_results_saved += 1
+            except Exception as e:
+                logger.error(f"   [ERROR] Failed to save game result {gr.id}: {e}")
+        logger.info(f"   [SAVED] {game_results_saved} game results")
         
-        game_results_df = pd.DataFrame(game_results_data)
-        game_results_csv_path = output_path / "game_result.csv"
-        game_results_df.to_csv(game_results_csv_path, index=False)
-        print(f"   [SAVED] {game_results_csv_path.name} ({len(game_results_data)} rows)")
-        
-        # Save position comparisons
-        comparisons_data = []
+        # Save position comparisons using repository
+        logger.info("   [INFO] Saving position comparisons...")
+        comparisons_saved = 0
         for pc in position_comparisons:
-            comparisons_data.append({
-                'id': str(pc.id),
-                'match_id': str(pc.match_id),
-                'position': pc.position,
-                'team1_player_id': str(pc.team1_player_id),
-                'team2_player_id': str(pc.team2_player_id),
-                'team1_score': int(pc.team1_score),
-                'team2_score': int(pc.team2_score),
-                'outcome': pc.outcome.value,
-                'created_at': pc.created_at.isoformat(),
-                'updated_at': pc.updated_at.isoformat()
-            })
+            try:
+                await position_comparison_repo.add(pc)
+                comparisons_saved += 1
+            except Exception as e:
+                logger.error(f"   [ERROR] Failed to save position comparison {pc.id}: {e}")
+        logger.info(f"   [SAVED] {comparisons_saved} position comparisons")
         
-        comparisons_df = pd.DataFrame(comparisons_data)
-        comparisons_csv_path = output_path / "position_comparison.csv"
-        comparisons_df.to_csv(comparisons_csv_path, index=False)
-        print(f"   [SAVED] {comparisons_csv_path.name} ({len(comparisons_data)} rows)")
-        
-        # Save match scorings
-        scorings_data = []
+        # Save match scorings using repository
+        logger.info("   [INFO] Saving match scorings...")
+        scorings_saved = 0
         for ms in match_scorings:
-            scorings_data.append({
-                'id': str(ms.id),
-                'match_id': str(ms.match_id),
-                'scoring_system_id': ms.scoring_system_id,
-                'team1_individual_points': ms.team1_individual_points,
-                'team2_individual_points': ms.team2_individual_points,
-                'team1_match_points': ms.team1_match_points,
-                'team2_match_points': ms.team2_match_points,
-                'computed_at': ms.computed_at.isoformat(),
-                'created_at': ms.created_at.isoformat(),
-                'updated_at': ms.updated_at.isoformat()
-            })
+            try:
+                await match_scoring_repo.add(ms)
+                scorings_saved += 1
+            except Exception as e:
+                logger.error(f"   [ERROR] Failed to save match scoring {ms.id}: {e}")
+        logger.info(f"   [SAVED] {scorings_saved} match scorings")
         
-        scorings_df = pd.DataFrame(scorings_data)
-        scorings_csv_path = output_path / "match_scoring.csv"
-        scorings_df.to_csv(scorings_csv_path, index=False)
-        print(f"   [SAVED] {scorings_csv_path.name} ({len(scorings_data)} rows)")
-        
-        games_created = len(game_results)  # For summary
-        matches_created = len(matches)
+        games_created = game_results_saved  # For summary
+        matches_created = matches_saved
     else:
-        print(f"   [SKIP] Game file not found: {legacy_game_path}")
+        logger.warning(f"   [SKIP] Game file not found: {legacy_game_path}")
         games_created = 0
         matches_created = 0
     
-    print()
-    print("=" * 70)
-    print("Data Migration Complete!")
-    print("=" * 70)
-    print()
-    print("Summary:")
-    print(f"  - Leagues: {len(league_id_map)}")
-    print(f"  - Clubs: {len(club_id_map)}")
-    print(f"  - Players: {len(player_id_map)}")
-    print(f"  - League Seasons: {len(league_season_id_map)}")
-    print(f"  - Team Seasons: {len(team_season_id_map)}")
-    print(f"  - Events: {len(event_id_map)}")
-    print(f"  - Matches: {matches_created}")
-    print(f"  - Game Results: {games_created}")
-    print()
-    print("Data saved to CSV files in sample_data/relational_csv/")
-    print()
+    logger.info("")
+    logger.info("=" * 70)
+    logger.info("Data Migration Complete!")
+    logger.info("=" * 70)
+    logger.info("")
+    logger.info("Summary:")
+    logger.info(f"  - Leagues: {len(league_id_map)}")
+    logger.info(f"  - Clubs: {len(club_id_map)}")
+    logger.info(f"  - Players: {len(player_id_map)}")
+    logger.info(f"  - League Seasons: {len(league_season_id_map)}")
+    logger.info(f"  - Team Seasons: {len(team_season_id_map)}")
+    logger.info(f"  - Events: {len(event_id_map)}")
+    logger.info(f"  - Matches: {matches_created}")
+    logger.info(f"  - Game Results: {games_created}")
+    logger.info("")
+    logger.info("Data saved to CSV files in sample_data/relational_csv/")
+    logger.info("")
 
 
 async def run_with_timeout():
@@ -1066,18 +1045,18 @@ async def run_with_timeout():
     try:
         await asyncio.wait_for(seed_sample_data(), timeout=10.0)
     except asyncio.TimeoutError:
-        print()
-        print("=" * 70)
-        print("ERROR: Seed script timed out after 10 seconds!")
-        print("=" * 70)
-        print()
-        print("The seed script appears to be stuck in an infinite loop.")
-        print("Please check the code for:")
-        print("  - Nested loops that may not terminate")
-        print("  - Repository operations that may be blocking")
-        print("  - Data processing that may be taking too long")
-        print()
-        print("Exiting with error code 1")
+        logger.error("")
+        logger.error("=" * 70)
+        logger.error("ERROR: Seed script timed out after 10 seconds!")
+        logger.error("=" * 70)
+        logger.error("")
+        logger.error("The seed script appears to be stuck in an infinite loop.")
+        logger.error("Please check the code for:")
+        logger.error("  - Nested loops that may not terminate")
+        logger.error("  - Repository operations that may be blocking")
+        logger.error("  - Data processing that may be taking too long")
+        logger.error("")
+        logger.error("Exiting with error code 1")
         import sys
         sys.exit(1)
 
@@ -1087,20 +1066,20 @@ if __name__ == "__main__":
     
     # Validate after seeding if successful
     if result:
-        print("\n" + "=" * 70)
-        print("Post-Seed Validation")
-        print("=" * 70)
+        logger.info("\n" + "=" * 70)
+        logger.info("Post-Seed Validation")
+        logger.info("=" * 70)
         try:
             from scripts.validate_sample_data import validate_data
             data_path = Path("sample_data/relational_csv")
             is_valid, issues = validate_data(data_path)
             
             if not is_valid:
-                print("\n[WARNING] Data validation found issues. Review the output above.")
-                print("Consider running the seed script again or manually fixing issues.")
+                logger.warning("\n[WARNING] Data validation found issues. Review the output above.")
+                logger.warning("Consider running the seed script again or manually fixing issues.")
             else:
-                print("\n[SUCCESS] Data validation passed!")
+                logger.info("\n[SUCCESS] Data validation passed!")
         except ImportError:
-            print("[INFO] Validation script not available, skipping validation")
+            logger.info("[INFO] Validation script not available, skipping validation")
         except Exception as e:
-            print(f"[WARNING] Validation failed with error: {e}")
+            logger.warning(f"[WARNING] Validation failed with error: {e}")

@@ -72,12 +72,25 @@ class PandasPlayerRepository(PlayerRepository):
         self,
         club_id: UUID
     ) -> List[Player]:
-        """Get players for a club from CSV."""
+        """Get players for a club from CSV via ClubPlayer relationship."""
+        # Get club_player relationships for this club
+        club_player_df = self._adapter.get_club_player_data()
+        if club_player_df.empty:
+            return []
+        
+        # Filter by club_id and get player_ids
+        club_players = club_player_df[club_player_df['club_id'] == str(club_id)]
+        if club_players.empty:
+            return []
+        
+        player_ids = set(club_players['player_id'].astype(str))
+        
+        # Get all players and filter by player_ids
         df = self._load_data()
         if df.empty:
             return []
         
-        filtered = df[df['club_id'] == str(club_id)]
+        filtered = df[df['id'].astype(str).isin(player_ids)]
         return [self._mapper.to_domain(row) for _, row in filtered.iterrows()]
     
     async def get_by_name(

@@ -15,6 +15,10 @@ import pandas as pd
 from uuid import UUID
 from typing import Dict, List, Tuple, Set
 from collections import defaultdict
+from infrastructure.logging import get_logger
+
+# Initialize logger
+logger = get_logger(__name__)
 
 
 def validate_uuid(value) -> bool:
@@ -35,13 +39,13 @@ def validate_data(data_path: Path) -> Tuple[bool, List[str]]:
     """
     issues = []
     
-    print("=" * 70)
-    print("Data Validation and Sanitation")
-    print("=" * 70)
-    print()
+    logger.info("=" * 70)
+    logger.info("Data Validation and Sanitation")
+    logger.info("=" * 70)
+    logger.info("")
     
     # Load all CSV files
-    print("Loading data files...")
+    logger.info("Loading data files...")
     try:
         df_matches = pd.read_csv(data_path / "match.csv")
         df_game_results = pd.read_csv(data_path / "game_result.csv")
@@ -56,14 +60,14 @@ def validate_data(data_path: Path) -> Tuple[bool, List[str]]:
         issues.append(f"Missing required file: {e.filename}")
         return False, issues
     
-    print(f"   [OK] Loaded {len(df_matches)} matches")
-    print(f"   [OK] Loaded {len(df_game_results)} game results")
-    print(f"   [OK] Loaded {len(df_position_comparisons)} position comparisons")
-    print(f"   [OK] Loaded {len(df_match_scoring)} match scorings")
-    print()
+    logger.info(f"   [OK] Loaded {len(df_matches)} matches")
+    logger.info(f"   [OK] Loaded {len(df_game_results)} game results")
+    logger.info(f"   [OK] Loaded {len(df_position_comparisons)} position comparisons")
+    logger.info(f"   [OK] Loaded {len(df_match_scoring)} match scorings")
+    logger.info("")
     
     # 1. Validate UUIDs
-    print("1. Validating UUIDs...")
+    logger.info("1. Validating UUIDs...")
     uuid_issues = []
     for idx, row in df_matches.iterrows():
         if not validate_uuid(row['id']):
@@ -76,59 +80,59 @@ def validate_data(data_path: Path) -> Tuple[bool, List[str]]:
         if len(uuid_issues) > 10:
             issues.append(f"... and {len(uuid_issues) - 10} more UUID issues")
     else:
-        print("   [OK] All UUIDs are valid")
-    print()
+        logger.info("   [OK] All UUIDs are valid")
+    logger.info("")
     
     # 2. Validate referential integrity
-    print("2. Validating referential integrity...")
+    logger.info("2. Validating referential integrity...")
     
     # Match -> Event
     event_ids = set(df_events['id'].values)
     match_event_issues = df_matches[~df_matches['event_id'].isin(event_ids)]
     if not match_event_issues.empty:
         issues.append(f"Matches with invalid event_id: {len(match_event_issues)}")
-        print(f"   [ERROR] {len(match_event_issues)} matches reference non-existent events")
+        logger.error(f"   [ERROR] {len(match_event_issues)} matches reference non-existent events")
     else:
-        print("   [OK] All matches reference valid events")
+        logger.info("   [OK] All matches reference valid events")
     
     # GameResult -> Match
     match_ids = set(df_matches['id'].values)
     game_result_match_issues = df_game_results[~df_game_results['match_id'].isin(match_ids)]
     if not game_result_match_issues.empty:
         issues.append(f"GameResults with invalid match_id: {len(game_result_match_issues)}")
-        print(f"   [ERROR] {len(game_result_match_issues)} game results reference non-existent matches")
+        logger.error(f"   [ERROR] {len(game_result_match_issues)} game results reference non-existent matches")
     else:
-        print("   [OK] All game results reference valid matches")
+        logger.info("   [OK] All game results reference valid matches")
     
     # PositionComparison -> Match
     position_comparison_match_issues = df_position_comparisons[~df_position_comparisons['match_id'].isin(match_ids)]
     if not position_comparison_match_issues.empty:
         issues.append(f"PositionComparisons with invalid match_id: {len(position_comparison_match_issues)}")
-        print(f"   [ERROR] {len(position_comparison_match_issues)} position comparisons reference non-existent matches")
+        logger.error(f"   [ERROR] {len(position_comparison_match_issues)} position comparisons reference non-existent matches")
     else:
-        print("   [OK] All position comparisons reference valid matches")
+        logger.info("   [OK] All position comparisons reference valid matches")
     
     # MatchScoring -> Match
     match_scoring_match_issues = df_match_scoring[~df_match_scoring['match_id'].isin(match_ids)]
     if not match_scoring_match_issues.empty:
         issues.append(f"MatchScorings with invalid match_id: {len(match_scoring_match_issues)}")
-        print(f"   [ERROR] {len(match_scoring_match_issues)} match scorings reference non-existent matches")
+        logger.error(f"   [ERROR] {len(match_scoring_match_issues)} match scorings reference non-existent matches")
     else:
-        print("   [OK] All match scorings reference valid matches")
+        logger.info("   [OK] All match scorings reference valid matches")
     
     # MatchScoring -> ScoringSystem
     scoring_system_ids = set(df_scoring_systems['id'].values)
     match_scoring_system_issues = df_match_scoring[~df_match_scoring['scoring_system_id'].isin(scoring_system_ids)]
     if not match_scoring_system_issues.empty:
         issues.append(f"MatchScorings with invalid scoring_system_id: {len(match_scoring_system_issues)}")
-        print(f"   [ERROR] {len(match_scoring_system_issues)} match scorings reference non-existent scoring systems")
+        logger.error(f"   [ERROR] {len(match_scoring_system_issues)} match scorings reference non-existent scoring systems")
     else:
-        print("   [OK] All match scorings reference valid scoring systems")
+        logger.info("   [OK] All match scorings reference valid scoring systems")
     
-    print()
+    logger.info("")
     
     # 3. Validate match completeness
-    print("3. Validating match completeness...")
+    logger.info("3. Validating match completeness...")
     
     matches_without_game_results = []
     matches_without_position_comparisons = []
@@ -148,27 +152,27 @@ def validate_data(data_path: Path) -> Tuple[bool, List[str]]:
     
     if matches_without_game_results:
         issues.append(f"Matches without game results: {len(matches_without_game_results)}")
-        print(f"   [ERROR] {len(matches_without_game_results)} matches have no game results")
+        logger.error(f"   [ERROR] {len(matches_without_game_results)} matches have no game results")
     else:
-        print("   [OK] All matches have game results")
+        logger.info("   [OK] All matches have game results")
     
     if matches_without_position_comparisons:
         issues.append(f"Matches without position comparisons: {len(matches_without_position_comparisons)}")
-        print(f"   [ERROR] {len(matches_without_position_comparisons)} matches have no position comparisons")
-        print(f"   [INFO] Example match IDs: {matches_without_position_comparisons[:5]}")
+        logger.error(f"   [ERROR] {len(matches_without_position_comparisons)} matches have no position comparisons")
+        logger.info(f"   [INFO] Example match IDs: {matches_without_position_comparisons[:5]}")
     else:
-        print("   [OK] All matches have position comparisons")
+        logger.info("   [OK] All matches have position comparisons")
     
     if matches_without_scoring:
         issues.append(f"Matches without scoring: {len(matches_without_scoring)}")
-        print(f"   [ERROR] {len(matches_without_scoring)} matches have no scoring")
+        logger.error(f"   [ERROR] {len(matches_without_scoring)} matches have no scoring")
     else:
-        print("   [OK] All matches have scoring")
+        logger.info("   [OK] All matches have scoring")
     
-    print()
+    logger.info("")
     
     # 4. Validate position comparison completeness
-    print("4. Validating position comparison completeness...")
+    logger.info("4. Validating position comparison completeness...")
     
     matches_missing_positions = []
     for match_id in match_ids:
@@ -182,16 +186,16 @@ def validate_data(data_path: Path) -> Tuple[bool, List[str]]:
     
     if matches_missing_positions:
         issues.append(f"Matches with incomplete position comparisons: {len(matches_missing_positions)}")
-        print(f"   [ERROR] {len(matches_missing_positions)} matches are missing position comparisons")
+        logger.error(f"   [ERROR] {len(matches_missing_positions)} matches are missing position comparisons")
         for match_id, missing in matches_missing_positions[:5]:
-            print(f"   [INFO] Match {match_id}: missing positions {missing}")
+            logger.info(f"   [INFO] Match {match_id}: missing positions {missing}")
     else:
-        print("   [OK] All matches have complete position comparisons (positions 0-3)")
+        logger.info("   [OK] All matches have complete position comparisons (positions 0-3)")
     
-    print()
+    logger.info("")
     
     # 5. Validate score consistency
-    print("5. Validating score consistency...")
+    logger.info("5. Validating score consistency...")
     
     score_mismatches = []
     for _, match in df_matches.iterrows():
@@ -224,16 +228,16 @@ def validate_data(data_path: Path) -> Tuple[bool, List[str]]:
     
     if score_mismatches:
         issues.append(f"Score mismatches: {len(score_mismatches)}")
-        print(f"   [ERROR] {len(score_mismatches)} score mismatches found")
+        logger.error(f"   [ERROR] {len(score_mismatches)} score mismatches found")
         for match_id, team, stored, calculated in score_mismatches[:5]:
-            print(f"   [INFO] Match {match_id} {team}: stored={stored}, calculated={calculated}")
+            logger.info(f"   [INFO] Match {match_id} {team}: stored={stored}, calculated={calculated}")
     else:
-        print("   [OK] All match scores are consistent with game results")
+        logger.info("   [OK] All match scores are consistent with game results")
     
-    print()
+    logger.info("")
     
     # 6. Validate position comparison scores match game results
-    print("6. Validating position comparison scores...")
+    logger.info("6. Validating position comparison scores...")
     
     position_score_mismatches = []
     for _, comparison in df_position_comparisons.iterrows():
@@ -258,25 +262,25 @@ def validate_data(data_path: Path) -> Tuple[bool, List[str]]:
     
     if position_score_mismatches:
         issues.append(f"Position comparison score issues: {len(position_score_mismatches)}")
-        print(f"   [ERROR] {len(position_score_mismatches)} position comparison score issues")
+        logger.error(f"   [ERROR] {len(position_score_mismatches)} position comparison score issues")
     else:
-        print("   [OK] All position comparison scores are valid")
+        logger.info("   [OK] All position comparison scores are valid")
     
-    print()
+    logger.info("")
     
     # Summary
-    print("=" * 70)
+    logger.info("=" * 70)
     if issues:
-        print(f"VALIDATION FAILED: Found {len(issues)} issues")
-        print()
-        print("Issues found:")
+        logger.error(f"VALIDATION FAILED: Found {len(issues)} issues")
+        logger.error("")
+        logger.error("Issues found:")
         for i, issue in enumerate(issues[:20], 1):  # Limit to first 20
-            print(f"  {i}. {issue}")
+            logger.error(f"  {i}. {issue}")
         if len(issues) > 20:
-            print(f"  ... and {len(issues) - 20} more issues")
+            logger.error(f"  ... and {len(issues) - 20} more issues")
         return False, issues
     else:
-        print("VALIDATION PASSED: No issues found")
+        logger.info("VALIDATION PASSED: No issues found")
         return True, []
 
 
@@ -299,13 +303,13 @@ def sanitize_data(data_path: Path, fix_issues: bool = False) -> Dict[str, int]:
     }
     
     if not fix_issues:
-        print("Running in report-only mode. Set fix_issues=True to apply fixes.")
+        logger.info("Running in report-only mode. Set fix_issues=True to apply fixes.")
         return fixes
     
-    print("=" * 70)
-    print("Data Sanitation")
-    print("=" * 70)
-    print()
+    logger.info("=" * 70)
+    logger.info("Data Sanitation")
+    logger.info("=" * 70)
+    logger.info("")
     
     # Load data
     df_matches = pd.read_csv(data_path / "match.csv")
@@ -318,7 +322,7 @@ def sanitize_data(data_path: Path, fix_issues: bool = False) -> Dict[str, int]:
     event_ids = set(df_events['id'].values)
     invalid_matches = df_matches[~df_matches['event_id'].isin(event_ids)]
     if not invalid_matches.empty:
-        print(f"Removing {len(invalid_matches)} matches with invalid event_id...")
+        logger.info(f"Removing {len(invalid_matches)} matches with invalid event_id...")
         df_matches = df_matches[df_matches['event_id'].isin(event_ids)]
         fixes['matches_deleted'] = len(invalid_matches)
     
@@ -326,7 +330,7 @@ def sanitize_data(data_path: Path, fix_issues: bool = False) -> Dict[str, int]:
     match_ids = set(df_matches['id'].values)
     invalid_game_results = df_game_results[~df_game_results['match_id'].isin(match_ids)]
     if not invalid_game_results.empty:
-        print(f"Removing {len(invalid_game_results)} game results with invalid match_id...")
+        logger.info(f"Removing {len(invalid_game_results)} game results with invalid match_id...")
         df_game_results = df_game_results[df_game_results['match_id'].isin(match_ids)]
         fixes['game_results_deleted'] = len(invalid_game_results)
     
@@ -335,10 +339,10 @@ def sanitize_data(data_path: Path, fix_issues: bool = False) -> Dict[str, int]:
     
     # Save cleaned data
     if fixes['matches_deleted'] > 0 or fixes['game_results_deleted'] > 0:
-        print("Saving cleaned data...")
+        logger.info("Saving cleaned data...")
         df_matches.to_csv(data_path / "match.csv", index=False)
         df_game_results.to_csv(data_path / "game_result.csv", index=False)
-        print("   [OK] Data saved")
+        logger.info("   [OK] Data saved")
     
     return fixes
 
@@ -367,11 +371,11 @@ if __name__ == "__main__":
     # Sanitize if requested
     if args.fix:
         fixes = sanitize_data(args.data_path, fix_issues=True)
-        print()
-        print("Fixes applied:")
+        logger.info("")
+        logger.info("Fixes applied:")
         for key, value in fixes.items():
             if value > 0:
-                print(f"  {key}: {value}")
+                logger.info(f"  {key}: {value}")
     
     # Exit with error code if validation failed
     sys.exit(0 if is_valid else 1)

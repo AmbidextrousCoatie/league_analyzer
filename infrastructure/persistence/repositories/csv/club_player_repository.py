@@ -105,23 +105,29 @@ class PandasClubPlayerRepository(ClubPlayerRepository):
     async def update(self, club_player: ClubPlayer) -> ClubPlayer:
         """Update an existing club player relationship."""
         df = self._load_data()
-        
+
         if df.empty:
             raise ValueError(f"ClubPlayer {club_player.id} not found")
-        
-        # Find and update row
+
+        # Find and update row based on business key (club_id + player_id)
         mask = (
-            (df['club_id'] == str(club_player.club_id)) &
-            (df['player_id'] == str(club_player.player_id))
+            (df["club_id"] == str(club_player.club_id))
+            & (df["player_id"] == str(club_player.player_id))
         )
         if not mask.any():
-            raise ValueError(f"ClubPlayer relationship not found")
-        
+            raise ValueError("ClubPlayer relationship not found")
+
         updated_row = self._mapper.to_dataframe(club_player)
-        df.loc[mask] = updated_row
+        # Assign column-by-column to avoid dtype and length issues
+        for col in df.columns:
+            if col in updated_row.index:
+                df.loc[mask, col] = updated_row[col]
+
         self._save_data(df)
-        
-        logger.debug(f"Updated club player relationship: club {club_player.club_id} <-> player {club_player.player_id}")
+
+        logger.debug(
+            f"Updated club player relationship: club {club_player.club_id} <-> player {club_player.player_id}"
+        )
         return club_player
     
     async def delete(self, club_player_id: UUID) -> bool:

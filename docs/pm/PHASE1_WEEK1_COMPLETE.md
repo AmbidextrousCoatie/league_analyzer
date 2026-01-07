@@ -160,7 +160,7 @@ Created foundational base classes:
 - `presentation/api/middleware/__init__.py`
 
 ### Documentation
-- `README_NEW_ARCHITECTURE.md` - Architecture overview and structure guide
+- `docs/architecture/README_NEW_ARCHITECTURE.md` - Architecture overview and structure guide
 
 ---
 
