@@ -47,21 +47,11 @@ class PandasTeamRepository(TeamRepository):
     
     def _load_data(self) -> pd.DataFrame:
         """Load team data from CSV."""
-        # Stub - needs implementation
-        try:
-            return self._adapter.get_team_data()
-        except AttributeError:
-            # If get_team_data doesn't exist, return empty DataFrame
-            return pd.DataFrame(columns=['id', 'name', 'club_id', 'team_number', 'created_at', 'updated_at'])
+        return self._adapter.get_team_data()
     
     def _save_data(self, df: pd.DataFrame) -> None:
         """Save team data to CSV."""
-        # Stub - needs implementation
-        try:
-            self._adapter.save_team_data(df)
-        except AttributeError:
-            # If save_team_data doesn't exist, log warning
-            logger.warning("save_team_data not implemented in adapter")
+        self._adapter.save_team_data(df)
     
     async def get_by_id(self, team_id: UUID) -> Optional[Team]:
         """Get team by ID."""

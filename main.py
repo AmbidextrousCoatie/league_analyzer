@@ -146,6 +146,45 @@ except Exception as e:
     logger.error(f"FAILED to register sample_data_router: {e}", exc_info=True)
     raise
 
+# Register Phase 3 application layer routes (production-ready backend, preliminary frontend)
+try:
+    from presentation.api.v1.queries.league_routes import router as league_queries_router
+    app.include_router(league_queries_router)
+    logger.info(f"League queries router registered: {len(league_queries_router.routes)} routes")
+except Exception as e:
+    logger.error(f"FAILED to register league_queries_router: {e}", exc_info=True)
+    # Don't raise - allow app to start even if Phase 3 routes fail
+
+try:
+    from presentation.api.v1.queries.team_routes import router as team_queries_router
+    app.include_router(team_queries_router)
+    logger.info(f"Team queries router registered: {len(team_queries_router.routes)} routes")
+except Exception as e:
+    logger.error(f"FAILED to register team_queries_router: {e}", exc_info=True)
+
+# Register slug-based routes (human-readable URIs)
+try:
+    from presentation.api.v1.queries.league_slug_routes import router as league_slug_router
+    app.include_router(league_slug_router)
+    logger.info(f"League slug router registered: {len(league_slug_router.routes)} routes")
+except Exception as e:
+    logger.error(f"FAILED to register league_slug_router: {e}", exc_info=True)
+
+try:
+    from presentation.api.v1.queries.team_slug_routes import router as team_slug_router
+    app.include_router(team_slug_router)
+    logger.info(f"Team slug router registered: {len(team_slug_router.routes)} routes")
+except Exception as e:
+    logger.error(f"FAILED to register team_slug_router: {e}", exc_info=True)
+
+try:
+    from presentation.api.v1.queries.player_slug_routes import router as player_slug_router
+    app.include_router(player_slug_router)
+    logger.info(f"Player slug router registered: {len(player_slug_router.routes)} routes")
+except Exception as e:
+    logger.error(f"FAILED to register player_slug_router: {e}", exc_info=True)
+    # Don't raise - allow app to start even if Phase 3 routes fail
+
 # Demo page route
 @app.get("/demo", response_class=HTMLResponse)
 def demo_page(request: Request):

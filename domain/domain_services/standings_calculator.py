@@ -163,6 +163,7 @@ class StandingsCalculator:
             # Sum scores and points for this team in this event
             total_score = sum(game.score for game in team_games)
             total_points = sum(game.points for game in team_games)
+            number_of_games = len(team_games)  # Count of individual player games
             
             # Get week number for weekly performance
             week = 1  # Default
@@ -176,7 +177,7 @@ class StandingsCalculator:
             
             # Update weekly performance
             StandingsCalculator._update_weekly_performance(
-                standing, week, total_score, total_points
+                standing, week, total_score, total_points, number_of_games
             )
         
         # Calculate averages and sort by position
@@ -206,7 +207,8 @@ class StandingsCalculator:
         standing: TeamStanding,
         week: int,
         score: float,
-        points: float
+        points: float,
+        number_of_games: int
     ) -> None:
         """
         Update or create weekly performance for a team.
@@ -216,6 +218,7 @@ class StandingsCalculator:
             week: Week number
             score: Score for this week
             points: Points for this week
+            number_of_games: Number of individual player games in this week
         """
         # Find existing weekly performance
         existing = next(
@@ -224,10 +227,10 @@ class StandingsCalculator:
         )
         
         if existing:
-            # Update existing
+            # Update existing (accumulate scores, points, and game count)
             existing.score += score
             existing.points += points
-            existing.number_of_games += 1
+            existing.number_of_games += number_of_games
         else:
             # Create new
             standing.weekly_performances.append(
@@ -235,7 +238,7 @@ class StandingsCalculator:
                     week=week,
                     score=score,
                     points=points,
-                    number_of_games=1
+                    number_of_games=number_of_games
                 )
             )
     

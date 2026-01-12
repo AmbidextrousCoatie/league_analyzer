@@ -1,6 +1,6 @@
 # Code Coverage Report
 
-**Date:** 2026-01-07  
+**Date:** 2026-01-12  
 **Report Type:** Automated Coverage Report  
 **Status:** ✅ Tests Executed Successfully
 
@@ -17,7 +17,7 @@
 
 **Total Tests:** 384
 
-**Overall Coverage:** **78.9%** (4494 statements, 947 missed)
+**Overall Coverage:** **72.5%** (4890 statements, 1347 missed)
 
 ---
 
@@ -28,10 +28,10 @@ This report provides an automated, reproducible view of code coverage after runn
 ### Coverage Breakdown
 
 **Overall Statistics:**
-- **Statements:** 4494
-- **Covered:** 3547
-- **Missing:** 947
-- **Coverage:** 78.9%
+- **Statements:** 4890
+- **Covered:** 3543
+- **Missing:** 1347
+- **Coverage:** 72.5%
 
 
 ---
@@ -49,24 +49,24 @@ This report provides an automated, reproducible view of code coverage after runn
 
 
 ### Domain Layer
-- **Coverage:** 81.8%
-- **Statements:** 2072
-- **Covered:** 1694
-- **Missing:** 378
+- **Coverage:** 81.9%
+- **Statements:** 2065
+- **Covered:** 1692
+- **Missing:** 373
 - **Status:** ❌
 
 ### Application Layer
 - **Coverage:** 0.0%
-- **Statements:** 34
+- **Statements:** 442
 - **Covered:** 0
-- **Missing:** 34
+- **Missing:** 442
 - **Status:** ❌
 
 ### Infrastructure Layer
-- **Coverage:** 77.6%
-- **Statements:** 2388
-- **Covered:** 1853
-- **Missing:** 535
+- **Coverage:** 77.7%
+- **Statements:** 2383
+- **Covered:** 1851
+- **Missing:** 532
 - **Status:** ⚠️
 
 ---
@@ -100,6 +100,6 @@ pytest tests/ -v --tb=no --cov=domain --cov=application --cov=infrastructure --c
 - **Reproducible**: This report is generated automatically and can be regenerated at any time
 - **Integration**: This script is integrated with the regression testing system
 - **Coverage Goals**: Aim for 100% domain, 90%+ application, 80%+ infrastructure per manifesto
-- **Last Updated**: 2026-01-07T11:48:34.474685
+- **Last Updated**: 2026-01-12T14:10:42.912826
 
 ---

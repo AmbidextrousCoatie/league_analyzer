@@ -36,7 +36,9 @@ from infrastructure.persistence.repositories.csv.league_repository import Pandas
 from infrastructure.persistence.repositories.csv.club_repository import PandasClubRepository
 from infrastructure.persistence.repositories.csv.scoring_system_repository import PandasScoringSystemRepository
 from infrastructure.persistence.repositories.csv.club_player_repository import PandasClubPlayerRepository
+from infrastructure.persistence.repositories.csv.team_repository import PandasTeamRepository
 from infrastructure.persistence.mappers.csv.club_player_mapper import PandasClubPlayerMapper
+from infrastructure.persistence.mappers.csv.team_mapper import PandasTeamMapper
 from jinja2 import Environment, FileSystemLoader
 
 router = APIRouter(prefix="/sample-data", tags=["sample-data"])
@@ -67,6 +69,7 @@ def _get_repositories():
         'event': PandasEventRepository(adapter, PandasEventMapper()),
         'league_season': PandasLeagueSeasonRepository(adapter, PandasLeagueSeasonMapper()),
         'team_season': PandasTeamSeasonRepository(adapter, PandasTeamSeasonMapper()),
+        'team': PandasTeamRepository(adapter, PandasTeamMapper()),
         'game': PandasGameRepository(adapter, PandasGameMapper()),
         'player': PandasPlayerRepository(adapter, PandasPlayerMapper()),
         'league': PandasLeagueRepository(adapter, PandasLeagueMapper()),
@@ -312,11 +315,13 @@ async def list_team_seasons():
     """List all team seasons (team participation in league seasons)."""
     repos = _get_repositories()
     team_seasons = await repos['team_season'].get_all()
+    teams = await repos['team'].get_all()
     clubs = await repos['club'].get_all()
     league_seasons = await repos['league_season'].get_all()
     leagues = await repos['league'].get_all()
     
     # Create mappings for quick lookup
+    team_map = {team.id: team for team in teams}
     club_map = {club.id: club for club in clubs}
     league_season_map = {ls.id: ls for ls in league_seasons}
     league_map = {league.id: league for league in leagues}
@@ -324,7 +329,13 @@ async def list_team_seasons():
     # Enrich team seasons with club, league, and season information
     enriched_seasons = []
     for ts in team_seasons:
-        club = club_map.get(ts.club_id)
+        # Get team from team_id
+        team = team_map.get(ts.team_id)
+        if not team:
+            continue  # Skip if team not found
+        
+        # Get club from team
+        club = club_map.get(team.club_id)
         league_season = league_season_map.get(ts.league_season_id)
         league = league_map.get(league_season.league_id) if league_season else None
         
@@ -335,7 +346,7 @@ async def list_team_seasons():
             'league_name': league.name if league else 'Unknown',
             'league_abbreviation': league.abbreviation if league else None,
             'season': str(league_season.season) if league_season else 'Unknown',
-            'team_number': ts.team_number,
+            'team_number': team.team_number,
             'vacancy_status': ts.vacancy_status
         })
     
@@ -453,16 +464,25 @@ async def api_team_seasons() -> List[Dict[str, Any]]:
     """API endpoint for team seasons."""
     repos = _get_repositories()
     team_seasons = await repos['team_season'].get_all()
-    return [
-        {
+    teams = await repos['team'].get_all()
+    team_map = {team.id: team for team in teams}
+    
+    result = []
+    for ts in team_seasons:
+        team = team_map.get(ts.team_id)
+        if not team:
+            continue  # Skip if team not found
+        
+        result.append({
             "id": str(ts.id),
             "league_season_id": str(ts.league_season_id),
-            "club_id": str(ts.club_id),
-            "team_number": ts.team_number,
+            "team_id": str(ts.team_id),
+            "club_id": str(team.club_id),
+            "team_number": team.team_number,
             "vacancy_status": ts.vacancy_status.value
-        }
-        for ts in team_seasons
-    ]
+        })
+    
+    return result
 
 
 @router.get("/api/clubs")
@@ -606,15 +626,26 @@ async def match_detail():
     league_name = league_row.iloc[0]['name'] if not league_row.empty and 'name' in league_row.columns else 'Unknown League'
     league_abbr = league_row.iloc[0]['abbreviation'] if not league_row.empty and 'abbreviation' in league_row.columns else None
     
-    # Get team season info
+    # Get team season info and resolve team_id to team
     team1_row = df_team_seasons[df_team_seasons['id'] == team1_id] if not df_team_seasons.empty else pd.DataFrame()
     team2_row = df_team_seasons[df_team_seasons['id'] == team2_id] if not df_team_seasons.empty else pd.DataFrame()
     
-    team1_club_id = team1_row.iloc[0]['club_id'] if not team1_row.empty and 'club_id' in team1_row.columns else None
-    team1_number = int(team1_row.iloc[0]['team_number']) if not team1_row.empty and 'team_number' in team1_row.columns and pd.notna(team1_row.iloc[0].get('team_number')) else None
+    # Get team_id from team_season, then look up team
+    team1_team_id = team1_row.iloc[0]['team_id'] if not team1_row.empty and 'team_id' in team1_row.columns else None
+    team2_team_id = team2_row.iloc[0]['team_id'] if not team2_row.empty and 'team_id' in team2_row.columns else None
     
-    team2_club_id = team2_row.iloc[0]['club_id'] if not team2_row.empty and 'club_id' in team2_row.columns else None
-    team2_number = int(team2_row.iloc[0]['team_number']) if not team2_row.empty and 'team_number' in team2_row.columns and pd.notna(team2_row.iloc[0].get('team_number')) else None
+    # Load teams CSV
+    df_teams = pd.read_csv(_data_path / "team.csv") if (_data_path / "team.csv").exists() else pd.DataFrame()
+    
+    # Get team info
+    team1_team_row = df_teams[df_teams['id'] == team1_team_id] if team1_team_id and not df_teams.empty else pd.DataFrame()
+    team2_team_row = df_teams[df_teams['id'] == team2_team_id] if team2_team_id and not df_teams.empty else pd.DataFrame()
+    
+    team1_club_id = team1_team_row.iloc[0]['club_id'] if not team1_team_row.empty and 'club_id' in team1_team_row.columns else None
+    team1_number = int(team1_team_row.iloc[0]['team_number']) if not team1_team_row.empty and 'team_number' in team1_team_row.columns and pd.notna(team1_team_row.iloc[0].get('team_number')) else None
+    
+    team2_club_id = team2_team_row.iloc[0]['club_id'] if not team2_team_row.empty and 'club_id' in team2_team_row.columns else None
+    team2_number = int(team2_team_row.iloc[0]['team_number']) if not team2_team_row.empty and 'team_number' in team2_team_row.columns and pd.notna(team2_team_row.iloc[0].get('team_number')) else None
     
     # Get club names
     club1_row = df_clubs[df_clubs['id'] == team1_club_id] if team1_club_id and not df_clubs.empty else pd.DataFrame()
@@ -623,8 +654,8 @@ async def match_detail():
     club1_name = club1_row.iloc[0]['name'] if not club1_row.empty and 'name' in club1_row.columns else 'Unknown Club'
     club2_name = club2_row.iloc[0]['name'] if not club2_row.empty and 'name' in club2_row.columns else 'Unknown Club'
     
-    team1_name = f"{club1_name} {team1_number}" if team1_number else club1_name
-    team2_name = f"{club2_name} {team2_number}" if team2_number else club2_name
+    team1_name = f"{club1_name} {team1_number}" if team1_number and team1_number > 1 else club1_name
+    team2_name = f"{club2_name} {team2_number}" if team2_number and team2_number > 1 else club2_name
     
     # Get game results for this match
     match_game_results = df_game_results[df_game_results['match_id'] == match_id]

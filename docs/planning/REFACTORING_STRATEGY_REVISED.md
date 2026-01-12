@@ -320,10 +320,12 @@ presentation/
 - [x] Set up CQRS structure (commands/ vs queries/ directories)
 - [x] Create query base class
 - [x] Create command base class
-- [ ] Implement `GetLeagueStandings` query
+- [x] Implement `GetLeagueStandings` query
 - [ ] Implement `GetLeagueHistory` query
 - [ ] Add query validation
 - [ ] Add error handling
+- [ ] **Make data handlers more robust** - Handle unknown `league_season_id` and other invalid IDs gracefully with proper error messages instead of crashing
+- [ ] **Performance note:** Slug-based routes are currently 5-10x slower than legacy due to CSV I/O. Optimization planned for Week 14 (CSV caching + slug indices)
 
 **Learning Focus:**
 - CQRS pattern
@@ -358,6 +360,16 @@ presentation/
 - [ ] `UpdateTeam` command - **NEW**
 - [ ] `DeleteTeam` command - **NEW**
 
+#### Week 10: Player Queries & Commands
+- [ ] `GetPlayerStatistics` query - **Player stats with flexible filtering (league, team, tournament, season)**
+- [ ] `GetPlayerHistory` query - **All teams, clubs, leagues, tournaments player has participated in**
+- [ ] `GetPlayerTeams` query - **List all teams player has played for**
+- [ ] `GetPlayerClubs` query - **List all clubs player has been member of**
+- [ ] `GetPlayerLeagues` query - **List all leagues player has competed in**
+- [ ] `CreatePlayer` command - **NEW**
+- [ ] `UpdatePlayer` command - **NEW**
+- [ ] `DeletePlayer` command - **NEW**
+
 **Learning Focus:**
 - Complex queries
 - Command handlers with business logic
@@ -365,11 +377,15 @@ presentation/
 - Performance considerations
 - Domain event publishing
 
-#### Week 10: Player Queries & Import Command
-- [ ] `GetPlayerStatistics` query
-- [ ] `GetPlayerPerformance` query
+#### Week 10: Player Queries & Commands
+- [ ] `GetPlayerStatistics` query - **Player stats with flexible filtering (league, team, tournament, season)**
+- [ ] `GetPlayerHistory` query - **All teams, clubs, leagues, tournaments player has participated in**
+- [ ] `GetPlayerTeams` query - **List all teams player has played for**
+- [ ] `GetPlayerClubs` query - **List all clubs player has been member of**
+- [ ] `GetPlayerLeagues` query - **List all leagues player has competed in**
 - [ ] `CreatePlayer` command - **NEW**
 - [ ] `UpdatePlayer` command - **NEW**
+- [ ] `DeletePlayer` command - **NEW**
 - [ ] `ImportExcel` command - **NEW** (Excel import functionality)
 - [ ] Add comprehensive unit tests
 - [ ] Add integration tests
@@ -453,12 +469,19 @@ presentation/
 - [ ] Add comprehensive API tests (read + write)
 - [ ] Performance testing
 - [ ] Test transaction scenarios
+- [ ] **Performance optimization for slug-based routes** - Add CSV file caching to `PandasDataAdapter` (in-memory DataFrame cache with file modification time invalidation) - **Expected: 60-70% faster**
+- [ ] **Performance optimization** - Build slug lookup indices at startup (pre-compute slug → entity_id mappings for O(1) lookups) - **Expected: 20-30% faster**
+- [ ] **Performance optimization** - Use DataFrame-level lookups for slug resolution (skip domain entity conversion when only IDs needed) - **Expected: 10-15% faster**
+- [ ] **Tournament routes** - Implement tournament slug-based routes (`/tournaments/{tournament-id}/standings`, `/tournaments/{tournament-id}/players/{slug}/stats`) - **Future**
+- [ ] **Alternative entry points** - Add club-centric player routes (`/clubs/{slug}/players/{slug}/stats`), league-centric player routes (`/leagues/{abbreviation}/players/{slug}/stats`) - **Future**
 
 **Learning Focus:**
 - API testing (read + write)
 - Performance optimization
 - Load testing
 - Transaction testing
+- Caching strategies
+- Index-based lookups
 
 **Deliverables:**
 - ✅ Clean REST API (read + write)

@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>League Standings - {{ league_name }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1 {
+            color: #333;
+        }
+        .info {
+            color: #666;
+            margin-bottom: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+        tr:hover {
+            background-color: #f5f5f5;
+        }
+        .position {
+            font-weight: bold;
+            text-align: center;
+        }
+        .points {
+            font-weight: bold;
+            color: #0066cc;
+        }
+    </style>
+</head>
+<body>
+    <h1>{{ league_name }} - Standings</h1>
+    <div class="info">
+        <p><strong>Season:</strong> {{ season }}</p>
+        {% if week %}
+        <p><strong>Week:</strong> {{ week }}</p>
+        {% else %}
+        <p><strong>Overall Standings</strong></p>
+        {% endif %}
+        <p><strong>Status:</strong> {{ status }}</p>
+    </div>
+    
+    <h2>{% if week %}Week {{ week }} Standings{% else %}Overall Standings{% endif %}</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Pos</th>
+                <th>Team</th>
+                <th>Points</th>
+                <th>Score</th>
+                <th>Avg Score</th>
+                <th>Games</th>
+                <th>W-L-T</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for standing in standings %}
+            <tr>
+                <td class="position">{{ standing.position }}</td>
+                <td>{{ standing.team_name }}</td>
+                <td class="points">{{ standing.total_points }}</td>
+                <td>{{ standing.total_score }}</td>
+                <td>{{ "%.1f"|format(standing.average_score) }}</td>
+                <td>{{ standing.games_played }}</td>
+                <td>{{ standing.wins }}-{{ standing.losses }}-{{ standing.ties }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    
+    {% if weekly_standings %}
+    <h2 style="margin-top: 40px;">Weekly Standings</h2>
+    {% for weekly in weekly_standings %}
+    <h3 style="margin-top: 30px; margin-bottom: 10px;">Week {{ weekly.week }}</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Pos</th>
+                <th>Team</th>
+                <th>Points</th>
+                <th>Score</th>
+                <th>Avg Score</th>
+                <th>Games</th>
+                <th>W-L-T</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for standing in weekly.standings %}
+            <tr>
+                <td class="position">{{ standing.position }}</td>
+                <td>{{ standing.team_name }}</td>
+                <td class="points">{{ standing.total_points }}</td>
+                <td>{{ standing.total_score }}</td>
+                <td>{{ "%.1f"|format(standing.average_score) }}</td>
+                <td>{{ standing.games_played }}</td>
+                <td>{{ standing.wins }}-{{ standing.losses }}-{{ standing.ties }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endfor %}
+    {% endif %}
+    
+    <p style="margin-top: 30px; color: #999; font-size: 0.9em;">
+        ⚠️ Preliminary frontend - will be replaced with Vue.js in Phase 5
+    </p>
+</body>
+</html>

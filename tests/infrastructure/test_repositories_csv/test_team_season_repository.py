@@ -22,18 +22,17 @@ class TestPandasTeamSeasonRepository:
         return uuid4()
     
     @pytest.fixture
-    def club_id(self):
-        """Fixture for club ID."""
+    def team_id(self):
+        """Fixture for team ID."""
         return uuid4()
     
     @pytest.fixture
-    def sample_team_season(self, league_season_id, club_id):
+    def sample_team_season(self, league_season_id, team_id):
         """Fixture for sample team season."""
         return TeamSeason(
             id=uuid4(),
             league_season_id=league_season_id,
-            club_id=club_id,
-            team_number=1,
+            team_id=team_id,
             vacancy_status=VacancyStatus.ACTIVE
         )
     
@@ -42,16 +41,18 @@ class TestPandasTeamSeasonRepository:
         """Create a temporary team_season.csv file for testing."""
         csv_file = tmp_path / "team_season.csv"
         df = pd.DataFrame(columns=[
-            'id', 'league_season_id', 'club_id', 'team_number'
+            'id', 'league_season_id', 'team_id', 'vacancy_status'
         ])
         df.to_csv(csv_file, index=False)
         return csv_file
     
     @pytest.fixture
-    def mock_data_adapter(self, team_season_csv_path):
+    def mock_data_adapter(self, tmp_path, team_season_csv_path):
         """Mock DataAdapter for testing with real CSV file."""
         from infrastructure.persistence.adapters.pandas_adapter import PandasDataAdapter
-        adapter = PandasDataAdapter(team_season_csv_path)
+        # Adapter expects a directory path, not a file path
+        # It will look for team_season.csv in that directory
+        adapter = PandasDataAdapter(tmp_path)
         return adapter
     
     @pytest.fixture
@@ -89,20 +90,19 @@ class TestPandasTeamSeasonRepository:
         self,
         team_season_repository: TeamSeasonRepository,
         league_season_id: UUID,
-        club_id: UUID
+        team_id: UUID
     ):
         """Test getting all team seasons."""
         ts1 = TeamSeason(
             id=uuid4(),
             league_season_id=league_season_id,
-            club_id=club_id,
-            team_number=1
+            team_id=team_id
         )
+        other_team_id = uuid4()
         ts2 = TeamSeason(
             id=uuid4(),
             league_season_id=league_season_id,
-            club_id=club_id,
-            team_number=2
+            team_id=other_team_id
         )
         await team_season_repository.add(ts1)
         await team_season_repository.add(ts2)
@@ -123,27 +123,25 @@ class TestPandasTeamSeasonRepository:
         self,
         team_season_repository: TeamSeasonRepository,
         league_season_id: UUID,
-        club_id: UUID
+        team_id: UUID
     ):
-        """Test that adding a TeamSeason with same club+team_number+league_season updates existing."""
-        # This test documents expected behavior: same club+team_number+league_season should be unique
+        """Test that adding a TeamSeason with same team+league_season updates existing."""
+        # This test documents expected behavior: same team+league_season should be unique
         # Note: Current implementation only checks for duplicate IDs, not business key duplicates
         # This may need to be enforced at application/domain service level
         ts1 = TeamSeason(
             id=uuid4(),
             league_season_id=league_season_id,
-            club_id=club_id,
-            team_number=1
+            team_id=team_id
         )
         await team_season_repository.add(ts1)
         
-        # Try to add another TeamSeason with same club+team_number+league_season but different ID
+        # Try to add another TeamSeason with same team+league_season but different ID
         # Current implementation allows this - may need business rule enforcement
         ts2 = TeamSeason(
             id=uuid4(),  # Different ID
             league_season_id=league_season_id,
-            club_id=club_id,
-            team_number=1  # Same team_number
+            team_id=team_id  # Same team_id
         )
         # Repository currently allows this - test documents current behavior
         result = await team_season_repository.add(ts2)
@@ -185,21 +183,19 @@ class TestPandasTeamSeasonRepository:
         self,
         team_season_repository: TeamSeasonRepository,
         league_season_id: UUID,
-        club_id: UUID
+        team_id: UUID
     ):
         """Test getting team seasons by league season."""
         ts1 = TeamSeason(
             id=uuid4(),
             league_season_id=league_season_id,
-            club_id=club_id,
-            team_number=1
+            team_id=team_id
         )
         other_league_season_id = uuid4()
         ts2 = TeamSeason(
             id=uuid4(),
             league_season_id=other_league_season_id,
-            club_id=club_id,
-            team_number=1
+            team_id=team_id
         )
         await team_season_repository.add(ts1)
         await team_season_repository.add(ts2)
@@ -207,51 +203,48 @@ class TestPandasTeamSeasonRepository:
         assert len(results) >= 1
         assert all(ts.league_season_id == league_season_id for ts in results)
     
-    async def test_get_by_club_returns_filtered_team_seasons(
+    async def test_get_by_team_returns_filtered_team_seasons(
         self,
         team_season_repository: TeamSeasonRepository,
         league_season_id: UUID,
-        club_id: UUID
+        team_id: UUID
     ):
-        """Test getting team seasons by club."""
+        """Test getting team seasons by team."""
         ts1 = TeamSeason(
             id=uuid4(),
             league_season_id=league_season_id,
-            club_id=club_id,
-            team_number=1
+            team_id=team_id
         )
-        other_club_id = uuid4()
+        other_team_id = uuid4()
         ts2 = TeamSeason(
             id=uuid4(),
             league_season_id=league_season_id,
-            club_id=other_club_id,
-            team_number=1
+            team_id=other_team_id
         )
         await team_season_repository.add(ts1)
         await team_season_repository.add(ts2)
-        results = await team_season_repository.get_by_club(club_id)
+        results = await team_season_repository.get_by_team(team_id)
         assert len(results) >= 1
-        assert all(ts.club_id == club_id for ts in results)
+        assert all(ts.team_id == team_id for ts in results)
     
     async def test_get_by_vacancy_status_returns_filtered_team_seasons(
         self,
         team_season_repository: TeamSeasonRepository,
         league_season_id: UUID,
-        club_id: UUID
+        team_id: UUID
     ):
         """Test getting team seasons by vacancy status."""
         ts1 = TeamSeason(
             id=uuid4(),
             league_season_id=league_season_id,
-            club_id=club_id,
-            team_number=1,
+            team_id=team_id,
             vacancy_status=VacancyStatus.ACTIVE
         )
+        other_team_id = uuid4()
         ts2 = TeamSeason(
             id=uuid4(),
             league_season_id=league_season_id,
-            club_id=club_id,
-            team_number=2,
+            team_id=other_team_id,
             vacancy_status=VacancyStatus.VACANT
         )
         await team_season_repository.add(ts1)

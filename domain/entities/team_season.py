@@ -23,11 +23,13 @@ class TeamSeason:
     
     Represents a team's participation in a specific league season.
     Teams can have different statuses (active, vacant, forfeit).
+    
+    Note: TeamSeason references a Team entity (via team_id), which represents
+    a stable team identity (club + team_number) across all seasons.
     """
     id: UUID = field(default_factory=uuid4)
     league_season_id: UUID = field(default=None)
-    club_id: UUID = field(default=None)
-    team_number: int = field(default=1)
+    team_id: UUID = field(default=None)
     vacancy_status: VacancyStatus = field(default=VacancyStatus.ACTIVE)
     created_at: datetime = field(default_factory=datetime.utcnow)
     updated_at: datetime = field(default_factory=datetime.utcnow)
@@ -37,13 +39,8 @@ class TeamSeason:
         if self.league_season_id is None:
             raise InvalidTeamSeasonData("TeamSeason must have a league_season_id")
         
-        if self.club_id is None:
-            raise InvalidTeamSeasonData("TeamSeason must have a club_id")
-        
-        if self.team_number < 1:
-            raise InvalidTeamSeasonData(
-                f"Team number must be positive, got: {self.team_number}"
-            )
+        if self.team_id is None:
+            raise InvalidTeamSeasonData("TeamSeason must have a team_id")
     
     def update_vacancy_status(self, new_status: VacancyStatus) -> None:
         """
@@ -75,22 +72,6 @@ class TeamSeason:
         """Check if team position is available."""
         return self.vacancy_status.is_available()
     
-    def update_team_number(self, team_number: int) -> None:
-        """
-        Update team number.
-        
-        Args:
-            team_number: New team number (must be positive)
-        
-        Raises:
-            InvalidTeamSeasonData: If team number is invalid
-        """
-        if team_number < 1:
-            raise InvalidTeamSeasonData(
-                f"Team number must be positive, got: {team_number}"
-            )
-        self.team_number = team_number
-        self.updated_at = datetime.utcnow()
     
     def __eq__(self, other: object) -> bool:
         """Equality based on ID."""
@@ -106,7 +87,6 @@ class TeamSeason:
         """String representation."""
         return (
             f"TeamSeason(id={self.id}, league_season_id={self.league_season_id}, "
-            f"club_id={self.club_id}, team_number={self.team_number}, "
-            f"vacancy_status={self.vacancy_status})"
+            f"team_id={self.team_id}, vacancy_status={self.vacancy_status})"
         )
 

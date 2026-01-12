@@ -59,18 +59,18 @@ class TeamSeasonRepository(ABC):
         pass
     
     @abstractmethod
-    async def get_by_club(
+    async def get_by_team(
         self,
-        club_id: UUID
+        team_id: UUID
     ) -> List[TeamSeason]:
         """
-        Get all team seasons for a club.
+        Get all team seasons for a team.
         
         Args:
-            club_id: UUID of the club
+            team_id: UUID of the team
         
         Returns:
-            List of team seasons for the club
+            List of team seasons for the team
         """
         pass
     

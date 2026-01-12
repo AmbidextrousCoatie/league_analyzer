@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Team Score Sheet - {{ team_name }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1, h2, h3 {
+            color: #333;
+        }
+        .info {
+            color: #666;
+            margin-bottom: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            margin-bottom: 30px;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+            border: 1px solid #ddd;
+        }
+        th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+        tr:hover {
+            background-color: #f5f5f5;
+        }
+        .match-header {
+            background-color: #e8f4f8;
+            font-weight: bold;
+        }
+        .position-header {
+            background-color: #f0f0f0;
+        }
+        .points {
+            font-weight: bold;
+            color: #0066cc;
+        }
+        .summary {
+            background-color: #f9f9f9;
+            padding: 15px;
+            border: 1px solid #ddd;
+            margin-top: 20px;
+        }
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>{{ team_name }} - Score Sheet</h1>
+    <div class="info">
+        <p><strong>League:</strong> {{ league_name }}</p>
+        <p><strong>Season:</strong> {{ season }}</p>
+        {% if week %}
+        <p><strong>Week:</strong> {{ week }}</p>
+        {% else %}
+        <p><strong>All Weeks</strong></p>
+        {% endif %}
+    </div>
+    
+    {% for match in matches %}
+    <h2>Week {{ match.week }} - Round {{ match.round_number }}, Match {{ match.match_number }}</h2>
+    <p><strong>Opponent:</strong> {{ match.opponent_team_name }}</p>
+    
+    <table>
+        <thead>
+            <tr>
+                <th>Position</th>
+                <th>Player</th>
+                <th>Score</th>
+                <th>Opponent</th>
+                <th>Opponent Score</th>
+                <th>Points</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for pos_score in match.position_scores %}
+            <tr>
+                <td>{{ pos_score.position }}</td>
+                <td>{{ pos_score.player_name }}</td>
+                <td>{{ pos_score.score }}</td>
+                <td>{{ pos_score.opponent_player_name }}</td>
+                <td>{{ pos_score.opponent_score }}</td>
+                <td class="points">{{ pos_score.points }}</td>
+            </tr>
+            {% endfor %}
+            <tr class="match-header">
+                <td colspan="2"><strong>Team Total</strong></td>
+                <td><strong>{{ match.team_total_score }}</strong></td>
+                <td colspan="2"><strong>Opponent Total</strong></td>
+                <td><strong>{{ match.opponent_total_score }}</strong></td>
+            </tr>
+            <tr class="match-header">
+                <td colspan="5"><strong>Team Match Points</strong></td>
+                <td class="points"><strong>{{ match.team_match_points }}</strong></td>
+            </tr>
+        </tbody>
+    </table>
+    {% endfor %}
+    
+    <div class="summary">
+        <h2>Summary</h2>
+        
+        <h3>Points per Position</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Position</th>
+                    <th>Total Points</th>
+                    <th>Matches Played</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for pos_summary in position_summaries %}
+                <tr>
+                    <td>{{ pos_summary.position }}</td>
+                    <td class="points">{{ pos_summary.total_points }}</td>
+                    <td>{{ pos_summary.matches_played }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        
+        <h3>Overall Statistics</h3>
+        <div class="summary-row">
+            <span><strong>Total Individual Points:</strong></span>
+            <span class="points">{{ total_individual_points }}</span>
+        </div>
+        <div class="summary-row">
+            <span><strong>Total Team Match Points:</strong></span>
+            <span class="points">{{ total_team_match_points }}</span>
+        </div>
+        <div class="summary-row">
+            <span><strong>Total Points:</strong></span>
+            <span class="points"><strong>{{ total_points }}</strong></span>
+        </div>
+        <div class="summary-row">
+            <span><strong>Record:</strong></span>
+            <span><strong>{{ wins }}-{{ losses }}-{{ ties }}</strong></span>
+        </div>
+    </div>
+    
+    <p style="margin-top: 30px; color: #999; font-size: 0.9em;">
+        ⚠️ Preliminary frontend - will be replaced with Vue.js in Phase 5
+    </p>
+</body>
+</html>

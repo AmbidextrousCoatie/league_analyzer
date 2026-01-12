@@ -17,10 +17,11 @@ import pandas as pd
 import re
 from uuid import uuid4, UUID
 from datetime import datetime, date
-from typing import Optional
+from typing import Optional, Dict
 from domain.entities.league import League, get_league_long_name
 from domain.entities.league_season import LeagueSeason
 from domain.entities.team_season import TeamSeason
+from domain.entities.team import Team
 from domain.entities.event import Event
 from domain.entities.game_result import GameResult
 from domain.entities.match import Match, MatchStatus
@@ -47,9 +48,11 @@ from infrastructure.persistence.mappers.csv.game_result_mapper import PandasGame
 from infrastructure.persistence.mappers.csv.position_comparison_mapper import PandasPositionComparisonMapper
 from infrastructure.persistence.mappers.csv.match_scoring_mapper import PandasMatchScoringMapper
 from infrastructure.persistence.mappers.csv.club_player_mapper import PandasClubPlayerMapper
+from infrastructure.persistence.mappers.csv.team_mapper import PandasTeamMapper
 from infrastructure.persistence.repositories.csv.event_repository import PandasEventRepository
 from infrastructure.persistence.repositories.csv.league_season_repository import PandasLeagueSeasonRepository
 from infrastructure.persistence.repositories.csv.team_season_repository import PandasTeamSeasonRepository
+from infrastructure.persistence.repositories.csv.team_repository import PandasTeamRepository
 from infrastructure.persistence.repositories.csv.game_repository import PandasGameRepository
 from infrastructure.persistence.repositories.csv.player_repository import PandasPlayerRepository
 from infrastructure.persistence.repositories.csv.league_repository import PandasLeagueRepository
@@ -99,6 +102,7 @@ async def seed_sample_data():
     event_mapper = PandasEventMapper()
     league_season_mapper = PandasLeagueSeasonMapper()
     team_season_mapper = PandasTeamSeasonMapper()
+    team_mapper = PandasTeamMapper()
     player_mapper = PandasPlayerMapper()
     league_mapper = PandasLeagueMapper()
     club_mapper = PandasClubMapper()
@@ -111,6 +115,7 @@ async def seed_sample_data():
     event_repo = PandasEventRepository(adapter, event_mapper)
     league_season_repo = PandasLeagueSeasonRepository(adapter, league_season_mapper)
     team_season_repo = PandasTeamSeasonRepository(adapter, team_season_mapper)
+    team_repo = PandasTeamRepository(adapter, team_mapper)
     player_repo = PandasPlayerRepository(adapter, player_mapper)
     league_repo = PandasLeagueRepository(adapter, league_mapper)
     club_repo = PandasClubRepository(adapter, club_mapper)
@@ -527,9 +532,69 @@ async def seed_sample_data():
     else:
         logger.warning(f"   [SKIP] League season file not found: {legacy_league_season_path}")
     
-    # 5. Load and transform Team Seasons
-    logger.info("\n5. Processing Team Seasons...")
+    # 5. Create Team entities from unique (club_id, team_number) combinations
+    logger.info("\n5. Processing Teams...")
     legacy_team_season_path = legacy_path / "team_season.csv"
+    team_id_map: Dict[tuple, UUID] = {}  # Maps (club_id, team_number) -> team_id
+    teams_created = 0
+    
+    if legacy_team_season_path.exists():
+        df_team_seasons = pd.read_csv(legacy_team_season_path)
+        # Deduplicate by id
+        df_team_seasons = df_team_seasons.drop_duplicates(subset=['id'], keep='first')
+        
+        # Filter: Only process team seasons belonging to target season (25/26)
+        df_team_seasons_filtered = df_team_seasons[
+            df_team_seasons['league_season_id'].astype(str).isin(league_season_id_map.keys())
+        ].copy()
+        
+        # Get unique (club_id, team_number) combinations
+        unique_teams = df_team_seasons_filtered[['club_id', 'team_number']].drop_duplicates()
+        
+        for _, row in unique_teams.iterrows():
+            legacy_club_id = str(row['club_id']).strip()
+            team_number = int(row['team_number']) if pd.notna(row.get('team_number')) else 1
+            
+            # Get club UUID
+            club_id = club_id_map.get(legacy_club_id)
+            if not club_id:
+                logger.warning(f"   [WARN] Club {legacy_club_id} not found, skipping team")
+                continue
+            
+            # Check if team already exists
+            team_key = (club_id, team_number)
+            if team_key in team_id_map:
+                continue  # Team already created
+            
+            # Get club to build team name
+            club = await club_repo.get_by_id(club_id)
+            if not club:
+                logger.warning(f"   [WARN] Club {club_id} not found in repository, skipping team")
+                continue
+            
+            # Create team name
+            team_name = club.name
+            if team_number > 1:
+                team_name += f" {team_number}"
+            
+            # Create Team entity
+            team = Team(
+                id=uuid4(),
+                name=team_name,
+                club_id=club_id,
+                team_number=team_number
+            )
+            team = await team_repo.add(team)
+            team_id_map[team_key] = team.id
+            teams_created += 1
+            #logger.debug(f"   [OK] Created Team: {team_name} (Club {legacy_club_id}, Team {team_number})")
+        
+        logger.info(f"   [SUMMARY] Created {teams_created} teams")
+    else:
+        logger.warning(f"   [SKIP] Team season file not found: {legacy_team_season_path}")
+    
+    # 6. Load and transform Team Seasons
+    logger.info("\n6. Processing Team Seasons...")
     if legacy_team_season_path.exists():
         df_team_seasons = pd.read_csv(legacy_team_season_path)
         # Deduplicate by id
@@ -561,22 +626,28 @@ async def seed_sample_data():
                 logger.warning(f"   [WARN] Club {legacy_club_id} not found for team season {legacy_id}")
                 continue
             
+            # Get team_id from team_id_map
+            team_key = (club_id, team_number)
+            team_id = team_id_map.get(team_key)
+            if not team_id:
+                logger.warning(f"   [WARN] Team (Club {legacy_club_id}, Team {team_number}) not found for team season {legacy_id}")
+                continue
+            
             team_season = TeamSeason(
                 id=uuid4(),
                 league_season_id=league_season_id,
-                club_id=club_id,
-                team_number=team_number,
+                team_id=team_id,
                 vacancy_status=VacancyStatus.ACTIVE
             )
             team_season = await team_season_repo.add(team_season)
             team_season_id_map[legacy_id] = team_season.id
             team_seasons_created += 1
-            #logger.debug(f"   [OK] Created TeamSeason: Club {legacy_club_id} Team {team_number}")
+            #logger.debug(f"   [OK] Created TeamSeason: Team {team_id}")
         logger.info(f"   [SUMMARY] Created {team_seasons_created} team seasons")
     else:
         logger.warning(f"   [SKIP] Team season file not found: {legacy_team_season_path}")
     
-    # 6. Load and transform Events
+    # 7. Load and transform Events
     logger.info("\n7. Processing Events...")
     legacy_event_path = legacy_path / "event.csv"
     if legacy_event_path.exists():
@@ -650,11 +721,54 @@ async def seed_sample_data():
     
     # 7. Load and transform Games to new data model (Match, GameResult, PositionComparison, MatchScoring)
     logger.info("\n8. Processing Games (New Data Model)...")
-    legacy_game_path = legacy_path / "new" / "game_result_new.csv"
-    if legacy_game_path.exists():
-        logger.info("   [INFO] Loading game data...")
-        df_games = pd.read_csv(legacy_game_path)
+    # Read from original CSV to get Team and Opponent columns for reliable match pairing
+    legacy_bowling_results_path = Path("league_analyzer_v1/database/data/bowling_ergebnisse_reconstructed_clean.csv")
+    if legacy_bowling_results_path.exists():
+        logger.info("   [INFO] Loading game data from original CSV (with Team/Opponent columns)...")
+        df_games = pd.read_csv(legacy_bowling_results_path, sep=';')
         logger.info(f"   [INFO] Loaded {len(df_games)} game rows")
+        
+        # Filter to only player rows (exclude "Team Total" rows)
+        df_games = df_games[
+            (df_games['Player ID'].notna()) & 
+            (df_games['Player ID'] != 0) &
+            (df_games['Player'] != 'Team Total')
+        ].copy()
+        logger.info(f"   [INFO] After filtering Team Total rows: {len(df_games)} player game rows")
+        
+        # Filter by target season - only process rows matching TARGET_SEASON
+        # Normalize season strings for comparison (handle "24/25", "24-25", "2024-25", etc.)
+        def normalize_season_for_comparison(season_str: str) -> str:
+            """Normalize season string to match TARGET_SEASON format (e.g., "25/26")."""
+            if not season_str or pd.isna(season_str):
+                return ""
+            season_str = str(season_str).strip()
+            # Handle formats like "24/25", "24-25", "2024-25", "2024/25"
+            if '/' in season_str:
+                parts = season_str.split('/')
+            elif '-' in season_str:
+                parts = season_str.split('-')
+            else:
+                return season_str
+            
+            if len(parts) == 2:
+                # Extract last 2 digits from each part
+                part1 = parts[0].strip()
+                part2 = parts[1].strip()
+                # If 4-digit year, extract last 2 digits
+                if len(part1) == 4:
+                    part1 = part1[2:]
+                if len(part2) == 4:
+                    part2 = part2[2:]
+                # If 2-digit year, use as-is
+                if len(part1) == 2 and len(part2) == 2:
+                    return f"{part1}/{part2}"
+            return season_str
+        
+        # Filter rows by season
+        df_games['season_normalized'] = df_games['Season'].apply(normalize_season_for_comparison)
+        df_games = df_games[df_games['season_normalized'] == TARGET_SEASON].copy()
+        logger.info(f"   [INFO] After filtering by season '{TARGET_SEASON}': {len(df_games)} player game rows")
         
         # Cache all data upfront to avoid repeated get_all() calls
         logger.info("   [INFO] Caching repository data...")
@@ -662,35 +776,194 @@ async def seed_sample_data():
         all_players = await player_repo.get_all()
         all_league_seasons = await league_season_repo.get_all()
         all_scoring_systems = await scoring_system_repo.get_all()
+        all_team_seasons = await team_season_repo.get_all()
+        all_teams = await team_repo.get_all()
+        all_clubs = await club_repo.get_all()
+        all_leagues = await league_repo.get_all()
+        
+        # Filter league seasons to only TARGET_SEASON
+        # Normalize TARGET_SEASON to match the format used in LeagueSeason entities (e.g., "2025-26")
+        target_season_normalized = TARGET_SEASON
+        if '/' in TARGET_SEASON:
+            parts = TARGET_SEASON.split('/')
+            if len(parts) == 2:
+                start_short = int(parts[0])
+                end_short = int(parts[1])
+                # For recent data (2020s), assume 2000s
+                if start_short >= 50:
+                    start_year = 1900 + start_short
+                else:
+                    start_year = 2000 + start_short
+                target_season_normalized = f"{start_year}-{end_short:02d}"
+        
+        # Filter league seasons to only those matching TARGET_SEASON
+        target_league_season_ids = set()
+        for ls in all_league_seasons:
+            # Compare normalized season strings
+            ls_season_str = str(ls.season).replace('-', '/').strip()
+            target_season_str = TARGET_SEASON.replace('-', '/').strip()
+            # Also try direct comparison with normalized format
+            if (ls_season_str == target_season_str or 
+                str(ls.season) == target_season_normalized):
+                target_league_season_ids.add(ls.id)
+        
+        logger.info(f"   [INFO] Found {len(target_league_season_ids)} league seasons matching '{TARGET_SEASON}'")
+        
+        # Filter events to only those belonging to target league seasons
+        all_events = [e for e in all_events if e.league_season_id in target_league_season_ids]
+        logger.info(f"   [INFO] Filtered to {len(all_events)} events for target season")
+        
         # Create lookup maps for O(1) access
         event_map = {e.id: e for e in all_events}
         player_map = {p.dbu_id: p.id for p in all_players if p.dbu_id}  # Map legacy player IDs to UUIDs
-        league_season_map = {ls.id: ls for ls in all_league_seasons}
+        league_season_map = {ls.id: ls for ls in all_league_seasons if ls.id in target_league_season_ids}
         scoring_system_map = {str(ss.id): ss for ss in all_scoring_systems}  # Map by string ID
+        league_map = {l.id: l for l in all_leagues}  # Map league_id to League entity
         
-        logger.info("   [INFO] Processing game rows and grouping into matches...")
+        # Build team_season lookup by team name (club + team_number)
+        # Helper function to extract club name and team number from team name
+        def extract_club_name_from_team(team_name: str) -> Optional[str]:
+            """Extract club name from team name (e.g., 'BC Comet Nürnberg 1' -> 'BC Comet Nürnberg')."""
+            if not team_name or pd.isna(team_name):
+                return None
+            team_name = str(team_name).strip()
+            # Remove trailing team number (e.g., " 1", " 2", " 3")
+            team_name = re.sub(r'\s+\d+$', '', team_name)
+            return team_name
         
-        # Step 1: Collect raw game data and group by match
+        # Build team_season lookup: (league_season_id, club_name, team_number) -> team_season_id
+        team_season_lookup = {}  # (league_season_id, club_name, team_number) -> team_season_id
+        team_map = {t.id: t for t in all_teams}  # Map team_id to Team entity
+        for ts in all_team_seasons:
+            # Get team from team_id
+            team = team_map.get(ts.team_id)
+            if not team:
+                continue
+            
+            # Get club from team
+            club = next((c for c in all_clubs if c.id == team.club_id), None)
+            if club:
+                league_season_id = str(ts.league_season_id)
+                club_name = club.name
+                team_number = team.team_number
+                key = (league_season_id, club_name, team_number)
+                team_season_lookup[key] = ts.id
+        
+        logger.info("   [INFO] Processing game rows and grouping into matches by Team/Opponent...")
+        
+        # Step 1: Collect raw game data and group by match using Team and Opponent
         from collections import defaultdict
-        match_data = defaultdict(list)  # (event_id, round_number, match_number) -> list of game rows
+        match_data = defaultdict(list)  # (event_id, round_number, team_season_id, opponent_team_season_id) -> list of game rows
+        
+        # Map Season/Week/Date/League to event_id
+        df_games['date_parsed'] = pd.to_datetime(df_games['Date'], errors='coerce').dt.date
+        df_games['Week_num'] = pd.to_numeric(df_games['Week'], errors='coerce').astype('Int64')
+        
+        # Diagnostic counters
+        rows_processed = 0
+        rows_no_event = 0
+        rows_no_player = 0
+        rows_no_team = 0
+        rows_no_opponent = 0
+        rows_success = 0
         
         row_count = 0
         for _, row in df_games.iterrows():
             row_count += 1
+            rows_processed += 1
             if row_count % 100 == 0:
                 logger.debug(f"   [PROGRESS] Processing row {row_count}/{len(df_games)}...")
                 await asyncio.sleep(0)  # Yield control
             
-            legacy_event_id = str(row['event_id']).strip()
-            legacy_player_id = str(row['player_id']).strip()
-            legacy_team_season_id = str(row['team_season_id']).strip()
-            position = int(row['lineup_position']) if pd.notna(row.get('lineup_position')) else 0
-            match_number = int(row['match_number']) if pd.notna(row.get('match_number')) else 0
-            round_number = int(row['round_number']) if pd.notna(row.get('round_number')) else 1
+            # Get event_id from Season/Week/Date/League
+            season_str = str(row.get('Season', '')).strip()
+            week_num = int(row['Week_num']) if pd.notna(row.get('Week_num')) else None
+            date_parsed = row.get('date_parsed')
+            league_abbr = str(row.get('League', '')).strip()
+            
+            # Find matching event
+            # Match by Week/Date/League - only consider events from target season
+            # (all_events is already filtered to target season)
+            event_id = None
+            for event in all_events:
+                # Check league abbreviation first (fastest filter)
+                league_season = league_season_map.get(event.league_season_id)
+                if not league_season:
+                    continue
+                league = league_map.get(league_season.league_id)
+                if not league or league.abbreviation != league_abbr:
+                    continue
+                
+                # Match by week and date - exact match required
+                # The event's league_season is already filtered to target season
+                if (event.league_week == week_num and
+                    event.date.date() == date_parsed):
+                    event_id = event.id
+                    break
+            
+            if not event_id:
+                rows_no_event += 1
+                if rows_no_event <= 5:  # Log first 5 failures for debugging
+                    logger.debug(f"   [DEBUG] No event found for row: Season={season_str}, Week={week_num}, Date={date_parsed}, League={league_abbr}")
+                continue  # Skip if event not found (not in target season)
+            
+            # Get player_id
+            legacy_player_id = str(row.get('Player ID', '')).strip()
+            player_id = player_map.get(legacy_player_id)
+            if not player_id:
+                rows_no_player += 1
+                continue  # Skip if player not found
+            
+            # Get team_season_id from Team name
+            team_name = str(row.get('Team', '')).strip()
+            club_name = extract_club_name_from_team(team_name)
+            if not club_name:
+                continue
+            
+            # Extract team number from team name
+            team_number_match = re.search(r'\s+(\d+)$', team_name)
+            team_number = int(team_number_match.group(1)) if team_number_match else 1
+            
+            # Get league_season_id from event
+            event = event_map.get(event_id)
+            if not event:
+                continue
+            league_season_id_str = str(event.league_season_id)
+            
+            # Look up team_season_id
+            lookup_key = (league_season_id_str, club_name, team_number)
+            team_season_id = team_season_lookup.get(lookup_key)
+            if not team_season_id:
+                rows_no_team += 1
+                if rows_no_team <= 5:  # Log first 5 failures for debugging
+                    logger.debug(f"   [DEBUG] Team season not found: club={club_name}, team_number={team_number}, league_season={league_season_id_str}")
+                continue  # Skip if team season not found
+            
+            # Get opponent_team_season_id from Opponent name
+            opponent_name = str(row.get('Opponent', '')).strip()
+            opponent_club_name = extract_club_name_from_team(opponent_name)
+            if not opponent_club_name:
+                continue
+            
+            # Extract opponent team number
+            opponent_team_number_match = re.search(r'\s+(\d+)$', opponent_name)
+            opponent_team_number = int(opponent_team_number_match.group(1)) if opponent_team_number_match else 1
+            
+            # Look up opponent_team_season_id
+            opponent_lookup_key = (league_season_id_str, opponent_club_name, opponent_team_number)
+            opponent_team_season_id = team_season_lookup.get(opponent_lookup_key)
+            if not opponent_team_season_id:
+                rows_no_opponent += 1
+                if rows_no_opponent <= 5:  # Log first 5 failures for debugging
+                    logger.debug(f"   [DEBUG] Opponent team season not found: club={opponent_club_name}, team_number={opponent_team_number}, league_season={league_season_id_str}")
+                continue  # Skip if opponent team season not found
+            
+            # Get position and round_number
+            position = int(row.get('Position', 0)) if pd.notna(row.get('Position')) else 0
+            round_number = int(row.get('Round Number', 1)) if pd.notna(row.get('Round Number')) else 1
             
             # Read score and validate it's non-negative (skip invalid data)
-            # Scores are always integers (pins knocked down)
-            raw_score = row.get('score')
+            raw_score = row.get('Score')
             if pd.isna(raw_score):
                 score = 0
             else:
@@ -698,148 +971,100 @@ async def seed_sample_data():
                 if score < 0:
                     continue  # Skip negative scores
             
-            # Get UUIDs
-            event_id = event_id_map.get(legacy_event_id)
-            player_id = player_map.get(legacy_player_id)
-            team_season_id = team_season_id_map.get(legacy_team_season_id)
+            handicap = None  # Not in source data
+            is_disqualified = False  # Will be determined by score == 0 or missing
             
-            # Filter: Only process games for events in target season (25/26)
-            # Events are already filtered by league_season, so if event_id is None, 
-            # the event was filtered out (not in 25/26 season)
-            if not event_id:
-                continue  # Skip games for events not in target season
-            if not player_id:
-                continue  # Skip if player not found
-            if not team_season_id:
-                continue  # Skip if team season not found (or filtered out)
-            
-            handicap = float(row['handicap']) if pd.notna(row.get('handicap')) else None
-            is_disqualified = bool(row.get('is_disqualified', False)) if pd.notna(row.get('is_disqualified')) else False
-            
-            # Store game data for match grouping
-            match_key = (event_id, round_number, match_number)
+            # Store game data for match grouping using Team/Opponent pairing
+            # Use sorted tuple to ensure consistent key regardless of which team is "Team" vs "Opponent"
+            team_pair = tuple(sorted([team_season_id, opponent_team_season_id]))
+            match_key = (event_id, round_number, team_pair[0], team_pair[1])
             match_data[match_key].append({
                 'event_id': event_id,
                 'player_id': player_id,
                 'team_season_id': team_season_id,
+                'opponent_team_season_id': opponent_team_season_id,
                 'position': position,
                 'score': score,
                 'handicap': handicap,
-                'is_disqualified': is_disqualified,
-                'legacy_event_id': legacy_event_id,
-                'legacy_team_season_id': legacy_team_season_id
+                'is_disqualified': is_disqualified
             })
+            rows_success += 1
         
+        logger.info(f"   [INFO] Processing summary:")
+        logger.info(f"   [INFO]   - Rows processed: {rows_processed}")
+        logger.info(f"   [INFO]   - Rows with no event match: {rows_no_event}")
+        logger.info(f"   [INFO]   - Rows with no player match: {rows_no_player}")
+        logger.info(f"   [INFO]   - Rows with no team match: {rows_no_team}")
+        logger.info(f"   [INFO]   - Rows with no opponent match: {rows_no_opponent}")
+        logger.info(f"   [INFO]   - Rows successfully processed: {rows_success}")
         logger.info(f"   [INFO] Grouped into {len(match_data)} matches")
         
         # Step 2: Create Match entities and GameResult entities
         matches = []
         game_results = []
-        match_id_map = {}  # (event_id, round_number, match_number) -> match_id
+        match_id_map = {}  # (event_id, round_number, team1_id, team2_id) -> match_id
+        
+        # Generate sequential match numbers per (event_id, round_number) for display
+        match_number_counter = {}  # (event_id, round_number) -> next match_number
         
         for match_key, game_rows in match_data.items():
-            event_id, round_number, match_number = match_key
+            event_id, round_number, team1_id, team2_id = match_key
             
-            # Find unique teams in this match
+            # Verify we have exactly 2 teams
             team_ids = set()
             for game_row in game_rows:
                 team_ids.add(game_row['team_season_id'])
             
-            if len(team_ids) == 2:
-                # Normal case: exactly 2 teams
-                team_list = sorted(list(team_ids))
-                team1_id = team_list[0]
-                team2_id = team_list[1]
-                
-                # Calculate team totals
-                team1_total = sum(gr['score'] for gr in game_rows if gr['team_season_id'] == team1_id)
-                team2_total = sum(gr['score'] for gr in game_rows if gr['team_season_id'] == team2_id)
-                
-                # Create Match entity
-                match = Match(
-                    id=uuid4(),
-                    event_id=event_id,
-                    round_number=round_number,
-                    match_number=match_number,
-                    team1_team_season_id=team1_id,
-                    team2_team_season_id=team2_id,
-                    team1_total_score=team1_total,
-                    team2_total_score=team2_total,
-                    status=MatchStatus.COMPLETED
-                )
-                
-                matches.append(match)
-                match_id_map[match_key] = match.id
-                
-                # Create GameResult entities for this match
-                for game_row in game_rows:
-                    game_result = GameResult(
-                        id=uuid4(),
-                        match_id=match.id,
-                        player_id=game_row['player_id'],
-                        team_season_id=game_row['team_season_id'],
-                        position=game_row['position'],
-                        score=game_row['score'],
-                        handicap=game_row['handicap'],
-                        is_disqualified=game_row['is_disqualified']
-                    )
-                    game_results.append(game_result)
-            elif len(team_ids) > 2 and len(team_ids) % 2 == 0:
-                # Multiple teams: split into pairs (round-robin concurrent matches)
-                # Group games by team
-                team_games = {}
-                for game_row in game_rows:
-                    team_id = game_row['team_season_id']
-                    if team_id not in team_games:
-                        team_games[team_id] = []
-                    team_games[team_id].append(game_row)
-                
-                # Sort teams and pair them
-                team_list = sorted(list(team_ids))
-                num_matches = len(team_list) // 2
-                
-                for i in range(num_matches):
-                    team1_id = team_list[i * 2]
-                    team2_id = team_list[i * 2 + 1]
-                    
-                    # Calculate team totals
-                    team1_total = sum(gr['score'] for gr in team_games[team1_id])
-                    team2_total = sum(gr['score'] for gr in team_games[team2_id])
-                    
-                    # Create Match entity with adjusted match_number
-                    adjusted_match_number = match_number + i if match_number == 0 else match_number
-                    match = Match(
-                        id=uuid4(),
-                        event_id=event_id,
-                        round_number=round_number,
-                        match_number=adjusted_match_number,
-                        team1_team_season_id=team1_id,
-                        team2_team_season_id=team2_id,
-                        team1_total_score=team1_total,
-                        team2_total_score=team2_total,
-                        status=MatchStatus.COMPLETED
-                    )
-                    
-                    matches.append(match)
-                    match_id_map[(event_id, round_number, adjusted_match_number)] = match.id
-                    
-                    # Create GameResult entities for this specific match pair
-                    for game_row in team_games[team1_id] + team_games[team2_id]:
-                        game_result = GameResult(
-                            id=uuid4(),
-                            match_id=match.id,
-                            player_id=game_row['player_id'],
-                            team_season_id=game_row['team_season_id'],
-                            position=game_row['position'],
-                            score=game_row['score'],
-                            handicap=game_row['handicap'],
-                            is_disqualified=game_row['is_disqualified']
-                        )
-                        game_results.append(game_result)
-            else:
-                logger.warning(f"   [WARN] Match (event={event_id}, round={round_number}, match={match_number}) "
-                      f"has {len(team_ids)} teams, expected 2 or even number. Skipping.")
+            if len(team_ids) != 2:
+                logger.warning(f"   [WARN] Match (event={event_id}, round={round_number}, teams={team_ids}) "
+                      f"has {len(team_ids)} teams, expected 2. Skipping.")
                 continue
+            
+            # Ensure team1_id and team2_id match the actual teams
+            if team1_id not in team_ids or team2_id not in team_ids:
+                logger.warning(f"   [WARN] Match key teams don't match actual teams. Skipping.")
+                continue
+            
+            # Calculate team totals
+            team1_total = sum(gr['score'] for gr in game_rows if gr['team_season_id'] == team1_id)
+            team2_total = sum(gr['score'] for gr in game_rows if gr['team_season_id'] == team2_id)
+            
+            # Generate sequential match_number for display (not used for identification)
+            counter_key = (event_id, round_number)
+            if counter_key not in match_number_counter:
+                match_number_counter[counter_key] = 0
+            match_number = match_number_counter[counter_key]
+            match_number_counter[counter_key] += 1
+            
+            # Create Match entity
+            match = Match(
+                id=uuid4(),
+                event_id=event_id,
+                round_number=round_number,
+                match_number=match_number,  # Sequential number for display only
+                team1_team_season_id=team1_id,
+                team2_team_season_id=team2_id,
+                team1_total_score=team1_total,
+                team2_total_score=team2_total,
+                status=MatchStatus.COMPLETED
+            )
+            
+            matches.append(match)
+            match_id_map[match_key] = match.id
+            
+            # Create GameResult entities for this match
+            for game_row in game_rows:
+                game_result = GameResult(
+                    id=uuid4(),
+                    match_id=match.id,
+                    player_id=game_row['player_id'],
+                    team_season_id=game_row['team_season_id'],
+                    position=game_row['position'],
+                    score=game_row['score'],
+                    handicap=game_row['handicap'],
+                    is_disqualified=game_row['is_disqualified']
+                )
+                game_results.append(game_result)
         
         logger.info(f"   [SUMMARY] Created {len(matches)} matches and {len(game_results)} game results")
         
@@ -1017,7 +1242,7 @@ async def seed_sample_data():
         games_created = game_results_saved  # For summary
         matches_created = matches_saved
     else:
-        logger.warning(f"   [SKIP] Game file not found: {legacy_game_path}")
+        logger.warning(f"   [SKIP] Game file not found: {legacy_bowling_results_path}")
         games_created = 0
         matches_created = 0
     

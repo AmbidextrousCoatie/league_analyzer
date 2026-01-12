@@ -81,16 +81,16 @@ class PandasTeamSeasonRepository(TeamSeasonRepository):
         filtered = df[df['league_season_id'] == str(league_season_id)]
         return [self._mapper.to_domain(row) for _, row in filtered.iterrows()]
     
-    async def get_by_club(
+    async def get_by_team(
         self,
-        club_id: UUID
+        team_id: UUID
     ) -> List[TeamSeason]:
-        """Get team seasons for a club from CSV."""
+        """Get team seasons for a team from CSV."""
         df = self._load_data()
         if df.empty:
             return []
         
-        filtered = df[df['club_id'] == str(club_id)]
+        filtered = df[df['team_id'] == str(team_id)]
         return [self._mapper.to_domain(row) for _, row in filtered.iterrows()]
     
     async def get_by_vacancy_status(

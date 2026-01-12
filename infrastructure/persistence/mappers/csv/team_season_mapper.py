@@ -31,10 +31,16 @@ class PandasTeamSeasonMapper:
         # Handle UUID conversion
         team_season_id = UUID(row['id']) if isinstance(row['id'], str) and len(row['id']) > 10 else row['id']
         league_season_id = UUID(row['league_season_id']) if isinstance(row['league_season_id'], str) and len(row['league_season_id']) > 10 else row['league_season_id']
-        club_id = UUID(row['club_id']) if isinstance(row['club_id'], str) and len(row['club_id']) > 10 else row['club_id']
         
-        # Handle optional fields
-        team_number = int(row['team_number']) if pd.notna(row.get('team_number')) else 1
+        # Handle team_id - support both new format (team_id) and legacy format (club_id + team_number)
+        # Legacy format: if team_id is missing but club_id and team_number exist, we'll need to resolve it
+        # For now, assume team_id is present in new format
+        if 'team_id' in row and pd.notna(row.get('team_id')):
+            team_id = UUID(row['team_id']) if isinstance(row['team_id'], str) and len(row['team_id']) > 10 else row['team_id']
+        else:
+            # Legacy format: try to get from club_id + team_number (will need to be resolved by repository)
+            # For migration purposes, we'll raise an error if team_id is missing
+            raise ValueError("team_id is required. Legacy format (club_id + team_number) is no longer supported.")
         
         # Handle vacancy_status - default to ACTIVE if not present
         vacancy_status_str = row.get('vacancy_status', 'active')
@@ -48,8 +54,7 @@ class PandasTeamSeasonMapper:
         return TeamSeason(
             id=team_season_id,
             league_season_id=league_season_id,
-            club_id=club_id,
-            team_number=team_number,
+            team_id=team_id,
             vacancy_status=vacancy_status
         )
     
@@ -67,8 +72,7 @@ class PandasTeamSeasonMapper:
         return pd.Series({
             'id': str(team_season.id),
             'league_season_id': str(team_season.league_season_id),
-            'club_id': str(team_season.club_id),
-            'team_number': team_season.team_number,
+            'team_id': str(team_season.team_id),
             'vacancy_status': team_season.vacancy_status.value
         })
 
