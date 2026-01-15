@@ -354,6 +354,8 @@ class GetLeagueStandingsHandler:
         
         if not team_seasons:
             # No teams found - return empty standings
+            from infrastructure.logging import get_logger
+            logger = get_logger(__name__)
             logger.warning(f"No team seasons found for league season {league_season.id}")
             return LeagueStandingsDTO(
                 league_id=league.id,
@@ -378,10 +380,14 @@ class GetLeagueStandingsHandler:
                 team_season_to_team[team_season.id] = team.id
                 teams[team.id] = team
             else:
+                from infrastructure.logging import get_logger
+                logger = get_logger(__name__)
                 logger.warning(f"Team {team_season.team_id} not found for team season {team_season.id}")
         
         # Ensure we have at least one valid team
         if not teams:
+            from infrastructure.logging import get_logger
+            logger = get_logger(__name__)
             logger.warning(f"No valid teams found for league season {league_season.id}")
             return LeagueStandingsDTO(
                 league_id=league.id,

@@ -20,8 +20,13 @@
 - ✅ Comprehensive test coverage (384 tests, 79% coverage)
 - ✅ Week 6: Adapter pattern (complete, Unit of Work deferred - not critical for CSV)
 
-**Phase 3: ⏳ NOT STARTED** (Weeks 7-11)
-- Application layer (CQRS) - Base classes exist, handlers pending
+**Phase 3: 🚧 IN PROGRESS** (Weeks 7-11)
+- ✅ Week 7: CQRS Foundation & First Queries (GetLeagueStandings, GetLeagueHistory)
+- ✅ Query validation, error handling, robustness improvements
+- ✅ API routes (JSON and HTML endpoints) with slug-based routing
+- ✅ Integration tests for API routes
+- ✅ Unit tests for query validators
+- ⏳ Week 8: Additional League Queries & First Commands
 
 **Phase 4: ⏳ NOT STARTED** (Weeks 12-14)
 - API endpoints
@@ -321,10 +326,17 @@ presentation/
 - [x] Create query base class
 - [x] Create command base class
 - [x] Implement `GetLeagueStandings` query
-- [ ] Implement `GetLeagueHistory` query
-- [ ] Add query validation
-- [ ] Add error handling
-- [ ] **Make data handlers more robust** - Handle unknown `league_season_id` and other invalid IDs gracefully with proper error messages instead of crashing
+- [x] Implement `GetLeagueHistory` query
+  - [x] Season-by-season summaries (top 3 places, league average, total points)
+  - [x] All-time records (team season average, team game, individual season average, individual game)
+  - [x] League average trend
+- [x] Add query validation (UUIDs, season strings, week numbers, slugs)
+- [x] Add error handling (consistent error responses, proper HTTP status codes)
+- [x] **Make data handlers more robust** - Handle unknown `league_season_id` and other invalid IDs gracefully with proper error messages instead of crashing
+- [x] Add API routes (JSON and HTML endpoints) with slug-based routing
+- [x] Add integration tests for API routes
+- [x] Add unit tests for query validators
+- [ ] Add unit tests for query handlers with edge cases
 - [ ] **Performance note:** Slug-based routes are currently 5-10x slower than legacy due to CSV I/O. Optimization planned for Week 14 (CSV caching + slug indices)
 
 **Learning Focus:**
