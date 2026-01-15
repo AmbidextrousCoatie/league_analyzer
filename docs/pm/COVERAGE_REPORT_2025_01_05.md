@@ -1,6 +1,6 @@
 # Code Coverage Report
 
-**Date:** 2026-01-12  
+**Date:** 2026-01-15  
 **Report Type:** Automated Coverage Report  
 **Status:** ✅ Tests Executed Successfully
 
@@ -11,13 +11,13 @@
 **Test Execution:** Tests executed using venv at `C:\Users\cfell\venvs\league_analyzer`.
 
 **Test Results:**
-- ✅ **384 tests passed**
+- ✅ **424 tests passed**
 - ❌ 0 tests failed
 - ⚠️ 0 errors
 
-**Total Tests:** 384
+**Total Tests:** 424
 
-**Overall Coverage:** **72.5%** (4890 statements, 1347 missed)
+**Overall Coverage:** **76.0%** (5178 statements, 1245 missed)
 
 ---
 
@@ -28,10 +28,10 @@ This report provides an automated, reproducible view of code coverage after runn
 ### Coverage Breakdown
 
 **Overall Statistics:**
-- **Statements:** 4890
-- **Covered:** 3543
-- **Missing:** 1347
-- **Coverage:** 72.5%
+- **Statements:** 5178
+- **Covered:** 3933
+- **Missing:** 1245
+- **Coverage:** 76.0%
 
 
 ---
@@ -56,17 +56,17 @@ This report provides an automated, reproducible view of code coverage after runn
 - **Status:** ❌
 
 ### Application Layer
-- **Coverage:** 0.0%
-- **Statements:** 442
-- **Covered:** 0
-- **Missing:** 442
+- **Coverage:** 48.4%
+- **Statements:** 730
+- **Covered:** 353
+- **Missing:** 377
 - **Status:** ❌
 
 ### Infrastructure Layer
-- **Coverage:** 77.7%
+- **Coverage:** 79.2%
 - **Statements:** 2383
-- **Covered:** 1851
-- **Missing:** 532
+- **Covered:** 1888
+- **Missing:** 495
 - **Status:** ⚠️
 
 ---
@@ -100,6 +100,6 @@ pytest tests/ -v --tb=no --cov=domain --cov=application --cov=infrastructure --c
 - **Reproducible**: This report is generated automatically and can be regenerated at any time
 - **Integration**: This script is integrated with the regression testing system
 - **Coverage Goals**: Aim for 100% domain, 90%+ application, 80%+ infrastructure per manifesto
-- **Last Updated**: 2026-01-12T14:10:42.912826
+- **Last Updated**: 2026-01-15T08:55:17.472351
 
 ---

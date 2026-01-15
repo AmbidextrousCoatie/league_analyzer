@@ -76,9 +76,12 @@ async def seed_sample_data():
     logger.info("=" * 70)
     logger.info("")
     
-    # Filter: Only process league season 25/26
-    TARGET_SEASON = "25/26"
-    logger.info(f"[FILTER] Restricting data generation to league season: {TARGET_SEASON}")
+    # Filter: Set to None to process all seasons, or set to a specific season (e.g., "25/26") to filter
+    TARGET_SEASON = None
+    if TARGET_SEASON:
+        logger.info(f"[FILTER] Restricting data generation to league season: {TARGET_SEASON}")
+    else:
+        logger.info("[FILTER] Processing all seasons (no filter applied)")
     logger.info("")
     
     # Paths
@@ -487,11 +490,12 @@ async def seed_sample_data():
                 continue
             scoring_system_id = str(scoring_system_uuid)
             
-            # Filter: Only process target season (25/26)
-            # Normalize season string for comparison (handle variations like "25/26", "25-26", etc.)
-            normalized_season_input = season_str.replace('-', '/').strip()
-            if normalized_season_input != TARGET_SEASON:
-                continue  # Skip this league season
+            # Filter: Only process target season if TARGET_SEASON is set
+            if TARGET_SEASON:
+                # Normalize season string for comparison (handle variations like "25/26", "25-26", etc.)
+                normalized_season_input = season_str.replace('-', '/').strip()
+                if normalized_season_input != TARGET_SEASON:
+                    continue  # Skip this league season
             
             # Normalize season format from "25/26" to "2025-26"
             # The mapper has a helper function, but we'll normalize here for clarity
@@ -543,10 +547,14 @@ async def seed_sample_data():
         # Deduplicate by id
         df_team_seasons = df_team_seasons.drop_duplicates(subset=['id'], keep='first')
         
-        # Filter: Only process team seasons belonging to target season (25/26)
-        df_team_seasons_filtered = df_team_seasons[
-            df_team_seasons['league_season_id'].astype(str).isin(league_season_id_map.keys())
-        ].copy()
+        # Filter: Only process team seasons belonging to target season if TARGET_SEASON is set
+        if TARGET_SEASON:
+            df_team_seasons_filtered = df_team_seasons[
+                df_team_seasons['league_season_id'].astype(str).isin(league_season_id_map.keys())
+            ].copy()
+        else:
+            # Process all team seasons
+            df_team_seasons_filtered = df_team_seasons.copy()
         
         # Get unique (club_id, team_number) combinations
         unique_teams = df_team_seasons_filtered[['club_id', 'team_number']].drop_duplicates()
@@ -609,9 +617,10 @@ async def seed_sample_data():
             
             legacy_league_season_id = str(row['league_season_id']).strip()
             
-            # Filter: Only process team seasons belonging to target season (25/26)
-            if legacy_league_season_id not in league_season_id_map:
-                continue  # Skip team seasons not in our filtered league seasons
+            # Filter: Only process team seasons belonging to target season if TARGET_SEASON is set
+            if TARGET_SEASON:
+                if legacy_league_season_id not in league_season_id_map:
+                    continue  # Skip team seasons not in our filtered league seasons
             legacy_club_id = str(row['club_id']).strip()
             team_number = int(row['team_number']) if pd.notna(row.get('team_number')) else 1
             
@@ -664,9 +673,10 @@ async def seed_sample_data():
             
             legacy_league_season_id = str(row['league_season_id']).strip()
             
-            # Filter: Only process events belonging to target season (25/26)
-            if legacy_league_season_id not in league_season_id_map:
-                continue  # Skip events not in our filtered league seasons
+            # Filter: Only process events belonging to target season if TARGET_SEASON is set
+            if TARGET_SEASON:
+                if legacy_league_season_id not in league_season_id_map:
+                    continue  # Skip events not in our filtered league seasons
             
             event_type = str(row.get('event_type', 'league')).strip()
             league_week = int(row['league_week']) if pd.notna(row.get('league_week')) else None
@@ -736,39 +746,42 @@ async def seed_sample_data():
         ].copy()
         logger.info(f"   [INFO] After filtering Team Total rows: {len(df_games)} player game rows")
         
-        # Filter by target season - only process rows matching TARGET_SEASON
-        # Normalize season strings for comparison (handle "24/25", "24-25", "2024-25", etc.)
-        def normalize_season_for_comparison(season_str: str) -> str:
-            """Normalize season string to match TARGET_SEASON format (e.g., "25/26")."""
-            if not season_str or pd.isna(season_str):
-                return ""
-            season_str = str(season_str).strip()
-            # Handle formats like "24/25", "24-25", "2024-25", "2024/25"
-            if '/' in season_str:
-                parts = season_str.split('/')
-            elif '-' in season_str:
-                parts = season_str.split('-')
-            else:
+        # Filter by target season - only process rows matching TARGET_SEASON if set
+        if TARGET_SEASON:
+            # Normalize season strings for comparison (handle "24/25", "24-25", "2024-25", etc.)
+            def normalize_season_for_comparison(season_str: str) -> str:
+                """Normalize season string to match TARGET_SEASON format (e.g., "25/26")."""
+                if not season_str or pd.isna(season_str):
+                    return ""
+                season_str = str(season_str).strip()
+                # Handle formats like "24/25", "24-25", "2024-25", "2024/25"
+                if '/' in season_str:
+                    parts = season_str.split('/')
+                elif '-' in season_str:
+                    parts = season_str.split('-')
+                else:
+                    return season_str
+                
+                if len(parts) == 2:
+                    # Extract last 2 digits from each part
+                    part1 = parts[0].strip()
+                    part2 = parts[1].strip()
+                    # If 4-digit year, extract last 2 digits
+                    if len(part1) == 4:
+                        part1 = part1[2:]
+                    if len(part2) == 4:
+                        part2 = part2[2:]
+                    # If 2-digit year, use as-is
+                    if len(part1) == 2 and len(part2) == 2:
+                        return f"{part1}/{part2}"
                 return season_str
             
-            if len(parts) == 2:
-                # Extract last 2 digits from each part
-                part1 = parts[0].strip()
-                part2 = parts[1].strip()
-                # If 4-digit year, extract last 2 digits
-                if len(part1) == 4:
-                    part1 = part1[2:]
-                if len(part2) == 4:
-                    part2 = part2[2:]
-                # If 2-digit year, use as-is
-                if len(part1) == 2 and len(part2) == 2:
-                    return f"{part1}/{part2}"
-            return season_str
-        
-        # Filter rows by season
-        df_games['season_normalized'] = df_games['Season'].apply(normalize_season_for_comparison)
-        df_games = df_games[df_games['season_normalized'] == TARGET_SEASON].copy()
-        logger.info(f"   [INFO] After filtering by season '{TARGET_SEASON}': {len(df_games)} player game rows")
+            # Filter rows by season
+            df_games['season_normalized'] = df_games['Season'].apply(normalize_season_for_comparison)
+            df_games = df_games[df_games['season_normalized'] == TARGET_SEASON].copy()
+            logger.info(f"   [INFO] After filtering by season '{TARGET_SEASON}': {len(df_games)} player game rows")
+        else:
+            logger.info(f"   [INFO] Processing all seasons: {len(df_games)} player game rows")
         
         # Cache all data upfront to avoid repeated get_all() calls
         logger.info("   [INFO] Caching repository data...")
@@ -781,42 +794,48 @@ async def seed_sample_data():
         all_clubs = await club_repo.get_all()
         all_leagues = await league_repo.get_all()
         
-        # Filter league seasons to only TARGET_SEASON
-        # Normalize TARGET_SEASON to match the format used in LeagueSeason entities (e.g., "2025-26")
-        target_season_normalized = TARGET_SEASON
-        if '/' in TARGET_SEASON:
-            parts = TARGET_SEASON.split('/')
-            if len(parts) == 2:
-                start_short = int(parts[0])
-                end_short = int(parts[1])
-                # For recent data (2020s), assume 2000s
-                if start_short >= 50:
-                    start_year = 1900 + start_short
-                else:
-                    start_year = 2000 + start_short
-                target_season_normalized = f"{start_year}-{end_short:02d}"
-        
-        # Filter league seasons to only those matching TARGET_SEASON
-        target_league_season_ids = set()
-        for ls in all_league_seasons:
-            # Compare normalized season strings
-            ls_season_str = str(ls.season).replace('-', '/').strip()
-            target_season_str = TARGET_SEASON.replace('-', '/').strip()
-            # Also try direct comparison with normalized format
-            if (ls_season_str == target_season_str or 
-                str(ls.season) == target_season_normalized):
-                target_league_season_ids.add(ls.id)
-        
-        logger.info(f"   [INFO] Found {len(target_league_season_ids)} league seasons matching '{TARGET_SEASON}'")
-        
-        # Filter events to only those belonging to target league seasons
-        all_events = [e for e in all_events if e.league_season_id in target_league_season_ids]
-        logger.info(f"   [INFO] Filtered to {len(all_events)} events for target season")
+        # Filter league seasons to only TARGET_SEASON if set
+        if TARGET_SEASON:
+            # Normalize TARGET_SEASON to match the format used in LeagueSeason entities (e.g., "2025-26")
+            target_season_normalized = TARGET_SEASON
+            if '/' in TARGET_SEASON:
+                parts = TARGET_SEASON.split('/')
+                if len(parts) == 2:
+                    start_short = int(parts[0])
+                    end_short = int(parts[1])
+                    # For recent data (2020s), assume 2000s
+                    if start_short >= 50:
+                        start_year = 1900 + start_short
+                    else:
+                        start_year = 2000 + start_short
+                    target_season_normalized = f"{start_year}-{end_short:02d}"
+            
+            # Filter league seasons to only those matching TARGET_SEASON
+            target_league_season_ids = set()
+            for ls in all_league_seasons:
+                # Compare normalized season strings
+                ls_season_str = str(ls.season).replace('-', '/').strip()
+                target_season_str = TARGET_SEASON.replace('-', '/').strip()
+                # Also try direct comparison with normalized format
+                if (ls_season_str == target_season_str or 
+                    str(ls.season) == target_season_normalized):
+                    target_league_season_ids.add(ls.id)
+            
+            logger.info(f"   [INFO] Found {len(target_league_season_ids)} league seasons matching '{TARGET_SEASON}'")
+            
+            # Filter events to only those belonging to target league seasons
+            all_events = [e for e in all_events if e.league_season_id in target_league_season_ids]
+            logger.info(f"   [INFO] Filtered to {len(all_events)} events for target season")
+        else:
+            # Process all league seasons and events
+            target_league_season_ids = {ls.id for ls in all_league_seasons}
+            logger.info(f"   [INFO] Processing all {len(target_league_season_ids)} league seasons")
+            logger.info(f"   [INFO] Processing all {len(all_events)} events")
         
         # Create lookup maps for O(1) access
         event_map = {e.id: e for e in all_events}
         player_map = {p.dbu_id: p.id for p in all_players if p.dbu_id}  # Map legacy player IDs to UUIDs
-        league_season_map = {ls.id: ls for ls in all_league_seasons if ls.id in target_league_season_ids}
+        league_season_map = {ls.id: ls for ls in all_league_seasons if (not TARGET_SEASON or ls.id in target_league_season_ids)}
         scoring_system_map = {str(ss.id): ss for ss in all_scoring_systems}  # Map by string ID
         league_map = {l.id: l for l in all_leagues}  # Map league_id to League entity
         
@@ -882,8 +901,8 @@ async def seed_sample_data():
             league_abbr = str(row.get('League', '')).strip()
             
             # Find matching event
-            # Match by Week/Date/League - only consider events from target season
-            # (all_events is already filtered to target season)
+            # Match by Week/Date/League
+            # (all_events is already filtered to target season if TARGET_SEASON is set)
             event_id = None
             for event in all_events:
                 # Check league abbreviation first (fastest filter)
@@ -895,7 +914,7 @@ async def seed_sample_data():
                     continue
                 
                 # Match by week and date - exact match required
-                # The event's league_season is already filtered to target season
+                # (The event's league_season is already filtered to target season if TARGET_SEASON is set)
                 if (event.league_week == week_num and
                     event.date.date() == date_parsed):
                     event_id = event.id

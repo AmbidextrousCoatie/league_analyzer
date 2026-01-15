@@ -352,6 +352,21 @@ class GetLeagueStandingsHandler:
         # 4. Load team seasons and build team mapping (needed for standings calculation)
         team_seasons = await self._team_season_repo.get_by_league_season(league_season.id)
         
+        if not team_seasons:
+            # No teams found - return empty standings
+            logger.warning(f"No team seasons found for league season {league_season.id}")
+            return LeagueStandingsDTO(
+                league_id=league.id,
+                league_name=league.name,
+                league_season_id=league_season.id,
+                season=league_season.season.value,
+                week=query.week,
+                standings=[],
+                weekly_standings=[],
+                status="provisional",
+                calculated_at=datetime.utcnow()
+            )
+        
         # Build team_season_id to team_id mapping
         team_season_to_team: Dict[UUID, UUID] = {}
         teams: Dict[UUID, Team] = {}
@@ -364,6 +379,21 @@ class GetLeagueStandingsHandler:
                 teams[team.id] = team
             else:
                 logger.warning(f"Team {team_season.team_id} not found for team season {team_season.id}")
+        
+        # Ensure we have at least one valid team
+        if not teams:
+            logger.warning(f"No valid teams found for league season {league_season.id}")
+            return LeagueStandingsDTO(
+                league_id=league.id,
+                league_name=league.name,
+                league_season_id=league_season.id,
+                season=league_season.season.value,
+                week=query.week,
+                standings=[],
+                weekly_standings=[],
+                status="provisional",
+                calculated_at=datetime.utcnow()
+            )
         
         # 5. Process games and calculate standings
         # If week is specified, only process that week; otherwise process all weeks

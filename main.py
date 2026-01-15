@@ -23,6 +23,7 @@ from jinja2 import Environment, FileSystemLoader
 # Setup logging
 from infrastructure.logging import setup_logging, get_logger
 from infrastructure.config.settings import settings
+from presentation.api.v1.middleware.error_handler import handle_application_exceptions
 
 # Configure logging at startup
 log_file = Path(settings.log_file) if settings.log_file else None
@@ -42,6 +43,45 @@ app = FastAPI(
     docs_url="/docs",  # Swagger UI at /docs
     redoc_url="/redoc"  # ReDoc at /redoc
 )
+
+# Add error handling middleware
+app.middleware("http")(handle_application_exceptions)
+
+# Add FastAPI exception handlers for validation errors and HTTP exceptions
+from fastapi.exceptions import RequestValidationError
+from fastapi import status, HTTPException
+from fastapi.responses import JSONResponse
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    """Convert FastAPI's 422 validation errors to 400 Bad Request."""
+    from infrastructure.logging import get_logger
+    logger = get_logger(__name__)
+    logger.warning(f"Validation error: {exc.errors()} for path: {request.url.path}")
+    return JSONResponse(
+        status_code=400,
+        content={
+            "error": "ValidationError",
+            "detail": "Invalid request parameters",
+            "path": str(request.url.path),
+            "errors": exc.errors()
+        }
+    )
+
+@app.exception_handler(HTTPException)
+async def http_exception_handler(request: Request, exc: HTTPException):
+    """Format HTTPException responses consistently."""
+    from infrastructure.logging import get_logger
+    logger = get_logger(__name__)
+    logger.warning(f"HTTP exception {exc.status_code}: {exc.detail} for path: {request.url.path}")
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={
+            "error": exc.__class__.__name__,
+            "detail": exc.detail,
+            "path": str(request.url.path)
+        }
+    )
 
 @app.on_event("startup")
 async def startup_event():
