@@ -15,6 +15,10 @@ from typing import Optional
 from infrastructure.logging import get_logger
 from application.queries.league.get_team_score_sheet_query import GetTeamScoreSheetQuery
 from application.query_handlers.league.get_team_score_sheet_handler import GetTeamScoreSheetHandler
+from application.queries.league.get_team_week_details_query import GetTeamWeekDetailsQuery
+from application.query_handlers.league.get_team_week_details_handler import GetTeamWeekDetailsHandler
+from application.exceptions import ValidationError, EntityNotFoundError
+from application.validators import validate_uuid, validate_week_number
 from infrastructure.persistence.adapters.pandas_adapter import PandasDataAdapter
 from infrastructure.persistence.repositories.csv.league_repository import PandasLeagueRepository
 from infrastructure.persistence.repositories.csv.league_season_repository import PandasLeagueSeasonRepository
@@ -66,8 +70,8 @@ _player_repo = PandasPlayerRepository(_adapter, PandasPlayerMapper())
 _club_repo = PandasClubRepository(_adapter, PandasClubMapper())
 _team_repo = PandasTeamRepository(_adapter, PandasTeamMapper())
 
-# Initialize handler (production-ready application layer)
-_handler = GetTeamScoreSheetHandler(
+# Initialize handlers (production-ready application layer)
+_score_sheet_handler = GetTeamScoreSheetHandler(
     league_repository=_league_repo,
     league_season_repository=_league_season_repo,
     team_season_repository=_team_season_repo,
@@ -78,6 +82,19 @@ _handler = GetTeamScoreSheetHandler(
     scoring_system_repository=_scoring_system_repo,
     player_repository=_player_repo,
     club_repository=_club_repo,
+    team_repository=_team_repo
+)
+
+_week_details_handler = GetTeamWeekDetailsHandler(
+    team_season_repository=_team_season_repo,
+    league_season_repository=_league_season_repo,
+    league_repository=_league_repo,
+    event_repository=_event_repo,
+    match_repository=_match_repo,
+    game_result_repository=_game_result_repo,
+    position_comparison_repository=_position_comparison_repo,
+    scoring_system_repository=_scoring_system_repo,
+    player_repository=_player_repo,
     team_repository=_team_repo
 )
 
@@ -111,7 +128,7 @@ async def get_team_score_sheet_json(
             team_season_id=team_season_id,
             week=week
         )
-        result = await _handler.handle(query)
+        result = await _score_sheet_handler.handle(query)
         
         # Convert DTO to dict for JSON response
         return {
@@ -200,7 +217,7 @@ async def get_team_score_sheet_view(
             team_season_id=team_season_id,
             week=week
         )
-        result = await _handler.handle(query)
+        result = await _score_sheet_handler.handle(query)
         
         # Render preliminary template
         template = env.get_template("team_score_sheet.html")
@@ -220,6 +237,150 @@ async def get_team_score_sheet_view(
         )
     except Exception as e:
         logger.error(f"Error getting team score sheet: {e}", exc_info=True)
+        return HTMLResponse(
+            content=f"<html><body><h1>Error</h1><p>{str(e)}</p></body></html>",
+            status_code=500
+        )
+
+
+@router.get("/{team_season_id}/week-details", response_class=JSONResponse)
+async def get_team_week_details_json(
+    team_season_id: UUID,
+    week: int
+):
+    """
+    Get team week details (JSON response).
+    
+    ⚠️ PRELIMINARY: Simple JSON endpoint for rapid iteration.
+    
+    Args:
+        team_season_id: UUID of the team season (required)
+        week: Week number (required)
+    """
+    try:
+        # Validate inputs
+        validated_team_season_id = validate_uuid(team_season_id, "team_season_id")
+        validated_week = validate_week_number(week, "week")
+        
+        query = GetTeamWeekDetailsQuery(
+            team_season_id=validated_team_season_id,
+            week=validated_week
+        )
+        result = await _week_details_handler.handle(query)
+        
+        # Convert DTO to dict for JSON response
+        return JSONResponse(content={
+            "team_season_id": str(result.team_season_id),
+            "team_name": result.team_name,
+            "league_season_id": str(result.league_season_id),
+            "league_name": result.league_name,
+            "season": result.season,
+            "week": result.week,
+            "matches": [
+                {
+                    "match_id": str(m.match_id),
+                    "opponent_team_season_id": str(m.opponent_team_season_id),
+                    "opponent_team_name": m.opponent_team_name,
+                    "team_total_score": m.team_total_score,
+                    "opponent_total_score": m.opponent_total_score,
+                    "team_match_points": m.team_match_points,
+                    "opponent_match_points": m.opponent_match_points,
+                    "result": m.result
+                }
+                for m in result.matches
+            ],
+            "player_performances": [
+                {
+                    "player_id": str(p.player_id),
+                    "player_name": p.player_name,
+                    "position": p.position,
+                    "score": p.score,
+                    "points": p.points,
+                    "opponent_player_name": p.opponent_player_name,
+                    "opponent_score": p.opponent_score
+                }
+                for p in result.player_performances
+            ],
+            "total_team_score": result.total_team_score,
+            "total_team_match_points": result.total_team_match_points,
+            "total_individual_points": result.total_individual_points,
+            "total_points": result.total_points,
+            "wins": result.wins,
+            "losses": result.losses,
+            "ties": result.ties,
+            "average_score": result.average_score,
+            "number_of_matches": result.number_of_matches
+        })
+    except ValidationError as e:
+        logger.warning(f"Validation error in team week details: {e}")
+        raise HTTPException(status_code=400, detail=str(e))
+    except EntityNotFoundError as e:
+        logger.warning(f"Entity not found in team week details: {e}")
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        logger.error(f"Error getting team week details: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/{team_season_id}/week-details/view", response_class=HTMLResponse)
+async def get_team_week_details_view(
+    team_season_id: UUID,
+    week: int
+):
+    """
+    Get team week details (HTML view).
+    
+    ⚠️ PRELIMINARY: Simple HTML template for rapid iteration.
+    Will be replaced with proper Vue.js frontend in Phase 5.
+    
+    Args:
+        team_season_id: UUID of the team season (required)
+        week: Week number (required)
+    """
+    try:
+        # Validate inputs
+        validated_team_season_id = validate_uuid(team_season_id, "team_season_id")
+        validated_week = validate_week_number(week, "week")
+        
+        query = GetTeamWeekDetailsQuery(
+            team_season_id=validated_team_season_id,
+            week=validated_week
+        )
+        result = await _week_details_handler.handle(query)
+        
+        # Render preliminary template (we'll create this template)
+        template = env.get_template("team_week_details_preliminary.html")
+        return template.render(
+            team_name=result.team_name,
+            league_name=result.league_name,
+            season=result.season,
+            week=result.week,
+            matches=result.matches,
+            player_performances=result.player_performances,
+            total_team_score=result.total_team_score,
+            total_team_match_points=result.total_team_match_points,
+            total_individual_points=result.total_individual_points,
+            total_points=result.total_points,
+            wins=result.wins,
+            losses=result.losses,
+            ties=result.ties,
+            average_score=result.average_score,
+            number_of_matches=result.number_of_matches
+        )
+    except ValidationError as e:
+        logger.warning(f"Validation error in team week details view: {e}")
+        return HTMLResponse(
+            content=f"<html><body><h1>Validation Error</h1><p>{str(e)}</p></body></html>",
+            status_code=400
+        )
+    except EntityNotFoundError as e:
+        logger.warning(f"Entity not found in team week details view: {e}")
+        return HTMLResponse(
+            content=f"<html><body><h1>Not Found</h1><p>{str(e)}</p></body></html>",
+            status_code=404
+        )
+    except Exception as e:
+        logger.error(f"Error getting team week details view: {e}", exc_info=True)
         return HTMLResponse(
             content=f"<html><body><h1>Error</h1><p>{str(e)}</p></body></html>",
             status_code=500

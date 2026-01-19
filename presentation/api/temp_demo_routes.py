@@ -1,374 +1,393 @@
 """
-TEMPORARY DEMO ROUTES - CAN BE REMOVED AFTER PHASE 1
+TEMPORARY DEMO ROUTES - Uses Real Handlers
 
-These routes are for demonstration purposes only to show domain services working.
-They use test data and should be replaced with proper application layer handlers.
+These routes demonstrate the application layer handlers using real seed data.
+They provide quick access to standings, statistics, and match data.
 
-TODO: Remove this file when Phase 2 (Application Layer) is implemented.
+TODO: These can be removed once proper frontend is implemented, or kept as quick demo endpoints.
 """
 
-from fastapi import APIRouter
-from typing import Dict, List
-from uuid import UUID, uuid4
-from datetime import datetime
-
-from domain.entities import Team, League, Game, Player
-from domain.value_objects import Score, Points, Season, GameResult
-from domain.domain_services import StandingsCalculator, StatisticsCalculator
+from fastapi import APIRouter, HTTPException, Request
+from fastapi.responses import HTMLResponse, JSONResponse
+from typing import Dict, List, Optional
+from uuid import UUID
 from infrastructure.logging import get_logger
+from jinja2 import Environment, FileSystemLoader
+from pathlib import Path
+from application.queries.league.get_league_standings_query import GetLeagueStandingsQuery
+from application.query_handlers.league.get_league_standings_handler import GetLeagueStandingsHandler
+from application.exceptions import ValidationError, EntityNotFoundError
+from infrastructure.persistence.adapters.pandas_adapter import PandasDataAdapter
+from infrastructure.persistence.repositories.csv.league_repository import PandasLeagueRepository
+from infrastructure.persistence.repositories.csv.league_season_repository import PandasLeagueSeasonRepository
+from infrastructure.persistence.repositories.csv.event_repository import PandasEventRepository
+from infrastructure.persistence.repositories.csv.match_repository import PandasMatchRepository
+from infrastructure.persistence.repositories.csv.game_result_repository import PandasGameResultRepository
+from infrastructure.persistence.repositories.csv.position_comparison_repository import PandasPositionComparisonRepository
+from infrastructure.persistence.repositories.csv.team_season_repository import PandasTeamSeasonRepository
+from infrastructure.persistence.repositories.csv.team_repository import PandasTeamRepository
+from infrastructure.persistence.repositories.csv.club_repository import PandasClubRepository
+from infrastructure.persistence.repositories.csv.scoring_system_repository import PandasScoringSystemRepository
+from infrastructure.persistence.mappers.csv.league_mapper import PandasLeagueMapper
+from infrastructure.persistence.mappers.csv.league_season_mapper import PandasLeagueSeasonMapper
+from infrastructure.persistence.mappers.csv.event_mapper import PandasEventMapper
+from infrastructure.persistence.mappers.csv.match_mapper import PandasMatchMapper
+from infrastructure.persistence.mappers.csv.game_result_mapper import PandasGameResultMapper
+from infrastructure.persistence.mappers.csv.position_comparison_mapper import PandasPositionComparisonMapper
+from infrastructure.persistence.mappers.csv.team_season_mapper import PandasTeamSeasonMapper
+from infrastructure.persistence.mappers.csv.team_mapper import PandasTeamMapper
+from infrastructure.persistence.mappers.csv.club_mapper import PandasClubMapper
+from infrastructure.persistence.mappers.csv.scoring_system_mapper import PandasScoringSystemMapper
+from domain.domain_services.standings_calculator import StandingsCalculator
 
 logger = get_logger(__name__)
 
 router = APIRouter(prefix="/api/temp/demo", tags=["TEMPORARY - Demo"])
 
+# Setup Jinja2 for preliminary templates
+# File is at: presentation/api/temp_demo_routes.py
+# Templates are at: presentation/templates/
+_template_dir = Path(__file__).parent.parent / "templates"
+_jinja_env = Environment(loader=FileSystemLoader(str(_template_dir)))
 
-def create_demo_data() -> Dict:
+# Initialize data adapter and repositories (same as in league_routes.py)
+_data_path = Path("sample_data/relational_csv")
+_adapter = PandasDataAdapter(_data_path)
+
+# Initialize mappers
+_league_mapper = PandasLeagueMapper()
+_league_season_mapper = PandasLeagueSeasonMapper()
+_event_mapper = PandasEventMapper()
+_match_mapper = PandasMatchMapper()
+_game_result_mapper = PandasGameResultMapper()
+_position_comparison_mapper = PandasPositionComparisonMapper()
+_team_season_mapper = PandasTeamSeasonMapper()
+_team_mapper = PandasTeamMapper()
+_club_mapper = PandasClubMapper()
+_scoring_system_mapper = PandasScoringSystemMapper()
+
+# Initialize repositories
+_league_repo = PandasLeagueRepository(_adapter, _league_mapper)
+_league_season_repo = PandasLeagueSeasonRepository(_adapter, _league_season_mapper)
+_event_repo = PandasEventRepository(_adapter, _event_mapper)
+_match_repo = PandasMatchRepository(_adapter, _match_mapper)
+_game_result_repo = PandasGameResultRepository(_adapter, _game_result_mapper)
+_position_comparison_repo = PandasPositionComparisonRepository(_adapter, _position_comparison_mapper)
+_team_season_repo = PandasTeamSeasonRepository(_adapter, _team_season_mapper)
+_team_repo = PandasTeamRepository(_adapter, _team_mapper)
+_club_repo = PandasClubRepository(_adapter, _club_mapper)
+_scoring_system_repo = PandasScoringSystemRepository(_adapter, _scoring_system_mapper)
+
+# Initialize domain service
+_standings_calculator = StandingsCalculator()
+
+# Initialize handler
+_standings_handler = GetLeagueStandingsHandler(
+    league_repository=_league_repo,
+    league_season_repository=_league_season_repo,
+    event_repository=_event_repo,
+    match_repository=_match_repo,
+    game_result_repository=_game_result_repo,
+    position_comparison_repository=_position_comparison_repo,
+    team_season_repository=_team_season_repo,
+    team_repository=_team_repo,
+    club_repository=_club_repo,
+    scoring_system_repository=_scoring_system_repo,
+    standings_calculator=_standings_calculator
+)
+
+
+# Removed create_demo_data() - now using real handlers and seed data
+
+
+@router.get("/standings/view", response_class=HTMLResponse)
+async def get_standings_view(
+    request: Request,
+    league_abbreviation: Optional[str] = "bayl",
+    season: Optional[str] = None
+):
     """
-    Create demo data similar to test fixtures.
+    TEMPORARY: Get league standings HTML view using real handlers and seed data.
+    
+    This endpoint uses GetLeagueStandingsHandler to access real seed data.
+    Defaults to "bayl" league if not specified.
+    """
+    logger.info(f"Demo endpoint: /api/temp/demo/standings/view accessed (league={league_abbreviation}, season={season})")
+    
+    try:
+        # Resolve league abbreviation to league_id
+        from presentation.api.v1.queries.slug_utils import resolve_league_by_abbreviation
+        league_id = await resolve_league_by_abbreviation(league_abbreviation, _league_repo)
+        if not league_id:
+            raise HTTPException(
+                status_code=404,
+                detail=f"League with abbreviation '{league_abbreviation}' not found"
+            )
+        
+        # Resolve season to league_season_id if provided
+        league_season_id = None
+        if season:
+            from presentation.api.v1.queries.slug_utils import resolve_league_season_by_league_and_season
+            from application.validators import validate_season_string
+            validated_season = validate_season_string(season, "season")
+            league_season_id = await resolve_league_season_by_league_and_season(
+                league_id, validated_season, _league_season_repo
+            )
+            if not league_season_id:
+                raise HTTPException(
+                    status_code=404,
+                    detail=f"League season '{season}' not found for league '{league_abbreviation}'"
+                )
+        
+        # Use real handler
+        query = GetLeagueStandingsQuery(
+            league_id=league_id,
+            league_season_id=league_season_id,
+            week=None
+        )
+        result = await _standings_handler.handle(query)
+        
+        # Render template
+        template = _jinja_env.get_template("demo_standings_preliminary.html")
+        return HTMLResponse(content=template.render(
+            request=request,
+            title=f"Demo Standings - {result.league_name}",
+            league_name=result.league_name,
+            season=result.season,
+            week=result.week,
+            status=result.status,
+            standings=result.standings,
+            weekly_standings=result.weekly_standings
+        ))
+    
+    except ValidationError as e:
+        logger.error(f"Validation error in demo standings view: {e}")
+        return HTMLResponse(
+            content=f"<html><body><h1>Validation Error</h1><p>{str(e)}</p></body></html>",
+            status_code=400
+        )
+    except EntityNotFoundError as e:
+        logger.error(f"Entity not found in demo standings view: {e}")
+        return HTMLResponse(
+            content=f"<html><body><h1>Not Found</h1><p>{str(e)}</p></body></html>",
+            status_code=404
+        )
+    except Exception as e:
+        logger.error(f"Error in demo standings view: {e}", exc_info=True)
+        return HTMLResponse(
+            content=f"<html><body><h1>Error</h1><p>{str(e)}</p></body></html>",
+            status_code=500
+        )
+
+
+@router.get("/standings", response_class=JSONResponse)
+async def get_standings(league_abbreviation: Optional[str] = "bayl", season: Optional[str] = None):
+    """
+    TEMPORARY: Get league standings using real handlers and seed data.
+    
+    This endpoint uses GetLeagueStandingsHandler to access real seed data.
+    Defaults to "bayl" league if not specified.
+    
+    Args:
+        league_abbreviation: League abbreviation (default: "bayl")
+        season: Optional season string (e.g., "25/26" or "2025-26")
     
     Returns:
-        Dictionary with teams, league, games, and player_to_team mapping
+        League standings from real seed data
     """
-    # Create season
-    season = Season("2024-25")
+    logger.info(f"Demo endpoint: /api/temp/demo/standings accessed (league={league_abbreviation}, season={season})")
     
-    # Create league (using abbreviation and level instead of season)
-    league = League(name="Demo League", abbreviation="Demo", level=3)
-    
-    # Create teams
-    team1 = Team(name="Team Alpha", league_id=league.id)
-    team2 = Team(name="Team Beta", league_id=league.id)
-    team3 = Team(name="Team Gamma", league_id=league.id)
-    
-    league.add_team(team1)
-    league.add_team(team2)
-    league.add_team(team3)
-    
-    # Create players
-    players_team1 = [Player(name=f"Player {i+1}A", team_id=team1.id) for i in range(4)]
-    players_team2 = [Player(name=f"Player {i+1}B", team_id=team2.id) for i in range(4)]
-    players_team3 = [Player(name=f"Player {i+1}C", team_id=team3.id) for i in range(4)]
-    
-    all_players = players_team1 + players_team2 + players_team3
-    
-    # Create player-to-team mapping
-    player_to_team: Dict[UUID, UUID] = {}
-    for player in players_team1:
-        player_to_team[player.id] = team1.id
-    for player in players_team2:
-        player_to_team[player.id] = team2.id
-    for player in players_team3:
-        player_to_team[player.id] = team3.id
-    
-    # Create games
-    games: List[Game] = []
-    
-    # Week 1: Team 1 vs Team 2 (Team 1 wins)
-    game1 = Game(
-        league_id=league.id,
-        season=season,
-        week=1,
-        team_id=team1.id,
-        opponent_team_id=team2.id
-    )
-    # Team 1 scores: 180, 190, 200, 210 = 780 total, 2 points
-    for i, (player, score) in enumerate(zip(players_team1, [180, 190, 200, 210]), 1):
-        game1.add_result(GameResult(
-            player_id=player.id,
-            position=i,
-            scratch_score=Score(score),
-            points=Points(0.5)
-        ))
-    # Team 2 scores: 170, 180, 190, 200 = 740 total, 0 points
-    for i, (player, score) in enumerate(zip(players_team2, [170, 180, 190, 200]), 1):
-        game1.add_result(GameResult(
-            player_id=player.id,
-            position=i,
-            scratch_score=Score(score),
-            points=Points(0.0)
-        ))
-    games.append(game1)
-    
-    # Week 1: Team 3 vs Team 1 (Team 3 wins)
-    game2 = Game(
-        league_id=league.id,
-        season=season,
-        week=1,
-        team_id=team3.id,
-        opponent_team_id=team1.id
-    )
-    # Team 3 scores: 200, 210, 190, 200 = 800 total, 2 points
-    for i, (player, score) in enumerate(zip(players_team3, [200, 210, 190, 200]), 1):
-        game2.add_result(GameResult(
-            player_id=player.id,
-            position=i,
-            scratch_score=Score(score),
-            points=Points(0.5)
-        ))
-    # Team 1 scores: 160, 170, 180, 190 = 700 total, 0 points
-    for i, (player, score) in enumerate(zip(players_team1, [160, 170, 180, 190]), 1):
-        game2.add_result(GameResult(
-            player_id=player.id,
-            position=i,
-            scratch_score=Score(score),
-            points=Points(0.0)
-        ))
-    games.append(game2)
-    
-    # Week 2: Team 2 vs Team 3 (Team 2 wins)
-    game3 = Game(
-        league_id=league.id,
-        season=season,
-        week=2,
-        team_id=team2.id,
-        opponent_team_id=team3.id
-    )
-    # Team 2 scores: 200, 210, 190, 200 = 800 total, 2 points
-    for i, (player, score) in enumerate(zip(players_team2, [200, 210, 190, 200]), 1):
-        game3.add_result(GameResult(
-            player_id=player.id,
-            position=i,
-            scratch_score=Score(score),
-            points=Points(0.5)
-        ))
-    # Team 3 scores: 175, 185, 195, 205 = 760 total, 0 points
-    for i, (player, score) in enumerate(zip(players_team3, [175, 185, 195, 205]), 1):
-        game3.add_result(GameResult(
-            player_id=player.id,
-            position=i,
-            scratch_score=Score(score),
-            points=Points(0.0)
-        ))
-    games.append(game3)
-    
-    # Week 2: Team 1 vs Team 2 (Team 1 wins)
-    game4 = Game(
-        league_id=league.id,
-        season=season,
-        week=2,
-        team_id=team1.id,
-        opponent_team_id=team2.id
-    )
-    # Team 1 scores: 200, 200, 200, 200 = 800 total, 2 points
-    for i, (player, score) in enumerate(zip(players_team1, [200, 200, 200, 200]), 1):
-        game4.add_result(GameResult(
-            player_id=player.id,
-            position=i,
-            scratch_score=Score(score),
-            points=Points(0.5)
-        ))
-    # Team 2 scores: 175, 175, 175, 175 = 700 total, 0 points
-    for i, (player, score) in enumerate(zip(players_team2, [175, 175, 175, 175]), 1):
-        game4.add_result(GameResult(
-            player_id=player.id,
-            position=i,
-            scratch_score=Score(score),
-            points=Points(0.0)
-        ))
-    games.append(game4)
-    
-    teams = {
-        team1.id: team1,
-        team2.id: team2,
-        team3.id: team3
-    }
-    
-    return {
-        'league': league,
-        'teams': teams,
-        'games': games,
-        'players': all_players,
-        'player_to_team': player_to_team
-    }
-
-
-@router.get("/standings")
-def get_standings():
-    """
-    TEMPORARY: Get league standings using StandingsCalculator.
-    
-    This endpoint demonstrates the StandingsCalculator domain service.
-    TODO: Replace with proper application layer handler.
-    """
-    logger.info("TEMPORARY demo endpoint: /api/temp/demo/standings accessed")
-    
-    demo_data = create_demo_data()
-    
-    # Create mock league season ID
-    league_season_id = demo_data['league'].id  # Using league ID as mock
-    
-    standings = StandingsCalculator.calculate_standings(
-        games=demo_data['games'],
-        teams=demo_data['teams'],
-        league_season_id=league_season_id,
-        player_to_team=demo_data['player_to_team']
-    )
-    
-    # Convert to JSON-serializable format
-    result = []
-    for standing in standings.teams:
-        weekly_perfs = []
-        for wp in standing.weekly_performances:
-            weekly_perfs.append({
-                'week': wp.week,
-                'score': round(wp.score, 2),
-                'points': round(wp.points, 2),
-                'games': wp.number_of_games
+    try:
+        # Resolve league abbreviation to league_id
+        from presentation.api.v1.queries.slug_utils import resolve_league_by_abbreviation
+        league_id = await resolve_league_by_abbreviation(league_abbreviation, _league_repo)
+        if not league_id:
+            raise HTTPException(
+                status_code=404,
+                detail=f"League with abbreviation '{league_abbreviation}' not found"
+            )
+        
+        # Resolve season to league_season_id if provided
+        league_season_id = None
+        if season:
+            from presentation.api.v1.queries.slug_utils import resolve_league_season_by_league_and_season
+            from application.validators import validate_season_string
+            validated_season = validate_season_string(season, "season")
+            league_season_id = await resolve_league_season_by_league_and_season(
+                league_id, validated_season, _league_season_repo
+            )
+            if not league_season_id:
+                raise HTTPException(
+                    status_code=404,
+                    detail=f"League season '{season}' not found for league '{league_abbreviation}'"
+                )
+        
+        # Use real handler
+        query = GetLeagueStandingsQuery(
+            league_id=league_id,
+            league_season_id=league_season_id,
+            week=None
+        )
+        result = await _standings_handler.handle(query)
+        
+        # Convert to JSON-serializable format
+        standings_list = []
+        for standing in result.standings:
+            weekly_perfs = []
+            for wp in standing.weekly_performances:
+                weekly_perfs.append({
+                    'week': wp.week,
+                    'score': wp.score,
+                    'points': wp.points,
+                    'games': wp.number_of_games
+                })
+            
+            standings_list.append({
+                'team_id': str(standing.team_id),
+                'team_name': standing.team_name,
+                'position': standing.position,
+                'total_score': standing.total_score,
+                'total_points': standing.total_points,
+                'average_score': standing.average_score,
+                'games_played': standing.games_played,
+                'wins': standing.wins,
+                'losses': standing.losses,
+                'ties': standing.ties,
+                'weekly_performances': weekly_perfs
             })
         
-        result.append({
-            'team_id': str(standing.team_id),
-            'team_name': standing.team_name,
-            'position': standing.position,
-            'total_score': round(standing.total_score, 2),
-            'total_points': round(standing.total_points, 2),
-            'average_score': round(standing.average_score, 2),
-            'weekly_performances': weekly_perfs
-        })
+        return {
+            'league_id': str(result.league_id),
+            'league_name': result.league_name,
+            'league_season_id': str(result.league_season_id),
+            'season': result.season,
+            'week': result.week,
+            'status': result.status,
+            'calculated_at': result.calculated_at.isoformat(),
+            'standings': standings_list,
+            'note': 'Uses real seed data via GetLeagueStandingsHandler'
+        }
     
-    return {
-        'league_name': demo_data['league'].name,
-        'season': str(demo_data['league'].season),
-        'league_season_id': str(league_season_id),
-        'status': str(standings.status),
-        'calculated_at': standings.calculated_at.isoformat(),
-        'standings': result,
-        'note': 'TEMPORARY DEMO ENDPOINT - Will be replaced in Phase 2'
-    }
+    except ValidationError as e:
+        logger.error(f"Validation error in demo standings: {e}")
+        raise HTTPException(status_code=400, detail=str(e))
+    except EntityNotFoundError as e:
+        logger.error(f"Entity not found in demo standings: {e}")
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        logger.error(f"Error in demo standings: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
 
 @router.get("/team-statistics/{team_name}")
-def get_team_statistics(team_name: str):
+async def get_team_statistics(team_name: str):
     """
-    TEMPORARY: Get team statistics using StatisticsCalculator.
+    TEMPORARY: Get team statistics - placeholder for future implementation.
     
-    This endpoint demonstrates the StatisticsCalculator domain service.
-    TODO: Replace with proper application layer handler.
+    TODO: Implement GetTeamStatisticsHandler and use it here.
+    For now, this endpoint is disabled as it requires team statistics handler.
     """
-    logger.info(f"TEMPORARY demo endpoint: /api/temp/demo/team-statistics/{team_name} accessed")
-    
-    demo_data = create_demo_data()
-    
-    # Find team by name
-    team = None
-    for t in demo_data['teams'].values():
-        if t.name == team_name:
-            team = t
-            break
-    
-    if not team:
-        return {
-            'error': f'Team "{team_name}" not found',
-            'available_teams': [t.name for t in demo_data['teams'].values()]
-        }
-    
-    stats = StatisticsCalculator.calculate_team_statistics(
-        games=demo_data['games'],
-        team_id=team.id,
-        player_to_team=demo_data['player_to_team']
-    )
-    
-    weekly_perfs = []
-    for wp in stats.weekly_performances:
-        weekly_perfs.append({
-            'week': wp.week,
-            'total_score': round(wp.total_score, 2),
-            'total_points': round(wp.total_points, 2),
-            'games': wp.number_of_games
-        })
+    logger.info(f"Demo endpoint: /api/temp/demo/team-statistics/{team_name} accessed")
     
     return {
-        'team_id': str(stats.team_id),
-        'team_name': team_name,
-        'total_score': round(stats.total_score, 2),
-        'total_points': round(stats.total_points, 2),
-        'games_played': stats.games_played,
-        'average_score': round(stats.average_score, 2),
-        'best_score': round(stats.best_score, 2),
-        'worst_score': round(stats.worst_score, 2),
-        'weekly_performances': weekly_perfs,
-        'note': 'TEMPORARY DEMO ENDPOINT - Will be replaced in Phase 2'
+        'error': 'Team statistics endpoint not yet implemented',
+        'note': 'Will use GetTeamStatisticsHandler when implemented',
+        'suggestion': 'Use /api/v1/teams/{team_season_id}/score-sheet for team data'
     }
 
 
 @router.get("/player-statistics/{player_name}")
-def get_player_statistics(player_name: str):
+async def get_player_statistics(player_name: str):
     """
-    TEMPORARY: Get player statistics using StatisticsCalculator.
+    TEMPORARY: Get player statistics - placeholder for future implementation.
     
-    This endpoint demonstrates the StatisticsCalculator domain service.
-    TODO: Replace with proper application layer handler.
+    TODO: Implement GetPlayerStatisticsHandler and use it here.
+    For now, this endpoint is disabled as it requires player statistics handler.
     """
-    logger.info(f"TEMPORARY demo endpoint: /api/temp/demo/player-statistics/{player_name} accessed")
+    logger.info(f"Demo endpoint: /api/temp/demo/player-statistics/{player_name} accessed")
     
-    demo_data = create_demo_data()
+    return {
+        'error': 'Player statistics endpoint not yet implemented',
+        'note': 'Will use GetPlayerStatisticsHandler when implemented',
+        'suggestion': 'Use /api/v1/players/{player_slug}/stats for player data'
+    }
+
+
+@router.get("/demo-data/view", response_class=HTMLResponse)
+async def get_demo_data_view(request: Request):
+    """
+    TEMPORARY: Get list of available leagues from seed data (HTML view).
     
-    # Find player by name
-    player = None
-    for p in demo_data['players']:
-        if p.name == player_name:
-            player = p
-            break
+    Useful for debugging and understanding what data is available.
+    """
+    logger.info("Demo endpoint: /api/temp/demo/demo-data/view accessed")
     
-    if not player:
+    try:
+        # Get all leagues from seed data
+        leagues = await _league_repo.get_all()
+        
+        league_list = []
+        for league in leagues:
+            # Get league seasons for this league
+            league_seasons = await _league_season_repo.get_by_league(league.id)
+            
+            league_list.append({
+                'id': str(league.id),
+                'name': league.name,
+                'abbreviation': league.abbreviation,
+                'level': league.level,
+                'seasons': [str(ls.season) for ls in league_seasons]
+            })
+        
+        # Render template
+        template = _jinja_env.get_template("demo_data_preliminary.html")
+        return HTMLResponse(content=template.render(
+            request=request,
+            title="Demo Data - Available Leagues",
+            leagues=league_list
+        ))
+    
+    except Exception as e:
+        logger.error(f"Error getting demo data view: {e}", exc_info=True)
+        return HTMLResponse(
+            content=f"<html><body><h1>Error</h1><p>{str(e)}</p></body></html>",
+            status_code=500
+        )
+
+
+@router.get("/demo-data", response_class=JSONResponse)
+async def get_demo_data():
+    """
+    TEMPORARY: Get list of available leagues from seed data.
+    
+    Useful for debugging and understanding what data is available.
+    """
+    logger.info("Demo endpoint: /api/temp/demo/demo-data accessed")
+    
+    try:
+        # Get all leagues from seed data
+        leagues = await _league_repo.get_all()
+        
+        league_list = []
+        for league in leagues:
+            # Get league seasons for this league
+            league_seasons = await _league_season_repo.get_by_league(league.id)
+            
+            league_list.append({
+                'id': str(league.id),
+                'name': league.name,
+                'abbreviation': league.abbreviation,
+                'level': league.level,
+                'seasons': [str(ls.season) for ls in league_seasons]
+            })
+        
         return {
-            'error': f'Player "{player_name}" not found',
-            'available_players': [p.name for p in demo_data['players']]
+            'leagues': league_list,
+            'note': 'Uses real seed data via repositories',
+            'suggestion': 'Use /api/temp/demo/standings?league_abbreviation=bayl to see standings'
         }
     
-    stats = StatisticsCalculator.calculate_player_statistics(
-        games=demo_data['games'],
-        player_id=player.id
-    )
-    
-    return {
-        'player_id': str(stats.player_id),
-        'player_name': player_name,
-        'total_score': round(stats.total_score, 2),
-        'total_points': round(stats.total_points, 2),
-        'games_played': stats.games_played,
-        'average_score': round(stats.average_score, 2),
-        'best_score': round(stats.best_score, 2),
-        'worst_score': round(stats.worst_score, 2),
-        'note': 'TEMPORARY DEMO ENDPOINT - Will be replaced in Phase 2'
-    }
-
-
-@router.get("/demo-data")
-def get_demo_data():
-    """
-    TEMPORARY: Get raw demo data structure.
-    
-    Useful for debugging and understanding the data model.
-    TODO: Remove when proper data access layer is implemented.
-    """
-    logger.info("TEMPORARY demo endpoint: /api/temp/demo/demo-data accessed")
-    
-    demo_data = create_demo_data()
-    
-    return {
-        'league': {
-            'id': str(demo_data['league'].id),
-            'name': demo_data['league'].name,
-            'season': str(demo_data['league'].season)
-        },
-        'teams': [
-            {
-                'id': str(t.id),
-                'name': t.name,
-                'league_id': str(t.league_id)
-            }
-            for t in demo_data['teams'].values()
-        ],
-        'players': [
-            {
-                'id': str(p.id),
-                'name': p.name,
-                'team_id': str(p.team_id) if p.team_id else None
-            }
-            for p in demo_data['players']
-        ],
-        'games_count': len(demo_data['games']),
-        'note': 'TEMPORARY DEMO ENDPOINT - Will be replaced in Phase 2'
-    }
+    except Exception as e:
+        logger.error(f"Error getting demo data: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 

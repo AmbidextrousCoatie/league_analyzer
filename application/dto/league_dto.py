@@ -103,3 +103,48 @@ class LeagueHistoryDTO:
     league_average_trend: List[float]  # League-wide average per season (ordered same as season_summaries)
     all_time_records: List[AllTimeRecordDTO]
     calculated_at: datetime
+
+
+@dataclass
+class PositionComparisonDTO:
+    """Position-by-position comparison data."""
+    position: int
+    team1_player_id: UUID
+    team1_player_name: str
+    team1_score: int
+    team1_points: float
+    team2_player_id: UUID
+    team2_player_name: str
+    team2_score: int
+    team2_points: float
+    outcome: str  # "team1_win", "team2_win", or "tie"
+
+
+@dataclass
+class TeamMatchSummaryDTO:
+    """Team summary for a match."""
+    team_id: UUID
+    team_name: str
+    total_score: int
+    individual_points: float
+    match_points: float
+    total_points: float
+
+
+@dataclass
+class MatchOverviewDTO:
+    """Match overview response DTO."""
+    match_id: UUID
+    event_id: UUID
+    league_id: UUID
+    league_name: str
+    league_abbreviation: Optional[str]
+    league_season_id: UUID
+    season: str
+    league_week: Optional[int]
+    round_number: int
+    match_number: int
+    team1: TeamMatchSummaryDTO
+    team2: TeamMatchSummaryDTO
+    position_comparisons: List[PositionComparisonDTO]
+    calculated_at: datetime

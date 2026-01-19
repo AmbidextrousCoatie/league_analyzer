@@ -14,6 +14,10 @@ from typing import Optional
 from infrastructure.logging import get_logger
 from application.queries.league.get_team_score_sheet_query import GetTeamScoreSheetQuery
 from application.query_handlers.league.get_team_score_sheet_handler import GetTeamScoreSheetHandler
+from application.queries.league.get_team_week_details_query import GetTeamWeekDetailsQuery
+from application.query_handlers.league.get_team_week_details_handler import GetTeamWeekDetailsHandler
+from application.exceptions import ValidationError, EntityNotFoundError
+from application.validators import validate_week_number
 from infrastructure.persistence.adapters.pandas_adapter import PandasDataAdapter
 from infrastructure.persistence.repositories.csv.league_repository import PandasLeagueRepository
 from infrastructure.persistence.repositories.csv.league_season_repository import PandasLeagueSeasonRepository
@@ -73,8 +77,8 @@ _player_repo = PandasPlayerRepository(_adapter, PandasPlayerMapper())
 _club_repo = PandasClubRepository(_adapter, PandasClubMapper())
 _team_repo = PandasTeamRepository(_adapter, PandasTeamMapper())
 
-# Initialize handler (production-ready application layer)
-_handler = GetTeamScoreSheetHandler(
+# Initialize handlers (production-ready application layer)
+_score_sheet_handler = GetTeamScoreSheetHandler(
     league_repository=_league_repo,
     league_season_repository=_league_season_repo,
     team_season_repository=_team_season_repo,
@@ -85,6 +89,19 @@ _handler = GetTeamScoreSheetHandler(
     scoring_system_repository=_scoring_system_repo,
     player_repository=_player_repo,
     club_repository=_club_repo,
+    team_repository=_team_repo
+)
+
+_week_details_handler = GetTeamWeekDetailsHandler(
+    team_season_repository=_team_season_repo,
+    league_season_repository=_league_season_repo,
+    league_repository=_league_repo,
+    event_repository=_event_repo,
+    match_repository=_match_repo,
+    game_result_repository=_game_result_repo,
+    position_comparison_repository=_position_comparison_repo,
+    scoring_system_repository=_scoring_system_repo,
+    player_repository=_player_repo,
     team_repository=_team_repo
 )
 
@@ -179,7 +196,7 @@ async def get_team_score_sheet_json_slug(
             team_season_id=team_season_id,
             week=week
         )
-        result = await _handler.handle(query)
+        result = await _score_sheet_handler.handle(query)
         
         # Convert DTO to dict for JSON response
         return {
@@ -329,7 +346,7 @@ async def get_team_score_sheet_view_slug(
             team_season_id=team_season_id,
             week=week
         )
-        result = await _handler.handle(query)
+        result = await _score_sheet_handler.handle(query)
         
         # Render template
         template = env.get_template("team_score_sheet.html")
@@ -357,3 +374,250 @@ async def get_team_score_sheet_view_slug(
         )
 
 
+@router.get("/{club_slug}/teams/{team_number}/seasons/{season}/week-details", response_class=JSONResponse)
+async def get_team_week_details_json_slug(
+    club_slug: str,
+    team_number: int,
+    season: str,
+    week: int = Query(..., description="Week number (required)")
+):
+    """
+    Get team week details (JSON response) using club slug, team number, season, and week.
+    
+    Examples:
+        /clubs/donaubowler-regensburg/teams/1/seasons/25-26/week-details?week=1
+    """
+    try:
+        # Validate week
+        validated_week = validate_week_number(week, "week")
+        
+        # Resolve club slug to club_id
+        club_id = await resolve_club_by_slug(club_slug, _club_repo)
+        if not club_id:
+            raise HTTPException(
+                status_code=404,
+                detail=f"Club with slug '{club_slug}' not found"
+            )
+        
+        # Resolve team by club and number
+        team_id = await resolve_team_by_club_and_number(club_id, team_number, _team_repo)
+        if not team_id:
+            available_teams = await _team_repo.get_by_club(club_id)
+            available_teams_str = ", ".join([str(t.team_number) for t in available_teams])
+            if available_teams_str:
+                raise HTTPException(
+                    status_code=404,
+                    detail=f"Team {team_number} not found for club '{club_slug}'. Available teams: {available_teams_str}"
+                )
+            else:
+                raise HTTPException(
+                    status_code=404,
+                    detail=f"Team {team_number} not found for club '{club_slug}'. No teams found for this club."
+                )
+        
+        # Resolve season to league_season_id
+        team_seasons = await _team_season_repo.get_by_team(team_id)
+        if not team_seasons:
+            raise HTTPException(
+                status_code=404,
+                detail=f"Team {team_number} from club '{club_slug}' not found in any season"
+            )
+        
+        # Normalize season string
+        normalized_season = normalize_season_string(season)
+        
+        # Find matching league season
+        team_season = None
+        for ts in team_seasons:
+            league_season = await _league_season_repo.get_by_id(ts.league_season_id)
+            if league_season:
+                ls_season_str = str(league_season.season).replace('-', '/').strip()
+                normalized_ls_season = normalize_season_string(ls_season_str)
+                if normalized_ls_season == normalized_season:
+                    team_season = ts
+                    break
+        
+        if not team_season:
+            raise HTTPException(
+                status_code=404,
+                detail=f"Team {team_number} from club '{club_slug}' not found in season '{season}'"
+            )
+        
+        # Use handler
+        query = GetTeamWeekDetailsQuery(
+            team_season_id=team_season.id,
+            week=validated_week
+        )
+        result = await _week_details_handler.handle(query)
+        
+        # Convert DTO to dict for JSON response
+        return JSONResponse(content={
+            "team_season_id": str(result.team_season_id),
+            "team_name": result.team_name,
+            "league_season_id": str(result.league_season_id),
+            "league_name": result.league_name,
+            "season": result.season,
+            "week": result.week,
+            "matches": [
+                {
+                    "match_id": str(m.match_id),
+                    "opponent_team_season_id": str(m.opponent_team_season_id),
+                    "opponent_team_name": m.opponent_team_name,
+                    "team_total_score": m.team_total_score,
+                    "opponent_total_score": m.opponent_total_score,
+                    "team_match_points": m.team_match_points,
+                    "opponent_match_points": m.opponent_match_points,
+                    "result": m.result
+                }
+                for m in result.matches
+            ],
+            "player_performances": [
+                {
+                    "player_id": str(p.player_id),
+                    "player_name": p.player_name,
+                    "position": p.position,
+                    "score": p.score,
+                    "points": p.points,
+                    "opponent_player_name": p.opponent_player_name,
+                    "opponent_score": p.opponent_score
+                }
+                for p in result.player_performances
+            ],
+            "total_team_score": result.total_team_score,
+            "total_team_match_points": result.total_team_match_points,
+            "total_individual_points": result.total_individual_points,
+            "total_points": result.total_points,
+            "wins": result.wins,
+            "losses": result.losses,
+            "ties": result.ties,
+            "average_score": result.average_score,
+            "number_of_matches": result.number_of_matches
+        })
+    except ValidationError as e:
+        logger.warning(f"Validation error in team week details slug route: {e}")
+        raise HTTPException(status_code=400, detail=str(e))
+    except EntityNotFoundError as e:
+        logger.warning(f"Entity not found in team week details slug route: {e}")
+        raise HTTPException(status_code=404, detail=str(e))
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error getting team week details: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/{club_slug}/teams/{team_number}/seasons/{season}/week-details/view", response_class=HTMLResponse)
+async def get_team_week_details_view_slug(
+    club_slug: str,
+    team_number: int,
+    season: str,
+    week: int = Query(..., description="Week number (required)")
+):
+    """
+    Get team week details (HTML view) using club slug, team number, season, and week.
+    
+    Examples:
+        /clubs/donaubowler-regensburg/teams/1/seasons/25-26/week-details/view?week=1
+    """
+    try:
+        # Validate week
+        validated_week = validate_week_number(week, "week")
+        
+        # Resolve club slug to club_id
+        club_id = await resolve_club_by_slug(club_slug, _club_repo)
+        if not club_id:
+            raise HTTPException(
+                status_code=404,
+                detail=f"Club with slug '{club_slug}' not found"
+            )
+        
+        # Resolve team by club and number
+        team_id = await resolve_team_by_club_and_number(club_id, team_number, _team_repo)
+        if not team_id:
+            available_teams = await _team_repo.get_by_club(club_id)
+            available_teams_str = ", ".join([str(t.team_number) for t in available_teams])
+            if available_teams_str:
+                raise HTTPException(
+                    status_code=404,
+                    detail=f"Team {team_number} not found for club '{club_slug}'. Available teams: {available_teams_str}"
+                )
+            else:
+                raise HTTPException(
+                    status_code=404,
+                    detail=f"Team {team_number} not found for club '{club_slug}'. No teams found for this club."
+                )
+        
+        # Resolve season to league_season_id
+        team_seasons = await _team_season_repo.get_by_team(team_id)
+        if not team_seasons:
+            raise HTTPException(
+                status_code=404,
+                detail=f"Team {team_number} from club '{club_slug}' not found in any season"
+            )
+        
+        # Normalize season string
+        normalized_season = normalize_season_string(season)
+        
+        # Find matching league season
+        team_season = None
+        for ts in team_seasons:
+            league_season = await _league_season_repo.get_by_id(ts.league_season_id)
+            if league_season:
+                ls_season_str = str(league_season.season).replace('-', '/').strip()
+                normalized_ls_season = normalize_season_string(ls_season_str)
+                if normalized_ls_season == normalized_season:
+                    team_season = ts
+                    break
+        
+        if not team_season:
+            raise HTTPException(
+                status_code=404,
+                detail=f"Team {team_number} from club '{club_slug}' not found in season '{season}'"
+            )
+        
+        # Use handler
+        query = GetTeamWeekDetailsQuery(
+            team_season_id=team_season.id,
+            week=validated_week
+        )
+        result = await _week_details_handler.handle(query)
+        
+        # Render preliminary template
+        template = env.get_template("team_week_details_preliminary.html")
+        return template.render(
+            team_name=result.team_name,
+            league_name=result.league_name,
+            season=result.season,
+            week=result.week,
+            matches=result.matches,
+            player_performances=result.player_performances,
+            total_team_score=result.total_team_score,
+            total_team_match_points=result.total_team_match_points,
+            total_individual_points=result.total_individual_points,
+            total_points=result.total_points,
+            wins=result.wins,
+            losses=result.losses,
+            ties=result.ties,
+            average_score=result.average_score,
+            number_of_matches=result.number_of_matches
+        )
+    except ValidationError as e:
+        logger.warning(f"Validation error in team week details view slug route: {e}")
+        return HTMLResponse(
+            content=f"<html><body><h1>Validation Error</h1><p>{str(e)}</p></body></html>",
+            status_code=400
+        )
+    except EntityNotFoundError as e:
+        logger.warning(f"Entity not found in team week details view slug route: {e}")
+        return HTMLResponse(
+            content=f"<html><body><h1>Not Found</h1><p>{str(e)}</p></body></html>",
+            status_code=404
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error getting team week details view: {e}", exc_info=True)
+        return HTMLResponse(
+            content=f"<html><body><h1>Error</h1><p>{str(e)}</p></body></html>",
+            status_code=500
+        )
