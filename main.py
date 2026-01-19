@@ -209,6 +209,14 @@ try:
 except Exception as e:
     logger.error(f"FAILED to register match_queries_router: {e}", exc_info=True)
 
+# Register match command routes
+try:
+    from presentation.api.v1.commands.match_routes import router as match_commands_router
+    app.include_router(match_commands_router)
+    logger.info(f"Match commands router registered: {len(match_commands_router.routes)} routes")
+except Exception as e:
+    logger.error(f"FAILED to register match_commands_router: {e}", exc_info=True)
+
 # Register slug-based routes (human-readable URIs)
 try:
     from presentation.api.v1.queries.league_slug_routes import router as league_slug_router

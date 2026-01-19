@@ -12,7 +12,7 @@ See Also:
 """
 
 from abc import ABC
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from uuid import UUID, uuid4
 from datetime import datetime
 
@@ -57,6 +57,12 @@ class Command(ABC):
         Commands should not contain business logic. Business logic belongs
         in domain entities and domain services.
     """
-    command_id: UUID = uuid4()
-    timestamp: datetime = datetime.utcnow()
+    command_id: UUID = field(default_factory=uuid4, init=False)
+    timestamp: datetime = field(default_factory=datetime.utcnow, init=False)
+    
+    def __post_init__(self):
+        """Initialize base class fields after subclass fields."""
+        # Set command_id and timestamp if not already set
+        object.__setattr__(self, 'command_id', uuid4())
+        object.__setattr__(self, 'timestamp', datetime.utcnow())
 

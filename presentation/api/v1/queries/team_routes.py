@@ -17,6 +17,8 @@ from application.queries.league.get_team_score_sheet_query import GetTeamScoreSh
 from application.query_handlers.league.get_team_score_sheet_handler import GetTeamScoreSheetHandler
 from application.queries.league.get_team_week_details_query import GetTeamWeekDetailsQuery
 from application.query_handlers.league.get_team_week_details_handler import GetTeamWeekDetailsHandler
+from application.queries.league.get_team_vs_team_comparison_query import GetTeamVsTeamComparisonQuery
+from application.query_handlers.league.get_team_vs_team_comparison_handler import GetTeamVsTeamComparisonHandler
 from application.exceptions import ValidationError, EntityNotFoundError
 from application.validators import validate_uuid, validate_week_number
 from infrastructure.persistence.adapters.pandas_adapter import PandasDataAdapter
@@ -31,6 +33,7 @@ from infrastructure.persistence.repositories.csv.scoring_system_repository impor
 from infrastructure.persistence.repositories.csv.player_repository import PandasPlayerRepository
 from infrastructure.persistence.repositories.csv.club_repository import PandasClubRepository
 from infrastructure.persistence.repositories.csv.team_repository import PandasTeamRepository
+from infrastructure.persistence.repositories.csv.match_scoring_repository import PandasMatchScoringRepository
 from infrastructure.persistence.mappers.csv.league_mapper import PandasLeagueMapper
 from infrastructure.persistence.mappers.csv.league_season_mapper import PandasLeagueSeasonMapper
 from infrastructure.persistence.mappers.csv.team_season_mapper import PandasTeamSeasonMapper
@@ -42,6 +45,7 @@ from infrastructure.persistence.mappers.csv.scoring_system_mapper import PandasS
 from infrastructure.persistence.mappers.csv.player_mapper import PandasPlayerMapper
 from infrastructure.persistence.mappers.csv.club_mapper import PandasClubMapper
 from infrastructure.persistence.mappers.csv.team_mapper import PandasTeamMapper
+from infrastructure.persistence.mappers.csv.match_scoring_mapper import PandasMatchScoringMapper
 from pathlib import Path
 from jinja2 import Environment, FileSystemLoader
 
@@ -69,6 +73,7 @@ _scoring_system_repo = PandasScoringSystemRepository(_adapter, PandasScoringSyst
 _player_repo = PandasPlayerRepository(_adapter, PandasPlayerMapper())
 _club_repo = PandasClubRepository(_adapter, PandasClubMapper())
 _team_repo = PandasTeamRepository(_adapter, PandasTeamMapper())
+_match_scoring_repo = PandasMatchScoringRepository(_adapter, PandasMatchScoringMapper())
 
 # Initialize handlers (production-ready application layer)
 _score_sheet_handler = GetTeamScoreSheetHandler(
@@ -96,6 +101,19 @@ _week_details_handler = GetTeamWeekDetailsHandler(
     scoring_system_repository=_scoring_system_repo,
     player_repository=_player_repo,
     team_repository=_team_repo
+)
+
+_comparison_handler = GetTeamVsTeamComparisonHandler(
+    team_season_repository=_team_season_repo,
+    league_season_repository=_league_season_repo,
+    league_repository=_league_repo,
+    event_repository=_event_repo,
+    match_repository=_match_repo,
+    game_result_repository=_game_result_repo,
+    position_comparison_repository=_position_comparison_repo,
+    scoring_system_repository=_scoring_system_repo,
+    team_repository=_team_repo,
+    match_scoring_repository=_match_scoring_repo
 )
 
 
@@ -381,6 +399,173 @@ async def get_team_week_details_view(
         )
     except Exception as e:
         logger.error(f"Error getting team week details view: {e}", exc_info=True)
+        return HTMLResponse(
+            content=f"<html><body><h1>Error</h1><p>{str(e)}</p></body></html>",
+            status_code=500
+        )
+
+
+@router.get("/{team1_season_id}/vs/{team2_season_id}/comparison", response_class=JSONResponse)
+async def get_team_vs_team_comparison_json(
+    team1_season_id: UUID,
+    team2_season_id: UUID
+):
+    """
+    Get head-to-head comparison between two teams (JSON response).
+    
+    ⚠️ PRELIMINARY: Simple JSON endpoint for rapid iteration.
+    Will be replaced with proper Vue.js frontend in Phase 5.
+    
+    Args:
+        team1_season_id: UUID of the first team season (required)
+        team2_season_id: UUID of the second team season (required)
+    """
+    try:
+        # Validate inputs
+        validated_team1_id = validate_uuid(team1_season_id, "team1_season_id")
+        validated_team2_id = validate_uuid(team2_season_id, "team2_season_id")
+        
+        query = GetTeamVsTeamComparisonQuery(
+            team1_season_id=validated_team1_id,
+            team2_season_id=validated_team2_id
+        )
+        result = await _comparison_handler.handle(query)
+        
+        # Convert DTO to dict for JSON response
+        return JSONResponse(content={
+            "team1_season_id": str(result.team1_season_id),
+            "team1_name": result.team1_name,
+            "team2_season_id": str(result.team2_season_id),
+            "team2_name": result.team2_name,
+            "league_season_id": str(result.league_season_id),
+            "league_name": result.league_name,
+            "season": result.season,
+            "matches_played": result.matches_played,
+            "team1_wins": result.team1_wins,
+            "team2_wins": result.team2_wins,
+            "ties": result.ties,
+            "team1_total_score": result.team1_total_score,
+            "team2_total_score": result.team2_total_score,
+            "team1_average_score": result.team1_average_score,
+            "team2_average_score": result.team2_average_score,
+            "team1_total_match_points": result.team1_total_match_points,
+            "team2_total_match_points": result.team2_total_match_points,
+            "team1_total_individual_points": result.team1_total_individual_points,
+            "team2_total_individual_points": result.team2_total_individual_points,
+            "team1_total_points": result.team1_total_points,
+            "team2_total_points": result.team2_total_points,
+            "matches": [
+                {
+                    "match_id": str(m.match_id),
+                    "event_id": str(m.event_id),
+                    "league_week": m.league_week,
+                    "round_number": m.round_number,
+                    "match_number": m.match_number,
+                    "team1_total_score": m.team1_total_score,
+                    "team2_total_score": m.team2_total_score,
+                    "team1_match_points": m.team1_match_points,
+                    "team2_match_points": m.team2_match_points,
+                    "team1_individual_points": m.team1_individual_points,
+                    "team2_individual_points": m.team2_individual_points,
+                    "team1_total_points": m.team1_total_points,
+                    "team2_total_points": m.team2_total_points,
+                    "result": m.result,
+                    "date": m.date.isoformat() if m.date else None
+                }
+                for m in result.matches
+            ],
+            "position_comparisons": [
+                {
+                    "position": p.position,
+                    "team1_wins": p.team1_wins,
+                    "team2_wins": p.team2_wins,
+                    "ties": p.ties,
+                    "team1_total_score": p.team1_total_score,
+                    "team2_total_score": p.team2_total_score,
+                    "team1_average_score": p.team1_average_score,
+                    "team2_average_score": p.team2_average_score,
+                    "team1_total_points": p.team1_total_points,
+                    "team2_total_points": p.team2_total_points
+                }
+                for p in result.position_comparisons
+            ],
+            "calculated_at": result.calculated_at.isoformat()
+        })
+    except ValidationError as e:
+        logger.warning(f"Validation error in team vs team comparison: {e}")
+        raise HTTPException(status_code=400, detail=str(e))
+    except EntityNotFoundError as e:
+        logger.warning(f"Entity not found in team vs team comparison: {e}")
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        logger.error(f"Error getting team vs team comparison: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Internal server error")
+
+
+@router.get("/{team1_season_id}/vs/{team2_season_id}/comparison/view", response_class=HTMLResponse)
+async def get_team_vs_team_comparison_view(
+    team1_season_id: UUID,
+    team2_season_id: UUID
+):
+    """
+    Get head-to-head comparison between two teams (HTML view).
+    
+    ⚠️ PRELIMINARY: Simple HTML template for rapid iteration.
+    Will be replaced with proper Vue.js frontend in Phase 5.
+    
+    Args:
+        team1_season_id: UUID of the first team season (required)
+        team2_season_id: UUID of the second team season (required)
+    """
+    try:
+        # Validate inputs
+        validated_team1_id = validate_uuid(team1_season_id, "team1_season_id")
+        validated_team2_id = validate_uuid(team2_season_id, "team2_season_id")
+        
+        query = GetTeamVsTeamComparisonQuery(
+            team1_season_id=validated_team1_id,
+            team2_season_id=validated_team2_id
+        )
+        result = await _comparison_handler.handle(query)
+        
+        # Render preliminary template
+        template = env.get_template("team_vs_team_comparison_preliminary.html")
+        return template.render(
+            team1_name=result.team1_name,
+            team2_name=result.team2_name,
+            league_name=result.league_name,
+            season=result.season,
+            matches_played=result.matches_played,
+            team1_wins=result.team1_wins,
+            team2_wins=result.team2_wins,
+            ties=result.ties,
+            team1_total_score=result.team1_total_score,
+            team2_total_score=result.team2_total_score,
+            team1_average_score=result.team1_average_score,
+            team2_average_score=result.team2_average_score,
+            team1_total_match_points=result.team1_total_match_points,
+            team2_total_match_points=result.team2_total_match_points,
+            team1_total_individual_points=result.team1_total_individual_points,
+            team2_total_individual_points=result.team2_total_individual_points,
+            team1_total_points=result.team1_total_points,
+            team2_total_points=result.team2_total_points,
+            matches=result.matches,
+            position_comparisons=result.position_comparisons
+        )
+    except ValidationError as e:
+        logger.warning(f"Validation error in team vs team comparison view: {e}")
+        return HTMLResponse(
+            content=f"<html><body><h1>Validation Error</h1><p>{str(e)}</p></body></html>",
+            status_code=400
+        )
+    except EntityNotFoundError as e:
+        logger.warning(f"Entity not found in team vs team comparison view: {e}")
+        return HTMLResponse(
+            content=f"<html><body><h1>Not Found</h1><p>{str(e)}</p></body></html>",
+            status_code=404
+        )
+    except Exception as e:
+        logger.error(f"Error getting team vs team comparison view: {e}", exc_info=True)
         return HTMLResponse(
             content=f"<html><body><h1>Error</h1><p>{str(e)}</p></body></html>",
             status_code=500

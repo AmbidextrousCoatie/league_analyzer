@@ -206,7 +206,7 @@ class GetMatchOverviewHandler:
         for player_id in player_ids:
             player = await self._player_repo.get_by_id(player_id)
             if player:
-                player_names[player_id] = player.full_name or player.name
+                player_names[player_id] = player.name
         
         # Build position DTOs (positions 0-3)
         for position in range(4):
