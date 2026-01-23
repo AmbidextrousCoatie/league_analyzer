@@ -34,3 +34,21 @@ class UpdateGameResultDTO(CommandResultDTO):
 class DeleteGameResultDTO(CommandResultDTO):
     """Result DTO for DeleteGameCommand."""
     match_id: UUID
+
+
+@dataclass
+class CreateTeamResultDTO(CommandResultDTO):
+    """Result DTO for CreateTeamCommand."""
+    team_id: UUID
+
+
+@dataclass
+class UpdateTeamResultDTO(CommandResultDTO):
+    """Result DTO for UpdateTeamCommand."""
+    team_id: UUID
+
+
+@dataclass
+class DeleteTeamResultDTO(CommandResultDTO):
+    """Result DTO for DeleteTeamCommand."""
+    team_id: UUID
