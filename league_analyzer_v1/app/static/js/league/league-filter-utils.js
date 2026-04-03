@@ -76,13 +76,29 @@ function updateLeagueButtons() {
         .then(response => response.json())
         .then(leagues => {
             const normalizedLeagues = normalizeLeagueResponse(leagues);
-            const buttonsLeague = normalizedLeagues.map(league => `
-                <input type="radio" class="btn-check" name="league" id="league_${league.short_name.replace(/\s+/g, '_')}" 
+            const leagueButtonSafeId = (shortName) => {
+                if (typeof window !== 'undefined' && window.DomIdUtils && window.DomIdUtils.toSafeDomIdToken) {
+                    return window.DomIdUtils.toSafeDomIdToken(shortName);
+                }
+                let t = String(shortName || '')
+                    .trim()
+                    .replace(/[^A-Za-z0-9_-]+/g, '_')
+                    .replace(/_+/g, '_')
+                    .replace(/^_|_$/g, '');
+                if (!t) t = 'unknown';
+                if (!/^[A-Za-z_]/.test(t)) t = 'id_' + t;
+                return t;
+            };
+            const buttonsLeague = normalizedLeagues.map((league) => {
+                const lid = leagueButtonSafeId(league.short_name);
+                return `
+                <input type="radio" class="btn-check" name="league" id="league_${lid}" 
                        value="${league.short_name}" data-long-name="${league.long_name}" ${league.short_name === currentState.league ? 'checked' : ''}>
-                <label class="btn btn-outline-primary" for="league_${league.short_name.replace(/\s+/g, '_')}" title="${league.long_name}">
+                <label class="btn btn-outline-primary" for="league_${lid}" title="${league.long_name}">
                     ${league.short_name}
                 </label>
-            `).join('');
+            `;
+            }).join('');
             document.getElementById('buttonsLeague').innerHTML = buttonsLeague;
             
             // Auto-select highest league if none selected

@@ -2,8 +2,42 @@
 League Service Utility Functions
 Shared utility functions extracted from league_service.py for better organization and reusability.
 """
+from __future__ import annotations
+
+import csv
+from functools import lru_cache
+from pathlib import Path
 from typing import Union, List, Dict, Any
+
 from app.utils.color_constants import get_heat_map_color
+
+
+@lru_cache(maxsize=1)
+def get_league_long_name_map() -> Dict[str, str]:
+    """
+    Load id -> long_name from database/relational_csv/league.csv
+    (generated from league_mapping.csv in the relational build pipeline).
+    """
+    path = Path(__file__).resolve().parent.parent.parent / "database" / "relational_csv" / "league.csv"
+    if not path.is_file():
+        return {}
+    out: Dict[str, str] = {}
+    with path.open(newline="", encoding="utf-8") as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            lid = (row.get("id") or "").strip()
+            long_name = (row.get("long_name") or "").strip()
+            if lid and long_name:
+                out[lid] = long_name
+    return out
+
+
+def resolve_league_long_name(short_id: str) -> str:
+    """Return display long name for a league short id, or the id if unmapped."""
+    if short_id is None or short_id == "":
+        return ""
+    key = str(short_id).strip()
+    return get_league_long_name_map().get(key, key)
 
 
 def format_float_one_decimal(value: Union[int, float]) -> str:

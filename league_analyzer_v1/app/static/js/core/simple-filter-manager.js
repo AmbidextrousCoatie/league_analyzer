@@ -570,7 +570,19 @@ class SimpleFilterManager {
         // Create league buttons
         const buttonsHtml = this.availableData.leagues.map(league => {
             const isChecked = league.short_name === selectedLeague;
-            const safeId = league.short_name.replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_-]/g, '');
+            let safeId;
+            if (typeof window !== 'undefined' && window.DomIdUtils && window.DomIdUtils.toSafeDomIdToken) {
+                safeId = window.DomIdUtils.toSafeDomIdToken(league.short_name);
+            } else {
+                let t = String(league.short_name || '')
+                    .trim()
+                    .replace(/[^A-Za-z0-9_-]+/g, '_')
+                    .replace(/_+/g, '_')
+                    .replace(/^_|_$/g, '');
+                if (!t) t = 'unknown';
+                if (!/^[A-Za-z_]/.test(t)) t = 'id_' + t;
+                safeId = t;
+            }
             const longName = league.long_name || league.short_name;
             
             return `

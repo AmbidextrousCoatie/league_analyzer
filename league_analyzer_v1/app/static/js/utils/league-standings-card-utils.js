@@ -1,7 +1,26 @@
 /**
  * Utility functions for rendering league standings and honor scores cards
  * Used by both matchday-block and season-league-standings-block
+ *
+ * Expects js/utils/dom-id-utils.js loaded first (league stats template order).
  */
+function safeDomIdToken(value) {
+    if (typeof window !== 'undefined' && window.DomIdUtils && typeof window.DomIdUtils.toSafeDomIdToken === 'function') {
+        return window.DomIdUtils.toSafeDomIdToken(value);
+    }
+    if (value === null || value === undefined) {
+        return 'unknown';
+    }
+    let token = String(value).trim().replace(/[^A-Za-z0-9_-]+/g, '_');
+    token = token.replace(/_+/g, '_').replace(/^_|_$/g, '');
+    if (!token) {
+        token = 'unknown';
+    }
+    if (!/^[A-Za-z_]/.test(token)) {
+        token = 'id_' + token;
+    }
+    return token;
+}
 
 /**
  * Generate HTML for a league standings + honor scores card
@@ -15,7 +34,10 @@
  */
 function generateLeagueStandingsCardHTML(options) {
     const { league, week, season, tableId, honorScoresPrefix = '' } = options;
-    
+    const safeTableId = safeDomIdToken(tableId);
+    const safeHonorPrefix =
+        honorScoresPrefix !== '' && honorScoresPrefix != null ? safeDomIdToken(honorScoresPrefix) : '';
+
     // Build header title
     let headerTitle = league;
     if (week) {
@@ -23,7 +45,7 @@ function generateLeagueStandingsCardHTML(options) {
     }
     
     // Build honor scores element IDs with prefix
-    const prefix = honorScoresPrefix ? `${honorScoresPrefix}_` : '';
+    const prefix = safeHonorPrefix ? `${safeHonorPrefix}_` : '';
     const individualScoresId = `individualScores${prefix}`;
     const teamScoresId = `teamScores${prefix}`;
     const individualAveragesId = `individualAverages${prefix}`;
@@ -37,7 +59,7 @@ function generateLeagueStandingsCardHTML(options) {
         <div class="row">
             <div class="col-md-8">
                 <h6>${typeof t === 'function' ? t('league_standings', 'League Standings') : 'League Standings'}</h6>
-                <div id="${tableId}"></div>
+                <div id="${safeTableId}"></div>
             </div>
             <div class="col-md-4">
                 <div class="card">
@@ -131,8 +153,9 @@ function populateHonorScores(honorScoresData, prefix = '') {
     if (!honorScoresData) {
         return;
     }
-    
-    const idPrefix = prefix ? `${prefix}_` : '';
+
+    const safePrefix = prefix !== '' && prefix != null ? safeDomIdToken(prefix) : '';
+    const idPrefix = safePrefix ? `${safePrefix}_` : '';
     
     // Individual Scores
     if (honorScoresData.individual_scores && honorScoresData.individual_scores.length > 0) {

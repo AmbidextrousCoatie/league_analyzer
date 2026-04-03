@@ -9,7 +9,7 @@ import sys
 from app.services.data_dict import DataDict
 from app.config.debug_config import debug_config
 from app.models.table_data import TableData, ColumnGroup, Column
-from business_logic.league import longNames
+from app.utils.league_utils import resolve_league_long_name
 
 bp = Blueprint('league', __name__)
 
@@ -362,7 +362,7 @@ def get_available_leagues():
         enriched_leagues = [
             {
                 "short_name": league,
-                "long_name": longNames.get(league, league),
+                "long_name": resolve_league_long_name(league),
                 "value": league
             }
             for league in leagues

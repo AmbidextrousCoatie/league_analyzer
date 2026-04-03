@@ -91,7 +91,18 @@ class SeasonLeagueStandingsBlock extends BaseContentBlock {
 
     renderSeasonLeagueStandings(data, season) {
         const contentContainer = document.getElementById('seasonLeagueStandingsContent');
-        
+        const leagueIdToken =
+            window.DomIdUtils && typeof window.DomIdUtils.toSafeDomIdToken === 'function'
+                ? (v) => window.DomIdUtils.toSafeDomIdToken(v)
+                : (v) => {
+                      if (v === null || v === undefined) return 'unknown';
+                      let t = String(v).trim().replace(/[^A-Za-z0-9_-]+/g, '_');
+                      t = t.replace(/_+/g, '_').replace(/^_|_$/g, '');
+                      if (!t) t = 'unknown';
+                      if (!/^[A-Za-z_]/.test(t)) t = 'id_' + t;
+                      return t;
+                  };
+
         if (!data || !data.leagues || data.leagues.length === 0) {
             contentContainer.innerHTML = `
                 <div class="alert alert-info">
@@ -106,19 +117,20 @@ class SeasonLeagueStandingsBlock extends BaseContentBlock {
         
         // Create a card for each league
         data.leagues.forEach(leagueData => {
-            const { league, week, standings, honor_scores } = leagueData;
-            const leagueId = league.replace(/\s+/g, '_');
+            const { league, league_long, week, standings, honor_scores } = leagueData;
+            const leagueDisplay = league_long || league;
+            const leagueId = leagueIdToken(league);
             const tableId = `tableSeasonLeagueStandings_${leagueId}`;
             
             html += `
                 <div class="card mb-3">
                     <div class="card-header">
-                        <h6 class="mb-0">${league} - ${typeof t === 'function' ? (t('match_day_label', 'Match Day')) : 'Match Day'} ${week}</h6>
+                        <h6 class="mb-0">${leagueDisplay} - ${typeof t === 'function' ? (t('match_day_label', 'Match Day')) : 'Match Day'} ${week}</h6>
                     </div>
                     <div class="card-body">
                         ${typeof window.generateLeagueStandingsCardHTML === 'function' 
                             ? window.generateLeagueStandingsCardHTML({
-                                league: league,
+                                league: leagueDisplay,
                                 week: week,
                                 season: season,
                                 tableId: tableId,
@@ -168,7 +180,7 @@ class SeasonLeagueStandingsBlock extends BaseContentBlock {
         // Each league gets its own color cycle starting from position 1
         data.leagues.forEach(leagueData => {
             const { league, standings, honor_scores } = leagueData;
-            const leagueId = league.replace(/\s+/g, '_');
+            const leagueId = leagueIdToken(league);
             const tableId = `tableSeasonLeagueStandings_${leagueId}`;
             
             // Extract teams for this league and assign colors starting from palette index 0

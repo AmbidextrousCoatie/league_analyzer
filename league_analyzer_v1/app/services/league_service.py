@@ -18,7 +18,8 @@ from app.utils.league_utils import (
     format_float_one_decimal,
     get_league_level,
     convert_to_simple_types,
-    apply_heat_map_to_columns
+    apply_heat_map_to_columns,
+    resolve_league_long_name,
 )
 # from data_access.series_data import calculate_series_data, get_player_series_data, get_team_series_data
 
@@ -3713,6 +3714,7 @@ class LeagueService:
                         if standings:
                             league_standings.append({
                                 'league': league,
+                                'league_long': resolve_league_long_name(league),
                                 'week': latest_week,
                                 'standings': standings.to_dict(),
                                 'honor_scores': honor_scores

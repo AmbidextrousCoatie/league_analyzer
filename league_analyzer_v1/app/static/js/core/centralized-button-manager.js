@@ -609,7 +609,21 @@ class CentralizedButtonManager {
     }
     
     createSafeId(value) {
-        return String(value || '').replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_-]/g, '');
+        if (typeof window !== 'undefined' && window.DomIdUtils && typeof window.DomIdUtils.toSafeDomIdToken === 'function') {
+            return window.DomIdUtils.toSafeDomIdToken(value);
+        }
+        if (value === null || value === undefined) {
+            return 'unknown';
+        }
+        let token = String(value).trim().replace(/[^A-Za-z0-9_-]+/g, '_');
+        token = token.replace(/_+/g, '_').replace(/^_|_$/g, '');
+        if (!token) {
+            token = 'unknown';
+        }
+        if (!/^[A-Za-z_]/.test(token)) {
+            token = 'id_' + token;
+        }
+        return token;
     }
     
     escapeAttribute(value) {
