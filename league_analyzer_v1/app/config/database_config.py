@@ -53,6 +53,13 @@ class DatabaseConfig:
                 description='Reconstructed from relational tables',
                 is_default=False,
                 is_enabled=True
+            ),
+            'db_real_bowlingbayern': DataSourceConfig(
+                filename='bowling_ergebnisse_real_from_bowlingbayern.csv',
+                display_name='Real Data (Bowlingbayern)',
+                description='Actual bowling league data from Bowlingbayern',
+                is_default=False,
+                is_enabled=True
             )
         }
         

@@ -15,3 +15,5 @@ KL N1,Kreisliga Nord 1,5,north
 KL N2,Kreisliga Nord 2,5,north
 KL S1,Kreisliga Süd 1,5,south
 KL S2,Kreisliga Süd 2,5,south
+LL S (D), Landesliga Süd (Damen), 2,south
+BayL (D), Bayernliga (Damen), 1,state

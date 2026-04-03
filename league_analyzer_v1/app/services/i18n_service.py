@@ -243,7 +243,7 @@ class I18nService:
             "date": {"en": "Date", "de": "Datum"},
             "match_info": {"en": "Match Info", "de": "Spiel-Info"},
             "match": {"en": "Match", "de": "Spiel"},
-            "total_points": {"en": "Total Points", "de": "Gesamtpinfall"},
+            "total_points": {"en": "Total Points", "de": "Gesamtpunkte"},
             "team_performance": {"en": "Team Performance", "de": "Team-Leistung"},
             "season_timetable": {"en": "Season Timetable", "de": "Saison-Spielplan"},
             "individual_averages": {"en": "Individual Averages", "de": "Einzel-Durchschnitte"},

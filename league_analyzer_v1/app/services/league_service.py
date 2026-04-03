@@ -2062,7 +2062,7 @@ class LeagueService:
         # Get all rounds (matches) for this team in this event
         rounds = sorted(player_data[Columns.round_number].unique())
         
-        # Get all unique players who played in this event
+        # Get all unique players who played in this event.
         # Use player_id as primary identifier, fallback to player_name
         player_identifiers = []
         for _, row in player_data.iterrows():
