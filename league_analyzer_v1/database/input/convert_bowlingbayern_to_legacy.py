@@ -188,9 +188,23 @@ def build_week_dates(rows: List[Dict[str, str]]) -> Dict[Tuple[str, str], str]:
     return {k: ts.date().isoformat() for k, ts in per_week_min.items()}
 
 
+def _input_row_sort_key(row: Dict[str, str]) -> Tuple[int, int, int, str]:
+    """Stable ordering so EDV canonical-name 'first seen' is reproducible across runs."""
+    ids = parse_game_id(row.get("Game-ID", ""))
+    team = (row.get("Teamname") or "").strip()
+    wk = int(ids.week) if ids.week.isdigit() else 999
+    rn = int(ids.round_number) if ids.round_number.isdigit() else 999
+    mn = int(ids.match_number) if ids.match_number.isdigit() else 999
+    return (wk, rn, mn, team)
+
+
 def convert() -> List[Dict[str, str]]:
     source_rows = load_and_deduplicate()
     week_dates = build_week_dates(source_rows)
+    source_rows.sort(key=_input_row_sort_key)
+
+    # Same EDV must always map to one display name (avoid duplicate "players" when Vor-/Nachname order flips).
+    edv_canonical_player_name: Dict[str, str] = {}
 
     output_rows: List[Dict[str, str]] = []
     for row in source_rows:
@@ -213,8 +227,19 @@ def convert() -> List[Dict[str, str]]:
 
         # 4 player rows, slot 1 => position 0.
         for slot in (1, 2, 3, 4):
+            raw_edv = (row.get(f"EDV {slot}") or "").strip()
             player = (row.get(f"Spieler {slot}") or "").strip()
-            player_id = mapped_player_id((row.get(f"EDV {slot}") or "").strip(), player)
+            parsed_edv = to_int(raw_edv)
+            if parsed_edv is not None:
+                player_id = str(parsed_edv)
+                if player_id not in edv_canonical_player_name:
+                    edv_canonical_player_name[player_id] = player
+                elif not edv_canonical_player_name[player_id] and player:
+                    # First row sometimes has empty Spieler; lock in first non-empty when that happens.
+                    edv_canonical_player_name[player_id] = player
+                player = edv_canonical_player_name[player_id]
+            else:
+                player_id = mapped_player_id(raw_edv, player)
             score_raw = (row.get(f"Pins {slot}") or "").strip()
             opp_raw = (row.get(f"Pins Gegner {slot}") or "").strip()
             score = to_int(score_raw)
