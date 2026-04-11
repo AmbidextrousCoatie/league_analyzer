@@ -104,3 +104,7 @@ app/static/js/
 
 ## Historical Information
 Detailed implementation history and troubleshooting information can be found in the `archive/` directory.
+
+## Data Pipeline Planning
+- `GF_DATA_PIPELINE_IMPLEMENTATION_PLAN.md` - Gravity Forms ingestion/staging/sync plan for legacy data generation.
+- `GF_PIPELINE_SPRINT1_RUNBOOK.md` - Runnable Sprint-1 setup (extract, staging, minimal sanitize).

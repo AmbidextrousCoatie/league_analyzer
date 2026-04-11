@@ -46,3 +46,9 @@ This document maps the current input format in `league_analyzer_v1/database/inpu
 - No explicit `Season` field in input.
 - No explicit `Location` field in input.
 - Several legacy fields are derivations rather than direct mappings.
+
+## Attributes required for legacy reconstruction (comma-separated)
+
+Use these **semantic** names when designing exports or Gravity Forms `_field_ids` (map each to the form’s field id / entry property from `GET /forms/{id}` or the entry object). `Spiel-ID` and `Game-ID` are alternatives for the same logical game key in some feeds—include whichever exists on the form.
+
+`id`, `form_id`, `date_created`, `date_updated`, `status`, `Spiel-ID`, `Game-ID`, `Datum des Eintrags`, `Aktualisierungsdatum`, `Teamname`, `Spieler 1`, `Spieler 2`, `Spieler 3`, `Spieler 4`, `EDV 1`, `EDV 2`, `EDV 3`, `EDV 4`, `Gegner`, `Pins 1`, `Pins 2`, `Pins 3`, `Pins 4`, `Pins Gesamt`, `Pins Gegner 1`, `Pins Gegner 2`, `Pins Gegner 3`, `Pins Gegner 4`, `Pins Gegner`
