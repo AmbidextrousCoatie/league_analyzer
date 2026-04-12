@@ -21,6 +21,7 @@ DEFAULT_SEASON = "25/26"
 DEFAULT_PLAYERS_PER_TEAM = "4"
 LEAGUE_CODE_MAP = {
     "BAYL-M": "BayL",
+    "BAYL-F": "BayL (D)",
     "LL-S-M": "LL S",
     "LL-S-F": "LL S (D)",
     "KRL-S1": "KL S1",

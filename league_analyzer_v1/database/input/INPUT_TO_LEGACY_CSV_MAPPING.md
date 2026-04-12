@@ -26,7 +26,7 @@ This document maps the current input format in `league_analyzer_v1/database/inpu
 | `Season` | Not present | False | Not delivered by input. For now use fixed default `25/26`. |
 | `Week` | `Spiel-ID` | False | Derived from first digit of encoded game triple in `Spiel-ID` (`W##` logic). Not a direct field copy. |
 | `Date` | `Datum des Eintrags` / `Aktualisierungsdatum` | False | Use the **smallest timestamp** associated with each `(League, Week)` bucket as canonical date for all results in that bucket; then format as date. |
-| `League` | `Spiel-ID` / `Game-ID` prefix | False | Derived from code prefix and mapped to `league.csv` IDs. Active mapping: `BAYL-M -> BayL`, `LL-S-M -> LL S`, `LL-S-F -> LL S (D)`, `KRL-S1 -> KL S1`, `KRL-N2 -> KL N2`, `BZOL-N2 -> BZOL N2`, `BZOL-N1 -> BZOL N1`. |
+| `League` | `Spiel-ID` / `Game-ID` prefix | False | Derived from code prefix and mapped to `league.csv` IDs. Active mapping: `BAYL-M -> BayL`, `BAYL-F -> BayL (D)` (Bayernliga Damen), `LL-S-M -> LL S`, `LL-S-F -> LL S (D)`, `KRL-S1 -> KL S1`, `KRL-N2 -> KL N2`, `BZOL-N2 -> BZOL N2`, `BZOL-N1 -> BZOL N1`. |
 | `Players per Team` | Not present (implicit in schema) | False | Use default constant `4`. |
 | `Location` | Not present | False | Not delivered in input. Skip (leave empty) for now. |
 | `Round Number` | `Spiel-ID` | False | Derived from second digit of encoded game triple in `Spiel-ID`. Not a direct field copy. |
