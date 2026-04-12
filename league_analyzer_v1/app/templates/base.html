@@ -653,6 +653,14 @@
         async function refreshPlayerComponents() {
             console.log('🔄 Refreshing player components...');
             
+            if (typeof window.reloadPlayerSearchList === 'function') {
+                try {
+                    await window.reloadPlayerSearchList();
+                } catch (error) {
+                    console.warn('reloadPlayerSearchList failed:', error);
+                }
+            }
+            
             const methods = [
                 'loadPlayerStats',
                 'displayLifetimeStats',

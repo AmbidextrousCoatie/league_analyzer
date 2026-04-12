@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, request, jsonify
 from app.services.team_service import TeamService
 from app.config.database_config import database_config
+from app.utils.json_safe import json_safe
 
 bp = Blueprint('team', __name__)
 
@@ -21,7 +22,7 @@ def get_teams():
             league_name=None,
             season=None
         )
-        return jsonify(teams)
+        return jsonify(json_safe(teams))
         
     except Exception as e:
         print(f"Error in get_teams: {str(e)}")

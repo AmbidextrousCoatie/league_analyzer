@@ -121,7 +121,10 @@ class TeamStatsApp {
             const urlParams = new URLSearchParams(window.location.search);
             const database = urlParams.get('database') || 'db_real_bowlingbayern';
             
-            const response = await fetch(`/team/get_teams?database=${database}`);
+            const response =
+                typeof fetchWithDatabase === "function"
+                    ? await fetchWithDatabase("/team/get_teams")
+                    : await fetch(`/team/get_teams?database=${encodeURIComponent(database)}`);
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }

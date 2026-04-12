@@ -64,7 +64,10 @@ class SimpleFilterManager {
             
             if (this.mode === 'team') {
                 // Load teams for team mode
-                const teamsResponse = await fetch(`/team/get_teams?database=${database}`);
+                const teamsResponse =
+                    typeof fetchWithDatabase === "function"
+                        ? await fetchWithDatabase("/team/get_teams")
+                        : await fetch(`/team/get_teams?database=${encodeURIComponent(database)}`);
                 if (teamsResponse.ok) {
                     this.availableData.teams = await teamsResponse.json();
                     this.populateTeamDropdown();

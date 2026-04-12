@@ -62,9 +62,10 @@ def create_app():
         return dict(static_url=get_static_url)
     
     from app.routes import main, player_routes, league_routes, league_routes_legacy, team_routes
+    # Register team API blueprint before main so `/team/get_*` is never shadowed by `/team/<analysis>`-style routes.
+    app.register_blueprint(team_routes.bp)
     app.register_blueprint(main.bp)
     app.register_blueprint(player_routes.bp)
     app.register_blueprint(league_routes.bp)
     app.register_blueprint(league_routes_legacy.bp_legacy)
-    app.register_blueprint(team_routes.bp)
     return app 

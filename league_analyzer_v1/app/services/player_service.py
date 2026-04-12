@@ -1,5 +1,4 @@
 import pandas as pd
-from data_access.pd_dataframes import fetch_column, fetch_data
 from data_access.schema import Columns
 from app.services.data_manager import DataManager
 from business_logic.statistics import calculate_score_average_player, calculate_games_count_player
@@ -7,6 +6,15 @@ from business_logic.server import Server
 from app.services.statistics_service import StatisticsService
 from app.models.statistics_models import PlayerStatistics
 from typing import Dict, List, Any, Optional
+
+
+def _csv_bool_is_true(s: pd.Series) -> pd.Series:
+    return s.astype(str).str.strip().str.lower().isin(("true", "1", "yes"))
+
+
+def _csv_bool_is_false(s: pd.Series) -> pd.Series:
+    return s.astype(str).str.strip().str.lower().isin(("false", "0", "no", ""))
+
 
 class PlayerService:
     def __init__(self, database: str = None):
@@ -17,13 +25,29 @@ class PlayerService:
 
     def get_all_players(self):
         """Get list of all players for selection"""
-        players = fetch_column(
-            database_df=self.data_manager.df,
-            column_name=Columns.player_name,
-            unique=True,
-            as_list=True
-        )
-        return [{'id': name, 'name': name} for name in sorted(players)]
+        df = self.data_manager.df
+        if df is None or df.empty or Columns.player_name not in df.columns:
+            return []
+        sub = df
+        if Columns.input_data in df.columns and Columns.computed_data in df.columns:
+            sub = df[
+                _csv_bool_is_true(df[Columns.input_data])
+                & _csv_bool_is_false(df[Columns.computed_data])
+            ]
+        names = sub[Columns.player_name].dropna()
+        cleaned: List[str] = []
+        seen: set = set()
+        for raw in names.unique():
+            label = str(raw).strip()
+            low = label.lower()
+            if not label or low in ("nan", "none", "<na>", "nat", "#n/a"):
+                continue
+            if label == "Team Total":
+                continue
+            if label not in seen:
+                seen.add(label)
+                cleaned.append(label)
+        return [{"id": n, "name": n} for n in sorted(cleaned)]
 
     def get_player_statistics(self, player_name: str, season: str) -> PlayerStatistics:
         """Get comprehensive player statistics"""
@@ -121,8 +145,8 @@ class PlayerService:
         if search_term:
             search_term = search_term.lower()
             filtered_players = [
-                player for player in all_players 
-                if search_term in player['name'].lower()
+                player for player in all_players
+                if search_term in str(player.get("name", "")).lower()
             ]
             return filtered_players
         

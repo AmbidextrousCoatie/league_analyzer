@@ -5,6 +5,22 @@ from typing import List
 from data_access.schema import Columns, ColumnsExtra
 from app.config.debug_config import debug_config
 
+
+def _player_name_lookup_variants(name: str) -> List[str]:
+    """Return the given label plus a ``First Last`` form when input looks like ``Last, First``."""
+    n = (name or "").strip()
+    if not n:
+        return []
+    variants: List[str] = [n]
+    if "," in n:
+        left, right = [p.strip() for p in n.split(",", 1)]
+        if left and right:
+            flipped = f"{right} {left}".strip()
+            if flipped != n:
+                variants.append(flipped)
+    return list(dict.fromkeys(variants))
+
+
 class Server:
     # fetches basic dataframes from data adapter
     # converts basic dataframes to aggregated dataframes
@@ -145,17 +161,22 @@ class Server:
                             .copy())
         return individual_scores_df, team_scores_df, individual_averages_df, team_averages_df
 
-    def get_teams_in_league_season(self, league_name:str, season:str, debug_output:bool=False) -> List[str]:
-        filters_depr = {Columns.league_name: league_name, Columns.season: season}
-        filters = {
-            Columns.league_name: {'value': league_name, 'operator': 'eq'},
-            Columns.season: {'value': season, 'operator': 'eq'}
-        }
+    def get_teams_in_league_season(self, league_name: str, season: str, debug_output: bool = False) -> List[str]:
+        from data_access.adapters.data_adapter_pandas import _unique_clean_str_labels
+
+        filters: dict = {}
+        if league_name is not None and str(league_name).strip() != "":
+            filters[Columns.league_name] = {"value": league_name, "operator": "eq"}
+        if season is not None and str(season).strip() != "":
+            filters[Columns.season] = {"value": season, "operator": "eq"}
 
         columns = [Columns.team_name]
         if debug_output:
-            print ("get_teams_in_league_season: filter:" + str(filters) + " | columns:" + str(columns))
-        return sorted(self.data_adapter.get_filtered_data(columns=columns, filters=filters)[Columns.team_name].unique().tolist())
+            print("get_teams_in_league_season: filter:" + str(filters) + " | columns:" + str(columns))
+        df = self.data_adapter.get_filtered_data(columns=columns, filters=filters if filters else None)
+        if df.empty or Columns.team_name not in df.columns:
+            return []
+        return _unique_clean_str_labels(df[Columns.team_name])
 
     def aggregate_league_table(self, data_individual: pd.DataFrame, data_team: pd.DataFrame, week:int, debug: bool=False) -> pd.DataFrame:
         """
@@ -680,18 +701,24 @@ class Server:
     def get_games_for_player(self, player_name: str) -> pd.DataFrame:
         """Get all games for a player"""
 
-        
-        player_filters = {
-            Columns.player_name: {
-                'value': player_name,
-                'operator': 'eq'
+        variants = _player_name_lookup_variants(player_name)
+        if not variants:
+            return pd.DataFrame()
+
+        if len(variants) == 1:
+            player_filters = {
+                Columns.player_name: {'value': variants[0], 'operator': 'eq'}
             }
-        }
+        else:
+            player_filters = {
+                Columns.player_name: {'value': variants, 'operator': 'in'}
+            }
 
-        columns = [Columns.player_id, Columns.player_name, Columns.date, Columns.week, Columns.season, Columns.league_name, Columns.team_name, Columns.score, Columns.points]
-        result = self.data_adapter.get_filtered_data(columns=columns, filters=player_filters)
-
-        return result
+        columns = [
+            Columns.player_id, Columns.player_name, Columns.date, Columns.week, Columns.season,
+            Columns.league_name, Columns.team_name, Columns.score, Columns.points,
+        ]
+        return self.data_adapter.get_filtered_data(columns=columns, filters=player_filters)
 
     def get_matches(self, team: str = None, season: str = None, league: str = None, opponent_team_name: str = None) -> pd.DataFrame:
         """Get matches data with team and opponent scores

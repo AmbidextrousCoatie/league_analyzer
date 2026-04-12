@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, jsonify, request
 from app.services.player_service import PlayerService
 from app.config.database_config import database_config
+from app.utils.json_safe import json_safe
 
 bp = Blueprint('player', __name__, url_prefix='/player')
 
@@ -18,7 +19,7 @@ def search_players():
     search_term = request.args.get('search', '')
     player_service = get_player_service()
     players = player_service.search_players(search_term)
-    return jsonify(players)
+    return jsonify(json_safe(players))
 
 @bp.route('/get-stats')
 def get_stats():

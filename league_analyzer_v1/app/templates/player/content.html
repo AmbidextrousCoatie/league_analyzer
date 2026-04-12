@@ -134,16 +134,43 @@ document.addEventListener('DOMContentLoaded', function() {
             database: params.get('database')
         };
     }
-    
+
+    function escapeAttr(s) {
+        return String(s)
+            .replace(/&/g, '&amp;')
+            .replace(/"/g, '&quot;')
+            .replace(/</g, '&lt;');
+    }
+
+    async function reloadPlayerSearchList() {
+        const response = await fetchWithDatabase('{{ url_for("player.search_players") }}');
+        const players = await response.json();
+        playerList.innerHTML = players.map(player =>
+            `<option value="${escapeAttr(player.name)}" data-id="${escapeAttr(player.id)}">`
+        ).join('');
+        const typed = (playerInput.value || '').trim();
+        if (typed && !players.some(p => p.name === typed)) {
+            playerInput.value = '';
+            document.getElementById('playerStats').innerHTML = `
+                <div class="alert alert-info">
+                    <strong>Selection cleared</strong> — that name is not in this data source. Pick a name from the list.
+                </div>
+            `;
+            document.getElementById('lifetimeGames').textContent = '-';
+            document.getElementById('lifetimePins').textContent = '-';
+            document.getElementById('lifetimeAvg').textContent = '-';
+            document.getElementById('bestGame').textContent = '-';
+            document.getElementById('bestGameEvent').textContent = '-';
+            document.getElementById('bestGameDate').textContent = '-';
+            document.getElementById('bestSeason').textContent = '-';
+            document.getElementById('mostImproved').textContent = '-';
+            document.getElementById('seasonStatsBody').innerHTML = '';
+        }
+        return players;
+    }
+
     // Load all players immediately
-    fetchWithDatabase('{{ url_for("player.search_players") }}')
-        .then(response => response.json())
-        .then(players => {
-            // Populate datalist with options
-            playerList.innerHTML = players.map(player => 
-                `<option value="${player.name}" data-id="${player.id}">`
-            ).join('');
-            
+    reloadPlayerSearchList().then(players => {
             // Check for URL parameters and auto-select player
             const urlParams = parseUrlParams();
             if (urlParams.player_name) {
@@ -181,8 +208,14 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     function loadPlayerStats(playerName) {
-        console.log("loadPlayerStats: " + playerName);
-        fetchWithDatabase(`{{ url_for("player.get_lifetime_stats") }}?player_name=${encodeURIComponent(playerName)}`)
+        const name = (playerName != null && String(playerName).trim() !== '')
+            ? String(playerName).trim()
+            : (playerInput && playerInput.value ? playerInput.value.trim() : '');
+        if (!name) {
+            return;
+        }
+        console.log("loadPlayerStats: " + name);
+        fetchWithDatabase(`{{ url_for("player.get_lifetime_stats") }}?player_name=${encodeURIComponent(name)}`)
             .then(response => response.json())
             .then(data => {
                 // Check if data is null or missing required properties
@@ -191,7 +224,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     // Display error message to user
                     document.getElementById('playerStats').innerHTML = `
                         <div class="alert alert-warning">
-                            <strong>No data available</strong> for player "${playerName}" in the selected database.
+                            <strong>No data available</strong> for player "${name}" in the selected database.
                         </div>
                     `;
                     // Clear other sections
@@ -215,11 +248,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.error('Error loading player stats:', error);
                 document.getElementById('playerStats').innerHTML = `
                     <div class="alert alert-danger">
-                        <strong>Error loading data</strong> for player "${playerName}": ${error.message}
+                        <strong>Error loading data</strong> for player "${name}": ${error.message}
                     </div>
                 `;
             });
     }
+
+    window.reloadPlayerSearchList = reloadPlayerSearchList;
+    window.loadPlayerStats = loadPlayerStats;
 
     function displayLifetimeStats(stats) {
         // Update lifetime stats card with null checks

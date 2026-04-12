@@ -26,10 +26,8 @@ def league_stats(analysis):
     season = session.get('selected_season', 'all')
     return render_template('league/stats.html', analysis=analysis, season=season)
 
-@bp.route('/team/<analysis>')
-def team_stats(analysis):
-    season = session.get('selected_season', 'all')
-    return render_template('team/stats.html', analysis=analysis, season=season)
+# NOTE: Do not register `/team/<variable>` here — it shadows `/team/get_teams` and other
+# team blueprint JSON routes on some Werkzeug/Flask orderings. Use `team.stats` (/team/stats).
 
 @bp.route('/player/<analysis>')
 def player_stats(analysis):

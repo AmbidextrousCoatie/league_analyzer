@@ -21,10 +21,22 @@ class TeamService:
         self.server = Server(database=database)
         self.stats_service = StatisticsService(database=database)
 
-    def get_all_teams(self, league_name: str=None, season: str=None):
-        """Returns all teams for a given league and season"""
+    def get_all_teams(self, league_name: str = None, season: str = None):
+        """Returns distinct team names (player rows only), JSON-safe; optional league/season filter."""
         print(f"Team Service: Get All Teams - Received request with: league_name={league_name}, season={season}")
-        return self.server.get_teams_in_league_season(league_name=league_name, season=season, debug_output=True)
+        filters: dict = {Columns.computed_data: {"value": False, "operator": "eq"}}
+        if league_name:
+            filters[Columns.league_name] = {"value": league_name, "operator": "eq"}
+        if season:
+            filters[Columns.season] = {"value": season, "operator": "eq"}
+        df = self.server.data_adapter.get_filtered_data(
+            filters=filters, columns=[Columns.team_name]
+        )
+        if df.empty or Columns.team_name not in df.columns:
+            return []
+        from data_access.adapters.data_adapter_pandas import _unique_clean_str_labels
+
+        return _unique_clean_str_labels(df[Columns.team_name])
         
     def get_available_seasons(self, team_name: str=None):
         """Returns all possible seasons"""
