@@ -7069,6 +7069,256 @@ Season;Week;Date;League;Players per Team;Location;Round Number;Match Number;Team
 25/26;6;2026-04-11;BayL;4;;4;4;SG Rottendorf 1;1;Stefan Reichardt;16945;Donaubowler Regensburg 1;170;1.0;True;False
 25/26;6;2026-04-11;BayL;4;;4;4;SG Rottendorf 1;2;Christian Büttner;16862;Donaubowler Regensburg 1;203;1.0;True;False
 25/26;6;2026-04-11;BayL;4;;4;4;SG Rottendorf 1;3;Tim Meier;38545;Donaubowler Regensburg 1;224;1.0;True;False
+25/26;6;2026-04-11;BayL;4;;5;0;Bowlinghaus Bamberg 1;0;William Karl;16532;Donaubowler Regensburg 1;204;1.0;True;False
+25/26;6;2026-04-11;BayL;4;;5;0;Bowlinghaus Bamberg 1;0;Team Total;0;Donaubowler Regensburg 1;735;3.0;False;True
+25/26;6;2026-04-11;BayL;4;;5;0;Bowlinghaus Bamberg 1;1;Jonathan Nolan;16873;Donaubowler Regensburg 1;193;1.0;True;False
+25/26;6;2026-04-11;BayL;4;;5;0;Bowlinghaus Bamberg 1;2;Thomas Nikoleit;25516;Donaubowler Regensburg 1;183;1.0;True;False
+25/26;6;2026-04-11;BayL;4;;5;0;Bowlinghaus Bamberg 1;3;Alexander Renner;16251;Donaubowler Regensburg 1;155;0.0;True;False
+25/26;6;2026-04-11;BayL;4;;5;0;Donaubowler Regensburg 1;0;Christian Feller;16007;Bowlinghaus Bamberg 1;189;0.0;True;False
+25/26;6;2026-04-11;BayL;4;;5;0;Donaubowler Regensburg 1;0;Team Total;0;Bowlinghaus Bamberg 1;721;0.0;False;True
+25/26;6;2026-04-11;BayL;4;;5;0;Donaubowler Regensburg 1;1;Volkmar Hartfeil;7830;Bowlinghaus Bamberg 1;192;0.0;True;False
+25/26;6;2026-04-11;BayL;4;;5;0;Donaubowler Regensburg 1;2;Kurt Obermeier;7831;Bowlinghaus Bamberg 1;147;0.0;True;False
+25/26;6;2026-04-11;BayL;4;;5;0;Donaubowler Regensburg 1;3;Marco Hürdler;25271;Bowlinghaus Bamberg 1;193;1.0;True;False
+25/26;6;2026-04-11;BayL;4;;5;1;BC Comet Nürnberg;0;Andreas Mittelmaier;16896;SG Rottendorf 1;202;0.0;True;False
+25/26;6;2026-04-11;BayL;4;;5;1;BC Comet Nürnberg;0;Team Total;0;SG Rottendorf 1;829;0.0;False;True
+25/26;6;2026-04-11;BayL;4;;5;1;BC Comet Nürnberg;1;Andreas Schick;7102;SG Rottendorf 1;214;1.0;True;False
+25/26;6;2026-04-11;BayL;4;;5;1;BC Comet Nürnberg;2;Christian Schlick;7724;SG Rottendorf 1;190;0.0;True;False
+25/26;6;2026-04-11;BayL;4;;5;1;BC Comet Nürnberg;3;Michael Schlundt;7725;SG Rottendorf 1;223;0.0;True;False
+25/26;6;2026-04-11;BayL;4;;5;1;SG Rottendorf 1;0;Rothenhöfer Maximilian;38396;BC Comet Nürnberg;289;1.0;True;False
+25/26;6;2026-04-11;BayL;4;;5;1;SG Rottendorf 1;0;Team Total;0;BC Comet Nürnberg;942;3.0;False;True
+25/26;6;2026-04-11;BayL;4;;5;1;SG Rottendorf 1;1;Stefan Reichardt;16945;BC Comet Nürnberg;174;0.0;True;False
+25/26;6;2026-04-11;BayL;4;;5;1;SG Rottendorf 1;2;Christian Büttner;16862;BC Comet Nürnberg;246;1.0;True;False
+25/26;6;2026-04-11;BayL;4;;5;1;SG Rottendorf 1;3;Tim Meier;38545;BC Comet Nürnberg;233;1.0;True;False
+25/26;6;2026-04-11;BayL;4;;5;2;SG DJK Rimpar 1;0;Michael Kreß;10622;Schanzer Ingolstadt 1;183;0.5;True;False
+25/26;6;2026-04-11;BayL;4;;5;2;SG DJK Rimpar 1;0;Team Total;0;Schanzer Ingolstadt 1;769;3.0;False;True
+25/26;6;2026-04-11;BayL;4;;5;2;SG DJK Rimpar 1;1;Marc Weissenseel;38723;Schanzer Ingolstadt 1;181;0.0;True;False
+25/26;6;2026-04-11;BayL;4;;5;2;SG DJK Rimpar 1;2;Alexander Scholz;16352;Schanzer Ingolstadt 1;185;1.0;True;False
+25/26;6;2026-04-11;BayL;4;;5;2;SG DJK Rimpar 1;3;Sebastian Boé;16287;Schanzer Ingolstadt 1;220;1.0;True;False
+25/26;6;2026-04-11;BayL;4;;5;2;Schanzer Ingolstadt 1;0;Oliver Schütze;38550;SG DJK Rimpar 1;183;0.5;True;False
+25/26;6;2026-04-11;BayL;4;;5;2;Schanzer Ingolstadt 1;0;Team Total;0;SG DJK Rimpar 1;761;0.0;False;True
+25/26;6;2026-04-11;BayL;4;;5;2;Schanzer Ingolstadt 1;1;Thomas Hartl;38411;SG DJK Rimpar 1;213;1.0;True;False
+25/26;6;2026-04-11;BayL;4;;5;2;Schanzer Ingolstadt 1;2;Markus Schmied;38361;SG DJK Rimpar 1;177;0.0;True;False
+25/26;6;2026-04-11;BayL;4;;5;2;Schanzer Ingolstadt 1;3;Jochen Spielvogel;7348;SG DJK Rimpar 1;188;0.0;True;False
+25/26;6;2026-04-11;BayL;4;;5;3;BC EMAX Unterföhring 2;0;Sebastian Lohse;27134;Werdenfels 1;199;1.0;True;False
+25/26;6;2026-04-11;BayL;4;;5;3;BC EMAX Unterföhring 2;0;Team Total;0;Werdenfels 1;820;3.0;False;True
+25/26;6;2026-04-11;BayL;4;;5;3;BC EMAX Unterföhring 2;1;Marco Probst;7602;Werdenfels 1;216;1.0;True;False
+25/26;6;2026-04-11;BayL;4;;5;3;BC EMAX Unterföhring 2;2;Selim Fliegner;38673;Werdenfels 1;223;1.0;True;False
+25/26;6;2026-04-11;BayL;4;;5;3;BC EMAX Unterföhring 2;3;Günter Denz;16398;Werdenfels 1;182;0.0;True;False
+25/26;6;2026-04-11;BayL;4;;5;3;Werdenfels 1;0;Michael Ring;7317;BC EMAX Unterföhring 2;170;0.0;True;False
+25/26;6;2026-04-11;BayL;4;;5;3;Werdenfels 1;0;Team Total;0;BC EMAX Unterföhring 2;724;0.0;False;True
+25/26;6;2026-04-11;BayL;4;;5;3;Werdenfels 1;1;Markus Auer;25788;BC EMAX Unterföhring 2;181;0.0;True;False
+25/26;6;2026-04-11;BayL;4;;5;3;Werdenfels 1;2;Jan Musiol;25166;BC EMAX Unterföhring 2;170;0.0;True;False
+25/26;6;2026-04-11;BayL;4;;5;3;Werdenfels 1;3;Bruno Gärtner;25649;BC EMAX Unterföhring 2;203;1.0;True;False
+25/26;6;2026-04-11;BayL;4;;5;4;BK München 3;0;Peter Börding;7593;Bajuwaren München 1;237;0.0;True;False
+25/26;6;2026-04-11;BayL;4;;5;4;BK München 3;0;Team Total;0;Bajuwaren München 1;820;0.0;False;True
+25/26;6;2026-04-11;BayL;4;;5;4;BK München 3;1;Georg Hinterwimmer;7867;Bajuwaren München 1;214;1.0;True;False
+25/26;6;2026-04-11;BayL;4;;5;4;BK München 3;2;Harald Laub;7597;Bajuwaren München 1;221;1.0;True;False
+25/26;6;2026-04-11;BayL;4;;5;4;BK München 3;3;Sebastian Hinterwimmer;7885;Bajuwaren München 1;148;0.0;True;False
+25/26;6;2026-04-11;BayL;4;;5;4;Bajuwaren München 1;0;Hans-Jürgen Glasl;7408;BK München 3;279;1.0;True;False
+25/26;6;2026-04-11;BayL;4;;5;4;Bajuwaren München 1;0;Team Total;0;BK München 3;823;3.0;False;True
+25/26;6;2026-04-11;BayL;4;;5;4;Bajuwaren München 1;1;Hans-Jürgen Glasl sen.;16762;BK München 3;164;0.0;True;False
+25/26;6;2026-04-11;BayL;4;;5;4;Bajuwaren München 1;2;Volker Lüthje;7601;BK München 3;166;0.0;True;False
+25/26;6;2026-04-11;BayL;4;;5;4;Bajuwaren München 1;3;Ralph Reichert;7416;BK München 3;214;1.0;True;False
+25/26;6;2026-04-11;BayL;4;;6;0;BC Comet Nürnberg;0;Andreas Mittelmaier;16896;Werdenfels 1;215;0.0;True;False
+25/26;6;2026-04-11;BayL;4;;6;0;BC Comet Nürnberg;0;Team Total;0;Werdenfels 1;843;3.0;False;True
+25/26;6;2026-04-11;BayL;4;;6;0;BC Comet Nürnberg;1;Andreas Schick;7102;Werdenfels 1;201;1.0;True;False
+25/26;6;2026-04-11;BayL;4;;6;0;BC Comet Nürnberg;2;Christian Schlick;7724;Werdenfels 1;194;0.0;True;False
+25/26;6;2026-04-11;BayL;4;;6;0;BC Comet Nürnberg;3;Michael Schlundt;7725;Werdenfels 1;233;1.0;True;False
+25/26;6;2026-04-11;BayL;4;;6;0;Werdenfels 1;0;Michael Ring;7317;BC Comet Nürnberg;226;1.0;True;False
+25/26;6;2026-04-11;BayL;4;;6;0;Werdenfels 1;0;Team Total;0;BC Comet Nürnberg;825;0.0;False;True
+25/26;6;2026-04-11;BayL;4;;6;0;Werdenfels 1;1;Markus Auer;25788;BC Comet Nürnberg;175;0.0;True;False
+25/26;6;2026-04-11;BayL;4;;6;0;Werdenfels 1;2;Jan Musiol;25166;BC Comet Nürnberg;225;1.0;True;False
+25/26;6;2026-04-11;BayL;4;;6;0;Werdenfels 1;3;Bruno Gärtner;25649;BC Comet Nürnberg;199;0.0;True;False
+25/26;6;2026-04-11;BayL;4;;6;1;Bajuwaren München 1;0;Hans-Jürgen Glasl;7408;Schanzer Ingolstadt 1;153;0.0;True;False
+25/26;6;2026-04-11;BayL;4;;6;1;Bajuwaren München 1;0;Team Total;0;Schanzer Ingolstadt 1;649;0.0;False;True
+25/26;6;2026-04-11;BayL;4;;6;1;Bajuwaren München 1;1;Hans-Jürgen Glasl sen.;16762;Schanzer Ingolstadt 1;158;0.0;True;False
+25/26;6;2026-04-11;BayL;4;;6;1;Bajuwaren München 1;2;Volker Lüthje;7601;Schanzer Ingolstadt 1;171;0.0;True;False
+25/26;6;2026-04-11;BayL;4;;6;1;Bajuwaren München 1;3;Ralph Reichert;7416;Schanzer Ingolstadt 1;167;0.0;True;False
+25/26;6;2026-04-11;BayL;4;;6;1;Schanzer Ingolstadt 1;0;Oliver Schütze;38550;Bajuwaren München 1;211;1.0;True;False
+25/26;6;2026-04-11;BayL;4;;6;1;Schanzer Ingolstadt 1;0;Team Total;0;Bajuwaren München 1;823;3.0;False;True
+25/26;6;2026-04-11;BayL;4;;6;1;Schanzer Ingolstadt 1;1;Thomas Hartl;38411;Bajuwaren München 1;191;1.0;True;False
+25/26;6;2026-04-11;BayL;4;;6;1;Schanzer Ingolstadt 1;2;Markus Schmied;38361;Bajuwaren München 1;222;1.0;True;False
+25/26;6;2026-04-11;BayL;4;;6;1;Schanzer Ingolstadt 1;3;Jochen Spielvogel;7348;Bajuwaren München 1;199;1.0;True;False
+25/26;6;2026-04-11;BayL;4;;6;2;Bowlinghaus Bamberg 1;0;William Karl;16532;SG Rottendorf 1;203;1.0;True;False
+25/26;6;2026-04-11;BayL;4;;6;2;Bowlinghaus Bamberg 1;0;Team Total;0;SG Rottendorf 1;780;0.0;False;True
+25/26;6;2026-04-11;BayL;4;;6;2;Bowlinghaus Bamberg 1;1;Jonathan Nolan;16873;SG Rottendorf 1;205;1.0;True;False
+25/26;6;2026-04-11;BayL;4;;6;2;Bowlinghaus Bamberg 1;2;Thomas Nikoleit;25516;SG Rottendorf 1;223;1.0;True;False
+25/26;6;2026-04-11;BayL;4;;6;2;Bowlinghaus Bamberg 1;3;Alexander Renner;16251;SG Rottendorf 1;149;0.0;True;False
+25/26;6;2026-04-11;BayL;4;;6;2;SG Rottendorf 1;0;Rothenhöfer Maximilian;38396;Bowlinghaus Bamberg 1;185;0.0;True;False
+25/26;6;2026-04-11;BayL;4;;6;2;SG Rottendorf 1;0;Team Total;0;Bowlinghaus Bamberg 1;791;3.0;False;True
+25/26;6;2026-04-11;BayL;4;;6;2;SG Rottendorf 1;1;Stefan Reichardt;16945;Bowlinghaus Bamberg 1;183;0.0;True;False
+25/26;6;2026-04-11;BayL;4;;6;2;SG Rottendorf 1;2;Christian Büttner;16862;Bowlinghaus Bamberg 1;222;0.0;True;False
+25/26;6;2026-04-11;BayL;4;;6;2;SG Rottendorf 1;3;Tim Meier;38545;Bowlinghaus Bamberg 1;201;1.0;True;False
+25/26;6;2026-04-11;BayL;4;;6;3;BK München 3;0;Peter Börding;7593;Donaubowler Regensburg 1;221;1.0;True;False
+25/26;6;2026-04-11;BayL;4;;6;3;BK München 3;0;Team Total;0;Donaubowler Regensburg 1;868;3.0;False;True
+25/26;6;2026-04-11;BayL;4;;6;3;BK München 3;1;Georg Hinterwimmer;7867;Donaubowler Regensburg 1;256;1.0;True;False
+25/26;6;2026-04-11;BayL;4;;6;3;BK München 3;2;Harald Laub;7597;Donaubowler Regensburg 1;166;0.0;True;False
+25/26;6;2026-04-11;BayL;4;;6;3;BK München 3;3;Daniel Börding;7591;Donaubowler Regensburg 1;225;1.0;True;False
+25/26;6;2026-04-11;BayL;4;;6;3;Donaubowler Regensburg 1;0;Christian Feller;16007;BK München 3;162;0.0;True;False
+25/26;6;2026-04-11;BayL;4;;6;3;Donaubowler Regensburg 1;0;Team Total;0;BK München 3;729;0.0;False;True
+25/26;6;2026-04-11;BayL;4;;6;3;Donaubowler Regensburg 1;1;Sebastian Radecker;38025;BK München 3;158;0.0;True;False
+25/26;6;2026-04-11;BayL;4;;6;3;Donaubowler Regensburg 1;2;Volkmar Hartfeil;7830;BK München 3;195;1.0;True;False
+25/26;6;2026-04-11;BayL;4;;6;3;Donaubowler Regensburg 1;3;Marco Hürdler;25271;BK München 3;214;0.0;True;False
+25/26;6;2026-04-11;BayL;4;;6;4;BC EMAX Unterföhring 2;0;Sebastian Lohse;27134;SG DJK Rimpar 1;197;1.0;True;False
+25/26;6;2026-04-11;BayL;4;;6;4;BC EMAX Unterföhring 2;0;Team Total;0;SG DJK Rimpar 1;781;3.0;False;True
+25/26;6;2026-04-11;BayL;4;;6;4;BC EMAX Unterföhring 2;1;Marco Probst;7602;SG DJK Rimpar 1;220;1.0;True;False
+25/26;6;2026-04-11;BayL;4;;6;4;BC EMAX Unterföhring 2;2;Selim Fliegner;38673;SG DJK Rimpar 1;153;0.0;True;False
+25/26;6;2026-04-11;BayL;4;;6;4;BC EMAX Unterföhring 2;3;Günter Denz;16398;SG DJK Rimpar 1;211;1.0;True;False
+25/26;6;2026-04-11;BayL;4;;6;4;SG DJK Rimpar 1;0;Michael Kreß;10622;BC EMAX Unterföhring 2;181;0.0;True;False
+25/26;6;2026-04-11;BayL;4;;6;4;SG DJK Rimpar 1;0;Team Total;0;BC EMAX Unterföhring 2;670;0.0;False;True
+25/26;6;2026-04-11;BayL;4;;6;4;SG DJK Rimpar 1;1;Marc Weissenseel;38723;BC EMAX Unterföhring 2;172;0.0;True;False
+25/26;6;2026-04-11;BayL;4;;6;4;SG DJK Rimpar 1;2;Alexander Scholz;16352;BC EMAX Unterföhring 2;155;1.0;True;False
+25/26;6;2026-04-11;BayL;4;;6;4;SG DJK Rimpar 1;3;Sebastian Boé;16287;BC EMAX Unterföhring 2;162;0.0;True;False
+25/26;6;2026-04-11;BayL;4;;7;0;BC EMAX Unterföhring 2;0;Sebastian Lohse;27134;SG Rottendorf 1;221;1.0;True;False
+25/26;6;2026-04-11;BayL;4;;7;0;BC EMAX Unterföhring 2;0;Team Total;0;SG Rottendorf 1;835;0.0;False;True
+25/26;6;2026-04-11;BayL;4;;7;0;BC EMAX Unterföhring 2;1;Marco Probst;7602;SG Rottendorf 1;218;1.0;True;False
+25/26;6;2026-04-11;BayL;4;;7;0;BC EMAX Unterföhring 2;2;Robert Pirzer;7428;SG Rottendorf 1;212;1.0;True;False
+25/26;6;2026-04-11;BayL;4;;7;0;BC EMAX Unterföhring 2;3;Günter Denz;16398;SG Rottendorf 1;184;0.0;True;False
+25/26;6;2026-04-11;BayL;4;;7;0;SG Rottendorf 1;0;Rothenhöfer Maximilian;38396;BC EMAX Unterföhring 2;215;0.0;True;False
+25/26;6;2026-04-11;BayL;4;;7;0;SG Rottendorf 1;0;Team Total;0;BC EMAX Unterföhring 2;853;3.0;False;True
+25/26;6;2026-04-11;BayL;4;;7;0;SG Rottendorf 1;1;Stefan Reichardt;16945;BC EMAX Unterföhring 2;212;0.0;True;False
+25/26;6;2026-04-11;BayL;4;;7;0;SG Rottendorf 1;2;Christian Büttner;16862;BC EMAX Unterföhring 2;189;0.0;True;False
+25/26;6;2026-04-11;BayL;4;;7;0;SG Rottendorf 1;3;Tim Meier;38545;BC EMAX Unterföhring 2;237;1.0;True;False
+25/26;6;2026-04-11;BayL;4;;7;1;BK München 3;0;Peter Börding;7593;SG DJK Rimpar 1;237;1.0;True;False
+25/26;6;2026-04-11;BayL;4;;7;1;BK München 3;0;Team Total;0;SG DJK Rimpar 1;849;3.0;False;True
+25/26;6;2026-04-11;BayL;4;;7;1;BK München 3;1;Georg Hinterwimmer;7867;SG DJK Rimpar 1;206;1.0;True;False
+25/26;6;2026-04-11;BayL;4;;7;1;BK München 3;2;Harald Laub;7597;SG DJK Rimpar 1;180;0.0;True;False
+25/26;6;2026-04-11;BayL;4;;7;1;BK München 3;3;Daniel Börding;7591;SG DJK Rimpar 1;226;1.0;True;False
+25/26;6;2026-04-11;BayL;4;;7;1;SG DJK Rimpar 1;0;Michael Kreß;10622;BK München 3;204;0.0;True;False
+25/26;6;2026-04-11;BayL;4;;7;1;SG DJK Rimpar 1;0;Team Total;0;BK München 3;788;0.0;False;True
+25/26;6;2026-04-11;BayL;4;;7;1;SG DJK Rimpar 1;1;Marc Weissenseel;38723;BK München 3;200;0.0;True;False
+25/26;6;2026-04-11;BayL;4;;7;1;SG DJK Rimpar 1;2;Alexander Scholz;16352;BK München 3;248;1.0;True;False
+25/26;6;2026-04-11;BayL;4;;7;1;SG DJK Rimpar 1;3;Sebastian Boé;16287;BK München 3;136;0.0;True;False
+25/26;6;2026-04-11;BayL;4;;7;2;BC Comet Nürnberg;0;Andreas Mittelmaier;16896;Donaubowler Regensburg 1;205;1.0;True;False
+25/26;6;2026-04-11;BayL;4;;7;2;BC Comet Nürnberg;0;Team Total;0;Donaubowler Regensburg 1;858;3.0;False;True
+25/26;6;2026-04-11;BayL;4;;7;2;BC Comet Nürnberg;1;Andreas Schick;7102;Donaubowler Regensburg 1;227;1.0;True;False
+25/26;6;2026-04-11;BayL;4;;7;2;BC Comet Nürnberg;2;Christian Schlick;7724;Donaubowler Regensburg 1;194;0.0;True;False
+25/26;6;2026-04-11;BayL;4;;7;2;BC Comet Nürnberg;3;Michael Schlundt;7725;Donaubowler Regensburg 1;232;0.0;True;False
+25/26;6;2026-04-11;BayL;4;;7;2;Donaubowler Regensburg 1;0;Sebastian Radecker;38025;BC Comet Nürnberg;183;0.0;True;False
+25/26;6;2026-04-11;BayL;4;;7;2;Donaubowler Regensburg 1;0;Team Total;0;BC Comet Nürnberg;778;0.0;False;True
+25/26;6;2026-04-11;BayL;4;;7;2;Donaubowler Regensburg 1;1;Christian Feller;16007;BC Comet Nürnberg;139;0.0;True;False
+25/26;6;2026-04-11;BayL;4;;7;2;Donaubowler Regensburg 1;2;Volkmar Hartfeil;7830;BC Comet Nürnberg;198;1.0;True;False
+25/26;6;2026-04-11;BayL;4;;7;2;Donaubowler Regensburg 1;3;Marco Hürdler;25271;BC Comet Nürnberg;258;1.0;True;False
+25/26;6;2026-04-11;BayL;4;;7;3;Bajuwaren München 1;0;Hans-Jürgen Glasl;7408;Bowlinghaus Bamberg 1;235;1.0;True;False
+25/26;6;2026-04-11;BayL;4;;7;3;Bajuwaren München 1;0;Team Total;0;Bowlinghaus Bamberg 1;768;3.0;False;True
+25/26;6;2026-04-11;BayL;4;;7;3;Bajuwaren München 1;1;Hans-Jürgen Glasl sen.;16762;Bowlinghaus Bamberg 1;220;1.0;True;False
+25/26;6;2026-04-11;BayL;4;;7;3;Bajuwaren München 1;2;Volker Lüthje;7601;Bowlinghaus Bamberg 1;132;0.0;True;False
+25/26;6;2026-04-11;BayL;4;;7;3;Bajuwaren München 1;3;Ralph Reichert;7416;Bowlinghaus Bamberg 1;181;1.0;True;False
+25/26;6;2026-04-11;BayL;4;;7;3;Bowlinghaus Bamberg 1;0;William Karl;16532;Bajuwaren München 1;205;0.0;True;False
+25/26;6;2026-04-11;BayL;4;;7;3;Bowlinghaus Bamberg 1;0;Team Total;0;Bajuwaren München 1;700;0.0;False;True
+25/26;6;2026-04-11;BayL;4;;7;3;Bowlinghaus Bamberg 1;1;Jonathan Nolan;16873;Bajuwaren München 1;179;0.0;True;False
+25/26;6;2026-04-11;BayL;4;;7;3;Bowlinghaus Bamberg 1;2;Thomas Nikoleit;25516;Bajuwaren München 1;168;1.0;True;False
+25/26;6;2026-04-11;BayL;4;;7;3;Bowlinghaus Bamberg 1;3;Alexander Renner;16251;Bajuwaren München 1;148;0.0;True;False
+25/26;6;2026-04-11;BayL;4;;7;4;Schanzer Ingolstadt 1;0;Oliver Schütze;38550;Werdenfels 1;209;0.0;True;False
+25/26;6;2026-04-11;BayL;4;;7;4;Schanzer Ingolstadt 1;0;Team Total;0;Werdenfels 1;840;0.0;False;True
+25/26;6;2026-04-11;BayL;4;;7;4;Schanzer Ingolstadt 1;1;Thomas Hartl;38411;Werdenfels 1;202;0.0;True;False
+25/26;6;2026-04-11;BayL;4;;7;4;Schanzer Ingolstadt 1;2;Markus Schmied;38361;Werdenfels 1;214;0.0;True;False
+25/26;6;2026-04-11;BayL;4;;7;4;Schanzer Ingolstadt 1;3;Jochen Spielvogel;7348;Werdenfels 1;215;0.0;True;False
+25/26;6;2026-04-11;BayL;4;;7;4;Werdenfels 1;0;Michael Ring;7317;Schanzer Ingolstadt 1;238;1.0;True;False
+25/26;6;2026-04-11;BayL;4;;7;4;Werdenfels 1;0;Team Total;0;Schanzer Ingolstadt 1;938;3.0;False;True
+25/26;6;2026-04-11;BayL;4;;7;4;Werdenfels 1;1;Jan Musiol;25166;Schanzer Ingolstadt 1;216;1.0;True;False
+25/26;6;2026-04-11;BayL;4;;7;4;Werdenfels 1;2;Bruno Gärtner;25649;Schanzer Ingolstadt 1;237;1.0;True;False
+25/26;6;2026-04-11;BayL;4;;7;4;Werdenfels 1;3;Daniel Hellmich;7314;Schanzer Ingolstadt 1;247;1.0;True;False
+25/26;6;2026-04-11;BayL;4;;8;0;Bowlinghaus Bamberg 1;0;William Karl;16532;SG DJK Rimpar 1;196;0.0;True;False
+25/26;6;2026-04-11;BayL;4;;8;0;Bowlinghaus Bamberg 1;0;Team Total;0;SG DJK Rimpar 1;787;3.0;False;True
+25/26;6;2026-04-11;BayL;4;;8;0;Bowlinghaus Bamberg 1;1;Jonathan Nolan;16873;SG DJK Rimpar 1;189;0.0;True;False
+25/26;6;2026-04-11;BayL;4;;8;0;Bowlinghaus Bamberg 1;2;Thomas Nikoleit;25516;SG DJK Rimpar 1;216;1.0;True;False
+25/26;6;2026-04-11;BayL;4;;8;0;Bowlinghaus Bamberg 1;3;Alexander Renner;16251;SG DJK Rimpar 1;186;0.0;True;False
+25/26;6;2026-04-11;BayL;4;;8;0;SG DJK Rimpar 1;0;Michael Kreß;10622;Bowlinghaus Bamberg 1;201;1.0;True;False
+25/26;6;2026-04-11;BayL;4;;8;0;SG DJK Rimpar 1;0;Team Total;0;Bowlinghaus Bamberg 1;768;0.0;False;True
+25/26;6;2026-04-11;BayL;4;;8;0;SG DJK Rimpar 1;1;Marc Weissenseel;38723;Bowlinghaus Bamberg 1;211;1.0;True;False
+25/26;6;2026-04-11;BayL;4;;8;0;SG DJK Rimpar 1;2;Alexander Scholz;16352;Bowlinghaus Bamberg 1;167;0.0;True;False
+25/26;6;2026-04-11;BayL;4;;8;0;SG DJK Rimpar 1;3;Sebastian Boé;16287;Bowlinghaus Bamberg 1;189;1.0;True;False
+25/26;6;2026-04-11;BayL;4;;8;1;BC EMAX Unterföhring 2;0;Sebastian Lohse;27134;Donaubowler Regensburg 1;221;0.5;True;False
+25/26;6;2026-04-11;BayL;4;;8;1;BC EMAX Unterföhring 2;0;Team Total;0;Donaubowler Regensburg 1;782;0.0;False;True
+25/26;6;2026-04-11;BayL;4;;8;1;BC EMAX Unterföhring 2;1;Marco Probst;7602;Donaubowler Regensburg 1;183;0.0;True;False
+25/26;6;2026-04-11;BayL;4;;8;1;BC EMAX Unterföhring 2;2;Robert Pirzer;7428;Donaubowler Regensburg 1;199;1.0;True;False
+25/26;6;2026-04-11;BayL;4;;8;1;BC EMAX Unterföhring 2;3;Günter Denz;16398;Donaubowler Regensburg 1;179;0.0;True;False
+25/26;6;2026-04-11;BayL;4;;8;1;Donaubowler Regensburg 1;0;Volkmar Hartfeil;7830;BC EMAX Unterföhring 2;221;0.5;True;False
+25/26;6;2026-04-11;BayL;4;;8;1;Donaubowler Regensburg 1;0;Team Total;0;BC EMAX Unterföhring 2;814;3.0;False;True
+25/26;6;2026-04-11;BayL;4;;8;1;Donaubowler Regensburg 1;1;Sebastian Radecker;38025;BC EMAX Unterföhring 2;191;1.0;True;False
+25/26;6;2026-04-11;BayL;4;;8;1;Donaubowler Regensburg 1;2;Kurt Obermeier;7831;BC EMAX Unterföhring 2;188;0.0;True;False
+25/26;6;2026-04-11;BayL;4;;8;1;Donaubowler Regensburg 1;3;Marco Hürdler;25271;BC EMAX Unterföhring 2;214;1.0;True;False
+25/26;6;2026-04-11;BayL;4;;8;2;BK München 3;0;Patrick Baszler;7886;Werdenfels 1;161;1.0;True;False
+25/26;6;2026-04-11;BayL;4;;8;2;BK München 3;0;Team Total;0;Werdenfels 1;771;3.0;False;True
+25/26;6;2026-04-11;BayL;4;;8;2;BK München 3;1;Georg Hinterwimmer;7867;Werdenfels 1;213;1.0;True;False
+25/26;6;2026-04-11;BayL;4;;8;2;BK München 3;2;Daniel Börding;7591;Werdenfels 1;205;1.0;True;False
+25/26;6;2026-04-11;BayL;4;;8;2;BK München 3;3;Sebastian Hinterwimmer;7885;Werdenfels 1;192;0.0;True;False
+25/26;6;2026-04-11;BayL;4;;8;2;Werdenfels 1;0;Michael Ring;7317;BK München 3;153;0.0;True;False
+25/26;6;2026-04-11;BayL;4;;8;2;Werdenfels 1;0;Team Total;0;BK München 3;736;0.0;False;True
+25/26;6;2026-04-11;BayL;4;;8;2;Werdenfels 1;1;Kral Ewald;7309;BK München 3;184;0.0;True;False
+25/26;6;2026-04-11;BayL;4;;8;2;Werdenfels 1;2;Jan Musiol;25166;BK München 3;154;0.0;True;False
+25/26;6;2026-04-11;BayL;4;;8;2;Werdenfels 1;3;Daniel Hellmich;7314;BK München 3;245;1.0;True;False
+25/26;6;2026-04-11;BayL;4;;8;3;SG Rottendorf 1;0;Rothenhöfer Maximilian;38396;Schanzer Ingolstadt 1;146;0.0;True;False
+25/26;6;2026-04-11;BayL;4;;8;3;SG Rottendorf 1;0;Team Total;0;Schanzer Ingolstadt 1;664;0.0;False;True
+25/26;6;2026-04-11;BayL;4;;8;3;SG Rottendorf 1;1;Stefan Reichardt;16945;Schanzer Ingolstadt 1;179;0.0;True;False
+25/26;6;2026-04-11;BayL;4;;8;3;SG Rottendorf 1;2;_Auswechslung im Spiel;69;Schanzer Ingolstadt 1;137;0.0;True;False
+25/26;6;2026-04-11;BayL;4;;8;3;SG Rottendorf 1;3;Tim Meier;38545;Schanzer Ingolstadt 1;202;0.0;True;False
+25/26;6;2026-04-11;BayL;4;;8;3;Schanzer Ingolstadt 1;0;Oliver Schütze;38550;SG Rottendorf 1;194;1.0;True;False
+25/26;6;2026-04-11;BayL;4;;8;3;Schanzer Ingolstadt 1;0;Team Total;0;SG Rottendorf 1;751;3.0;False;True
+25/26;6;2026-04-11;BayL;4;;8;3;Schanzer Ingolstadt 1;1;Thomas Hartl;38411;SG Rottendorf 1;182;1.0;True;False
+25/26;6;2026-04-11;BayL;4;;8;3;Schanzer Ingolstadt 1;2;Markus Schmied;38361;SG Rottendorf 1;171;1.0;True;False
+25/26;6;2026-04-11;BayL;4;;8;3;Schanzer Ingolstadt 1;3;Jochen Spielvogel;7348;SG Rottendorf 1;204;1.0;True;False
+25/26;6;2026-04-11;BayL;4;;8;4;BC Comet Nürnberg;0;Andreas Mittelmaier;16896;Bajuwaren München 1;187;0.0;True;False
+25/26;6;2026-04-11;BayL;4;;8;4;BC Comet Nürnberg;0;Team Total;0;Bajuwaren München 1;786;3.0;False;True
+25/26;6;2026-04-11;BayL;4;;8;4;BC Comet Nürnberg;1;Andreas Schick;7102;Bajuwaren München 1;194;1.0;True;False
+25/26;6;2026-04-11;BayL;4;;8;4;BC Comet Nürnberg;2;Christian Schlick;7724;Bajuwaren München 1;205;1.0;True;False
+25/26;6;2026-04-11;BayL;4;;8;4;BC Comet Nürnberg;3;Michael Schlundt;7725;Bajuwaren München 1;200;1.0;True;False
+25/26;6;2026-04-11;BayL;4;;8;4;Bajuwaren München 1;0;Hans-Jürgen Glasl;7408;BC Comet Nürnberg;212;1.0;True;False
+25/26;6;2026-04-11;BayL;4;;8;4;Bajuwaren München 1;0;Team Total;0;BC Comet Nürnberg;751;0.0;False;True
+25/26;6;2026-04-11;BayL;4;;8;4;Bajuwaren München 1;1;Hans-Jürgen Glasl sen.;16762;BC Comet Nürnberg;182;0.0;True;False
+25/26;6;2026-04-11;BayL;4;;8;4;Bajuwaren München 1;2;Volker Lüthje;7601;BC Comet Nürnberg;187;0.0;True;False
+25/26;6;2026-04-11;BayL;4;;8;4;Bajuwaren München 1;3;Ralph Reichert;7416;BC Comet Nürnberg;170;0.0;True;False
+25/26;6;2026-04-11;BayL;4;;9;0;BC Comet Nürnberg;0;Andreas Mittelmaier;16896;BK München 3;205;0.0;True;False
+25/26;6;2026-04-11;BayL;4;;9;0;BC Comet Nürnberg;0;Team Total;0;BK München 3;937;3.0;False;True
+25/26;6;2026-04-11;BayL;4;;9;0;BC Comet Nürnberg;1;Andreas Schick;7102;BK München 3;214;0.0;True;False
+25/26;6;2026-04-11;BayL;4;;9;0;BC Comet Nürnberg;2;Christian Schlick;7724;BK München 3;290;1.0;True;False
+25/26;6;2026-04-11;BayL;4;;9;0;BC Comet Nürnberg;3;Michael Schlundt;7725;BK München 3;228;0.0;True;False
+25/26;6;2026-04-11;BayL;4;;9;0;BK München 3;0;Patrick Baszler;7886;BC Comet Nürnberg;206;1.0;True;False
+25/26;6;2026-04-11;BayL;4;;9;0;BK München 3;0;Team Total;0;BC Comet Nürnberg;867;0.0;False;True
+25/26;6;2026-04-11;BayL;4;;9;0;BK München 3;1;Georg Hinterwimmer;7867;BC Comet Nürnberg;216;1.0;True;False
+25/26;6;2026-04-11;BayL;4;;9;0;BK München 3;2;Daniel Börding;7591;BC Comet Nürnberg;196;0.0;True;False
+25/26;6;2026-04-11;BayL;4;;9;0;BK München 3;3;Sebastian Hinterwimmer;7885;BC Comet Nürnberg;249;1.0;True;False
+25/26;6;2026-04-11;BayL;4;;9;1;Bowlinghaus Bamberg 1;0;William Karl;16532;Schanzer Ingolstadt 1;218;0.0;True;False
+25/26;6;2026-04-11;BayL;4;;9;1;Bowlinghaus Bamberg 1;0;Team Total;0;Schanzer Ingolstadt 1;763;0.0;False;True
+25/26;6;2026-04-11;BayL;4;;9;1;Bowlinghaus Bamberg 1;1;Jonathan Nolan;16873;Schanzer Ingolstadt 1;179;0.0;True;False
+25/26;6;2026-04-11;BayL;4;;9;1;Bowlinghaus Bamberg 1;2;Thomas Nikoleit;25516;Schanzer Ingolstadt 1;192;1.0;True;False
+25/26;6;2026-04-11;BayL;4;;9;1;Bowlinghaus Bamberg 1;3;Alexander Renner;16251;Schanzer Ingolstadt 1;174;0.0;True;False
+25/26;6;2026-04-11;BayL;4;;9;1;Schanzer Ingolstadt 1;0;Oliver Schütze;38550;Bowlinghaus Bamberg 1;256;1.0;True;False
+25/26;6;2026-04-11;BayL;4;;9;1;Schanzer Ingolstadt 1;0;Team Total;0;Bowlinghaus Bamberg 1;827;3.0;False;True
+25/26;6;2026-04-11;BayL;4;;9;1;Schanzer Ingolstadt 1;1;Thomas Hartl;38411;Bowlinghaus Bamberg 1;194;1.0;True;False
+25/26;6;2026-04-11;BayL;4;;9;1;Schanzer Ingolstadt 1;2;Markus Schmied;38361;Bowlinghaus Bamberg 1;184;0.0;True;False
+25/26;6;2026-04-11;BayL;4;;9;1;Schanzer Ingolstadt 1;3;Jochen Spielvogel;7348;Bowlinghaus Bamberg 1;193;1.0;True;False
+25/26;6;2026-04-11;BayL;4;;9;2;BC EMAX Unterföhring 2;0;Sebastian Lohse;27134;Bajuwaren München 1;242;0.0;True;False
+25/26;6;2026-04-11;BayL;4;;9;2;BC EMAX Unterföhring 2;0;Team Total;0;Bajuwaren München 1;850;3.0;False;True
+25/26;6;2026-04-11;BayL;4;;9;2;BC EMAX Unterföhring 2;1;Marco Probst;7602;Bajuwaren München 1;208;1.0;True;False
+25/26;6;2026-04-11;BayL;4;;9;2;BC EMAX Unterföhring 2;2;Robert Pirzer;7428;Bajuwaren München 1;214;1.0;True;False
+25/26;6;2026-04-11;BayL;4;;9;2;BC EMAX Unterföhring 2;3;Selim Fliegner;38673;Bajuwaren München 1;186;1.0;True;False
+25/26;6;2026-04-11;BayL;4;;9;2;Bajuwaren München 1;0;Hans-Jürgen Glasl;7408;BC EMAX Unterföhring 2;255;1.0;True;False
+25/26;6;2026-04-11;BayL;4;;9;2;Bajuwaren München 1;0;Team Total;0;BC EMAX Unterföhring 2;745;0.0;False;True
+25/26;6;2026-04-11;BayL;4;;9;2;Bajuwaren München 1;1;Hans-Jürgen Glasl sen.;16762;BC EMAX Unterföhring 2;139;0.0;True;False
+25/26;6;2026-04-11;BayL;4;;9;2;Bajuwaren München 1;2;Volker Lüthje;7601;BC EMAX Unterföhring 2;185;0.0;True;False
+25/26;6;2026-04-11;BayL;4;;9;2;Bajuwaren München 1;3;Ralph Reichert;7416;BC EMAX Unterföhring 2;166;0.0;True;False
+25/26;6;2026-04-11;BayL;4;;9;3;Donaubowler Regensburg 1;0;Volkmar Hartfeil;7830;Werdenfels 1;180;0.0;True;False
+25/26;6;2026-04-11;BayL;4;;9;3;Donaubowler Regensburg 1;0;Team Total;0;Werdenfels 1;750;0.0;False;True
+25/26;6;2026-04-11;BayL;4;;9;3;Donaubowler Regensburg 1;1;Sebastian Radecker;38025;Werdenfels 1;150;0.0;True;False
+25/26;6;2026-04-11;BayL;4;;9;3;Donaubowler Regensburg 1;2;Kurt Obermeier;7831;Werdenfels 1;194;0.0;True;False
+25/26;6;2026-04-11;BayL;4;;9;3;Donaubowler Regensburg 1;3;Marco Hürdler;25271;Werdenfels 1;226;1.0;True;False
+25/26;6;2026-04-11;BayL;4;;9;3;Werdenfels 1;0;Michael Ring;7317;Donaubowler Regensburg 1;226;1.0;True;False
+25/26;6;2026-04-11;BayL;4;;9;3;Werdenfels 1;0;Team Total;0;Donaubowler Regensburg 1;798;3.0;False;True
+25/26;6;2026-04-11;BayL;4;;9;3;Werdenfels 1;1;Kral Ewald;7309;Donaubowler Regensburg 1;166;1.0;True;False
+25/26;6;2026-04-11;BayL;4;;9;3;Werdenfels 1;2;Markus Auer;25788;Donaubowler Regensburg 1;203;1.0;True;False
+25/26;6;2026-04-11;BayL;4;;9;3;Werdenfels 1;3;Daniel Hellmich;7314;Donaubowler Regensburg 1;203;0.0;True;False
+25/26;6;2026-04-11;BayL;4;;9;4;SG DJK Rimpar 1;0;Michael Kreß;10622;SG Rottendorf 1;185;1.0;True;False
+25/26;6;2026-04-11;BayL;4;;9;4;SG DJK Rimpar 1;0;Team Total;0;SG Rottendorf 1;740;3.0;False;True
+25/26;6;2026-04-11;BayL;4;;9;4;SG DJK Rimpar 1;1;Marc Weissenseel;38723;SG Rottendorf 1;181;1.0;True;False
+25/26;6;2026-04-11;BayL;4;;9;4;SG DJK Rimpar 1;2;Alexander Scholz;16352;SG Rottendorf 1;184;1.0;True;False
+25/26;6;2026-04-11;BayL;4;;9;4;SG DJK Rimpar 1;3;Sebastian Boé;16287;SG Rottendorf 1;190;1.0;True;False
+25/26;6;2026-04-11;BayL;4;;9;4;SG Rottendorf 1;0;Rothenhöfer Maximilian;38396;SG DJK Rimpar 1;159;0.0;True;False
+25/26;6;2026-04-11;BayL;4;;9;4;SG Rottendorf 1;0;Team Total;0;SG DJK Rimpar 1;619;0.0;False;True
+25/26;6;2026-04-11;BayL;4;;9;4;SG Rottendorf 1;1;Stefan Reichardt;16945;SG DJK Rimpar 1;146;0.0;True;False
+25/26;6;2026-04-11;BayL;4;;9;4;SG Rottendorf 1;2;Patrick Stemmler;16495;SG DJK Rimpar 1;145;0.0;True;False
+25/26;6;2026-04-11;BayL;4;;9;4;SG Rottendorf 1;3;Tim Meier;38545;SG DJK Rimpar 1;169;0.0;True;False
 25/26;;;;4;;;;;0;;9000000;506;;0.0;True;False
 25/26;;;;4;;;;;0;Team Total;0;506;136;0.0;False;True
 25/26;;;;4;;;;;1;166;9378585;506;1;0.0;True;False
@@ -7105,6 +7355,11 @@ Season;Week;Date;League;Players per Team;Location;Round Number;Match Number;Team
 25/26;;;;4;;;;BK München 2;0;Monika Schott;16594;Weiß Blau Unterföhring 1;180;1.0;True;False
 25/26;;;;4;;;;BK München 2;0;Monika Schott;16594;Highroller Rosenheim 1;155;0.0;True;False
 25/26;;;;4;;;;BK München 2;0;Monika Schott;16594;Munich Mavericks 1;139;0.0;True;False
+25/26;;;;4;;;;BK München 2;0;Monika Schott;16594;Phönix 03 Lauf 1;182;1.0;True;False
+25/26;;;;4;;;;BK München 2;0;Monika Schott;16594;RW Lichtenhof 69 Stein 1;157;0.0;True;False
+25/26;;;;4;;;;BK München 2;0;Monika Schott;16594;Praetoria Regensburg 1;174;0.0;True;False
+25/26;;;;4;;;;BK München 2;0;Monika Schott;16594;BK München 3;184;1.0;True;False
+25/26;;;;4;;;;BK München 2;0;Monika Schott;16594;EPA München 1;172;0.0;True;False
 25/26;;;;4;;;;BK München 2;0;Team Total;0;Highroller Rosenheim 1;652;0.0;False;True
 25/26;;;;4;;;;BK München 2;0;Team Total;0;Munich Mavericks 1;701;0.0;False;True
 25/26;;;;4;;;;BK München 2;0;Team Total;0;Weiß Blau Unterföhring 1;620;0.0;False;True
@@ -7136,6 +7391,11 @@ Season;Week;Date;League;Players per Team;Location;Round Number;Match Number;Team
 25/26;;;;4;;;;BK München 2;0;Team Total;0;Weiß Blau Unterföhring 1;639;0.0;False;True
 25/26;;;;4;;;;BK München 2;0;Team Total;0;Highroller Rosenheim 1;612;0.0;False;True
 25/26;;;;4;;;;BK München 2;0;Team Total;0;Munich Mavericks 1;656;0.0;False;True
+25/26;;;;4;;;;BK München 2;0;Team Total;0;Phönix 03 Lauf 1;676;0.0;False;True
+25/26;;;;4;;;;BK München 2;0;Team Total;0;RW Lichtenhof 69 Stein 1;727;3.0;False;True
+25/26;;;;4;;;;BK München 2;0;Team Total;0;Praetoria Regensburg 1;644;0.0;False;True
+25/26;;;;4;;;;BK München 2;0;Team Total;0;BK München 3;786;3.0;False;True
+25/26;;;;4;;;;BK München 2;0;Team Total;0;EPA München 1;655;0.0;False;True
 25/26;;;;4;;;;BK München 2;1;Melanie Seeger;38350;Highroller Rosenheim 1;159;0.0;True;False
 25/26;;;;4;;;;BK München 2;1;Melanie Seeger;38350;Munich Mavericks 1;182;1.0;True;False
 25/26;;;;4;;;;BK München 2;1;Melanie Seeger;38350;Weiß Blau Unterföhring 1;164;1.0;True;False
@@ -7167,6 +7427,11 @@ Season;Week;Date;League;Players per Team;Location;Round Number;Match Number;Team
 25/26;;;;4;;;;BK München 2;1;Sophie Lengger;29556;Weiß Blau Unterföhring 1;126;0.0;True;False
 25/26;;;;4;;;;BK München 2;1;Sophie Lengger;29556;Highroller Rosenheim 1;142;0.0;True;False
 25/26;;;;4;;;;BK München 2;1;Sophie Lengger;29556;Munich Mavericks 1;157;0.0;True;False
+25/26;;;;4;;;;BK München 2;1;Sophie Lengger;29556;Phönix 03 Lauf 1;157;0.0;True;False
+25/26;;;;4;;;;BK München 2;1;Sophie Lengger;29556;RW Lichtenhof 69 Stein 1;215;1.0;True;False
+25/26;;;;4;;;;BK München 2;1;Sophie Lengger;29556;Praetoria Regensburg 1;178;1.0;True;False
+25/26;;;;4;;;;BK München 2;1;Sophie Lengger;29556;BK München 3;222;1.0;True;False
+25/26;;;;4;;;;BK München 2;1;Sophie Lengger;29556;EPA München 1;184;0.0;True;False
 25/26;;;;4;;;;BK München 2;2;Sophie Lengger;29556;Highroller Rosenheim 1;156;0.0;True;False
 25/26;;;;4;;;;BK München 2;2;Sophie Lengger;29556;Munich Mavericks 1;154;0.0;True;False
 25/26;;;;4;;;;BK München 2;2;Petra Waigel;7061;Weiß Blau Unterföhring 1;158;1.0;True;False
@@ -7198,6 +7463,11 @@ Season;Week;Date;League;Players per Team;Location;Round Number;Match Number;Team
 25/26;;;;4;;;;BK München 2;2;Petra Waigel;7061;Weiß Blau Unterföhring 1;175;0.0;True;False
 25/26;;;;4;;;;BK München 2;2;Petra Waigel;7061;Highroller Rosenheim 1;137;0.0;True;False
 25/26;;;;4;;;;BK München 2;2;Petra Waigel;7061;Munich Mavericks 1;135;0.0;True;False
+25/26;;;;4;;;;BK München 2;2;Petra Waigel;7061;Phönix 03 Lauf 1;155;0.0;True;False
+25/26;;;;4;;;;BK München 2;2;Petra Waigel;7061;RW Lichtenhof 69 Stein 1;163;1.0;True;False
+25/26;;;;4;;;;BK München 2;2;Petra Waigel;7061;Praetoria Regensburg 1;131;0.0;True;False
+25/26;;;;4;;;;BK München 2;2;Petra Waigel;7061;BK München 3;191;0.5;True;False
+25/26;;;;4;;;;BK München 2;2;Petra Waigel;7061;EPA München 1;131;0.0;True;False
 25/26;;;;4;;;;BK München 2;3;Nicole Schott;16595;Highroller Rosenheim 1;177;1.0;True;False
 25/26;;;;4;;;;BK München 2;3;Nicole Schott;16595;Munich Mavericks 1;190;1.0;True;False
 25/26;;;;4;;;;BK München 2;3;Sophie Lengger;29556;Weiß Blau Unterföhring 1;160;0.0;True;False
@@ -7229,6 +7499,11 @@ Season;Week;Date;League;Players per Team;Location;Round Number;Match Number;Team
 25/26;;;;4;;;;BK München 2;3;Nicole Schott;16595;Weiß Blau Unterföhring 1;158;0.0;True;False
 25/26;;;;4;;;;BK München 2;3;Nicole Schott;16595;Highroller Rosenheim 1;178;1.0;True;False
 25/26;;;;4;;;;BK München 2;3;Nicole Schott;16595;Munich Mavericks 1;225;1.0;True;False
+25/26;;;;4;;;;BK München 2;3;Nicole Schott;16595;Phönix 03 Lauf 1;182;1.0;True;False
+25/26;;;;4;;;;BK München 2;3;Nicole Schott;16595;RW Lichtenhof 69 Stein 1;192;1.0;True;False
+25/26;;;;4;;;;BK München 2;3;Nicole Schott;16595;Praetoria Regensburg 1;161;0.0;True;False
+25/26;;;;4;;;;BK München 2;3;Nicole Schott;16595;BK München 3;189;0.0;True;False
+25/26;;;;4;;;;BK München 2;3;Nicole Schott;16595;EPA München 1;168;0.0;True;False
 25/26;;;;4;;;;BK München 3;0;Sabine Hinterwimmer;7578;EPA München 1;189;1.0;True;False
 25/26;;;;4;;;;BK München 3;0;Müller Angelika;12850;Praetoria Regensburg 1;181;0.0;True;False
 25/26;;;;4;;;;BK München 3;0;Müller Angelika;12850;Munich Mavericks 1;158;0.0;True;False
@@ -7260,6 +7535,11 @@ Season;Week;Date;League;Players per Team;Location;Round Number;Match Number;Team
 25/26;;;;4;;;;BK München 3;0;Brigitte Clemenz;7574;Munich Mavericks 1;157;0.0;True;False
 25/26;;;;4;;;;BK München 3;0;Brigitte Clemenz;7574;Praetoria Regensburg 1;171;1.0;True;False
 25/26;;;;4;;;;BK München 3;0;Brigitte Clemenz;7574;EPA München 1;179;1.0;True;False
+25/26;;;;4;;;;BK München 3;0;Müller Angelika;12850;RW Lichtenhof 69 Stein 1;141;0.0;True;False
+25/26;;;;4;;;;BK München 3;0;Müller Angelika;12850;Phönix 03 Lauf 1;157;0.0;True;False
+25/26;;;;4;;;;BK München 3;0;Müller Angelika;12850;Weiß Blau Unterföhring 1;192;1.0;True;False
+25/26;;;;4;;;;BK München 3;0;Müller Angelika;12850;BK München 2;163;0.0;True;False
+25/26;;;;4;;;;BK München 3;0;Sabine Hinterwimmer;7578;Mainauenbowler Bayreuth Land 1;139;1.0;True;False
 25/26;;;;4;;;;BK München 3;0;Team Total;0;EPA München 1;656;0.0;False;True
 25/26;;;;4;;;;BK München 3;0;Team Total;0;Praetoria Regensburg 1;671;0.0;False;True
 25/26;;;;4;;;;BK München 3;0;Team Total;0;Munich Mavericks 1;651;0.0;False;True
@@ -7291,6 +7571,11 @@ Season;Week;Date;League;Players per Team;Location;Round Number;Match Number;Team
 25/26;;;;4;;;;BK München 3;0;Team Total;0;Munich Mavericks 1;696;3.0;False;True
 25/26;;;;4;;;;BK München 3;0;Team Total;0;Praetoria Regensburg 1;668;3.0;False;True
 25/26;;;;4;;;;BK München 3;0;Team Total;0;EPA München 1;713;3.0;False;True
+25/26;;;;4;;;;BK München 3;0;Team Total;0;RW Lichtenhof 69 Stein 1;671;0.0;False;True
+25/26;;;;4;;;;BK München 3;0;Team Total;0;Phönix 03 Lauf 1;635;0.0;False;True
+25/26;;;;4;;;;BK München 3;0;Team Total;0;Weiß Blau Unterföhring 1;786;3.0;False;True
+25/26;;;;4;;;;BK München 3;0;Team Total;0;BK München 2;752;0.0;False;True
+25/26;;;;4;;;;BK München 3;0;Team Total;0;Mainauenbowler Bayreuth Land 1;654;3.0;False;True
 25/26;;;;4;;;;BK München 3;1;Brigitte Clemenz;7574;EPA München 1;143;0.0;True;False
 25/26;;;;4;;;;BK München 3;1;Brigitte Clemenz;7574;Praetoria Regensburg 1;171;1.0;True;False
 25/26;;;;4;;;;BK München 3;1;Brigitte Clemenz;7574;Munich Mavericks 1;160;0.0;True;False
@@ -7322,6 +7607,11 @@ Season;Week;Date;League;Players per Team;Location;Round Number;Match Number;Team
 25/26;;;;4;;;;BK München 3;1;Andrea Danzer;16879;Munich Mavericks 1;127;0.0;True;False
 25/26;;;;4;;;;BK München 3;1;Müller Angelika;12850;Praetoria Regensburg 1;120;0.0;True;False
 25/26;;;;4;;;;BK München 3;1;Müller Angelika;12850;EPA München 1;166;0.0;True;False
+25/26;;;;4;;;;BK München 3;1;Andrea Danzer;16879;RW Lichtenhof 69 Stein 1;179;0.0;True;False
+25/26;;;;4;;;;BK München 3;1;Andrea Danzer;16879;Phönix 03 Lauf 1;154;1.0;True;False
+25/26;;;;4;;;;BK München 3;1;Andrea Danzer;16879;Weiß Blau Unterföhring 1;193;1.0;True;False
+25/26;;;;4;;;;BK München 3;1;Andrea Danzer;16879;BK München 2;160;0.0;True;False
+25/26;;;;4;;;;BK München 3;1;Andrea Danzer;16879;Mainauenbowler Bayreuth Land 1;156;0.0;True;False
 25/26;;;;4;;;;BK München 3;2;Angela Laub;7576;EPA München 1;165;0.0;True;False
 25/26;;;;4;;;;BK München 3;2;Sabine Hinterwimmer;7578;Praetoria Regensburg 1;157;0.0;True;False
 25/26;;;;4;;;;BK München 3;2;Sabine Hinterwimmer;7578;Munich Mavericks 1;176;1.0;True;False
@@ -7353,6 +7643,11 @@ Season;Week;Date;League;Players per Team;Location;Round Number;Match Number;Team
 25/26;;;;4;;;;BK München 3;2;Sabine Hinterwimmer;7578;Munich Mavericks 1;187;1.0;True;False
 25/26;;;;4;;;;BK München 3;2;Sabine Hinterwimmer;7578;Praetoria Regensburg 1;184;1.0;True;False
 25/26;;;;4;;;;BK München 3;2;Sabine Hinterwimmer;7578;EPA München 1;200;1.0;True;False
+25/26;;;;4;;;;BK München 3;2;Sabine Hinterwimmer;7578;RW Lichtenhof 69 Stein 1;170;0.0;True;False
+25/26;;;;4;;;;BK München 3;2;Sabine Hinterwimmer;7578;Phönix 03 Lauf 1;134;0.0;True;False
+25/26;;;;4;;;;BK München 3;2;Sabine Hinterwimmer;7578;Weiß Blau Unterföhring 1;212;1.0;True;False
+25/26;;;;4;;;;BK München 3;2;Sabine Hinterwimmer;7578;BK München 2;191;0.5;True;False
+25/26;;;;4;;;;BK München 3;2;Müller Angelika;12850;Mainauenbowler Bayreuth Land 1;163;0.0;True;False
 25/26;;;;4;;;;BK München 3;3;Andrea Danzer;16879;EPA München 1;159;0.0;True;False
 25/26;;;;4;;;;BK München 3;3;Angela Laub;7576;Praetoria Regensburg 1;162;0.0;True;False
 25/26;;;;4;;;;BK München 3;3;Angela Laub;7576;Munich Mavericks 1;157;0.0;True;False
@@ -7384,6 +7679,11 @@ Season;Week;Date;League;Players per Team;Location;Round Number;Match Number;Team
 25/26;;;;4;;;;BK München 3;3;Jessica Dozauer;7575;Munich Mavericks 1;225;1.0;True;False
 25/26;;;;4;;;;BK München 3;3;Jessica Dozauer;7575;Praetoria Regensburg 1;193;1.0;True;False
 25/26;;;;4;;;;BK München 3;3;Jessica Dozauer;7575;EPA München 1;168;1.0;True;False
+25/26;;;;4;;;;BK München 3;3;Jessica Dozauer;7575;RW Lichtenhof 69 Stein 1;181;0.0;True;False
+25/26;;;;4;;;;BK München 3;3;Jessica Dozauer;7575;Phönix 03 Lauf 1;190;0.0;True;False
+25/26;;;;4;;;;BK München 3;3;Jessica Dozauer;7575;Weiß Blau Unterföhring 1;189;1.0;True;False
+25/26;;;;4;;;;BK München 3;3;Jessica Dozauer;7575;BK München 2;238;1.0;True;False
+25/26;;;;4;;;;BK München 3;3;Jessica Dozauer;7575;Mainauenbowler Bayreuth Land 1;196;1.0;True;False
 25/26;;;;4;;;;EPA München 1;0;Elvira Kicker-Mihatsch;25798;BK München 3;157;0.0;True;False
 25/26;;;;4;;;;EPA München 1;0;Elvira Kicker-Mihatsch;25798;RW Lichtenhof 69 Stein 1;181;1.0;True;False
 25/26;;;;4;;;;EPA München 1;0;Elvira Kicker-Mihatsch;25798;Praetoria Regensburg 1;162;1.0;True;False
@@ -7415,6 +7715,11 @@ Season;Week;Date;League;Players per Team;Location;Round Number;Match Number;Team
 25/26;;;;4;;;;EPA München 1;0;Vanessa Bess;25192;Praetoria Regensburg 1;185;1.0;True;False
 25/26;;;;4;;;;EPA München 1;0;Carolin Schulz;25714;RW Lichtenhof 69 Stein 1;158;0.0;True;False
 25/26;;;;4;;;;EPA München 1;0;Carolin Schulz;25714;BK München 3;168;0.0;True;False
+25/26;;;;4;;;;EPA München 1;0;Carolin Schulz;25714;Highroller Rosenheim 1;171;0.0;True;False
+25/26;;;;4;;;;EPA München 1;0;Carolin Schulz;25714;Weiß Blau Unterföhring 1;199;1.0;True;False
+25/26;;;;4;;;;EPA München 1;0;Carolin Schulz;25714;Mainauenbowler Bayreuth Land 1;194;1.0;True;False
+25/26;;;;4;;;;EPA München 1;0;Vanessa Bess;25192;Munich Mavericks 1;196;0.0;True;False
+25/26;;;;4;;;;EPA München 1;0;Vanessa Bess;25192;BK München 2;182;1.0;True;False
 25/26;;;;4;;;;EPA München 1;0;Team Total;0;BK München 3;776;3.0;False;True
 25/26;;;;4;;;;EPA München 1;0;Team Total;0;RW Lichtenhof 69 Stein 1;709;3.0;False;True
 25/26;;;;4;;;;EPA München 1;0;Team Total;0;Praetoria Regensburg 1;694;3.0;False;True
@@ -7446,6 +7751,11 @@ Season;Week;Date;League;Players per Team;Location;Round Number;Match Number;Team
 25/26;;;;4;;;;EPA München 1;0;Team Total;0;Praetoria Regensburg 1;723;3.0;False;True
 25/26;;;;4;;;;EPA München 1;0;Team Total;0;RW Lichtenhof 69 Stein 1;773;3.0;False;True
 25/26;;;;4;;;;EPA München 1;0;Team Total;0;BK München 3;694;0.0;False;True
+25/26;;;;4;;;;EPA München 1;0;Team Total;0;Highroller Rosenheim 1;715;0.0;False;True
+25/26;;;;4;;;;EPA München 1;0;Team Total;0;Weiß Blau Unterföhring 1;724;0.0;False;True
+25/26;;;;4;;;;EPA München 1;0;Team Total;0;Mainauenbowler Bayreuth Land 1;720;3.0;False;True
+25/26;;;;4;;;;EPA München 1;0;Team Total;0;Munich Mavericks 1;729;3.0;False;True
+25/26;;;;4;;;;EPA München 1;0;Team Total;0;BK München 2;798;3.0;False;True
 25/26;;;;4;;;;EPA München 1;1;Angelika Hernitschek;7549;BK München 3;149;1.0;True;False
 25/26;;;;4;;;;EPA München 1;1;Angelika Hernitschek;7549;RW Lichtenhof 69 Stein 1;165;1.0;True;False
 25/26;;;;4;;;;EPA München 1;1;Angelika Hernitschek;7549;Praetoria Regensburg 1;158;1.0;True;False
@@ -7477,6 +7787,11 @@ Season;Week;Date;League;Players per Team;Location;Round Number;Match Number;Team
 25/26;;;;4;;;;EPA München 1;1;Elvira Kicker-Mihatsch;25798;Praetoria Regensburg 1;191;1.0;True;False
 25/26;;;;4;;;;EPA München 1;1;Elvira Kicker-Mihatsch;25798;RW Lichtenhof 69 Stein 1;179;1.0;True;False
 25/26;;;;4;;;;EPA München 1;1;Elvira Kicker-Mihatsch;25798;BK München 3;212;1.0;True;False
+25/26;;;;4;;;;EPA München 1;1;Elvira Kicker-Mihatsch;25798;Highroller Rosenheim 1;204;0.0;True;False
+25/26;;;;4;;;;EPA München 1;1;Angelika Hernitschek;7549;Weiß Blau Unterföhring 1;157;0.0;True;False
+25/26;;;;4;;;;EPA München 1;1;Elvira Kicker-Mihatsch;25798;Mainauenbowler Bayreuth Land 1;156;1.0;True;False
+25/26;;;;4;;;;EPA München 1;1;Elvira Kicker-Mihatsch;25798;Munich Mavericks 1;188;1.0;True;False
+25/26;;;;4;;;;EPA München 1;1;Elvira Kicker-Mihatsch;25798;BK München 2;212;1.0;True;False
 25/26;;;;4;;;;EPA München 1;2;Anja Lieb;7534;BK München 3;225;1.0;True;False
 25/26;;;;4;;;;EPA München 1;2;Anja Lieb;7534;RW Lichtenhof 69 Stein 1;181;0.0;True;False
 25/26;;;;4;;;;EPA München 1;2;Anja Lieb;7534;Praetoria Regensburg 1;182;1.0;True;False
@@ -7508,6 +7823,11 @@ Season;Week;Date;League;Players per Team;Location;Round Number;Match Number;Team
 25/26;;;;4;;;;EPA München 1;2;Angelika Hernitschek;7549;Praetoria Regensburg 1;179;0.0;True;False
 25/26;;;;4;;;;EPA München 1;2;Angelika Hernitschek;7549;RW Lichtenhof 69 Stein 1;189;1.0;True;False
 25/26;;;;4;;;;EPA München 1;2;Anja Lieb;7534;BK München 3;166;0.0;True;False
+25/26;;;;4;;;;EPA München 1;2;Anja Lieb;7534;Highroller Rosenheim 1;148;0.0;True;False
+25/26;;;;4;;;;EPA München 1;2;Anja Lieb;7534;Weiß Blau Unterföhring 1;183;0.0;True;False
+25/26;;;;4;;;;EPA München 1;2;Angelika Hernitschek;7549;Mainauenbowler Bayreuth Land 1;181;0.5;True;False
+25/26;;;;4;;;;EPA München 1;2;Angelika Hernitschek;7549;Munich Mavericks 1;182;1.0;True;False
+25/26;;;;4;;;;EPA München 1;2;Angelika Hernitschek;7549;BK München 2;213;1.0;True;False
 25/26;;;;4;;;;EPA München 1;3;Vanessa Bess;25192;BK München 3;245;1.0;True;False
 25/26;;;;4;;;;EPA München 1;3;Vanessa Bess;25192;RW Lichtenhof 69 Stein 1;182;1.0;True;False
 25/26;;;;4;;;;EPA München 1;3;Vanessa Bess;25192;Praetoria Regensburg 1;192;0.0;True;False
@@ -7539,6 +7859,11 @@ Season;Week;Date;League;Players per Team;Location;Round Number;Match Number;Team
 25/26;;;;4;;;;EPA München 1;3;Anja Lieb;7534;Praetoria Regensburg 1;168;1.0;True;False
 25/26;;;;4;;;;EPA München 1;3;Anja Lieb;7534;RW Lichtenhof 69 Stein 1;247;1.0;True;False
 25/26;;;;4;;;;EPA München 1;3;Vanessa Bess;25192;BK München 3;148;0.0;True;False
+25/26;;;;4;;;;EPA München 1;3;Vanessa Bess;25192;Highroller Rosenheim 1;192;1.0;True;False
+25/26;;;;4;;;;EPA München 1;3;Vanessa Bess;25192;Weiß Blau Unterföhring 1;185;0.0;True;False
+25/26;;;;4;;;;EPA München 1;3;Vanessa Bess;25192;Mainauenbowler Bayreuth Land 1;189;1.0;True;False
+25/26;;;;4;;;;EPA München 1;3;Anja Lieb;7534;Munich Mavericks 1;163;1.0;True;False
+25/26;;;;4;;;;EPA München 1;3;Anja Lieb;7534;BK München 2;191;1.0;True;False
 25/26;;;;4;;;;Highroller Rosenheim 1;0;Bianka Schanze;38757;Praetoria Regensburg 1;168;1.0;True;False
 25/26;;;;4;;;;Highroller Rosenheim 1;0;Bianka Schanze;38757;BK München 2;190;1.0;True;False
 25/26;;;;4;;;;Highroller Rosenheim 1;0;Bianka Schanze;38757;RW Lichtenhof 69 Stein 1;192;1.0;True;False
@@ -7570,6 +7895,11 @@ Season;Week;Date;League;Players per Team;Location;Round Number;Match Number;Team
 25/26;;;;4;;;;Highroller Rosenheim 1;0;Bianka Schanze;38757;RW Lichtenhof 69 Stein 1;173;0.0;True;False
 25/26;;;;4;;;;Highroller Rosenheim 1;0;Bianka Schanze;38757;BK München 2;165;1.0;True;False
 25/26;;;;4;;;;Highroller Rosenheim 1;0;Bianka Schanze;38757;Praetoria Regensburg 1;163;0.0;True;False
+25/26;;;;4;;;;Highroller Rosenheim 1;0;Bianka Schanze;38757;EPA München 1;190;1.0;True;False
+25/26;;;;4;;;;Highroller Rosenheim 1;0;Bianka Schanze;38757;Munich Mavericks 1;206;1.0;True;False
+25/26;;;;4;;;;Highroller Rosenheim 1;0;Bianka Schanze;38757;Phönix 03 Lauf 1;193;1.0;True;False
+25/26;;;;4;;;;Highroller Rosenheim 1;0;Bianka Schanze;38757;Mainauenbowler Bayreuth Land 1;157;1.0;True;False
+25/26;;;;4;;;;Highroller Rosenheim 1;0;Bianka Schanze;38757;Weiß Blau Unterföhring 1;213;1.0;True;False
 25/26;;;;4;;;;Highroller Rosenheim 1;0;Team Total;0;Praetoria Regensburg 1;675;0.0;False;True
 25/26;;;;4;;;;Highroller Rosenheim 1;0;Team Total;0;BK München 2;669;3.0;False;True
 25/26;;;;4;;;;Highroller Rosenheim 1;0;Team Total;0;RW Lichtenhof 69 Stein 1;715;3.0;False;True
@@ -7601,6 +7931,11 @@ Season;Week;Date;League;Players per Team;Location;Round Number;Match Number;Team
 25/26;;;;4;;;;Highroller Rosenheim 1;0;Team Total;0;RW Lichtenhof 69 Stein 1;766;3.0;False;True
 25/26;;;;4;;;;Highroller Rosenheim 1;0;Team Total;0;BK München 2;691;3.0;False;True
 25/26;;;;4;;;;Highroller Rosenheim 1;0;Team Total;0;Praetoria Regensburg 1;709;0.0;False;True
+25/26;;;;4;;;;Highroller Rosenheim 1;0;Team Total;0;EPA München 1;777;3.0;False;True
+25/26;;;;4;;;;Highroller Rosenheim 1;0;Team Total;0;Munich Mavericks 1;699;3.0;False;True
+25/26;;;;4;;;;Highroller Rosenheim 1;0;Team Total;0;Phönix 03 Lauf 1;725;3.0;False;True
+25/26;;;;4;;;;Highroller Rosenheim 1;0;Team Total;0;Mainauenbowler Bayreuth Land 1;675;3.0;False;True
+25/26;;;;4;;;;Highroller Rosenheim 1;0;Team Total;0;Weiß Blau Unterföhring 1;690;3.0;False;True
 25/26;;;;4;;;;Highroller Rosenheim 1;1;Cornelia Auer;25298;Praetoria Regensburg 1;179;1.0;True;False
 25/26;;;;4;;;;Highroller Rosenheim 1;1;Cornelia Auer;25298;BK München 2;167;1.0;True;False
 25/26;;;;4;;;;Highroller Rosenheim 1;1;Theresa Lindner;38458;RW Lichtenhof 69 Stein 1;149;0.0;True;False
@@ -7632,6 +7967,11 @@ Season;Week;Date;League;Players per Team;Location;Round Number;Match Number;Team
 25/26;;;;4;;;;Highroller Rosenheim 1;1;Rauscher Julia;38758;RW Lichtenhof 69 Stein 1;148;0.0;True;False
 25/26;;;;4;;;;Highroller Rosenheim 1;1;Rauscher Julia;38758;BK München 2;143;1.0;True;False
 25/26;;;;4;;;;Highroller Rosenheim 1;1;Rauscher Julia;38758;Praetoria Regensburg 1;188;1.0;True;False
+25/26;;;;4;;;;Highroller Rosenheim 1;1;Rauscher Julia;38758;EPA München 1;214;1.0;True;False
+25/26;;;;4;;;;Highroller Rosenheim 1;1;Rauscher Julia;38758;Munich Mavericks 1;160;0.0;True;False
+25/26;;;;4;;;;Highroller Rosenheim 1;1;Johanna Groll;25630;Phönix 03 Lauf 1;160;1.0;True;False
+25/26;;;;4;;;;Highroller Rosenheim 1;1;Johanna Groll;25630;Mainauenbowler Bayreuth Land 1;161;1.0;True;False
+25/26;;;;4;;;;Highroller Rosenheim 1;1;Rauscher Julia;38758;Weiß Blau Unterföhring 1;128;0.0;True;False
 25/26;;;;4;;;;Highroller Rosenheim 1;2;Natalie Groll;25857;Praetoria Regensburg 1;191;1.0;True;False
 25/26;;;;4;;;;Highroller Rosenheim 1;2;Natalie Groll;25857;BK München 2;163;1.0;True;False
 25/26;;;;4;;;;Highroller Rosenheim 1;2;Natalie Groll;25857;RW Lichtenhof 69 Stein 1;179;1.0;True;False
@@ -7663,6 +8003,11 @@ Season;Week;Date;League;Players per Team;Location;Round Number;Match Number;Team
 25/26;;;;4;;;;Highroller Rosenheim 1;2;Johanna Groll;25630;RW Lichtenhof 69 Stein 1;247;1.0;True;False
 25/26;;;;4;;;;Highroller Rosenheim 1;2;Johanna Groll;25630;BK München 2;211;1.0;True;False
 25/26;;;;4;;;;Highroller Rosenheim 1;2;Theresa Lindner;38458;Praetoria Regensburg 1;162;1.0;True;False
+25/26;;;;4;;;;Highroller Rosenheim 1;2;Natalie Groll;25857;EPA München 1;185;1.0;True;False
+25/26;;;;4;;;;Highroller Rosenheim 1;2;Natalie Groll;25857;Munich Mavericks 1;172;1.0;True;False
+25/26;;;;4;;;;Highroller Rosenheim 1;2;Natalie Groll;25857;Phönix 03 Lauf 1;157;0.0;True;False
+25/26;;;;4;;;;Highroller Rosenheim 1;2;Natalie Groll;25857;Mainauenbowler Bayreuth Land 1;188;1.0;True;False
+25/26;;;;4;;;;Highroller Rosenheim 1;2;Natalie Groll;25857;Weiß Blau Unterföhring 1;178;1.0;True;False
 25/26;;;;4;;;;Highroller Rosenheim 1;3;Johanna Groll;25630;Praetoria Regensburg 1;137;0.0;True;False
 25/26;;;;4;;;;Highroller Rosenheim 1;3;Johanna Groll;25630;BK München 2;149;0.0;True;False
 25/26;;;;4;;;;Highroller Rosenheim 1;3;Johanna Groll;25630;RW Lichtenhof 69 Stein 1;195;1.0;True;False
@@ -7694,6 +8039,11 @@ Season;Week;Date;League;Players per Team;Location;Round Number;Match Number;Team
 25/26;;;;4;;;;Highroller Rosenheim 1;3;Cornelia Auer;25298;RW Lichtenhof 69 Stein 1;198;1.0;True;False
 25/26;;;;4;;;;Highroller Rosenheim 1;3;Cornelia Auer;25298;BK München 2;172;0.0;True;False
 25/26;;;;4;;;;Highroller Rosenheim 1;3;Cornelia Auer;25298;Praetoria Regensburg 1;196;0.0;True;False
+25/26;;;;4;;;;Highroller Rosenheim 1;3;Cornelia Auer;25298;EPA München 1;188;0.0;True;False
+25/26;;;;4;;;;Highroller Rosenheim 1;3;Cornelia Auer;25298;Munich Mavericks 1;161;1.0;True;False
+25/26;;;;4;;;;Highroller Rosenheim 1;3;Cornelia Auer;25298;Phönix 03 Lauf 1;215;1.0;True;False
+25/26;;;;4;;;;Highroller Rosenheim 1;3;Cornelia Auer;25298;Mainauenbowler Bayreuth Land 1;169;1.0;True;False
+25/26;;;;4;;;;Highroller Rosenheim 1;3;Cornelia Auer;25298;Weiß Blau Unterföhring 1;171;0.5;True;False
 25/26;;;;4;;;;Mainauenbowler Bayreuth Land 1;0;Elke Söldner;7156;RW Lichtenhof 69 Stein 1;148;0.0;True;False
 25/26;;;;4;;;;Mainauenbowler Bayreuth Land 1;0;Elke Söldner;7156;Weiß Blau Unterföhring 1;155;0.0;True;False
 25/26;;;;4;;;;Mainauenbowler Bayreuth Land 1;0;Elke Söldner;7156;Phönix 03 Lauf 1;139;0.0;True;False
@@ -7725,6 +8075,11 @@ Season;Week;Date;League;Players per Team;Location;Round Number;Match Number;Team
 25/26;;;;4;;;;Mainauenbowler Bayreuth Land 1;0;Elke Söldner;7156;Phönix 03 Lauf 1;126;0.0;True;False
 25/26;;;;4;;;;Mainauenbowler Bayreuth Land 1;0;Elke Söldner;7156;Weiß Blau Unterföhring 1;145;0.0;True;False
 25/26;;;;4;;;;Mainauenbowler Bayreuth Land 1;0;Elke Söldner;7156;RW Lichtenhof 69 Stein 1;136;0.0;True;False
+25/26;;;;4;;;;Mainauenbowler Bayreuth Land 1;0;Elke Söldner;7156;Munich Mavericks 1;147;0.0;True;False
+25/26;;;;4;;;;Mainauenbowler Bayreuth Land 1;0;Elke Söldner;7156;Praetoria Regensburg 1;198;1.0;True;False
+25/26;;;;4;;;;Mainauenbowler Bayreuth Land 1;0;Elke Söldner;7156;EPA München 1;155;0.0;True;False
+25/26;;;;4;;;;Mainauenbowler Bayreuth Land 1;0;Elke Söldner;7156;Highroller Rosenheim 1;156;0.0;True;False
+25/26;;;;4;;;;Mainauenbowler Bayreuth Land 1;0;Elke Söldner;7156;BK München 3;131;0.0;True;False
 25/26;;;;4;;;;Mainauenbowler Bayreuth Land 1;0;Team Total;0;RW Lichtenhof 69 Stein 1;605;0.0;False;True
 25/26;;;;4;;;;Mainauenbowler Bayreuth Land 1;0;Team Total;0;Weiß Blau Unterföhring 1;650;0.0;False;True
 25/26;;;;4;;;;Mainauenbowler Bayreuth Land 1;0;Team Total;0;Phönix 03 Lauf 1;623;0.0;False;True
@@ -7756,6 +8111,11 @@ Season;Week;Date;League;Players per Team;Location;Round Number;Match Number;Team
 25/26;;;;4;;;;Mainauenbowler Bayreuth Land 1;0;Team Total;0;Phönix 03 Lauf 1;682;3.0;False;True
 25/26;;;;4;;;;Mainauenbowler Bayreuth Land 1;0;Team Total;0;Weiß Blau Unterföhring 1;599;0.0;False;True
 25/26;;;;4;;;;Mainauenbowler Bayreuth Land 1;0;Team Total;0;RW Lichtenhof 69 Stein 1;575;0.0;False;True
+25/26;;;;4;;;;Mainauenbowler Bayreuth Land 1;0;Team Total;0;Munich Mavericks 1;604;0.0;False;True
+25/26;;;;4;;;;Mainauenbowler Bayreuth Land 1;0;Team Total;0;Praetoria Regensburg 1;673;0.0;False;True
+25/26;;;;4;;;;Mainauenbowler Bayreuth Land 1;0;Team Total;0;EPA München 1;674;0.0;False;True
+25/26;;;;4;;;;Mainauenbowler Bayreuth Land 1;0;Team Total;0;Highroller Rosenheim 1;611;0.0;False;True
+25/26;;;;4;;;;Mainauenbowler Bayreuth Land 1;0;Team Total;0;BK München 3;633;0.0;False;True
 25/26;;;;4;;;;Mainauenbowler Bayreuth Land 1;1;Ulrike Theisen;25478;RW Lichtenhof 69 Stein 1;119;0.0;True;False
 25/26;;;;4;;;;Mainauenbowler Bayreuth Land 1;1;Ulrike Theisen;25478;Weiß Blau Unterföhring 1;149;0.0;True;False
 25/26;;;;4;;;;Mainauenbowler Bayreuth Land 1;1;Ulrike Theisen;25478;Phönix 03 Lauf 1;140;0.0;True;False
@@ -7787,6 +8147,11 @@ Season;Week;Date;League;Players per Team;Location;Round Number;Match Number;Team
 25/26;;;;4;;;;Mainauenbowler Bayreuth Land 1;1;Ulrike Theisen;25478;Phönix 03 Lauf 1;158;1.0;True;False
 25/26;;;;4;;;;Mainauenbowler Bayreuth Land 1;1;Ulrike Theisen;25478;Weiß Blau Unterföhring 1;125;0.0;True;False
 25/26;;;;4;;;;Mainauenbowler Bayreuth Land 1;1;Ulrike Theisen;25478;RW Lichtenhof 69 Stein 1;121;0.0;True;False
+25/26;;;;4;;;;Mainauenbowler Bayreuth Land 1;1;Ulrike Theisen;25478;Munich Mavericks 1;152;0.0;True;False
+25/26;;;;4;;;;Mainauenbowler Bayreuth Land 1;1;Ulrike Theisen;25478;Praetoria Regensburg 1;131;0.0;True;False
+25/26;;;;4;;;;Mainauenbowler Bayreuth Land 1;1;Ulrike Theisen;25478;EPA München 1;150;0.0;True;False
+25/26;;;;4;;;;Mainauenbowler Bayreuth Land 1;1;Ulrike Theisen;25478;Highroller Rosenheim 1;140;0.0;True;False
+25/26;;;;4;;;;Mainauenbowler Bayreuth Land 1;1;Ulrike Theisen;25478;BK München 3;171;1.0;True;False
 25/26;;;;4;;;;Mainauenbowler Bayreuth Land 1;2;Marina Weiske;7154;RW Lichtenhof 69 Stein 1;148;0.0;True;False
 25/26;;;;4;;;;Mainauenbowler Bayreuth Land 1;2;Marina Weiske;7154;Weiß Blau Unterföhring 1;179;1.0;True;False
 25/26;;;;4;;;;Mainauenbowler Bayreuth Land 1;2;Marina Weiske;7154;Phönix 03 Lauf 1;177;0.0;True;False
@@ -7818,6 +8183,11 @@ Season;Week;Date;League;Players per Team;Location;Round Number;Match Number;Team
 25/26;;;;4;;;;Mainauenbowler Bayreuth Land 1;2;Marina Weiske;7154;Phönix 03 Lauf 1;217;1.0;True;False
 25/26;;;;4;;;;Mainauenbowler Bayreuth Land 1;2;Marina Weiske;7154;Weiß Blau Unterföhring 1;163;1.0;True;False
 25/26;;;;4;;;;Mainauenbowler Bayreuth Land 1;2;Marina Weiske;7154;RW Lichtenhof 69 Stein 1;152;0.0;True;False
+25/26;;;;4;;;;Mainauenbowler Bayreuth Land 1;2;Marina Weiske;7154;Munich Mavericks 1;159;1.0;True;False
+25/26;;;;4;;;;Mainauenbowler Bayreuth Land 1;2;Marina Weiske;7154;Praetoria Regensburg 1;184;1.0;True;False
+25/26;;;;4;;;;Mainauenbowler Bayreuth Land 1;2;Marina Weiske;7154;EPA München 1;181;0.5;True;False
+25/26;;;;4;;;;Mainauenbowler Bayreuth Land 1;2;Marina Weiske;7154;Highroller Rosenheim 1;164;0.0;True;False
+25/26;;;;4;;;;Mainauenbowler Bayreuth Land 1;2;Marina Weiske;7154;BK München 3;175;1.0;True;False
 25/26;;;;4;;;;Mainauenbowler Bayreuth Land 1;3;Marion Bräutigam;7860;RW Lichtenhof 69 Stein 1;190;1.0;True;False
 25/26;;;;4;;;;Mainauenbowler Bayreuth Land 1;3;Marion Bräutigam;7860;Weiß Blau Unterföhring 1;167;0.0;True;False
 25/26;;;;4;;;;Mainauenbowler Bayreuth Land 1;3;Marion Bräutigam;7860;Phönix 03 Lauf 1;167;0.0;True;False
@@ -7849,6 +8219,11 @@ Season;Week;Date;League;Players per Team;Location;Round Number;Match Number;Team
 25/26;;;;4;;;;Mainauenbowler Bayreuth Land 1;3;Marion Bräutigam;7860;Phönix 03 Lauf 1;181;0.0;True;False
 25/26;;;;4;;;;Mainauenbowler Bayreuth Land 1;3;Marion Bräutigam;7860;Weiß Blau Unterföhring 1;166;0.0;True;False
 25/26;;;;4;;;;Mainauenbowler Bayreuth Land 1;3;Marion Bräutigam;7860;RW Lichtenhof 69 Stein 1;166;0.0;True;False
+25/26;;;;4;;;;Mainauenbowler Bayreuth Land 1;3;Marion Bräutigam;7860;Munich Mavericks 1;146;0.0;True;False
+25/26;;;;4;;;;Mainauenbowler Bayreuth Land 1;3;Marion Bräutigam;7860;Praetoria Regensburg 1;160;0.0;True;False
+25/26;;;;4;;;;Mainauenbowler Bayreuth Land 1;3;Marion Bräutigam;7860;EPA München 1;188;0.0;True;False
+25/26;;;;4;;;;Mainauenbowler Bayreuth Land 1;3;Marion Bräutigam;7860;Highroller Rosenheim 1;151;0.0;True;False
+25/26;;;;4;;;;Mainauenbowler Bayreuth Land 1;3;Marion Bräutigam;7860;BK München 3;156;0.0;True;False
 25/26;;;;4;;;;Munich Mavericks 1;0;Christine Bilan;16426;BK München 2;181;1.0;True;False
 25/26;;;;4;;;;Munich Mavericks 1;0;Christine Bilan;16426;Phönix 03 Lauf 1;177;1.0;True;False
 25/26;;;;4;;;;Munich Mavericks 1;0;Christine Bilan;16426;BK München 3;193;1.0;True;False
@@ -7880,6 +8255,11 @@ Season;Week;Date;League;Players per Team;Location;Round Number;Match Number;Team
 25/26;;;;4;;;;Munich Mavericks 1;0;Christine Bilan;16426;BK München 3;178;1.0;True;False
 25/26;;;;4;;;;Munich Mavericks 1;0;Christine Bilan;16426;Phönix 03 Lauf 1;247;1.0;True;False
 25/26;;;;4;;;;Munich Mavericks 1;0;Christine Bilan;16426;BK München 2;196;1.0;True;False
+25/26;;;;4;;;;Munich Mavericks 1;0;Christine Bilan;16426;Mainauenbowler Bayreuth Land 1;204;1.0;True;False
+25/26;;;;4;;;;Munich Mavericks 1;0;Christine Bilan;16426;Highroller Rosenheim 1;170;0.0;True;False
+25/26;;;;4;;;;Munich Mavericks 1;0;Christine Bilan;16426;RW Lichtenhof 69 Stein 1;225;1.0;True;False
+25/26;;;;4;;;;Munich Mavericks 1;0;Christine Bilan;16426;EPA München 1;199;1.0;True;False
+25/26;;;;4;;;;Munich Mavericks 1;0;Christine Bilan;16426;Praetoria Regensburg 1;191;1.0;True;False
 25/26;;;;4;;;;Munich Mavericks 1;0;Team Total;0;BK München 2;720;3.0;False;True
 25/26;;;;4;;;;Munich Mavericks 1;0;Team Total;0;Phönix 03 Lauf 1;652;0.0;False;True
 25/26;;;;4;;;;Munich Mavericks 1;0;Team Total;0;BK München 3;703;3.0;False;True
@@ -7911,6 +8291,11 @@ Season;Week;Date;League;Players per Team;Location;Round Number;Match Number;Team
 25/26;;;;4;;;;Munich Mavericks 1;0;Team Total;0;BK München 3;695;0.0;False;True
 25/26;;;;4;;;;Munich Mavericks 1;0;Team Total;0;Phönix 03 Lauf 1;754;0.0;False;True
 25/26;;;;4;;;;Munich Mavericks 1;0;Team Total;0;BK München 2;740;3.0;False;True
+25/26;;;;4;;;;Munich Mavericks 1;0;Team Total;0;Mainauenbowler Bayreuth Land 1;673;3.0;False;True
+25/26;;;;4;;;;Munich Mavericks 1;0;Team Total;0;Highroller Rosenheim 1;670;0.0;False;True
+25/26;;;;4;;;;Munich Mavericks 1;0;Team Total;0;RW Lichtenhof 69 Stein 1;726;3.0;False;True
+25/26;;;;4;;;;Munich Mavericks 1;0;Team Total;0;EPA München 1;679;0.0;False;True
+25/26;;;;4;;;;Munich Mavericks 1;0;Team Total;0;Praetoria Regensburg 1;697;0.0;False;True
 25/26;;;;4;;;;Munich Mavericks 1;1;Diana Beyer;25273;BK München 2;179;0.0;True;False
 25/26;;;;4;;;;Munich Mavericks 1;1;Diana Beyer;25273;Phönix 03 Lauf 1;158;0.0;True;False
 25/26;;;;4;;;;Munich Mavericks 1;1;Diana Beyer;25273;BK München 3;174;1.0;True;False
@@ -7942,6 +8327,11 @@ Season;Week;Date;League;Players per Team;Location;Round Number;Match Number;Team
 25/26;;;;4;;;;Munich Mavericks 1;1;Diana Beyer;25273;BK München 3;168;1.0;True;False
 25/26;;;;4;;;;Munich Mavericks 1;1;Diana Beyer;25273;Phönix 03 Lauf 1;167;0.0;True;False
 25/26;;;;4;;;;Munich Mavericks 1;1;Diana Beyer;25273;BK München 2;166;1.0;True;False
+25/26;;;;4;;;;Munich Mavericks 1;1;Diana Beyer;25273;Mainauenbowler Bayreuth Land 1;160;1.0;True;False
+25/26;;;;4;;;;Munich Mavericks 1;1;Diana Beyer;25273;Highroller Rosenheim 1;200;1.0;True;False
+25/26;;;;4;;;;Munich Mavericks 1;1;Diana Beyer;25273;RW Lichtenhof 69 Stein 1;170;1.0;True;False
+25/26;;;;4;;;;Munich Mavericks 1;1;Diana Beyer;25273;EPA München 1;163;0.0;True;False
+25/26;;;;4;;;;Munich Mavericks 1;1;Diana Beyer;25273;Praetoria Regensburg 1;146;0.0;True;False
 25/26;;;;4;;;;Munich Mavericks 1;2;Franziska Liepsch;29670;BK München 2;171;1.0;True;False
 25/26;;;;4;;;;Munich Mavericks 1;2;Franziska Liepsch;29670;Phönix 03 Lauf 1;135;0.0;True;False
 25/26;;;;4;;;;Munich Mavericks 1;2;Franziska Liepsch;29670;BK München 3;149;0.0;True;False
@@ -7973,6 +8363,11 @@ Season;Week;Date;League;Players per Team;Location;Round Number;Match Number;Team
 25/26;;;;4;;;;Munich Mavericks 1;2;Franziska Liepsch;29670;BK München 3;166;0.0;True;False
 25/26;;;;4;;;;Munich Mavericks 1;2;Franziska Liepsch;29670;Phönix 03 Lauf 1;139;0.0;True;False
 25/26;;;;4;;;;Munich Mavericks 1;2;Franziska Liepsch;29670;BK München 2;199;1.0;True;False
+25/26;;;;4;;;;Munich Mavericks 1;2;Hessling Heide;7541;Mainauenbowler Bayreuth Land 1;148;0.0;True;False
+25/26;;;;4;;;;Munich Mavericks 1;2;Hessling Heide;7541;Highroller Rosenheim 1;148;0.0;True;False
+25/26;;;;4;;;;Munich Mavericks 1;2;Hessling Heide;7541;RW Lichtenhof 69 Stein 1;128;0.0;True;False
+25/26;;;;4;;;;Munich Mavericks 1;2;Hessling Heide;7541;EPA München 1;168;0.0;True;False
+25/26;;;;4;;;;Munich Mavericks 1;2;Hessling Heide;7541;Praetoria Regensburg 1;201;1.0;True;False
 25/26;;;;4;;;;Munich Mavericks 1;3;Christiane Betz;7683;BK München 2;189;0.0;True;False
 25/26;;;;4;;;;Munich Mavericks 1;3;Christiane Betz;7683;Phönix 03 Lauf 1;182;0.0;True;False
 25/26;;;;4;;;;Munich Mavericks 1;3;Christiane Betz;7683;BK München 3;187;1.0;True;False
@@ -8004,6 +8399,11 @@ Season;Week;Date;League;Players per Team;Location;Round Number;Match Number;Team
 25/26;;;;4;;;;Munich Mavericks 1;3;Christiane Betz;7683;BK München 3;183;0.0;True;False
 25/26;;;;4;;;;Munich Mavericks 1;3;Christiane Betz;7683;Phönix 03 Lauf 1;201;0.0;True;False
 25/26;;;;4;;;;Munich Mavericks 1;3;Christiane Betz;7683;BK München 2;179;0.0;True;False
+25/26;;;;4;;;;Munich Mavericks 1;3;Franziska Liepsch;29670;Mainauenbowler Bayreuth Land 1;161;1.0;True;False
+25/26;;;;4;;;;Munich Mavericks 1;3;Franziska Liepsch;29670;Highroller Rosenheim 1;152;0.0;True;False
+25/26;;;;4;;;;Munich Mavericks 1;3;Franziska Liepsch;29670;RW Lichtenhof 69 Stein 1;203;0.0;True;False
+25/26;;;;4;;;;Munich Mavericks 1;3;Franziska Liepsch;29670;EPA München 1;149;0.0;True;False
+25/26;;;;4;;;;Munich Mavericks 1;3;Franziska Liepsch;29670;Praetoria Regensburg 1;159;0.0;True;False
 25/26;;;;4;;;;Phönix 03 Lauf 1;0;Helga Kleim;7787;Weiß Blau Unterföhring 1;155;1.0;True;False
 25/26;;;;4;;;;Phönix 03 Lauf 1;0;Helga Kleim;7787;Munich Mavericks 1;174;0.0;True;False
 25/26;;;;4;;;;Phönix 03 Lauf 1;0;Helga Kleim;7787;Mainauenbowler Bayreuth Land 1;203;1.0;True;False
@@ -8035,6 +8435,11 @@ Season;Week;Date;League;Players per Team;Location;Round Number;Match Number;Team
 25/26;;;;4;;;;Phönix 03 Lauf 1;0;Helga Kleim;7787;Mainauenbowler Bayreuth Land 1;152;1.0;True;False
 25/26;;;;4;;;;Phönix 03 Lauf 1;0;Helga Kleim;7787;Munich Mavericks 1;182;0.0;True;False
 25/26;;;;4;;;;Phönix 03 Lauf 1;0;Helga Kleim;7787;Weiß Blau Unterföhring 1;135;0.0;True;False
+25/26;;;;4;;;;Phönix 03 Lauf 1;0;Helga Kleim;7787;BK München 2;146;0.0;True;False
+25/26;;;;4;;;;Phönix 03 Lauf 1;0;Helga Kleim;7787;BK München 3;161;1.0;True;False
+25/26;;;;4;;;;Phönix 03 Lauf 1;0;Helga Kleim;7787;Highroller Rosenheim 1;154;0.0;True;False
+25/26;;;;4;;;;Phönix 03 Lauf 1;0;Helga Kleim;7787;Praetoria Regensburg 1;145;0.0;True;False
+25/26;;;;4;;;;Phönix 03 Lauf 1;0;Helga Kleim;7787;RW Lichtenhof 69 Stein 1;148;0.0;True;False
 25/26;;;;4;;;;Phönix 03 Lauf 1;0;Team Total;0;Weiß Blau Unterföhring 1;731;3.0;False;True
 25/26;;;;4;;;;Phönix 03 Lauf 1;0;Team Total;0;Munich Mavericks 1;706;3.0;False;True
 25/26;;;;4;;;;Phönix 03 Lauf 1;0;Team Total;0;Mainauenbowler Bayreuth Land 1;735;3.0;False;True
@@ -8066,6 +8471,11 @@ Season;Week;Date;League;Players per Team;Location;Round Number;Match Number;Team
 25/26;;;;4;;;;Phönix 03 Lauf 1;0;Team Total;0;Mainauenbowler Bayreuth Land 1;666;0.0;False;True
 25/26;;;;4;;;;Phönix 03 Lauf 1;0;Team Total;0;Munich Mavericks 1;758;3.0;False;True
 25/26;;;;4;;;;Phönix 03 Lauf 1;0;Team Total;0;Weiß Blau Unterföhring 1;613;0.0;False;True
+25/26;;;;4;;;;Phönix 03 Lauf 1;0;Team Total;0;BK München 2;703;3.0;False;True
+25/26;;;;4;;;;Phönix 03 Lauf 1;0;Team Total;0;BK München 3;703;3.0;False;True
+25/26;;;;4;;;;Phönix 03 Lauf 1;0;Team Total;0;Highroller Rosenheim 1;635;0.0;False;True
+25/26;;;;4;;;;Phönix 03 Lauf 1;0;Team Total;0;Praetoria Regensburg 1;683;0.0;False;True
+25/26;;;;4;;;;Phönix 03 Lauf 1;0;Team Total;0;RW Lichtenhof 69 Stein 1;644;0.0;False;True
 25/26;;;;4;;;;Phönix 03 Lauf 1;1;Ilse Grom-Ruffershöfer;16900;Weiß Blau Unterföhring 1;190;1.0;True;False
 25/26;;;;4;;;;Phönix 03 Lauf 1;1;Ilse Grom-Ruffershöfer;16900;Munich Mavericks 1;160;1.0;True;False
 25/26;;;;4;;;;Phönix 03 Lauf 1;1;Ilse Grom-Ruffershöfer;16900;Mainauenbowler Bayreuth Land 1;160;1.0;True;False
@@ -8097,6 +8507,11 @@ Season;Week;Date;League;Players per Team;Location;Round Number;Match Number;Team
 25/26;;;;4;;;;Phönix 03 Lauf 1;1;Ines Lüdecke-Heuschkel;29621;Mainauenbowler Bayreuth Land 1;153;0.0;True;False
 25/26;;;;4;;;;Phönix 03 Lauf 1;1;Ines Lüdecke-Heuschkel;29621;Munich Mavericks 1;172;1.0;True;False
 25/26;;;;4;;;;Phönix 03 Lauf 1;1;Ines Lüdecke-Heuschkel;29621;Weiß Blau Unterföhring 1;154;1.0;True;False
+25/26;;;;4;;;;Phönix 03 Lauf 1;1;Ines Lüdecke-Heuschkel;29621;BK München 2;196;1.0;True;False
+25/26;;;;4;;;;Phönix 03 Lauf 1;1;Ines Lüdecke-Heuschkel;29621;BK München 3;152;0.0;True;False
+25/26;;;;4;;;;Phönix 03 Lauf 1;1;Ines Lüdecke-Heuschkel;29621;Highroller Rosenheim 1;159;0.0;True;False
+25/26;;;;4;;;;Phönix 03 Lauf 1;1;Ines Lüdecke-Heuschkel;29621;Praetoria Regensburg 1;170;1.0;True;False
+25/26;;;;4;;;;Phönix 03 Lauf 1;1;Ines Lüdecke-Heuschkel;29621;RW Lichtenhof 69 Stein 1;155;1.0;True;False
 25/26;;;;4;;;;Phönix 03 Lauf 1;2;Christina Reichel;7786;Weiß Blau Unterföhring 1;174;1.0;True;False
 25/26;;;;4;;;;Phönix 03 Lauf 1;2;Christina Reichel;7786;Munich Mavericks 1;184;1.0;True;False
 25/26;;;;4;;;;Phönix 03 Lauf 1;2;Christina Reichel;7786;Mainauenbowler Bayreuth Land 1;180;1.0;True;False
@@ -8128,6 +8543,11 @@ Season;Week;Date;League;Players per Team;Location;Round Number;Match Number;Team
 25/26;;;;4;;;;Phönix 03 Lauf 1;2;Ilse Grom-Ruffershöfer;16900;Mainauenbowler Bayreuth Land 1;179;0.0;True;False
 25/26;;;;4;;;;Phönix 03 Lauf 1;2;Ilse Grom-Ruffershöfer;16900;Munich Mavericks 1;191;1.0;True;False
 25/26;;;;4;;;;Phönix 03 Lauf 1;2;Ilse Grom-Ruffershöfer;16900;Weiß Blau Unterföhring 1;161;1.0;True;False
+25/26;;;;4;;;;Phönix 03 Lauf 1;2;Christina Reichel;7786;BK München 2;206;1.0;True;False
+25/26;;;;4;;;;Phönix 03 Lauf 1;2;Christina Reichel;7786;BK München 3;177;1.0;True;False
+25/26;;;;4;;;;Phönix 03 Lauf 1;2;Christina Reichel;7786;Highroller Rosenheim 1;174;1.0;True;False
+25/26;;;;4;;;;Phönix 03 Lauf 1;2;Christina Reichel;7786;Praetoria Regensburg 1;172;0.0;True;False
+25/26;;;;4;;;;Phönix 03 Lauf 1;2;Christina Reichel;7786;RW Lichtenhof 69 Stein 1;154;0.0;True;False
 25/26;;;;4;;;;Phönix 03 Lauf 1;3;Katharina Schuster;7801;Weiß Blau Unterföhring 1;212;1.0;True;False
 25/26;;;;4;;;;Phönix 03 Lauf 1;3;Katharina Schuster;7801;Munich Mavericks 1;188;1.0;True;False
 25/26;;;;4;;;;Phönix 03 Lauf 1;3;Katharina Schuster;7801;Mainauenbowler Bayreuth Land 1;192;1.0;True;False
@@ -8159,6 +8579,11 @@ Season;Week;Date;League;Players per Team;Location;Round Number;Match Number;Team
 25/26;;;;4;;;;Phönix 03 Lauf 1;3;Katharina Schuster;7801;Mainauenbowler Bayreuth Land 1;182;1.0;True;False
 25/26;;;;4;;;;Phönix 03 Lauf 1;3;Katharina Schuster;7801;Munich Mavericks 1;213;1.0;True;False
 25/26;;;;4;;;;Phönix 03 Lauf 1;3;Katharina Schuster;7801;Weiß Blau Unterföhring 1;163;1.0;True;False
+25/26;;;;4;;;;Phönix 03 Lauf 1;3;Katharina Schuster;7801;BK München 2;155;0.0;True;False
+25/26;;;;4;;;;Phönix 03 Lauf 1;3;Katharina Schuster;7801;BK München 3;213;1.0;True;False
+25/26;;;;4;;;;Phönix 03 Lauf 1;3;Katharina Schuster;7801;Highroller Rosenheim 1;148;0.0;True;False
+25/26;;;;4;;;;Phönix 03 Lauf 1;3;Katharina Schuster;7801;Praetoria Regensburg 1;196;0.0;True;False
+25/26;;;;4;;;;Phönix 03 Lauf 1;3;Katharina Schuster;7801;RW Lichtenhof 69 Stein 1;187;1.0;True;False
 25/26;;;;4;;;;Praetoria Regensburg 1;0;Regina Spieler;7903;Highroller Rosenheim 1;135;0.0;True;False
 25/26;;;;4;;;;Praetoria Regensburg 1;0;Barbara Zahner;7889;BK München 3;182;1.0;True;False
 25/26;;;;4;;;;Praetoria Regensburg 1;0;Barbara Zahner;7889;EPA München 1;144;0.0;True;False
@@ -8190,6 +8615,11 @@ Season;Week;Date;League;Players per Team;Location;Round Number;Match Number;Team
 25/26;;;;4;;;;Praetoria Regensburg 1;0;Elisabeth Wölki;16170;EPA München 1;158;0.0;True;False
 25/26;;;;4;;;;Praetoria Regensburg 1;0;Elisabeth Wölki;16170;BK München 3;141;0.0;True;False
 25/26;;;;4;;;;Praetoria Regensburg 1;0;Elisabeth Wölki;16170;Highroller Rosenheim 1;213;1.0;True;False
+25/26;;;;4;;;;Praetoria Regensburg 1;0;Elisabeth Wölki;16170;Weiß Blau Unterföhring 1;183;0.0;True;False
+25/26;;;;4;;;;Praetoria Regensburg 1;0;Elisabeth Wölki;16170;Mainauenbowler Bayreuth Land 1;158;0.0;True;False
+25/26;;;;4;;;;Praetoria Regensburg 1;0;Elisabeth Wölki;16170;BK München 2;215;1.0;True;False
+25/26;;;;4;;;;Praetoria Regensburg 1;0;Elisabeth Wölki;16170;Phönix 03 Lauf 1;231;1.0;True;False
+25/26;;;;4;;;;Praetoria Regensburg 1;0;Elisabeth Wölki;16170;Munich Mavericks 1;180;0.0;True;False
 25/26;;;;4;;;;Praetoria Regensburg 1;0;Team Total;0;Highroller Rosenheim 1;693;3.0;False;True
 25/26;;;;4;;;;Praetoria Regensburg 1;0;Team Total;0;BK München 3;691;3.0;False;True
 25/26;;;;4;;;;Praetoria Regensburg 1;0;Team Total;0;EPA München 1;657;0.0;False;True
@@ -8221,6 +8651,11 @@ Season;Week;Date;League;Players per Team;Location;Round Number;Match Number;Team
 25/26;;;;4;;;;Praetoria Regensburg 1;0;Team Total;0;EPA München 1;646;0.0;False;True
 25/26;;;;4;;;;Praetoria Regensburg 1;0;Team Total;0;BK München 3;639;0.0;False;True
 25/26;;;;4;;;;Praetoria Regensburg 1;0;Team Total;0;Highroller Rosenheim 1;757;3.0;False;True
+25/26;;;;4;;;;Praetoria Regensburg 1;0;Team Total;0;Weiß Blau Unterföhring 1;712;0.0;False;True
+25/26;;;;4;;;;Praetoria Regensburg 1;0;Team Total;0;Mainauenbowler Bayreuth Land 1;675;3.0;False;True
+25/26;;;;4;;;;Praetoria Regensburg 1;0;Team Total;0;BK München 2;711;3.0;False;True
+25/26;;;;4;;;;Praetoria Regensburg 1;0;Team Total;0;Phönix 03 Lauf 1;744;3.0;False;True
+25/26;;;;4;;;;Praetoria Regensburg 1;0;Team Total;0;Munich Mavericks 1;749;3.0;False;True
 25/26;;;;4;;;;Praetoria Regensburg 1;1;Barbara Zahner;7889;Highroller Rosenheim 1;167;0.0;True;False
 25/26;;;;4;;;;Praetoria Regensburg 1;1;Regina Spieler;7903;BK München 3;152;0.0;True;False
 25/26;;;;4;;;;Praetoria Regensburg 1;1;Helene Schick;38931;EPA München 1;133;0.0;True;False
@@ -8252,6 +8687,11 @@ Season;Week;Date;League;Players per Team;Location;Round Number;Match Number;Team
 25/26;;;;4;;;;Praetoria Regensburg 1;1;_Auswechslung im Spiel;69;EPA München 1;150;0.0;True;False
 25/26;;;;4;;;;Praetoria Regensburg 1;1;Barbara Zahner;7889;BK München 3;144;1.0;True;False
 25/26;;;;4;;;;Praetoria Regensburg 1;1;Barbara Zahner;7889;Highroller Rosenheim 1;182;0.0;True;False
+25/26;;;;4;;;;Praetoria Regensburg 1;1;Helene Schick;38931;Weiß Blau Unterföhring 1;178;1.0;True;False
+25/26;;;;4;;;;Praetoria Regensburg 1;1;Helene Schick;38931;Mainauenbowler Bayreuth Land 1;179;1.0;True;False
+25/26;;;;4;;;;Praetoria Regensburg 1;1;Helene Schick;38931;BK München 2;174;0.0;True;False
+25/26;;;;4;;;;Praetoria Regensburg 1;1;Barbara Zahner;7889;Phönix 03 Lauf 1;142;0.0;True;False
+25/26;;;;4;;;;Praetoria Regensburg 1;1;Barbara Zahner;7889;Munich Mavericks 1;195;1.0;True;False
 25/26;;;;4;;;;Praetoria Regensburg 1;2;Anna Bösl;38258;Highroller Rosenheim 1;148;0.0;True;False
 25/26;;;;4;;;;Praetoria Regensburg 1;2;Anna Bösl;38258;BK München 3;179;1.0;True;False
 25/26;;;;4;;;;Praetoria Regensburg 1;2;Anna Bösl;38258;EPA München 1;172;0.0;True;False
@@ -8283,6 +8723,11 @@ Season;Week;Date;League;Players per Team;Location;Round Number;Match Number;Team
 25/26;;;;4;;;;Praetoria Regensburg 1;2;Anna Bösl;38258;EPA München 1;195;1.0;True;False
 25/26;;;;4;;;;Praetoria Regensburg 1;2;Anna Bösl;38258;BK München 3;171;0.0;True;False
 25/26;;;;4;;;;Praetoria Regensburg 1;2;Anna Bösl;38258;Highroller Rosenheim 1;161;0.0;True;False
+25/26;;;;4;;;;Praetoria Regensburg 1;2;Regina Spieler;7903;Weiß Blau Unterföhring 1;185;1.0;True;False
+25/26;;;;4;;;;Praetoria Regensburg 1;2;Regina Spieler;7903;Mainauenbowler Bayreuth Land 1;147;0.0;True;False
+25/26;;;;4;;;;Praetoria Regensburg 1;2;Regina Spieler;7903;BK München 2;134;1.0;True;False
+25/26;;;;4;;;;Praetoria Regensburg 1;2;Regina Spieler;7903;Phönix 03 Lauf 1;174;1.0;True;False
+25/26;;;;4;;;;Praetoria Regensburg 1;2;Regina Spieler;7903;Munich Mavericks 1;154;0.0;True;False
 25/26;;;;4;;;;Praetoria Regensburg 1;3;Sabrina Schlundt;25751;Highroller Rosenheim 1;243;1.0;True;False
 25/26;;;;4;;;;Praetoria Regensburg 1;3;Sabrina Schlundt;25751;BK München 3;178;1.0;True;False
 25/26;;;;4;;;;Praetoria Regensburg 1;3;Sabrina Schlundt;25751;EPA München 1;208;1.0;True;False
@@ -8314,6 +8759,11 @@ Season;Week;Date;League;Players per Team;Location;Round Number;Match Number;Team
 25/26;;;;4;;;;Praetoria Regensburg 1;3;Sabrina Schlundt;25751;EPA München 1;143;0.0;True;False
 25/26;;;;4;;;;Praetoria Regensburg 1;3;Sabrina Schlundt;25751;BK München 3;183;0.0;True;False
 25/26;;;;4;;;;Praetoria Regensburg 1;3;Sabrina Schlundt;25751;Highroller Rosenheim 1;201;1.0;True;False
+25/26;;;;4;;;;Praetoria Regensburg 1;3;Sabrina Schlundt;25751;Weiß Blau Unterföhring 1;166;0.0;True;False
+25/26;;;;4;;;;Praetoria Regensburg 1;3;Sabrina Schlundt;25751;Mainauenbowler Bayreuth Land 1;191;1.0;True;False
+25/26;;;;4;;;;Praetoria Regensburg 1;3;Sabrina Schlundt;25751;BK München 2;188;1.0;True;False
+25/26;;;;4;;;;Praetoria Regensburg 1;3;Sabrina Schlundt;25751;Phönix 03 Lauf 1;197;1.0;True;False
+25/26;;;;4;;;;Praetoria Regensburg 1;3;Sabrina Schlundt;25751;Munich Mavericks 1;220;1.0;True;False
 25/26;;;;4;;;;RW Lichtenhof 69 Stein 1;0;Melanie Thöne;38513;Mainauenbowler Bayreuth Land 1;197;1.0;True;False
 25/26;;;;4;;;;RW Lichtenhof 69 Stein 1;0;Melanie Thöne;38513;EPA München 1;176;0.0;True;False
 25/26;;;;4;;;;RW Lichtenhof 69 Stein 1;0;Melanie Thöne;38513;Highroller Rosenheim 1;171;0.0;True;False
@@ -8345,6 +8795,11 @@ Season;Week;Date;League;Players per Team;Location;Round Number;Match Number;Team
 25/26;;;;4;;;;RW Lichtenhof 69 Stein 1;0;Petra Martisko;7976;Highroller Rosenheim 1;206;1.0;True;False
 25/26;;;;4;;;;RW Lichtenhof 69 Stein 1;0;Petra Martisko;7976;EPA München 1;159;1.0;True;False
 25/26;;;;4;;;;RW Lichtenhof 69 Stein 1;0;Petra Martisko;7976;Mainauenbowler Bayreuth Land 1;189;1.0;True;False
+25/26;;;;4;;;;RW Lichtenhof 69 Stein 1;0;Petra Martisko;7976;BK München 3;166;1.0;True;False
+25/26;;;;4;;;;RW Lichtenhof 69 Stein 1;0;Petra Martisko;7976;BK München 2;169;1.0;True;False
+25/26;;;;4;;;;RW Lichtenhof 69 Stein 1;0;Petra Martisko;7976;Munich Mavericks 1;176;0.0;True;False
+25/26;;;;4;;;;RW Lichtenhof 69 Stein 1;0;Petra Martisko;7976;Weiß Blau Unterföhring 1;172;0.0;True;False
+25/26;;;;4;;;;RW Lichtenhof 69 Stein 1;0;Petra Martisko;7976;Phönix 03 Lauf 1;179;1.0;True;False
 25/26;;;;4;;;;RW Lichtenhof 69 Stein 1;0;Team Total;0;Mainauenbowler Bayreuth Land 1;737;3.0;False;True
 25/26;;;;4;;;;RW Lichtenhof 69 Stein 1;0;Team Total;0;EPA München 1;684;0.0;False;True
 25/26;;;;4;;;;RW Lichtenhof 69 Stein 1;0;Team Total;0;Highroller Rosenheim 1;656;0.0;False;True
@@ -8376,6 +8831,11 @@ Season;Week;Date;League;Players per Team;Location;Round Number;Match Number;Team
 25/26;;;;4;;;;RW Lichtenhof 69 Stein 1;0;Team Total;0;Highroller Rosenheim 1;738;0.0;False;True
 25/26;;;;4;;;;RW Lichtenhof 69 Stein 1;0;Team Total;0;EPA München 1;660;0.0;False;True
 25/26;;;;4;;;;RW Lichtenhof 69 Stein 1;0;Team Total;0;Mainauenbowler Bayreuth Land 1;722;3.0;False;True
+25/26;;;;4;;;;RW Lichtenhof 69 Stein 1;0;Team Total;0;BK München 3;758;3.0;False;True
+25/26;;;;4;;;;RW Lichtenhof 69 Stein 1;0;Team Total;0;BK München 2;641;0.0;False;True
+25/26;;;;4;;;;RW Lichtenhof 69 Stein 1;0;Team Total;0;Munich Mavericks 1;711;0.0;False;True
+25/26;;;;4;;;;RW Lichtenhof 69 Stein 1;0;Team Total;0;Weiß Blau Unterföhring 1;712;0.0;False;True
+25/26;;;;4;;;;RW Lichtenhof 69 Stein 1;0;Team Total;0;Phönix 03 Lauf 1;653;3.0;False;True
 25/26;;;;4;;;;RW Lichtenhof 69 Stein 1;1;Peggy Müller-Vukovic;25704;Mainauenbowler Bayreuth Land 1;190;1.0;True;False
 25/26;;;;4;;;;RW Lichtenhof 69 Stein 1;1;Peggy Müller-Vukovic;25704;EPA München 1;164;0.0;True;False
 25/26;;;;4;;;;RW Lichtenhof 69 Stein 1;1;Peggy Müller-Vukovic;25704;Highroller Rosenheim 1;159;1.0;True;False
@@ -8407,6 +8867,11 @@ Season;Week;Date;League;Players per Team;Location;Round Number;Match Number;Team
 25/26;;;;4;;;;RW Lichtenhof 69 Stein 1;1;Alexandra Wahl;25551;Highroller Rosenheim 1;222;1.0;True;False
 25/26;;;;4;;;;RW Lichtenhof 69 Stein 1;1;Alexandra Wahl;25551;EPA München 1;161;0.0;True;False
 25/26;;;;4;;;;RW Lichtenhof 69 Stein 1;1;Alexandra Wahl;25551;Mainauenbowler Bayreuth Land 1;167;1.0;True;False
+25/26;;;;4;;;;RW Lichtenhof 69 Stein 1;1;Alexandra Wahl;25551;BK München 3;213;1.0;True;False
+25/26;;;;4;;;;RW Lichtenhof 69 Stein 1;1;Alexandra Wahl;25551;BK München 2;148;0.0;True;False
+25/26;;;;4;;;;RW Lichtenhof 69 Stein 1;1;Peggy Müller-Vukovic;25704;Munich Mavericks 1;147;0.0;True;False
+25/26;;;;4;;;;RW Lichtenhof 69 Stein 1;1;Peggy Müller-Vukovic;25704;Weiß Blau Unterföhring 1;159;0.0;True;False
+25/26;;;;4;;;;RW Lichtenhof 69 Stein 1;1;Alexandra Wahl;25551;Phönix 03 Lauf 1;127;0.0;True;False
 25/26;;;;4;;;;RW Lichtenhof 69 Stein 1;2;Petra Martisko;7976;Mainauenbowler Bayreuth Land 1;190;1.0;True;False
 25/26;;;;4;;;;RW Lichtenhof 69 Stein 1;2;Petra Martisko;7976;EPA München 1;187;1.0;True;False
 25/26;;;;4;;;;RW Lichtenhof 69 Stein 1;2;Petra Martisko;7976;Highroller Rosenheim 1;150;0.0;True;False
@@ -8438,6 +8903,11 @@ Season;Week;Date;League;Players per Team;Location;Round Number;Match Number;Team
 25/26;;;;4;;;;RW Lichtenhof 69 Stein 1;2;Peggy Müller-Vukovic;25704;Highroller Rosenheim 1;115;0.0;True;False
 25/26;;;;4;;;;RW Lichtenhof 69 Stein 1;2;Peggy Müller-Vukovic;25704;EPA München 1;169;0.0;True;False
 25/26;;;;4;;;;RW Lichtenhof 69 Stein 1;2;Peggy Müller-Vukovic;25704;Mainauenbowler Bayreuth Land 1;162;1.0;True;False
+25/26;;;;4;;;;RW Lichtenhof 69 Stein 1;2;Renate Hödl;7972;BK München 3;180;1.0;True;False
+25/26;;;;4;;;;RW Lichtenhof 69 Stein 1;2;Renate Hödl;7972;BK München 2;149;0.0;True;False
+25/26;;;;4;;;;RW Lichtenhof 69 Stein 1;2;Renate Hödl;7972;Munich Mavericks 1;184;1.0;True;False
+25/26;;;;4;;;;RW Lichtenhof 69 Stein 1;2;Renate Hödl;7972;Weiß Blau Unterföhring 1;229;1.0;True;False
+25/26;;;;4;;;;RW Lichtenhof 69 Stein 1;2;Renate Hödl;7972;Phönix 03 Lauf 1;178;1.0;True;False
 25/26;;;;4;;;;RW Lichtenhof 69 Stein 1;3;Rauch Gabriele;7975;Mainauenbowler Bayreuth Land 1;160;0.0;True;False
 25/26;;;;4;;;;RW Lichtenhof 69 Stein 1;3;Rauch Gabriele;7975;EPA München 1;157;0.0;True;False
 25/26;;;;4;;;;RW Lichtenhof 69 Stein 1;3;Rauch Gabriele;7975;Highroller Rosenheim 1;176;0.0;True;False
@@ -8469,6 +8939,11 @@ Season;Week;Date;League;Players per Team;Location;Round Number;Match Number;Team
 25/26;;;;4;;;;RW Lichtenhof 69 Stein 1;3;Rauch Gabriele;7975;Highroller Rosenheim 1;195;0.0;True;False
 25/26;;;;4;;;;RW Lichtenhof 69 Stein 1;3;Rauch Gabriele;7975;EPA München 1;171;0.0;True;False
 25/26;;;;4;;;;RW Lichtenhof 69 Stein 1;3;Rauch Gabriele;7975;Mainauenbowler Bayreuth Land 1;204;1.0;True;False
+25/26;;;;4;;;;RW Lichtenhof 69 Stein 1;3;Rauch Gabriele;7975;BK München 3;199;1.0;True;False
+25/26;;;;4;;;;RW Lichtenhof 69 Stein 1;3;Rauch Gabriele;7975;BK München 2;175;0.0;True;False
+25/26;;;;4;;;;RW Lichtenhof 69 Stein 1;3;Rauch Gabriele;7975;Munich Mavericks 1;204;1.0;True;False
+25/26;;;;4;;;;RW Lichtenhof 69 Stein 1;3;Rauch Gabriele;7975;Weiß Blau Unterföhring 1;152;0.0;True;False
+25/26;;;;4;;;;RW Lichtenhof 69 Stein 1;3;Rauch Gabriele;7975;Phönix 03 Lauf 1;169;0.0;True;False
 25/26;;;;4;;;;Weiß Blau Unterföhring 1;0;Hannelore Dornacher;16414;Phönix 03 Lauf 1;139;0.0;True;False
 25/26;;;;4;;;;Weiß Blau Unterföhring 1;0;Hannelore Dornacher;16414;Mainauenbowler Bayreuth Land 1;179;1.0;True;False
 25/26;;;;4;;;;Weiß Blau Unterföhring 1;0;Hannelore Dornacher;16414;BK München 2;161;1.0;True;False
@@ -8500,6 +8975,11 @@ Season;Week;Date;League;Players per Team;Location;Round Number;Match Number;Team
 25/26;;;;4;;;;Weiß Blau Unterföhring 1;0;Petra Richter;21185;BK München 2;167;0.0;True;False
 25/26;;;;4;;;;Weiß Blau Unterföhring 1;0;Petra Richter;21185;Mainauenbowler Bayreuth Land 1;178;1.0;True;False
 25/26;;;;4;;;;Weiß Blau Unterföhring 1;0;Petra Richter;21185;Phönix 03 Lauf 1;221;1.0;True;False
+25/26;;;;4;;;;Weiß Blau Unterföhring 1;0;Petra Richter;21185;Praetoria Regensburg 1;206;1.0;True;False
+25/26;;;;4;;;;Weiß Blau Unterföhring 1;0;Petra Richter;21185;EPA München 1;194;0.0;True;False
+25/26;;;;4;;;;Weiß Blau Unterföhring 1;0;Petra Richter;21185;BK München 3;189;0.0;True;False
+25/26;;;;4;;;;Weiß Blau Unterföhring 1;0;Petra Richter;21185;RW Lichtenhof 69 Stein 1;213;1.0;True;False
+25/26;;;;4;;;;Weiß Blau Unterföhring 1;0;Petra Richter;21185;Highroller Rosenheim 1;193;0.0;True;False
 25/26;;;;4;;;;Weiß Blau Unterföhring 1;0;Team Total;0;Phönix 03 Lauf 1;629;0.0;False;True
 25/26;;;;4;;;;Weiß Blau Unterföhring 1;0;Team Total;0;Mainauenbowler Bayreuth Land 1;697;3.0;False;True
 25/26;;;;4;;;;Weiß Blau Unterföhring 1;0;Team Total;0;BK München 2;678;3.0;False;True
@@ -8531,6 +9011,11 @@ Season;Week;Date;League;Players per Team;Location;Round Number;Match Number;Team
 25/26;;;;4;;;;Weiß Blau Unterföhring 1;0;Team Total;0;BK München 2;715;3.0;False;True
 25/26;;;;4;;;;Weiß Blau Unterföhring 1;0;Team Total;0;Mainauenbowler Bayreuth Land 1;687;3.0;False;True
 25/26;;;;4;;;;Weiß Blau Unterföhring 1;0;Team Total;0;Phönix 03 Lauf 1;636;3.0;False;True
+25/26;;;;4;;;;Weiß Blau Unterföhring 1;0;Team Total;0;Praetoria Regensburg 1;741;3.0;False;True
+25/26;;;;4;;;;Weiß Blau Unterföhring 1;0;Team Total;0;EPA München 1;767;3.0;False;True
+25/26;;;;4;;;;Weiß Blau Unterföhring 1;0;Team Total;0;BK München 3;691;0.0;False;True
+25/26;;;;4;;;;Weiß Blau Unterföhring 1;0;Team Total;0;RW Lichtenhof 69 Stein 1;736;3.0;False;True
+25/26;;;;4;;;;Weiß Blau Unterföhring 1;0;Team Total;0;Highroller Rosenheim 1;672;0.0;False;True
 25/26;;;;4;;;;Weiß Blau Unterföhring 1;1;Petra Richter;21185;Phönix 03 Lauf 1;171;0.0;True;False
 25/26;;;;4;;;;Weiß Blau Unterföhring 1;1;Petra Richter;21185;Mainauenbowler Bayreuth Land 1;181;1.0;True;False
 25/26;;;;4;;;;Weiß Blau Unterföhring 1;1;Petra Richter;21185;BK München 2;158;0.0;True;False
@@ -8562,6 +9047,11 @@ Season;Week;Date;League;Players per Team;Location;Round Number;Match Number;Team
 25/26;;;;4;;;;Weiß Blau Unterföhring 1;1;Gabriele Zehner;7551;BK München 2;180;1.0;True;False
 25/26;;;;4;;;;Weiß Blau Unterföhring 1;1;Gabriele Zehner;7551;Mainauenbowler Bayreuth Land 1;157;1.0;True;False
 25/26;;;;4;;;;Weiß Blau Unterföhring 1;1;Gabriele Zehner;7551;Phönix 03 Lauf 1;135;0.0;True;False
+25/26;;;;4;;;;Weiß Blau Unterföhring 1;1;Gabriele Zehner;7551;Praetoria Regensburg 1;163;0.0;True;False
+25/26;;;;4;;;;Weiß Blau Unterföhring 1;1;Gabriele Zehner;7551;EPA München 1;188;1.0;True;False
+25/26;;;;4;;;;Weiß Blau Unterföhring 1;1;Gabriele Zehner;7551;BK München 3;178;0.0;True;False
+25/26;;;;4;;;;Weiß Blau Unterföhring 1;1;Gabriele Zehner;7551;RW Lichtenhof 69 Stein 1;160;1.0;True;False
+25/26;;;;4;;;;Weiß Blau Unterföhring 1;1;Gabriele Zehner;7551;Highroller Rosenheim 1;164;1.0;True;False
 25/26;;;;4;;;;Weiß Blau Unterföhring 1;2;Brigitte Mc Fadden;7546;Phönix 03 Lauf 1;141;0.0;True;False
 25/26;;;;4;;;;Weiß Blau Unterföhring 1;2;Brigitte Mc Fadden;7546;Mainauenbowler Bayreuth Land 1;145;0.0;True;False
 25/26;;;;4;;;;Weiß Blau Unterföhring 1;2;Brigitte Mc Fadden;7546;BK München 2;150;0.0;True;False
@@ -8593,6 +9083,11 @@ Season;Week;Date;League;Players per Team;Location;Round Number;Match Number;Team
 25/26;;;;4;;;;Weiß Blau Unterföhring 1;2;Brigitte Mc Fadden;7546;BK München 2;188;1.0;True;False
 25/26;;;;4;;;;Weiß Blau Unterföhring 1;2;Brigitte Mc Fadden;7546;Mainauenbowler Bayreuth Land 1;153;0.0;True;False
 25/26;;;;4;;;;Weiß Blau Unterföhring 1;2;Brigitte Mc Fadden;7546;Phönix 03 Lauf 1;127;0.0;True;False
+25/26;;;;4;;;;Weiß Blau Unterföhring 1;2;Brigitte Mc Fadden;7546;Praetoria Regensburg 1;182;0.0;True;False
+25/26;;;;4;;;;Weiß Blau Unterföhring 1;2;Brigitte Mc Fadden;7546;EPA München 1;189;1.0;True;False
+25/26;;;;4;;;;Weiß Blau Unterföhring 1;2;Brigitte Mc Fadden;7546;BK München 3;182;0.0;True;False
+25/26;;;;4;;;;Weiß Blau Unterföhring 1;2;Brigitte Mc Fadden;7546;RW Lichtenhof 69 Stein 1;194;0.0;True;False
+25/26;;;;4;;;;Weiß Blau Unterföhring 1;2;Brigitte Mc Fadden;7546;Highroller Rosenheim 1;144;0.0;True;False
 25/26;;;;4;;;;Weiß Blau Unterföhring 1;3;Beate Albert;7087;Phönix 03 Lauf 1;178;0.0;True;False
 25/26;;;;4;;;;Weiß Blau Unterföhring 1;3;Beate Albert;7087;Mainauenbowler Bayreuth Land 1;192;1.0;True;False
 25/26;;;;4;;;;Weiß Blau Unterföhring 1;3;Beate Albert;7087;BK München 2;209;1.0;True;False
@@ -8624,3 +9119,8 @@ Season;Week;Date;League;Players per Team;Location;Round Number;Match Number;Team
 25/26;;;;4;;;;Weiß Blau Unterföhring 1;3;Beate Albert;7087;BK München 2;180;1.0;True;False
 25/26;;;;4;;;;Weiß Blau Unterföhring 1;3;Beate Albert;7087;Mainauenbowler Bayreuth Land 1;199;1.0;True;False
 25/26;;;;4;;;;Weiß Blau Unterföhring 1;3;Beate Albert;7087;Phönix 03 Lauf 1;153;0.0;True;False
+25/26;;;;4;;;;Weiß Blau Unterföhring 1;3;Beate Albert;7087;Praetoria Regensburg 1;190;1.0;True;False
+25/26;;;;4;;;;Weiß Blau Unterföhring 1;3;Beate Albert;7087;EPA München 1;196;1.0;True;False
+25/26;;;;4;;;;Weiß Blau Unterföhring 1;3;Beate Albert;7087;BK München 3;142;0.0;True;False
+25/26;;;;4;;;;Weiß Blau Unterföhring 1;3;Beate Albert;7087;RW Lichtenhof 69 Stein 1;169;1.0;True;False
+25/26;;;;4;;;;Weiß Blau Unterföhring 1;3;Beate Albert;7087;Highroller Rosenheim 1;171;0.5;True;False
