@@ -844,13 +844,22 @@ class LeagueService:
             
             opponent_individual_data = self.adapter.get_filtered_data(filters=opponent_individual_filters)
             
-            # Get unique games (round_number) for this team and map to opponent names
-            games = sorted(player_data[Columns.round_number].unique())
-            
+            # Round numbers: coerce to int for stable column field keys. Pipeline CSV often has
+            # floats (1.0); Tabulator's nestedFieldSeparator is ".", so fields like "game1.0_score"
+            # resolve as nested paths and cells render empty. Use integer game keys: game1_score, …
+            rn = Columns.round_number
+
+            def _matches_round(df: pd.DataFrame, game_int: int) -> pd.Series:
+                return pd.to_numeric(df[rn], errors="coerce").eq(float(game_int))
+
+            games = sorted(
+                int(x) for x in pd.to_numeric(player_data[rn], errors="coerce").dropna().unique()
+            )
+
             # Create a mapping of round_number to opponent team name
             game_to_opponent = {}
             for game in games:
-                game_data = player_data[player_data[Columns.round_number] == game]
+                game_data = player_data[_matches_round(player_data, game)]
                 if not game_data.empty:
                     opponent_name = game_data[Columns.team_name_opponent].iloc[0]
                     game_to_opponent[game] = opponent_name
@@ -957,7 +966,7 @@ class LeagueService:
                 
                 # Add game data - only fill if player participated in this position
                 for game in games:
-                    game_data = player_rows[player_rows[Columns.round_number] == game]
+                    game_data = player_rows[_matches_round(player_rows, game)]
                     
                     if not game_data.empty:
                         row.append(int(game_data[Columns.score].iloc[0]))
@@ -994,7 +1003,7 @@ class LeagueService:
                     
                     # Add game data - only fill if player participated in this position
                     for game in games:
-                        game_data = player_rows[player_rows[Columns.round_number] == game]
+                        game_data = player_rows[_matches_round(player_rows, game)]
                         
                         if not game_data.empty:
                             row.append(int(game_data[Columns.score].iloc[0]))
@@ -1027,7 +1036,7 @@ class LeagueService:
                 
                 # Add game data for team
                 for game in games:
-                    game_data = team_data[team_data[Columns.round_number] == game]
+                    game_data = team_data[_matches_round(team_data, game)]
                     if not game_data.empty:
                         team_row.append(int(game_data[Columns.score].iloc[0]))
                         team_row.append(round(float(game_data[Columns.points].iloc[0]), 1))
@@ -1058,7 +1067,7 @@ class LeagueService:
                 
                 # Add game data for opponents
                 for game in games:
-                    game_data = opponent_data[opponent_data[Columns.round_number] == game]
+                    game_data = opponent_data[_matches_round(opponent_data, game)]
                     if not game_data.empty:
                         opponent_row.append(int(game_data[Columns.score].iloc[0]))
                         opponent_row.append("")  # Replace opponent points with empty string
@@ -1091,8 +1100,8 @@ class LeagueService:
             
             # Calculate total points for each game (individual + team)
             for game in games:
-                game_player_data = player_data[player_data[Columns.round_number] == game]
-                game_team_data = team_data[team_data[Columns.round_number] == game] if not team_data.empty else None
+                game_player_data = player_data[_matches_round(player_data, game)]
+                game_team_data = team_data[_matches_round(team_data, game)] if not team_data.empty else None
                 
                 # Individual points for this game
                 game_points_total = round(float(game_player_data[Columns.points].sum()), 1) if not game_player_data.empty else 0

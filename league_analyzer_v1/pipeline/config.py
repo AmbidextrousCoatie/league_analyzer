@@ -14,6 +14,8 @@ class GfConfig:
     timeout_seconds: float = 60.0
     page_size: int = 100
     forms: List[int] | None = None
+    #: ``id`` — stable paging (``sorting[key]=id``, ASC, numeric). ``date_updated`` — legacy newest-first (DESC).
+    entries_sort: str = "id"
 
     @staticmethod
     def from_env() -> "GfConfig":
@@ -23,6 +25,8 @@ class GfConfig:
         if forms_raw:
             forms = [int(x.strip()) for x in forms_raw.split(",") if x.strip()]
         verify = os.getenv("GF_SSL_VERIFY", "true").strip().lower() not in ("0", "false", "no")
+        sort_raw = os.getenv("GF_ENTRIES_SORT", "id").strip().lower()
+        entries_sort = sort_raw if sort_raw in ("id", "date_updated") else "id"
         return GfConfig(
             site_base_url=os.getenv("GF_SITE_BASE_URL", "").strip(),
             consumer_key=os.getenv("GF_CONSUMER_KEY", "").strip(),
@@ -31,5 +35,6 @@ class GfConfig:
             timeout_seconds=float(os.getenv("GF_TIMEOUT_SECONDS", "60")),
             page_size=max(1, min(200, int(os.getenv("GF_PAGE_SIZE", "100")))),
             forms=forms,
+            entries_sort=entries_sort,
         )
 

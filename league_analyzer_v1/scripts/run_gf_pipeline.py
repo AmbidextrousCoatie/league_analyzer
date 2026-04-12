@@ -28,6 +28,15 @@ def main() -> int:
     parser.add_argument("--ck", required=False, help="GF consumer key")
     parser.add_argument("--cs", required=False, help="GF consumer secret")
     parser.add_argument("--field-ids", default="", help="Optional _field_ids subset")
+    parser.add_argument(
+        "--entries-sort",
+        choices=("id", "date_updated"),
+        default="id",
+        help=(
+            "GF REST list sort for full-sync paging: id ASC + numeric (stable); "
+            "date_updated DESC (legacy). Incremental fetches always use date_updated."
+        ),
+    )
     parser.add_argument("--page-size", type=int, default=100)
     parser.add_argument("--insecure", action="store_true", help="Disable TLS verification")
     parser.add_argument(
@@ -63,6 +72,7 @@ def main() -> int:
         verify_ssl=not args.insecure,
         page_size=max(1, min(200, int(args.page_size))),
         forms=forms,
+        entries_sort=args.entries_sort,
     )
     result = run_ingest(config=cfg, mode=args.mode, field_ids=args.field_ids, skip_legacy=args.skip_legacy)
     print(json.dumps(result, indent=2, ensure_ascii=False))

@@ -6,7 +6,7 @@ import platform
 import sys
 from pathlib import Path
 from time import perf_counter
-from typing import Dict, List
+from typing import Any, Dict, List
 from urllib.parse import urlsplit
 
 from database.conversion.bowlingbayern_legacy_core import (
@@ -23,6 +23,23 @@ from .paths import PipelinePaths
 from .sanitize import sanitize_rows
 from .staging import rows_from_entries, utc_slug, write_csv, write_json
 from .state_store import StateStore
+
+
+def _dedupe_entries_by_id(entries: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """
+    Gravity Forms paging (``date_updated DESC``) can return the same entry on consecutive pages
+    when many rows share identical timestamps. Keep the first occurrence per ``id``.
+    """
+    seen: set[str] = set()
+    out: List[Dict[str, Any]] = []
+    for e in entries:
+        eid = str(e.get("id") or "").strip()
+        if eid:
+            if eid in seen:
+                continue
+            seen.add(eid)
+        out.append(e)
+    return out
 
 
 def _max_date_updated(entries: List[Dict[str, str]]) -> str:
@@ -140,12 +157,13 @@ def _benchmark_metadata(config: GfConfig, mode: str, form_id: int) -> Dict[str, 
         "mode": mode,
         "site_host": host,
         "page_size": config.page_size,
+        "entries_sort": config.entries_sort,
         "verify_ssl": config.verify_ssl,
         "python": sys.version.split()[0],
         "platform": platform.platform(),
         "benchmark_note": (
-            "seconds_new_data_probe = first GF /entries HTTP page (sorted by date_updated DESC); "
-            "incremental uses this page to see newest rows vs last_seen. "
+            "seconds_new_data_probe = first GF /entries HTTP page; "
+            "full sync uses config.entries_sort (default id ASC); incremental always date_updated DESC. "
             "seconds_all_entry_fetch = sum of all /entries pages this run. "
             "seconds_table_sync = local staging/sanitize/merge/legacy/state after fetch."
         ),
@@ -164,7 +182,12 @@ def run_ingest(
     client = GfClient(config)
     forms = config.forms or []
     run_id = utc_slug()
-    result: Dict[str, object] = {"run_id": run_id, "mode": mode, "forms": []}
+    result: Dict[str, object] = {
+        "run_id": run_id,
+        "mode": mode,
+        "entries_sort": config.entries_sort,
+        "forms": [],
+    }
     totals_probe = 0.0
     totals_fetch = 0.0
     totals_sync = 0.0
@@ -201,6 +224,8 @@ def run_ingest(
             page_timings_seconds = incr.page_timings_seconds
             raw_path = paths.incoming / f"form_{form_id}__{run_id}__incremental.json"
             write_json(raw_path, {"entries": incoming_entries, "since": form_state.last_seen_date_updated})
+
+        incoming_entries = _dedupe_entries_by_id(incoming_entries)
 
         seconds_new_data_probe = float(page_timings_seconds[0]) if page_timings_seconds else 0.0
         seconds_all_entry_fetch = float(sum(page_timings_seconds))

@@ -108,7 +108,7 @@ class GfClient:
         page: int,
         page_size: int,
         field_ids: str = "",
-        sort_desc_by_updated: bool = True,
+        entries_sort: str | None = None,
     ) -> PageResult:
         params: Dict[str, Any] = {
             "form_ids": str(form_id),
@@ -117,9 +117,16 @@ class GfClient:
         }
         if field_ids.strip():
             params["_field_ids"] = field_ids.strip()
-        if sort_desc_by_updated:
+        sort = (entries_sort or self.config.entries_sort or "id").strip().lower()
+        if sort == "date_updated":
             params["sorting[key]"] = "date_updated"
             params["sorting[direction]"] = "DESC"
+        elif sort == "id":
+            params["sorting[key]"] = "id"
+            params["sorting[direction]"] = "ASC"
+            params["sorting[is_numeric]"] = "true"
+        else:
+            raise ValueError(f"Unsupported entries_sort {sort!r}; use 'id' or 'date_updated'.")
         payload = self._request_json("entries", params=params)
         return PageResult(
             page=page,
@@ -137,7 +144,11 @@ class GfClient:
         while True:
             t0 = perf_counter()
             current = self.fetch_entries_page(
-                form_id, page=page, page_size=page_size, field_ids=field_ids, sort_desc_by_updated=True
+                form_id,
+                page=page,
+                page_size=page_size,
+                field_ids=field_ids,
+                entries_sort="date_updated",
             )
             page_timings.append(perf_counter() - t0)
             if not current.entries:
