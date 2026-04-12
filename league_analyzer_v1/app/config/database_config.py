@@ -3,6 +3,7 @@ Database Configuration
 Manages available data sources and their settings
 """
 
+import csv
 import os
 from typing import Dict, List, Optional
 from dataclasses import dataclass
@@ -12,6 +13,27 @@ from pathlib import Path
 APP_DIR = Path(__file__).parent.parent
 LEGACY_V1_DIR = APP_DIR.parent if APP_DIR.name == 'app' else APP_DIR
 DATABASE_DATA_DIR = LEGACY_V1_DIR / 'database' / 'data'
+PIPELINE_GF_LEGACY_CSV = (
+    LEGACY_V1_DIR / "database" / "pipeline" / "bowling_bayern" / "legacy_out" / "latest.csv"
+)
+
+
+def _ensure_pipeline_gf_legacy_csv_stub() -> None:
+    """
+    If the GF pipeline has never been run, latest.csv is missing and validation would
+    drop the source from the UI. Create legacy_out/ and a header-only CSV once so the
+    selector always lists Pipeline GF; the pipeline overwrites this file on ingest.
+    """
+    path = PIPELINE_GF_LEGACY_CSV
+    path.parent.mkdir(parents=True, exist_ok=True)
+    if path.is_file():
+        return
+    from database.conversion.bowlingbayern_legacy_core import OUTPUT_HEADERS
+
+    with path.open("w", encoding="utf-8", newline="") as f:
+        writer = csv.DictWriter(f, fieldnames=OUTPUT_HEADERS, delimiter=";")
+        writer.writeheader()
+
 
 @dataclass
 class DataSourceConfig:
@@ -42,27 +64,36 @@ class DatabaseConfig:
             ),
             'db_real': DataSourceConfig(
                 filename='bowling_ergebnisse_real.csv',
-                display_name='Real Data',
-                description='Actual bowling league data',
-                is_default=True,
-                is_enabled=True
-            ),
-            'db_real_recon': DataSourceConfig(
-                filename='bowling_ergebnisse_reconstructed.csv',
-                display_name='Real Data (Reconstructed)',
-                description='Reconstructed from relational tables',
+                display_name='Real Data (2024/25)',
+                description='Bowling league export CSV (2024/25 season snapshot)',
                 is_default=False,
                 is_enabled=True
             ),
             'db_real_bowlingbayern': DataSourceConfig(
                 filename='bowling_ergebnisse_real_from_bowlingbayern.csv',
-                display_name='Real Data (Bowlingbayern)',
-                description='Actual bowling league data from Bowlingbayern',
-                is_default=False,
+                display_name='Real Data (Bowling Bayern)',
+                description='Bowling Bayern liga export CSV (canonical input)',
+                is_default=True,
                 is_enabled=True
-            )
+            ),
+            'db_real_pipeline_gf': DataSourceConfig(
+                filename='latest.csv',
+                display_name='Real Data (Pipeline GF)',
+                description='Legacy CSV produced by the Gravity Forms pipeline (merged GF results)',
+                is_default=False,
+                is_enabled=True,
+                file_path=str(PIPELINE_GF_LEGACY_CSV),
+            ),
         }
-        
+
+        try:
+            _ensure_pipeline_gf_legacy_csv_stub()
+        except (ImportError, OSError) as exc:
+            print(
+                "Warning: could not create pipeline GF legacy stub "
+                f"({PIPELINE_GF_LEGACY_CSV}): {exc}"
+            )
+
         # Validate sources on initialization
         self._validate_sources()
     

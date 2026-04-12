@@ -26,6 +26,18 @@ OPERATORS = {
     "endswith": lambda x, y: x.endswith(y) if isinstance(x, str) else False,  # String ends with
 }
 
+
+def _unique_clean_str_labels(series: pd.Series) -> List[str]:
+    """Sorted unique non-empty labels; never returns float NaN (safe for ``jsonify``)."""
+    out: List[str] = []
+    for x in series.dropna().unique().tolist():
+        s = str(x).strip()
+        if not s or s.lower() in ("nan", "none", "<na>", "nat"):
+            continue
+        out.append(s)
+    return sorted(set(out))
+
+
 class DataAdapterPandas(DataAdapter):
     def __init__(self, path_to_csv_data: pathlib.Path=None, df: pd.DataFrame=None, database: str=None):
         self.data_path = path_to_csv_data
@@ -70,14 +82,23 @@ class DataAdapterPandas(DataAdapter):
         self.data_path = database_path
         self._load_data()
 
+    def _normalize_week_column(self) -> None:
+        """Coerce Week to nullable integers so filters and UI week tokens match (1 not 1.0)."""
+        if self.df is None or Columns.week not in self.df.columns:
+            return
+        w = pd.to_numeric(self.df[Columns.week], errors="coerce")
+        self.df[Columns.week] = w.round(0).astype("Int64")
+
     def _load_data(self):
         """Load data from CSV file"""
 
-        self.df = pd.read_csv(self.data_path, sep=';')
+        self.df = pd.read_csv(self.data_path, sep=";")
+        self._normalize_week_column()
 
     def set_dataframe(self, df):
         """Set the dataframe directly (for testing or in-memory operations)"""
         self.df = df
+        self._normalize_week_column()
 
     def get_filtered_data(self, 
                           filters: Optional[Dict[str, Dict[str, Any]]] = None, 
@@ -170,9 +191,17 @@ class DataAdapterPandas(DataAdapter):
             return []
         
         if "Week" in result.columns:
-            weeks = sorted(int(week) for week in result["Week"].unique())
-            return weeks
-        
+            weeks: List[int] = []
+            for w in result["Week"].dropna().unique():
+                try:
+                    w_str = str(w).strip()
+                    if not w_str or w_str.lower() == "nan":
+                        continue
+                    weeks.append(int(float(w_str)))
+                except (ValueError, TypeError):
+                    continue
+            return sorted(set(weeks))
+
         return []
 
     def get_league_week_data(self, query: LeagueQuery) -> pd.DataFrame:
@@ -255,10 +284,10 @@ class DataAdapterPandas(DataAdapter):
             filters_eq[Columns.league_name] = league_name
         if team_name is not None:
             filters_eq[Columns.team_name] = team_name
-        result = self.get_filtered_data__deprecated(columns=[Columns.season], filters_eq=filters_eq)[Columns.season].unique().tolist()
-        print(f"## DA - Pandas - get_seasons - Seasons: {result}")
-        return result
-        #return self.get_filtered_data__deprecated(columns=[Columns.season], filters_eq=filters_eq)[Columns.season].unique().tolist()
+        series = self.get_filtered_data__deprecated(columns=[Columns.season], filters_eq=filters_eq)[Columns.season]
+        cleaned = _unique_clean_str_labels(series)
+        print(f"## DA - Pandas - get_seasons - Seasons: {cleaned}")
+        return cleaned
     
     def get_leagues(self, season: str=None, team_name: str=None) -> List[str]:
         filters_eq = dict()
@@ -266,7 +295,10 @@ class DataAdapterPandas(DataAdapter):
             filters_eq[Columns.season] = season
         if team_name is not None:
             filters_eq[Columns.team_name] = team_name
-        return self.get_filtered_data__deprecated(columns=[Columns.league_name], filters_eq=filters_eq)[Columns.league_name].unique().tolist()
+        series = self.get_filtered_data__deprecated(columns=[Columns.league_name], filters_eq=filters_eq)[
+            Columns.league_name
+        ]
+        return _unique_clean_str_labels(series)
     
     def get_weeks__deprecated(self, league_name: str=None, season: str=None, team_name: str=None) -> List[int]:
         """

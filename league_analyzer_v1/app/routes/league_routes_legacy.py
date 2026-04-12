@@ -20,6 +20,7 @@ from app.services.league_service import LeagueService
 from app.services.league_service_legacy import LeagueServiceLegacy
 from app.services.i18n_service import i18n_service
 from app.config.debug_config import debug_config
+from app.config.database_config import database_config
 import traceback
 import sys
 
@@ -27,7 +28,7 @@ bp_legacy = Blueprint('league_legacy', __name__)
 
 def get_league_service():
     """Helper function to get LeagueService with database parameter"""
-    database = request.args.get('database') or 'db_real'
+    database = request.args.get('database') or database_config.get_default_source()
     debug_config.log_service('LeagueService', 'create', f"database={database}")
     return LeagueService(database=database)
 

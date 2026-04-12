@@ -10,12 +10,13 @@ from app.services.data_dict import DataDict
 from app.config.debug_config import debug_config
 from app.models.table_data import TableData, ColumnGroup, Column
 from app.utils.league_utils import resolve_league_long_name
+from app.config.database_config import database_config
 
 bp = Blueprint('league', __name__)
 
 def get_league_service():
     """Helper function to get LeagueService with database parameter"""
-    database = request.args.get('database') or 'db_real'  # Default to db_real if no database specified
+    database = request.args.get('database') or database_config.get_default_source()
     debug_config.log_service('LeagueService', 'create', f"database={database}")
     return LeagueService(database=database)
 
@@ -355,10 +356,10 @@ def get_available_seasons():
 @bp.route('/league/get_available_leagues')
 def get_available_leagues():
     try:
-        season = request.args.get('season')
-    
+        season = request.args.get("season")
+
         league_service = get_league_service()
-        leagues = league_service.get_leagues()
+        leagues = league_service.get_leagues(season=season)
         enriched_leagues = [
             {
                 "short_name": league,

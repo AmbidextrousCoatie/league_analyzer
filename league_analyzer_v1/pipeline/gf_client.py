@@ -3,8 +3,9 @@ from __future__ import annotations
 import base64
 import json
 import ssl
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime
+from time import perf_counter
 from typing import Any, Dict, List
 from urllib.parse import urlencode, urlsplit, urlunsplit
 from urllib.request import Request, urlopen
@@ -22,6 +23,22 @@ class PageResult:
     url: str
     payload: Dict[str, Any]
     entries: List[Dict[str, Any]]
+
+
+@dataclass
+class IncrementalFetchResult:
+    """Gravity Forms incremental entry fetch with per-page HTTP timings."""
+
+    entries: List[Dict[str, Any]] = field(default_factory=list)
+    page_timings_seconds: List[float] = field(default_factory=list)
+
+    @property
+    def seconds_first_page(self) -> float:
+        return float(self.page_timings_seconds[0]) if self.page_timings_seconds else 0.0
+
+    @property
+    def seconds_all_pages(self) -> float:
+        return float(sum(self.page_timings_seconds))
 
 
 class GfClient:
@@ -111,11 +128,18 @@ class GfClient:
             entries=self._extract_entries(payload),
         )
 
-    def fetch_incremental_entries(self, form_id: int, since_date_updated: str, page_size: int, field_ids: str = "") -> List[Dict[str, Any]]:
+    def fetch_incremental_entries(
+        self, form_id: int, since_date_updated: str, page_size: int, field_ids: str = ""
+    ) -> IncrementalFetchResult:
         out: List[Dict[str, Any]] = []
+        page_timings: List[float] = []
         page = 1
         while True:
-            current = self.fetch_entries_page(form_id, page=page, page_size=page_size, field_ids=field_ids, sort_desc_by_updated=True)
+            t0 = perf_counter()
+            current = self.fetch_entries_page(
+                form_id, page=page, page_size=page_size, field_ids=field_ids, sort_desc_by_updated=True
+            )
+            page_timings.append(perf_counter() - t0)
             if not current.entries:
                 break
             stop = False
@@ -132,5 +156,5 @@ class GfClient:
             if stop or len(current.entries) < page_size:
                 break
             page += 1
-        return out
+        return IncrementalFetchResult(entries=out, page_timings_seconds=page_timings)
 

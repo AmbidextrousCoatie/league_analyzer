@@ -212,7 +212,8 @@ class Server:
             print("Entering: week: " + str(week) + " | depth: " + str(depth))
  
         if week is None:
-            week = int(max(self.get_weeks(league_name=league_name, season=season)))
+            weeks = self.get_weeks(league=league_name, season=season)
+            week = int(max(weeks)) if weeks else 1
         # history should not be deeper than the current week
         if depth is None:
             depth = 0

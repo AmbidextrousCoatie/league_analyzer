@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, session, redirect, url_for, request, jsonify
 from data_access.pd_dataframes import fetch_column
 from app.services.data_manager import DataManager
+from app.config.database_config import database_config
 import datetime
 
 bp = Blueprint('main', __name__)
@@ -46,8 +47,6 @@ def switch_database():
     try:
         from flask import request, jsonify
         from app.services.data_manager import DataManager
-        from app.config.database_config import database_config
-        
         data = request.get_json()
         database = data.get('database')
         
@@ -144,7 +143,7 @@ def get_data_sources_info():
             'success': False,
             'current_source': 'db_sim',
             'current_display_name': 'Simulated Data',
-            'available_sources': ['db_sim', 'db_real'],
+            'available_sources': database_config.get_available_sources(),
             'message': f'Server error: {str(e)}'
         }, 500
 
@@ -195,7 +194,7 @@ def reload_data():
         return {
             'success': False,
             'message': f'Server error: {str(e)}',
-            'available_sources': ['db_sim', 'db_real']
+            'available_sources': database_config.get_available_sources()
         }, 500
 
 @bp.route('/get-data-source')
@@ -217,7 +216,7 @@ def get_data_source():
             'success': False,
             'current_source': 'db_sim',
             'current_display_name': 'Simulated Data',
-            'available_sources': ['db_sim', 'db_real'],
+            'available_sources': database_config.get_available_sources(),
             'message': f'Server error: {str(e)}'
         }, 500
 
@@ -286,8 +285,6 @@ def debug_session():
 def test_database_param():
     """Test route to verify database parameter is passed correctly through all layers"""
     try:
-        from app.config.database_config import database_config
-        
         database = request.args.get('database')
     
         
@@ -347,8 +344,6 @@ def test_database_param():
 def test_filter_endpoints():
     """Test all filter endpoints to ensure they use database parameter"""
     try:
-        from app.config.database_config import database_config
-        
         database = request.args.get('database')
     
         

@@ -119,7 +119,7 @@ class TeamStatsApp {
             
             // Get current database from URL or default
             const urlParams = new URLSearchParams(window.location.search);
-            const database = urlParams.get('database') || 'db_real';
+            const database = urlParams.get('database') || 'db_real_bowlingbayern';
             
             const response = await fetch(`/team/get_teams?database=${database}`);
             if (!response.ok) {

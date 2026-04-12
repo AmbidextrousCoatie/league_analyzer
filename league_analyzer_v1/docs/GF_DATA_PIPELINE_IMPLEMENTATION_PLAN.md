@@ -1,5 +1,17 @@
 # Gravity Forms Data Pipeline Implementation Plan
 
+## Implementation status (rolling)
+
+| Phase (see below) | Status | Notes |
+|-------------------|--------|--------|
+| Phase 0–1 | **Done** | Directories, GF client, state, `incoming/` + `staging/` |
+| Phase 2 (legacy) | **Done** | Shared `gf_results_v1_adapter.py` → `canonical/merged_gf_canonical.csv` → `legacy_out/`; CLI `run_gf_pipeline.py`; refresh-from-merge on incremental no-op; `rebuild_form92_legacy_from_staging.py` |
+| Phase 3 (points + validation) | **Not started** | Sprint 3 |
+| Phase 4 (schedule + manual API) | **Not started** | Sprint 3 |
+| Phase 5 (events) | **Optional** | After Sprint 3 if needed |
+
+---
+
 ## Goal
 
 Build a robust ingestion pipeline in `league_analyzer_v1` that:
@@ -116,7 +128,7 @@ Write sanitized output to `sanitized/`.
 
 ### Stage 4: Legacy Conversion
 
-- Reuse/port existing `convert_bowlingbayern_to_legacy.py` transformations.
+- Reuse `database/conversion/bowlingbayern_legacy_core.py` (pure transform); keep GF adapters separate from conversion rules.
 - Produce legacy flat rows exactly matching expected schema.
 - Write timestamped + latest files in `legacy_out/`.
 
@@ -338,13 +350,10 @@ Deliverable: near-real-time delta ingestion path.
 
 ---
 
-## Recommended First Sprint (Practical)
+## Recommended sequencing (updated)
 
-Implement **Phase 0 + Phase 1 + minimal Phase 2** first:
+**Done:** Phase 0–1 and **form 92** legacy path (CLI + merge + `latest.csv`); see `GF_PIPELINE_SPRINT1_RUNBOOK.md` (runbook covers Sprint 1–3 naming).
 
-- one form (e.g., 92),
-- full + incremental fetch,
-- staging CSV + sanitized CSV + legacy CSV output,
-- manual trigger endpoint only.
+**Sprint 3 (final):** Phase 3 (points + validation + quarantine as needed) and Phase 4 (manual trigger + scheduling). Optional Phase 5 when GF event hooks are available.
 
-Then add scheduler and forced daily full sync once data quality is stable.
+Operational detail for day-to-day runs remains in the runbook, not in this plan file.

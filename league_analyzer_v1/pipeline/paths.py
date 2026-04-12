@@ -10,6 +10,7 @@ class PipelinePaths:
     incoming: Path
     staging: Path
     sanitized: Path
+    canonical: Path
     legacy_out: Path
     state: Path
     logs: Path
@@ -23,6 +24,7 @@ class PipelinePaths:
             incoming=base / "incoming",
             staging=base / "staging",
             sanitized=base / "sanitized",
+            canonical=base / "canonical",
             legacy_out=base / "legacy_out",
             state=base / "state",
             logs=base / "logs",
@@ -35,6 +37,7 @@ class PipelinePaths:
             self.incoming,
             self.staging,
             self.sanitized,
+            self.canonical,
             self.legacy_out,
             self.state,
             self.logs,

@@ -21,6 +21,7 @@ from app.utils.league_utils import (
     apply_heat_map_to_columns,
     resolve_league_long_name,
 )
+from app.utils.json_safe import json_safe
 # from data_access.series_data import calculate_series_data, get_player_series_data, get_team_series_data
 
 class ColumnWidths:
@@ -76,9 +77,9 @@ class LeagueService:
         # print(f"####################### Getting seasons for league_name: {league_name} and team_name: {team_name}")
         return self.adapter.get_seasons(league_name=league_name, team_name=team_name)
 
-    def get_leagues(self) -> List[str]:
-        """Get all available leagues for a season"""
-        return self.adapter.get_leagues()
+    def get_leagues(self, season: Optional[str] = None) -> List[str]:
+        """Get all available leagues, optionally restricted to a season."""
+        return self.adapter.get_leagues(season=season)
     
     def get_available_rounds(self, season: str, league: str, week: int) -> List[int]:
         """Get available rounds (games) for a season, league, and week"""
@@ -1387,7 +1388,13 @@ class LeagueService:
             
             # Get all teams and weeks
             teams = team_data[Columns.team_name].unique()
-            weeks = sorted(team_data[Columns.week].unique())
+            weeks = sorted(
+                {
+                    int(round(float(w)))
+                    for w in team_data[Columns.week].unique()
+                    if pd.notna(w)
+                }
+            )
             
             for team in teams:
                 team_week_data = team_data[team_data[Columns.team_name] == team]
@@ -1446,7 +1453,8 @@ class LeagueService:
             # If week is not specified, get the latest week
             if week is None:
                 week = self.get_latest_week(season, league)
-            
+            week = int(week)
+
             # Direct query to get all data for this league and season (both individual and team points)
             # Get individual player data (for scores and averages)
             individual_filters = {
@@ -1480,10 +1488,16 @@ class LeagueService:
                     title=f"{i18n_service.get_text('no_data_available_for')} {league} - {season}"
                 )
             
-            # Get als and weeks
+            # Get teams and weeks (integer week indices — avoids float 1.0 vs int 1 mismatches)
             teams = league_data[Columns.team_name].unique()
-            all_weeks = sorted(league_data[Columns.week].unique())
-            
+            all_weeks = sorted(
+                {
+                    int(round(float(w)))
+                    for w in league_data[Columns.week].unique()
+                    if pd.notna(w)
+                }
+            )
+
             # Determine which weeks to show
             if include_history:
                 weeks_to_show = [w for w in all_weeks if w <= week]
@@ -1750,7 +1764,17 @@ class LeagueService:
             ).to_dict()
         
         # Get all weeks and teams (from individual data for weeks, from both for teams)
-        all_weeks = sorted(individual_data[Columns.week].unique()) if not individual_data.empty else []
+        all_weeks = (
+            sorted(
+                {
+                    int(round(float(w)))
+                    for w in individual_data[Columns.week].unique()
+                    if pd.notna(w)
+                }
+            )
+            if not individual_data.empty
+            else []
+        )
         all_teams_individual = set(individual_data[Columns.team_name].unique()) if not individual_data.empty else set()
         all_teams_team = set(team_data[Columns.team_name].unique()) if not team_data.empty else set()
         all_teams = sorted(all_teams_individual | all_teams_team)
@@ -3689,8 +3713,16 @@ class LeagueService:
             
             if leagues_data.empty:
                 return {"leagues": []}
-            
-            leagues = sorted(leagues_data[Columns.league_name].unique())
+
+            # Coerce to str so sort never compares float NaN / mixed dtypes (e.g. pipeline GF CSV).
+            _league_col = leagues_data[Columns.league_name].dropna()
+            leagues = sorted(
+                {
+                    str(x).strip()
+                    for x in _league_col.unique()
+                    if str(x).strip() and str(x).strip().lower() not in ("nan", "none", "<na>")
+                }
+            )
             
             # Get standings for each league's latest week
             league_standings = []
@@ -3724,11 +3756,13 @@ class LeagueService:
                     print(f"Error getting standings for league {league}: {e}")
                     continue
             
-            return {
-                'leagues': league_standings,
-                'season': season
-            }
-            
+            return json_safe(
+                {
+                    "leagues": league_standings,
+                    "season": season,
+                }
+            )
+
         except Exception as e:
             print(f"Error in get_season_league_standings: {e}")
             return {"leagues": []}

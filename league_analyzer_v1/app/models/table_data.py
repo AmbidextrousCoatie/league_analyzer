@@ -2,6 +2,8 @@
 from dataclasses import dataclass, field
 from typing import List, Dict, Any, Optional, Union
 
+from app.utils.json_safe import json_safe
+
 @dataclass
 class Column:
     """Individual column definition."""
@@ -48,13 +50,13 @@ class TableData:
     
     def to_dict(self) -> Dict[str, Any]:
         """Convert to a dictionary suitable for JSON serialization"""
-        return {
+        raw: Dict[str, Any] = {
             "columns": [
                 {
                     "title": group.title,
                     "columns": [
                         {
-                            "title": col.title, 
+                            "title": col.title,
                             "field": col.field,
                             **({"sortable": col.sortable} if col.sortable is not None else {}),
                             **({"filterable": col.filterable} if col.filterable is not None else {}),
@@ -63,15 +65,15 @@ class TableData:
                             **({"format": col.format} if col.format else {}),
                             **({"decimal_places": col.decimal_places} if col.decimal_places is not None else {}),
                             **({"style": col.style} if col.style else {}),
-                            **({"tooltip": col.tooltip} if col.tooltip else {})
-                        } 
+                            **({"tooltip": col.tooltip} if col.tooltip else {}),
+                        }
                         for col in group.columns
                     ],
                     **({"frozen": group.frozen} if group.frozen else {}),
                     **({"style": group.style} if group.style else {}),
                     **({"headerStyle": group.header_style} if group.header_style else {}),
                     **({"width": group.width} if group.width else {}),
-                    **({"highlighted": group.highlighted} if group.highlighted else {})
+                    **({"highlighted": group.highlighted} if group.highlighted else {}),
                 }
                 for group in self.columns
             ],
@@ -82,8 +84,9 @@ class TableData:
             **({"metadata": self.metadata} if self.metadata else {}),
             **({"row_metadata": self.row_metadata} if self.row_metadata else {}),
             **({"cell_metadata": self.cell_metadata} if self.cell_metadata else {}),
-            **({"default_sort": self.default_sort} if self.default_sort else {})
+            **({"default_sort": self.default_sort} if self.default_sort else {}),
         }
+        return json_safe(raw)
 
 #@dataclass
 #class TableDataLeague(TableData):
@@ -103,14 +106,15 @@ class PlotData:
     
     def to_dict(self) -> Dict[str, Any]:
         """Convert to a dictionary suitable for JSON serialization"""
-        return {
+        raw = {
             "title": self.title,
             "series": self.series,
             "xAxis": {"categories": self.x_axis} if self.x_axis else {},
             "yAxis": {"title": {"text": self.y_axis_label}} if self.y_axis_label else {},
             "plotType": self.plot_type,
-            "options": self.options
+            "options": self.options,
         }
+        return json_safe(raw)
 
 @dataclass
 class TileData:
@@ -152,5 +156,5 @@ class TileData:
             
         if self.link:
             result["link"] = self.link
-            
-        return result
+
+        return json_safe(result)

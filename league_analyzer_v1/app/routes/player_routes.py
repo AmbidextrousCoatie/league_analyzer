@@ -1,11 +1,12 @@
 from flask import Blueprint, render_template, jsonify, request
 from app.services.player_service import PlayerService
+from app.config.database_config import database_config
 
 bp = Blueprint('player', __name__, url_prefix='/player')
 
 def get_player_service():
     """Helper function to get PlayerService with database parameter"""
-    database = request.args.get('database') or 'db_sim'  # Default to db_sim if no database specified
+    database = request.args.get('database') or database_config.get_default_source()
     return PlayerService(database=database)
 
 @bp.route('/stats')

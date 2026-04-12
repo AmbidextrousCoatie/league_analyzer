@@ -7,7 +7,7 @@ This directory contains the original Flask-based League Analyzer application.
 - `app/` - Flask application (routes, services, templates, static files)
 - `business_logic/` - Business logic layer
 - `data_access/` - Data access layer (adapters, models)
-- `database/` - Database files and generators
+- `database/` - Database files and generators (see `database/conversion/` for legacy CSV transforms, `database/sources/` for file/API adapters)
 - `tests/` - Test files
 - `docs/` - Documentation
 

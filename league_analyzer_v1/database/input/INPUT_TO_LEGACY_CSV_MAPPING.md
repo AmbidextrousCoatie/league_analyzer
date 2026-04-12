@@ -2,6 +2,13 @@
 
 This document maps the current input format in `league_analyzer_v1/database/input` to the legacy flat format used by `league_analyzer_v1/database/data/bowling_ergebnisse_real.csv`.
 
+## Where code lives (separation of concerns)
+
+- **Canonical → legacy conversion (pure):** `database/conversion/bowlingbayern_legacy_core.py` — no GF, no pipeline, no Flask.
+- **File-based exports (liga CSV):** `database/sources/bowlingbayern_liga_csv.py`
+- **CLI wrapper (file source only):** `database/input/convert_bowlingbayern_to_legacy.py` — wires liga CSV → dedupe → core → output path.
+- **GF REST / staging:** `pipeline/` under `league_analyzer_v1` — `database/sources/gf_results_v1_adapter.py` maps all configured **results** forms (shared v1 numeric field layout) into the **same canonical row keys** as this document; merged rows then call the conversion core (`gf_form_registry.py` is thin glue).
+
 ## Context Notes
 
 - Redundant validation records exist in the source feed (for example `BAYL-M-###_Re` and `BAYL-M-###_Li`) and represent team/opponent perspectives of the same game.

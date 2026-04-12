@@ -17,6 +17,7 @@ class GfConfig:
 
     @staticmethod
     def from_env() -> "GfConfig":
+        # Comma-separated; if unset, callers (e.g. CLI) may substitute defaults from bowling_bayern_gf_forms.
         forms_raw = os.getenv("GF_FORMS", "").strip()
         forms: List[int] | None = None
         if forms_raw:

@@ -107,4 +107,4 @@ Detailed implementation history and troubleshooting information can be found in 
 
 ## Data Pipeline Planning
 - `GF_DATA_PIPELINE_IMPLEMENTATION_PLAN.md` - Gravity Forms ingestion/staging/sync plan for legacy data generation.
-- `GF_PIPELINE_SPRINT1_RUNBOOK.md` - Runnable Sprint-1 setup (extract, staging, minimal sanitize).
+- `GF_PIPELINE_SPRINT1_RUNBOOK.md` - Operator runbook: Sprint 1–2 behaviour (GF → legacy for form 92), CLI, backfill script, Sprint 3 (final) scope.
