@@ -57,9 +57,13 @@ def create_app():
     # Template helper for cache busting
     @app.context_processor
     def inject_cache_buster():
-        """Inject cache busting helper into templates"""
+        """Inject cache busting helper and app defaults into templates"""
         from app.utils.cache_buster import get_static_url
-        return dict(static_url=get_static_url)
+        from app.config.database_config import database_config
+        return dict(
+            static_url=get_static_url,
+            default_database=database_config.get_default_source(),
+        )
     
     from app.routes import main, player_routes, league_routes, league_routes_legacy, team_routes
     # Register team API blueprint before main so `/team/get_*` is never shadowed by `/team/<analysis>`-style routes.

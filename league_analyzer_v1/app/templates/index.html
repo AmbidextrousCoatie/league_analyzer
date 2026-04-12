@@ -54,6 +54,7 @@
 
 <!-- Add JavaScript for latest events -->
 <script>
+    const DEFAULT_DATABASE = "{{ default_database }}";
 document.addEventListener('DOMContentLoaded', function() {
     console.log('🔄 Loading latest events with database:', getCurrentDatabase());
     
@@ -90,7 +91,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const examples = [
         {
             label: 'Aktueller Tabellenstand: alle Ligen',
-            params: { database: 'db_real_bowlingbayern',
+            params: { database: DEFAULT_DATABASE,
                       season: 'latest'
             }
         },
@@ -99,7 +100,7 @@ document.addEventListener('DOMContentLoaded', function() {
             params: {
                 season: '24/25',
                 league: 'BayL',
-                database: 'db_real_bowlingbayern'
+                database: DEFAULT_DATABASE
             }
         },
         {
@@ -108,7 +109,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 season: '25/26',
                 league: 'BayL',
                 week: '1',
-                database: 'db_real_bowlingbayern'
+                database: DEFAULT_DATABASE
             }
         },
         {
@@ -118,21 +119,21 @@ document.addEventListener('DOMContentLoaded', function() {
                 league: 'BayL',
                 week: '1',
                 team: 'BK München 3',
-                database: 'db_real_bowlingbayern'
+                database: DEFAULT_DATABASE
             }
         },
         {
             label: 'Team Historie: Bowlinghaus Bamberg 1',
             params: {
                 team: 'Bowlinghaus Bamberg 1',
-                database: 'db_real_bowlingbayern'
+                database: DEFAULT_DATABASE
             }
         },
         {
             label: 'Spieler Statistiken: Hinterwimmer, Sebastian',
             params: {
                 player_name: 'Hinterwimmer, Sebastian',
-                database: 'db_real_bowlingbayern'
+                database: DEFAULT_DATABASE
             }
         },
         {

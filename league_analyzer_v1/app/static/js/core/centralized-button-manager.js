@@ -322,7 +322,7 @@ class CentralizedButtonManager {
         
         // Add database parameter
         const urlParams = new URLSearchParams(window.location.search);
-        const database = urlParams.get('database') || 'db_real_bowlingbayern';
+        const database = urlParams.get('database') || 'db_real_pipeline_gf';
         params.append('database', database);
         
         const url = `${group.endpoint}?${params.toString()}`;

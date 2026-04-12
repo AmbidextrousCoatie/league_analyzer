@@ -31,7 +31,7 @@ class URLStateManager {
             round: params.get('round') || '',
             league: params.get('league') || '',
             league_long: params.get('league_long') || '',
-            database: params.get('database') || 'db_real_bowlingbayern'
+            database: params.get('database') || 'db_real_pipeline_gf'
         };
     }
     

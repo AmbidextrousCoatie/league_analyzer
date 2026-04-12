@@ -119,7 +119,7 @@ class TeamStatsApp {
             
             // Get current database from URL or default
             const urlParams = new URLSearchParams(window.location.search);
-            const database = urlParams.get('database') || 'db_real_bowlingbayern';
+            const database = urlParams.get('database') || 'db_real_pipeline_gf';
             
             const response =
                 typeof fetchWithDatabase === "function"

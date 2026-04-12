@@ -73,14 +73,14 @@ class DatabaseConfig:
                 filename='bowling_ergebnisse_real_from_bowlingbayern.csv',
                 display_name='Real Data (Bowling Bayern)',
                 description='Bowling Bayern liga export CSV (canonical input)',
-                is_default=True,
+                is_default=False,
                 is_enabled=True
             ),
             'db_real_pipeline_gf': DataSourceConfig(
                 filename='latest.csv',
                 display_name='Real Data (Pipeline GF)',
                 description='Legacy CSV produced by the Gravity Forms pipeline (merged GF results)',
-                is_default=False,
+                is_default=True,
                 is_enabled=True,
                 file_path=str(PIPELINE_GF_LEGACY_CSV),
             ),

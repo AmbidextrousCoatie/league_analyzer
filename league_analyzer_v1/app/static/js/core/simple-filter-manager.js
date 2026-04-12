@@ -60,7 +60,7 @@ class SimpleFilterManager {
         try {
             // Get current database from URL
             const urlParams = new URLSearchParams(window.location.search);
-            const database = urlParams.get('database') || 'db_real_bowlingbayern';
+            const database = urlParams.get('database') || 'db_real_pipeline_gf';
             
             if (this.mode === 'team') {
                 // Load teams for team mode
@@ -391,7 +391,7 @@ class SimpleFilterManager {
         try {
             // Get current database from URL
             const urlParams = new URLSearchParams(window.location.search);
-            const database = urlParams.get('database') || 'db_real_bowlingbayern';
+            const database = urlParams.get('database') || 'db_real_pipeline_gf';
             
             const response = await fetch(`/team/get_available_seasons?team_name=${encodeURIComponent(teamName)}&database=${database}`);
             if (response.ok) {
@@ -414,7 +414,7 @@ class SimpleFilterManager {
         try {
             // Get current database from URL
             const urlParams = new URLSearchParams(window.location.search);
-            const database = urlParams.get('database') || 'db_real_bowlingbayern';
+            const database = urlParams.get('database') || 'db_real_pipeline_gf';
             
             const response = await fetch(`/team/get_available_weeks?team_name=${encodeURIComponent(teamName)}&season=${encodeURIComponent(season)}&database=${database}`);
             if (response.ok) {
@@ -432,7 +432,7 @@ class SimpleFilterManager {
         try {
             // Get current database from URL
             const urlParams = new URLSearchParams(window.location.search);
-            const database = urlParams.get('database') || 'db_real_bowlingbayern';
+            const database = urlParams.get('database') || 'db_real_pipeline_gf';
             console.log('🔍 loadAllSeasons: Fetching seasons with database:', database);
             const response = await fetch(`/league/get_available_seasons?database=${database}`);
             console.log('🔍 loadAllSeasons: Response status:', response.status);
@@ -459,7 +459,7 @@ class SimpleFilterManager {
         try {
             // Get current database from URL
             const urlParams = new URLSearchParams(window.location.search);
-            const database = urlParams.get('database') || 'db_real_bowlingbayern';
+            const database = urlParams.get('database') || 'db_real_pipeline_gf';
             // console.info(`####################### updateSeasonsForLeague - leagueName: ${leagueName} and database: ${database}`);
             const response = await fetch(`/league/get_available_seasons?league=${encodeURIComponent(leagueName)}&database=${database}`);
             if (response.ok) {
@@ -482,7 +482,7 @@ class SimpleFilterManager {
         try {
             // Get current database from URL
             const urlParams = new URLSearchParams(window.location.search);
-            const database = urlParams.get('database') || 'db_real_bowlingbayern';
+            const database = urlParams.get('database') || 'db_real_pipeline_gf';
             
             const response = await fetch(`/league/get_available_weeks?league=${encodeURIComponent(leagueName)}&season=${encodeURIComponent(season)}&database=${database}`);
             if (response.ok) {
@@ -505,7 +505,7 @@ class SimpleFilterManager {
         try {
             // Get current database from URL
             const urlParams = new URLSearchParams(window.location.search);
-            const database = urlParams.get('database') || 'db_real_bowlingbayern';
+            const database = urlParams.get('database') || 'db_real_pipeline_gf';
             
             const response = await fetch(`/league/get_available_teams?league=${encodeURIComponent(leagueName)}&season=${encodeURIComponent(season)}&database=${database}`);
             if (response.ok) {
